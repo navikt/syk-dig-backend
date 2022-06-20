@@ -1,0 +1,23 @@
+type Query {
+    utenlandssykmelding(id: String!): [UtenlandsSykmelding!]!
+    arbeidsgivere: [Arbeidsgiver!]!
+}
+
+type Mutation {
+    minMutation(arbeidsgiver: ArbeidsgiverInput!): Arbeidsgiver!
+}
+
+type UtenlandsSykmelding {
+    id: String!
+    fnr: String!
+}
+
+type Arbeidsgiver {
+    navn: String!
+    orgnummer: String
+}
+
+input ArbeidsgiverInput {
+    navn: String!
+    orgnummer: String
+}
