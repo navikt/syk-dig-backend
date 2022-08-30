@@ -7,6 +7,20 @@ metadata:
     team: teamsykmelding
 spec:
   image: {{ image }}
+  gcp:
+    sqlInstances:
+      - name: syk-dig-backend-db-instance
+        type: POSTGRES_14
+        diskSize: 10
+        tier: db-custom-1-3840
+        databases:
+          - name: syk-dig-backend
+            envVarPrefix: DB
+        diskAutoresize: true
+        highAvailability: false
+        diskType: SSD
+        insights:
+          enabled: true
   replicas:
     min: 2
     max: 6
@@ -37,4 +51,3 @@ spec:
     enabled: false
   ingresses:
     - "https://syk-dig-backend.intern.nav.no"
-  webproxy: true
