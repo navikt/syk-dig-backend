@@ -12,7 +12,6 @@ spec:
       - name: syk-dig-backend-db-instance
         type: POSTGRES_14
         diskSize: 10
-        tier: db-custom-1-3840
         databases:
           - name: syk-dig-backend
             envVarPrefix: DB

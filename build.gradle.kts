@@ -33,7 +33,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
 	implementation("org.postgresql:postgresql:$postgresVersion")
 	implementation("org.flywaydb:flyway-core")
-	implementation("org.yaml:snakeyaml:$snakeYamlVersion")
+	implementation("org.yaml:snakeyaml:$snakeYamlVersion") // overstyrer sårbar dependency
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.testcontainers:postgresql:$testContainersVersion")
 }
