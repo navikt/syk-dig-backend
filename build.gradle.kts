@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 
 plugins {
-	id("org.springframework.boot") version "2.7.0"
+	id("org.springframework.boot") version "2.7.3"
 	id("io.spring.dependency-management") version "1.0.13.RELEASE"
 	kotlin("jvm") version "1.7.10"
 	kotlin("plugin.spring") version "1.7.10"
@@ -17,6 +17,7 @@ repositories {
 	mavenCentral()
 }
 
+val postgresVersion = "42.5.0"
 val testContainersVersion = "1.17.3"
 
 dependencies {
@@ -29,7 +30,7 @@ dependencies {
 	implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-	implementation("org.postgresql:postgresql")
+	implementation("org.postgresql:postgresql:$postgresVersion")
 	implementation("org.flywaydb:flyway-core")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.testcontainers:postgresql:$testContainersVersion")
