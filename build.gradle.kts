@@ -18,6 +18,7 @@ repositories {
 }
 
 val postgresVersion = "42.5.0"
+val snakeYamlVersion = "1.31"
 val testContainersVersion = "1.17.3"
 
 dependencies {
@@ -32,6 +33,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
 	implementation("org.postgresql:postgresql:$postgresVersion")
 	implementation("org.flywaydb:flyway-core")
+	implementation("org.yaml:snakeyaml:$snakeYamlVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.testcontainers:postgresql:$testContainersVersion")
 }
