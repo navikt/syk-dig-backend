@@ -27,3 +27,6 @@ management:
     health:
         livenessstate.enabled: true
         readinessState.enabled: true
+
+aiven-kafka:
+    auto-offset-reset: earliest
