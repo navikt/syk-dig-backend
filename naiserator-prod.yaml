@@ -48,5 +48,7 @@ spec:
       memory: 768Mi
   vault:
     enabled: false
+  kafka:
+    pool: nav-prod
   ingresses:
     - "https://syk-dig-backend.intern.nav.no"
