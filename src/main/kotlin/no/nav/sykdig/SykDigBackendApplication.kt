@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-@EnableJwtTokenValidation
+@EnableJwtTokenValidation(ignore = ["com.netflix.graphql.dgs.mvc.DgsRestController"])
 class SykDigBackendApplication
 
 fun main(args: Array<String>) {
-	runApplication<SykDigBackendApplication>(*args)
+    runApplication<SykDigBackendApplication>(*args)
 }

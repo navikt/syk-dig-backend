@@ -7,6 +7,8 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 3
+  main:
+    allow-bean-definition-overriding: true
 
 KAFKA_TRUSTSTORE_PATH: ""
 KAFKA_CREDSTORE_PASSWORD: ""

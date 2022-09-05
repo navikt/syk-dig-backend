@@ -19,8 +19,8 @@ class OppgaveDataFetcher(
 ) {
     private val log = logger()
 
-    @ProtectedWithClaims(issuer = "azureator")
     @DgsQuery(field = "oppgave")
+    @ProtectedWithClaims(issuer = "azureator")
     fun getOppgave(@InputArgument oppgaveId: String): Digitaliseringsoppgave? {
         clientIdValidation.validateClientId(
             ClientIdValidation.NamespaceAndApp(

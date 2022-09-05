@@ -33,6 +33,7 @@ val smCommonVersion = "1.cbb3aed"
 val tokenSupportVersion = "2.1.4"
 val testContainersVersion = "1.17.3"
 val kluentVersion = "1.68"
+val logstashLogbackEncoderVersion = "7.2"
 
 dependencies {
 	implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
@@ -45,6 +46,8 @@ dependencies {
 	implementation("org.springframework.kafka:spring-kafka")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+	implementation("org.springframework.boot:spring-boot-starter-logging")
+	implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
 	implementation("org.postgresql:postgresql:$postgresVersion")
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.yaml:snakeyaml:$snakeYamlVersion") // overstyrer sårbar dependency
