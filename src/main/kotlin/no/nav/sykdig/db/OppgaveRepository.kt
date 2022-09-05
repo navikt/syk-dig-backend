@@ -1,7 +1,7 @@
 package no.nav.sykdig.db
 
 import no.nav.sykdig.objectMapper
-import no.nav.sykdig.model.Digitaliseringsoppgave
+import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -16,7 +16,7 @@ import java.util.UUID
 @Transactional
 @Repository
 class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate) {
-    fun lagreOppgave(digitaliseringsoppgave: Digitaliseringsoppgave) {
+    fun lagreOppgave(digitaliseringsoppgave: DigitaliseringsoppgaveDbModel) {
         namedParameterJdbcTemplate.update(
             """
             INSERT INTO oppgave(oppgave_id, fnr, journalpost_id, dokumentinfo_id, opprettet, ferdigstilt)
@@ -45,7 +45,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         )
     }
 
-    fun getOppgave(oppgaveId: String): Digitaliseringsoppgave? {
+    fun getOppgave(oppgaveId: String): DigitaliseringsoppgaveDbModel? {
         return namedParameterJdbcTemplate.query(
             """
             SELECT o.oppgave_id,
@@ -85,8 +85,8 @@ fun SykmeldingUnderArbeid.toPGObject() = PGobject().also {
     it.value = objectMapper.writeValueAsString(this)
 }
 
-private fun ResultSet.toDigitaliseringsoppgave(): Digitaliseringsoppgave =
-    Digitaliseringsoppgave(
+private fun ResultSet.toDigitaliseringsoppgave(): DigitaliseringsoppgaveDbModel =
+    DigitaliseringsoppgaveDbModel(
         oppgaveId = getString("oppgave_id"),
         fnr = getString("fnr"),
         journalpostId = getString("journalpost_id"),

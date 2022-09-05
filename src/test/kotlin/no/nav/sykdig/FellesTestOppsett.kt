@@ -1,5 +1,6 @@
 package no.nav.sykdig
 
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import no.nav.sykdig.db.OppgaveRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
@@ -15,6 +16,7 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMetrics
+@EnableMockOAuth2Server
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 abstract class FellesTestOppsett {
 

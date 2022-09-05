@@ -1,6 +1,7 @@
 type Query {
     utenlandssykmelding(id: String!): [UtenlandsSykmelding!]!
     arbeidsgivere: [Arbeidsgiver!]!
+    oppgave(oppgaveId: String!): Digitaliseringsoppgave
 }
 
 type Mutation {
@@ -15,6 +16,27 @@ type UtenlandsSykmelding {
 type Arbeidsgiver {
     navn: String!
     orgnummer: String
+}
+
+type Digitaliseringsoppgave {
+    oppgaveId: String!
+    sykmeldingId: String!
+    person: Person!
+    pdf: String
+}
+
+type Person {
+    fnr: String!
+    navn: String
+    adresser: [Adresse!]!
+}
+
+type Adresse {
+    gateadresse: String
+    postnummer: String
+    poststed: String
+    land: String
+    type: String
 }
 
 input ArbeidsgiverInput {

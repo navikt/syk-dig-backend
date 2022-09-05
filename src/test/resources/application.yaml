@@ -15,3 +15,23 @@ KAFKA_KEYSTORE_PATH: ""
 
 aiven-kafka:
   auto-offset-reset: latest
+
+syfotilgangskontroll.url: http://syfotilgangskontroll
+
+no.nav.security.jwt:
+  issuer:
+    azureator:
+      discoveryurl: http://localhost:${mock-oauth2-server.port}/azureator/.well-known/openid-configuration
+      accepted_audience: syk-dig-backend-client-id
+  client:
+    registration:
+      onbehalfof-syfotilgangskontroll:
+        token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: syfotilgangskontroll-client
+        authentication:
+          client-id: client-id
+          client-secret: secretzz
+          client-auth-method: client_secret_basic
+
+AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:teamsykmelding:syk-dig\",\"clientId\":\"syk-dig-client-id\"}]"

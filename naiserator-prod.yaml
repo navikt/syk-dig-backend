@@ -50,5 +50,17 @@ spec:
     enabled: false
   kafka:
     pool: nav-prod
+  azure:
+    application:
+      enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: syk-dig
   ingresses:
     - "https://syk-dig-backend.intern.nav.no"
+  env:
+    - name: SYFOTILGANGSKONTROLL_URL
+      value: https://syfo-tilgangskontroll.prod-fss-pub.nais.io
+    - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID
+      value: prod-fss.teamsykefravr.syfo-tilgangskontroll

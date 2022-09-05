@@ -3,7 +3,7 @@ package no.nav.sykdig.model
 import java.time.OffsetDateTime
 import java.util.UUID
 
-data class Digitaliseringsoppgave(
+data class DigitaliseringsoppgaveDbModel(
     val oppgaveId: String,
     val fnr: String,
     val journalpostId: String,

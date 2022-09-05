@@ -30,6 +30,7 @@ repositories {
 val postgresVersion = "42.5.0"
 val snakeYamlVersion = "1.31"
 val smCommonVersion = "1.cbb3aed"
+val tokenSupportVersion = "2.1.4"
 val testContainersVersion = "1.17.3"
 val kluentVersion = "1.68"
 
@@ -48,10 +49,15 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.yaml:snakeyaml:$snakeYamlVersion") // overstyrer sårbar dependency
 	implementation("no.nav.helse:syfosm-common-models:$smCommonVersion")
+	implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
+	implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
+	implementation("org.hibernate.validator:hibernate-validator")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.testcontainers:postgresql:$testContainersVersion")
 	testImplementation("org.testcontainers:kafka:$testContainersVersion")
 	testImplementation("org.amshove.kluent:kluent:$kluentVersion")
+	testImplementation("no.nav.security:token-validation-spring-test:$tokenSupportVersion")
 }
 
 tasks.withType<KotlinCompile> {

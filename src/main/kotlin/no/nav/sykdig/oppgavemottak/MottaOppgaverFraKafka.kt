@@ -1,7 +1,7 @@
 package no.nav.sykdig.oppgavemottak
 
 import no.nav.sykdig.db.OppgaveRepository
-import no.nav.sykdig.model.Digitaliseringsoppgave
+import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -12,7 +12,7 @@ class MottaOppgaverFraKafka(val oppgaveRepository: OppgaveRepository) {
     fun lagre(sykmeldingId: String, digitaliseringsoppgave: DigitaliseringsoppgaveKafka) {
         val opprettet = OffsetDateTime.now(ZoneOffset.UTC)
         oppgaveRepository.lagreOppgave(
-            Digitaliseringsoppgave(
+            DigitaliseringsoppgaveDbModel(
             oppgaveId = digitaliseringsoppgave.oppgaveId,
             fnr = digitaliseringsoppgave.fnr,
             journalpostId = digitaliseringsoppgave.journalpostId,
