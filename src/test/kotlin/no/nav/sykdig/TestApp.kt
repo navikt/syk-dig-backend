@@ -2,10 +2,12 @@ package no.nav.sykdig
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
 
 @SpringBootApplication
-class SykDigBackendApplication
+@AutoConfigureMetrics
+class TestApp
 
 fun main(args: Array<String>) {
-    runApplication<SykDigBackendApplication>(*args)
+    runApplication<TestApp>(*args)
 }

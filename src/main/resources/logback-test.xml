@@ -9,7 +9,7 @@
     <logger name="no.nav" level="INFO"/>
     <logger name="org.apache.kafka" level="WARN"/>
 
-    <root level="INFO">
+    <root level="info">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
