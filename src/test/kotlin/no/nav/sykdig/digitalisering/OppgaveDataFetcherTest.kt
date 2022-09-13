@@ -4,6 +4,7 @@ import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.db.OppgaveRepository
+import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 import no.nav.sykdig.tilgangskontroll.ClientIdValidation
@@ -11,6 +12,7 @@ import no.nav.sykdig.tilgangskontroll.SyfoTilgangskontrollOboClient
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,8 +35,12 @@ class OppgaveDataFetcherTest {
     @MockBean
     lateinit var oppgaveRepository: OppgaveRepository
 
+    @MockBean
+    lateinit var safClient: SafClient
+
     @Autowired
     lateinit var dgsQueryExecutor: DgsQueryExecutor
+
 
     fun before() {
         Mockito.`when`(clientIdValidation.validateClientId(listOf(any())))
@@ -50,15 +56,20 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer {
             true
         }
-
+        Mockito.`when`(safClient.hentPdfFraSaf(anyString(), anyString(), anyString())).thenAnswer {
+            "pdf".toByteArray()
+        }
         val oppgave: String = dgsQueryExecutor.executeAndExtractJsonPath(
             """
             {
                 oppgave(oppgaveId: "123") {
-                    sykmeldingId
+                    digitaliseringsoppgave {
+                        sykmeldingId                        
+                    }
+                    
                 }
             }
-        """.trimIndent(), "data.oppgave.sykmeldingId"
+        """.trimIndent(), "data.oppgave.digitaliseringsoppgave.sykmeldingId"
         )
 
         oppgave shouldBeEqualTo "555a874f-eaca-49eb-851a-2426a0798b66"

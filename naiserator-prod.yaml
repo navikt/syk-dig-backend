@@ -64,3 +64,7 @@ spec:
       value: https://syfo-tilgangskontroll.prod-fss-pub.nais.io
     - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID
       value: prod-fss.teamsykefravr.syfo-tilgangskontroll
+    - name: SAF_URL
+      value: https://saf.prod-fss-pub.nais.io
+    - name: SAF_CLIENT_ID
+      value: prod-fss.teamdokumenthandtering.saf
