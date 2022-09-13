@@ -35,13 +35,14 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
             VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
         """,
-            MapSqlParameterSource()
-                .addValue("sykmelding_id", digitaliseringsoppgave.sykmeldingId)
-                .addValue("oppgave_id", digitaliseringsoppgave.oppgaveId)
-                .addValue("type", digitaliseringsoppgave.type)
-                .addValue("sykmelding", digitaliseringsoppgave.sykmelding?.toPGObject())
-                .addValue("endret_av", digitaliseringsoppgave.endretAv)
-                .addValue("timestamp", Timestamp.from(digitaliseringsoppgave.timestamp.toInstant()))
+            mapOf(
+                "sykmelding_id" to digitaliseringsoppgave.sykmeldingId,
+                "oppgave_id" to digitaliseringsoppgave.oppgaveId,
+                "type" to digitaliseringsoppgave.type,
+                "sykmelding" to digitaliseringsoppgave.sykmelding?.toPGObject(),
+                "endret_av" to digitaliseringsoppgave.endretAv,
+                "timestamp" to Timestamp.from(digitaliseringsoppgave.timestamp.toInstant()),
+            )
         )
     }
 
@@ -68,8 +69,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                                                                                              LIMIT 1)
                     where o.oppgave_id = :oppgave_id;
             """,
-            MapSqlParameterSource()
-                .addValue("oppgave_id", oppgaveId)
+            mapOf("oppgave_id" to oppgaveId)
         ) { resultSet, _ ->
             resultSet.toDigitaliseringsoppgave()
         }.firstOrNull()

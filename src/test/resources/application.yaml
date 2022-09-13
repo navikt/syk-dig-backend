@@ -1,4 +1,11 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0
+          jwk-set-uri: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/discovery/v2.0/keys
+          audiences: 5590e86a-74ad-4fcf-a1e9-61dfcd31acfb
   profiles:
     active: test
   flyway:
@@ -7,6 +14,8 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 3
+  main:
+    allow-bean-definition-overriding: true
 
 KAFKA_TRUSTSTORE_PATH: ""
 KAFKA_CREDSTORE_PASSWORD: ""
@@ -32,7 +41,7 @@ no.nav.security.jwt:
         scope: syfotilgangskontroll-client
         authentication:
           client-id: client-id
-          client-secret: secretzz
+          client-secret: secret
           client-auth-method: client_secret_basic
       onbehalfof-saf:
         token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token

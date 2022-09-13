@@ -4,6 +4,8 @@ import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
+import no.nav.security.token.support.core.context.TokenValidationContext
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.sykdig.logger
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
@@ -12,6 +14,20 @@ import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST
+import org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes
+
+class SpringTokenValidationContextHolder : TokenValidationContextHolder {
+
+
+    private val TOKEN_VALIDATION_CONTEXT_ATTRIBUTE = SpringTokenValidationContextHolder::class.java.name
+    override fun getTokenValidationContext() = getRequestAttribute(TOKEN_VALIDATION_CONTEXT_ATTRIBUTE)?.let { it as TokenValidationContext } ?: TokenValidationContext(emptyMap())
+    override fun setTokenValidationContext(ctx: TokenValidationContext?) {
+        setRequestAttribute(TOKEN_VALIDATION_CONTEXT_ATTRIBUTE, ctx)
+    }
+    private fun getRequestAttribute(name: String) = currentRequestAttributes().getAttribute(name, SCOPE_REQUEST)
+    private fun setRequestAttribute(name: String, value: Any?) = value?.let { currentRequestAttributes().setAttribute(name, it, SCOPE_REQUEST) } ?:  currentRequestAttributes().removeAttribute(name, SCOPE_REQUEST)
+}
 
 @EnableOAuth2Client(cacheEnabled = true)
 @Configuration
@@ -31,6 +47,12 @@ class AadRestTemplateConfiguration {
             clientConfigurationProperties = clientConfigurationProperties,
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
+
+
+    @Bean
+    fun tokenValidationContextHolder(): TokenValidationContextHolder {
+        return SpringTokenValidationContextHolder()
+    }
 
     @Bean
     fun safRestTemplate(

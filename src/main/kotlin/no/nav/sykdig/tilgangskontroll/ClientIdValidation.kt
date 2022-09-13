@@ -1,8 +1,8 @@
 package no.nav.sykdig.tilgangskontroll
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.sykdig.tilgangskontroll.ClientIdValidation.NamespaceAndApp
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
+import no.nav.sykdig.tilgangskontroll.ClientIdValidation.NamespaceAndApp
 import no.nav.sykdig.logger
 import no.nav.sykdig.objectMapper
 import org.springframework.beans.factory.annotation.Value
