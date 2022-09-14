@@ -19,14 +19,13 @@ import org.springframework.web.context.request.RequestContextHolder.currentReque
 
 class SpringTokenValidationContextHolder : TokenValidationContextHolder {
 
-
     private val TOKEN_VALIDATION_CONTEXT_ATTRIBUTE = SpringTokenValidationContextHolder::class.java.name
     override fun getTokenValidationContext() = getRequestAttribute(TOKEN_VALIDATION_CONTEXT_ATTRIBUTE)?.let { it as TokenValidationContext } ?: TokenValidationContext(emptyMap())
     override fun setTokenValidationContext(ctx: TokenValidationContext?) {
         setRequestAttribute(TOKEN_VALIDATION_CONTEXT_ATTRIBUTE, ctx)
     }
     private fun getRequestAttribute(name: String) = currentRequestAttributes().getAttribute(name, SCOPE_REQUEST)
-    private fun setRequestAttribute(name: String, value: Any?) = value?.let { currentRequestAttributes().setAttribute(name, it, SCOPE_REQUEST) } ?:  currentRequestAttributes().removeAttribute(name, SCOPE_REQUEST)
+    private fun setRequestAttribute(name: String, value: Any?) = value?.let { currentRequestAttributes().setAttribute(name, it, SCOPE_REQUEST) } ?: currentRequestAttributes().removeAttribute(name, SCOPE_REQUEST)
 }
 
 @EnableOAuth2Client(cacheEnabled = true)
@@ -47,7 +46,6 @@ class AadRestTemplateConfiguration {
             clientConfigurationProperties = clientConfigurationProperties,
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
-
 
     @Bean
     fun tokenValidationContextHolder(): TokenValidationContextHolder {

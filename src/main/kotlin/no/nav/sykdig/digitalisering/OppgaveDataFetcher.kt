@@ -26,7 +26,7 @@ class OppgaveDataFetcher(
         // hent navn og adresse fra PDL
         // hent PDF fra SAF
 
-       // utvid format med SykmeldingUnderArbeid
+        // utvid format med SykmeldingUnderArbeid
         // Mer presis feilhåndtering
         // utvid format med SykmeldingUnderArbeid
         return if (oppgave != null) {

@@ -1,8 +1,8 @@
 package no.nav.sykdig.db
 
-import no.nav.sykdig.objectMapper
 import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
+import no.nav.sykdig.objectMapper
 import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate

@@ -13,18 +13,18 @@ class MottaOppgaverFraKafka(val oppgaveRepository: OppgaveRepository) {
         val opprettet = OffsetDateTime.now(ZoneOffset.UTC)
         oppgaveRepository.lagreOppgave(
             DigitaliseringsoppgaveDbModel(
-            oppgaveId = digitaliseringsoppgave.oppgaveId,
-            fnr = digitaliseringsoppgave.fnr,
-            journalpostId = digitaliseringsoppgave.journalpostId,
-            dokumentInfoId = digitaliseringsoppgave.dokumentInfoId,
-            opprettet = opprettet,
-            ferdigstilt = null,
-            sykmeldingId = UUID.fromString(sykmeldingId),
-            type = digitaliseringsoppgave.type,
-            sykmelding = null,
-            endretAv = "syk-dig-backend",
-            timestamp = opprettet
-        )
+                oppgaveId = digitaliseringsoppgave.oppgaveId,
+                fnr = digitaliseringsoppgave.fnr,
+                journalpostId = digitaliseringsoppgave.journalpostId,
+                dokumentInfoId = digitaliseringsoppgave.dokumentInfoId,
+                opprettet = opprettet,
+                ferdigstilt = null,
+                sykmeldingId = UUID.fromString(sykmeldingId),
+                type = digitaliseringsoppgave.type,
+                sykmelding = null,
+                endretAv = "syk-dig-backend",
+                timestamp = opprettet
+            )
         )
     }
 }

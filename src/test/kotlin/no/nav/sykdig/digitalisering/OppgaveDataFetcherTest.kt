@@ -2,32 +2,23 @@ package no.nav.sykdig.digitalisering
 
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
-import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
-import no.nav.sykdig.tilgangskontroll.ClientIdValidation
 import no.nav.sykdig.tilgangskontroll.SyfoTilgangskontrollOboClient
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.Profile
 import java.time.OffsetDateTime
 import java.util.UUID
 
-
 @SpringBootTest(classes = [DgsAutoConfiguration::class, OppgaveDataFetcher::class])
 class OppgaveDataFetcherTest {
-
-    @MockBean
-    lateinit var clientIdValidation: ClientIdValidation
 
     @MockBean
     lateinit var syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient
@@ -40,11 +31,6 @@ class OppgaveDataFetcherTest {
 
     @Autowired
     lateinit var dgsQueryExecutor: DgsQueryExecutor
-
-
-    fun before() {
-        Mockito.`when`(clientIdValidation.validateClientId(listOf(any())))
-    }
 
     @Test
     fun oppgave() {
@@ -69,7 +55,8 @@ class OppgaveDataFetcherTest {
                     
                 }
             }
-        """.trimIndent(), "data.oppgave.digitaliseringsoppgave.sykmeldingId"
+            """.trimIndent(),
+            "data.oppgave.digitaliseringsoppgave.sykmeldingId"
         )
 
         oppgave shouldBeEqualTo "555a874f-eaca-49eb-851a-2426a0798b66"

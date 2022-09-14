@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RestController
 class NaisRest {
     @Unprotected
     @GetMapping("/internal/is_alive")
-    fun isAlive() : String {
+    fun isAlive(): String {
         return "alive"
     }
     @Unprotected
     @GetMapping("/internal/is_ready")
-    fun isReady() : String {
+    fun isReady(): String {
         return "ready"
     }
 }

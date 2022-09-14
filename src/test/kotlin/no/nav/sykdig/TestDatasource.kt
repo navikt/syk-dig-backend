@@ -2,7 +2,6 @@ package no.nav.sykdig
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.testcontainers.containers.KafkaContainer
@@ -27,11 +26,8 @@ class TestDatasource {
             }
         }.also { threads.add(it) }
 
-
         psqlContainer = PostgreSQLContainer2()
         psqlContainer.start()
-
-
 
         threads.forEach { it.join() }
     }
