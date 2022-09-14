@@ -65,3 +65,5 @@ no.nav.security.jwt:
                     client-id: ${AZURE_APP_CLIENT_ID}
                     client-secret: ${AZURE_APP_CLIENT_SECRET}
                     client-auth-method: client_secret_basic
+
+logging.config: "classpath:logback.xml"
