@@ -31,7 +31,6 @@ class SafClient(
         headers["Nav-Callid"] = sykmeldingId
         headers["Nav-Consumer-Id"] = "syk-dig-backend"
 
-        log.debug("Henter pdf")
         try {
             val response = safRestTemplate.exchange(
                 "$url/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV",
@@ -39,7 +38,6 @@ class SafClient(
                 HttpEntity<Any>(headers),
                 ByteArray::class.java
             )
-            log.debug("Har hentet pdf")
             return response.body ?: throw RuntimeException("Tomt svar fra SAF for journalpostId $journalpostId")
         } catch (e: HttpClientErrorException) {
             if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
