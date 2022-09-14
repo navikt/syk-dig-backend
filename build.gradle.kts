@@ -60,7 +60,6 @@ dependencies {
     implementation("com.auth0:java-jwt:$javaJwtVersion")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
-    implementation("no.nav.security:token-validation-filter:$tokenSupportVersion")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springBootResourceVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")

@@ -25,6 +25,7 @@ class SyfoTilgangskontrollOboClient(
 
     @Retryable
     fun sjekkTilgangVeileder(fnr: String): Boolean {
+        log.debug("sjekker tilgang")
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
         headers[NAV_PERSONIDENT_HEADER] = fnr
@@ -36,7 +37,7 @@ class SyfoTilgangskontrollOboClient(
                 HttpEntity<Any>(headers),
                 String::class.java
             )
-
+            log.debug("tilgangsjekk ok")
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
 
