@@ -16,7 +16,8 @@ class SecurityConfiguration() {
         return http.authorizeRequests { authorizeRequests ->
             authorizeRequests
                 .mvcMatchers(HttpMethod.GET, "/internal/**").permitAll()
-                .anyRequest().authenticated()
+                .mvcMatchers(HttpMethod.GET, "/schema.json").permitAll()
+                    .anyRequest().authenticated()
                 .and()
                 .oauth2ResourceServer()
                 .jwt()
