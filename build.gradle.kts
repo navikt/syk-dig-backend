@@ -36,9 +36,11 @@ val kluentVersion = "1.68"
 val logstashLogbackEncoderVersion = "7.2"
 val javaJwtVersion = "4.0.0"
 val springBootResourceVersion = "2.7.3"
+val graphqlVersion = "19.2"
 dependencies {
 	implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
 	implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
+	implementation("com.graphql-java:graphql-java:$graphqlVersion")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
