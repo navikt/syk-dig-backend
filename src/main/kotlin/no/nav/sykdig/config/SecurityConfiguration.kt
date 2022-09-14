@@ -13,7 +13,6 @@ class SecurityConfiguration() {
     private val log = logger()
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain? {
-
         return http.authorizeRequests { authorizeRequests ->
             authorizeRequests
                 .mvcMatchers(HttpMethod.GET, "/internal/**").permitAll()
