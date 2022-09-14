@@ -15,7 +15,15 @@ spring:
         hikari:
             minimum-idle: 1
             maximum-pool-size: 5
-
+    security:
+        basic:
+            enabled: false
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: ${AZURE_OPENID_CONFIG_ISSUER}
+                    jwk-set-uri: ${AZURE_OPENID_CONFIG_JWKS_URI}
+                    audiences: ${AZURE_APP_CLIENT_ID}
 management:
     endpoint:
         prometheus.enabled: true
@@ -27,3 +35,33 @@ management:
     health:
         livenessstate.enabled: true
         readinessState.enabled: true
+
+aiven-kafka:
+    auto-offset-reset: earliest
+
+syfo-tilgangskontroll.url: ${SYFOTILGANGSKONTROLL_URL}
+saf.url: ${SAF_URL}
+
+no.nav.security.jwt:
+    issuer:
+        azureator:
+            discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+            accepted_audience: ${AZURE_APP_CLIENT_ID}
+    client:
+        registration:
+            onbehalfof-syfotilgangskontroll:
+                token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+                grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+                scope: api://${SYFOTILGANGSKONTROLL_AAD_CLIENT_ID}/.default
+                authentication:
+                    client-id: ${AZURE_APP_CLIENT_ID}
+                    client-secret: ${AZURE_APP_CLIENT_SECRET}
+                    client-auth-method: client_secret_basic
+            onbehalfof-saf:
+                token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+                grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+                scope: api://${SAF_CLIENT_ID}/.default
+                authentication:
+                    client-id: ${AZURE_APP_CLIENT_ID}
+                    client-secret: ${AZURE_APP_CLIENT_SECRET}
+                    client-auth-method: client_secret_basic

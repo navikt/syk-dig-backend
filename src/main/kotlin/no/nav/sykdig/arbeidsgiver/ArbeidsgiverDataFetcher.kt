@@ -9,6 +9,8 @@ import com.netflix.graphql.dgs.InputArgument
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.Arbeidsgiver
 import no.nav.sykdig.generated.types.ArbeidsgiverInput
+import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 
 @DgsComponent
 class ArbeidsgiverDataFetcher {
