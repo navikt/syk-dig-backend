@@ -58,10 +58,10 @@ class OppgaveDataFetcher(
                     error = null
                 )
             } catch (e: Exception) {
-                log.error("Noe gikk galt ved henting av PDF")
+                log.error("Noe gikk galt ved henting av oppgave")
                 return DigitaliseringsoppgaveRespons(
                     digitaliseringsoppgave = null,
-                    error = "Noe gikk galt ved henting av PDF"
+                    error = "Noe gikk galt ved henting av oppgave"
                 )
             }
         } else {

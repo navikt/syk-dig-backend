@@ -36,23 +36,29 @@ class PdlClient(
 
     @Retryable
     fun hentPerson(fnr: String, sykmeldingId: String): Person {
-        val pdlResponse =
-            client.executeQuery(PdlQuery(fnr).getQuery()).extractValueAsObject("data", PdlResponse::class.java)
+        try {
+            val pdlResponse =
+                client.executeQuery(PdlQuery(fnr).getQuery()).extractValueAsObject("data", PdlResponse::class.java)
 
-        if (pdlResponse.hentPerson == null || pdlResponse.hentPerson.navn.isNullOrEmpty()) {
-            log.error("Fant ikke navn for person i PDL $sykmeldingId")
-            throw RuntimeException("Fant ikke navn for person i PDL")
-        }
+            if (pdlResponse.hentPerson == null || pdlResponse.hentPerson.navn.isNullOrEmpty()) {
+                log.error("Fant ikke navn for person i PDL $sykmeldingId")
+                throw RuntimeException("Fant ikke navn for person i PDL")
+            }
 
-        val navn = pdlResponse.hentPerson.navn.first()
+            val navn = pdlResponse.hentPerson.navn.first()
 
-        return Person(
-            fnr = fnr,
-            navn = Navn(
-                fornavn = navn.fornavn,
-                mellomnavn = navn.mellomnavn,
-                etternavn = navn.etternavn
+            log.info("Hentet person med navn: $navn")
+            return Person(
+                fnr = fnr,
+                navn = Navn(
+                    fornavn = navn.fornavn,
+                    mellomnavn = navn.mellomnavn,
+                    etternavn = navn.etternavn
+                )
             )
-        )
+        } catch (e: Exception) {
+            log.error("Noe gikk galt ved kall til PDL", e)
+            throw e
+        }
     }
 }
