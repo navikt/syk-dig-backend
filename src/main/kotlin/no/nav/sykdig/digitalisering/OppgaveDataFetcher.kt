@@ -58,7 +58,7 @@ class OppgaveDataFetcher(
                     error = null
                 )
             } catch (e: Exception) {
-                log.error("Noe gikk galt ved henting av oppgave")
+                log.error("Noe gikk galt ved henting av oppgave med id $oppgaveId")
                 return DigitaliseringsoppgaveRespons(
                     digitaliseringsoppgave = null,
                     error = "Noe gikk galt ved henting av oppgave"

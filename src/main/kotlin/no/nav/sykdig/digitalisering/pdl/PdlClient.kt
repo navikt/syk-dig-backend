@@ -37,8 +37,13 @@ class PdlClient(
     @Retryable
     fun hentPerson(fnr: String, sykmeldingId: String): Person {
         try {
-            val pdlResponse =
-                client.executeQuery(PdlQuery(fnr).getQuery()).extractValueAsObject("data", PdlResponse::class.java)
+            val response =
+                client.executeQuery(PdlQuery(fnr).getQuery())
+
+            val errors = response.errors
+            errors.forEach { log.error("Feilmelding fra PDL: ${it.message} for $sykmeldingId") }
+
+            val pdlResponse = response.dataAsObject(PdlResponse::class.java)
 
             if (pdlResponse.hentPerson == null || pdlResponse.hentPerson.navn.isNullOrEmpty()) {
                 log.error("Fant ikke navn for person i PDL $sykmeldingId")
