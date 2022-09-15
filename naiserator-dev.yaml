@@ -71,4 +71,4 @@ spec:
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: PDL_CLIENT_ID
-      value: api://dev-fss.pdl.pdl-api/.default
+      value: dev-fss.pdl.pdl-api
