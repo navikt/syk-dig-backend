@@ -3,10 +3,13 @@ package no.nav.sykdig.digitalisering
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import no.nav.sykdig.db.OppgaveRepository
+import no.nav.sykdig.digitalisering.pdl.Navn
+import no.nav.sykdig.digitalisering.pdl.PdlClient
+import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.saf.SafClient
+import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
 import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
-import no.nav.sykdig.tilgangskontroll.SyfoTilgangskontrollOboClient
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
@@ -29,6 +32,9 @@ class OppgaveDataFetcherTest {
     @MockBean
     lateinit var safClient: SafClient
 
+    @MockBean
+    lateinit var pdlClient: PdlClient
+
     @Autowired
     lateinit var dgsQueryExecutor: DgsQueryExecutor
 
@@ -44,6 +50,9 @@ class OppgaveDataFetcherTest {
         }
         Mockito.`when`(safClient.hentPdfFraSaf(anyString(), anyString(), anyString())).thenAnswer {
             "pdf".toByteArray()
+        }
+        Mockito.`when`(pdlClient.hentPerson(anyString(), anyString())).thenAnswer {
+            Person("12345678910", Navn("fornavn", null, "etternavn"))
         }
         val oppgave: String = dgsQueryExecutor.executeAndExtractJsonPath(
             """
