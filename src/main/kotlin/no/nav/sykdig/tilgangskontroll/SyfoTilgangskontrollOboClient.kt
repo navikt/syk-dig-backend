@@ -36,7 +36,6 @@ class SyfoTilgangskontrollOboClient(
                 HttpEntity<Any>(headers),
                 String::class.java
             )
-
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
 

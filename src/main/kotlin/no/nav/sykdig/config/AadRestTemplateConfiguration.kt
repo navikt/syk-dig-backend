@@ -1,6 +1,7 @@
 package no.nav.sykdig.config
 
 import no.nav.security.token.support.client.core.ClientProperties
+import no.nav.security.token.support.client.core.context.JwtBearerTokenResolver
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -10,15 +11,19 @@ import no.nav.sykdig.logger
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST
 import org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes
+import java.util.Optional
 
 class SpringTokenValidationContextHolder : TokenValidationContextHolder {
-
 
     private val TOKEN_VALIDATION_CONTEXT_ATTRIBUTE = SpringTokenValidationContextHolder::class.java.name
     override fun getTokenValidationContext() = getRequestAttribute(TOKEN_VALIDATION_CONTEXT_ATTRIBUTE)?.let { it as TokenValidationContext } ?: TokenValidationContext(emptyMap())
@@ -26,7 +31,16 @@ class SpringTokenValidationContextHolder : TokenValidationContextHolder {
         setRequestAttribute(TOKEN_VALIDATION_CONTEXT_ATTRIBUTE, ctx)
     }
     private fun getRequestAttribute(name: String) = currentRequestAttributes().getAttribute(name, SCOPE_REQUEST)
-    private fun setRequestAttribute(name: String, value: Any?) = value?.let { currentRequestAttributes().setAttribute(name, it, SCOPE_REQUEST) } ?:  currentRequestAttributes().removeAttribute(name, SCOPE_REQUEST)
+    private fun setRequestAttribute(name: String, value: Any?) = value?.let { currentRequestAttributes().setAttribute(name, it, SCOPE_REQUEST) } ?: currentRequestAttributes().removeAttribute(name, SCOPE_REQUEST)
+}
+
+@Primary
+@Component
+class SykDigTokenResolver : JwtBearerTokenResolver {
+    override fun token(): Optional<String> {
+        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        return Optional.of(autentication.token.tokenValue)
+    }
 }
 
 @EnableOAuth2Client(cacheEnabled = true)
@@ -47,7 +61,6 @@ class AadRestTemplateConfiguration {
             clientConfigurationProperties = clientConfigurationProperties,
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
-
 
     @Bean
     fun tokenValidationContextHolder(): TokenValidationContextHolder {

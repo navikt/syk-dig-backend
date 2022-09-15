@@ -1,12 +1,13 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id("org.springframework.boot") version "2.7.3"
-	id("io.spring.dependency-management") version "1.0.13.RELEASE"
-	kotlin("jvm") version "1.7.10"
-	kotlin("plugin.spring") version "1.7.10"
-	id("com.netflix.dgs.codegen") version "5.1.17"
+    id("org.springframework.boot") version "2.7.3"
+    id("io.spring.dependency-management") version "1.0.13.RELEASE"
+    kotlin("jvm") version "1.7.10"
+    kotlin("plugin.spring") version "1.7.10"
+    id("com.netflix.dgs.codegen") version "5.1.17"
+    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
 
 group = "no.nav.sykdig"
@@ -17,14 +18,14 @@ val githubUser: String by project
 val githubPassword: String by project
 
 repositories {
-	mavenCentral()
-	maven {
-		url = uri("https://maven.pkg.github.com/navikt/syfosm-common")
-		credentials {
-			username = githubUser
-			password = githubPassword
-		}
-	}
+    mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/syfosm-common")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+    }
 }
 
 val postgresVersion = "42.5.0"
@@ -38,48 +39,46 @@ val javaJwtVersion = "4.0.0"
 val springBootResourceVersion = "2.7.3"
 val graphqlVersion = "19.2"
 dependencies {
-	implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
-	implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
-	implementation("com.graphql-java:graphql-java:$graphqlVersion")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-	implementation("io.micrometer:micrometer-registry-prometheus")
-	implementation("org.springframework.kafka:spring-kafka")
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-	implementation("org.springframework.boot:spring-boot-starter-logging")
-	implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
-	implementation("org.postgresql:postgresql:$postgresVersion")
-	implementation("org.flywaydb:flyway-core")
-	implementation("org.yaml:snakeyaml:$snakeYamlVersion") // overstyrer sårbar dependency
-	implementation("no.nav.helse:syfosm-common-models:$smCommonVersion")
-	implementation("org.hibernate.validator:hibernate-validator")
-	implementation("com.auth0:java-jwt:$javaJwtVersion")
-	implementation("org.springframework.boot:spring-boot-starter-security")
-	implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
-	implementation("no.nav.security:token-validation-filter:$tokenSupportVersion")
-	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springBootResourceVersion")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.testcontainers:postgresql:$testContainersVersion")
-	testImplementation("org.testcontainers:kafka:$testContainersVersion")
-	testImplementation("org.amshove.kluent:kluent:$kluentVersion")
-
+    implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
+    implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
+    implementation("com.graphql-java:graphql-java:$graphqlVersion")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-logging")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
+    implementation("org.postgresql:postgresql:$postgresVersion")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.yaml:snakeyaml:$snakeYamlVersion") // overstyrer sårbar dependency
+    implementation("no.nav.helse:syfosm-common-models:$smCommonVersion")
+    implementation("org.hibernate.validator:hibernate-validator")
+    implementation("com.auth0:java-jwt:$javaJwtVersion")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springBootResourceVersion")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.testcontainers:postgresql:$testContainersVersion")
+    testImplementation("org.testcontainers:kafka:$testContainersVersion")
+    testImplementation("org.amshove.kluent:kluent:$kluentVersion")
 }
 
 tasks.withType<KotlinCompile> {
-	kotlinOptions {
-		freeCompilerArgs = listOf("-Xjsr305=strict")
-		jvmTarget = "17"
-	}
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "17"
+    }
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 tasks.withType<GenerateJavaTask> {
-	packageName = "no.nav.sykdig.generated"
-	generateClient = true
+    packageName = "no.nav.sykdig.generated"
+    generateClient = true
 }
