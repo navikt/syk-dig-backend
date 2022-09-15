@@ -29,7 +29,7 @@ class OppgaveDataFetcher(
         // hent navn og adresse fra PDL
         // Mer presis feilhåndtering
         // utvid format med SykmeldingUnderArbeid
-        return if (oppgave != null) {
+        if (oppgave != null) {
             if (!syfoTilgangskontrollClient.sjekkTilgangVeileder(oppgave.fnr)) {
                 log.warn("Innlogget bruker har ikke tilgang til oppgave med id $oppgaveId")
                 return DigitaliseringsoppgaveRespons(
@@ -44,7 +44,7 @@ class OppgaveDataFetcher(
                     sykmeldingId = oppgave.sykmeldingId.toString()
                 )
                 val person = pdlClient.hentPerson(fnr = oppgave.fnr, sykmeldingId = oppgave.sykmeldingId.toString())
-                DigitaliseringsoppgaveRespons(
+                return DigitaliseringsoppgaveRespons(
                     digitaliseringsoppgave = Digitaliseringsoppgave(
                         oppgaveId = oppgave.oppgaveId,
                         sykmeldingId = oppgave.sykmeldingId.toString(),
