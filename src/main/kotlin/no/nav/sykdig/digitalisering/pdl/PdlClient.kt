@@ -4,6 +4,7 @@ import com.netflix.graphql.dgs.client.GraphQLClient
 import com.netflix.graphql.dgs.client.HttpResponse
 import no.nav.sykdig.digitalisering.pdl.graphql.PDL_QUERY
 import no.nav.sykdig.generated.types.PdlPerson
+import no.nav.sykdig.generated.types.PdlQuery
 import no.nav.sykdig.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -42,9 +43,9 @@ class PdlClient(
             val errors = response.errors
             errors.forEach { log.error("Feilmelding fra PDL: ${it.message} for $sykmeldingId") }
 
-            val pdlPerson = response.dataAsObject(PdlPerson::class.java)
+            val pdlPerson = response.dataAsObject(PdlQuery::class.java).hentPerson
 
-            if (pdlPerson.navn.isEmpty()) {
+            if (pdlPerson == null || pdlPerson.navn.isEmpty()) {
                 log.error("Fant ikke navn for person i PDL $sykmeldingId")
                 throw RuntimeException("Fant ikke navn for person i PDL")
             }
@@ -70,7 +71,7 @@ fun mapPdlPersonTilPerson(fnr: String, pdlPerson: PdlPerson): Person {
             mellomnavn = navn.mellomnavn,
             etternavn = navn.etternavn
         ),
-        bostedsadresse = bostedsadresse?.let { it ->
+        bostedsadresse = bostedsadresse?.let {
             Bostedsadresse(
                 coAdressenavn = it.coAdressenavn,
                 vegadresse = it.vegadresse?.let { vegadresse ->
