@@ -8,6 +8,7 @@ import no.nav.sykdig.digitalisering.pdl.PdlClient
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
+import no.nav.sykdig.generated.types.Adresse
 import no.nav.sykdig.generated.types.Digitaliseringsoppgave
 import no.nav.sykdig.generated.types.DigitaliseringsoppgaveRespons
 import no.nav.sykdig.generated.types.Person
@@ -51,7 +52,11 @@ class OppgaveDataFetcher(
                         person = Person(
                             fnr = person.fnr,
                             navn = person.navn.toFormattedNameString(),
-                            adresser = emptyList()
+                            adresser = if (person.bostedsadresse?.vegadresse != null) {
+                                listOf(Adresse(gateadresse = person.bostedsadresse.vegadresse.adressenavn, postnummer = person.bostedsadresse.vegadresse.postnummer, poststed = null, land = null, type = "BOSTED"))
+                            } else {
+                                emptyList()
+                            }
                         ),
                         pdf = pdf.decodeToString()
                     ),

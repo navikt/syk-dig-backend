@@ -3,9 +3,11 @@ package no.nav.sykdig.digitalisering
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import no.nav.sykdig.db.OppgaveRepository
+import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PdlClient
 import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.digitalisering.pdl.Vegadresse
 import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
 import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
@@ -52,7 +54,12 @@ class OppgaveDataFetcherTest {
             "pdf".toByteArray()
         }
         Mockito.`when`(pdlClient.hentPerson(anyString(), anyString())).thenAnswer {
-            Person("12345678910", Navn("fornavn", null, "etternavn"))
+            Person(
+                "12345678910",
+                Navn("fornavn", null, "etternavn"),
+                Bostedsadresse(null, Vegadresse("7", null, null, "Gateveien", null, "1111"), null, null, null),
+                null
+            )
         }
         val oppgave: String = dgsQueryExecutor.executeAndExtractJsonPath(
             """

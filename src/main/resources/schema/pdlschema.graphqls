@@ -1,0 +1,63 @@
+type PdlQuery {
+    hentPerson(ident: ID!): PdlPerson
+}
+
+type PdlPerson {
+    bostedsadresse(historikk: Boolean = false): [Bostedsadresse!]!
+    navn(historikk: Boolean = false): [Navn!]!
+    oppholdsadresse(historikk: Boolean = false):[Oppholdsadresse!]!
+}
+
+type Bostedsadresse {
+    coAdressenavn: String
+    vegadresse: Vegadresse
+    matrikkeladresse: Matrikkeladresse
+    utenlandskAdresse: UtenlandskAdresse
+    ukjentBosted: UkjentBosted
+}
+
+type Oppholdsadresse {
+    coAdressenavn: String
+    utenlandskAdresse: UtenlandskAdresse
+    vegadresse: Vegadresse
+    matrikkeladresse: Matrikkeladresse
+    oppholdAnnetSted: String
+}
+
+type Vegadresse {
+    husnummer: String
+    husbokstav: String
+    bruksenhetsnummer: String
+    adressenavn: String
+    kommunenummer: String
+    bydelsnummer: String
+    tilleggsnavn: String
+    postnummer: String
+}
+
+type Matrikkeladresse {
+    bruksenhetsnummer: String
+    tilleggsnavn: String
+    postnummer: String
+    kommunenummer: String
+}
+
+type UkjentBosted {
+    bostedskommune: String
+}
+
+type UtenlandskAdresse {
+    adressenavnNummer: String
+    bygningEtasjeLeilighet: String
+    postboksNummerNavn: String
+    postkode: String
+    bySted: String
+    regionDistriktOmraade: String
+    landkode: String!
+}
+
+type Navn {
+    fornavn: String!
+    mellomnavn: String
+    etternavn: String!
+}

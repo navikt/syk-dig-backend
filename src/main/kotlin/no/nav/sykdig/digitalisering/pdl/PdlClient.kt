@@ -3,7 +3,7 @@ package no.nav.sykdig.digitalisering.pdl
 import com.netflix.graphql.dgs.client.GraphQLClient
 import com.netflix.graphql.dgs.client.HttpResponse
 import no.nav.sykdig.digitalisering.pdl.graphql.PDL_QUERY
-import no.nav.sykdig.digitalisering.pdl.graphql.PdlResponse
+import no.nav.sykdig.generated.types.PdlPerson
 import no.nav.sykdig.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -42,27 +42,103 @@ class PdlClient(
             val errors = response.errors
             errors.forEach { log.error("Feilmelding fra PDL: ${it.message} for $sykmeldingId") }
 
-            val pdlResponse = response.dataAsObject(PdlResponse::class.java)
+            val pdlPerson = response.dataAsObject(PdlPerson::class.java)
 
-            if (pdlResponse.hentPerson == null || pdlResponse.hentPerson.navn.isNullOrEmpty()) {
+            if (pdlPerson.navn.isEmpty()) {
                 log.error("Fant ikke navn for person i PDL $sykmeldingId")
                 throw RuntimeException("Fant ikke navn for person i PDL")
             }
 
-            val navn = pdlResponse.hentPerson.navn.first()
-
-            log.info("Hentet person med navn: $navn")
-            return Person(
-                fnr = fnr,
-                navn = Navn(
-                    fornavn = navn.fornavn,
-                    mellomnavn = navn.mellomnavn,
-                    etternavn = navn.etternavn
-                )
-            )
+            log.info("Hentet person for $sykmeldingId")
+            return mapPdlPersonTilPerson(fnr, pdlPerson)
         } catch (e: Exception) {
             log.error("Noe gikk galt ved kall til PDL", e)
             throw e
         }
     }
+}
+
+fun mapPdlPersonTilPerson(fnr: String, pdlPerson: PdlPerson): Person {
+    val navn = pdlPerson.navn.first()
+    val bostedsadresse = pdlPerson.bostedsadresse.firstOrNull()
+    val oppholdsadresse = pdlPerson.oppholdsadresse.firstOrNull()
+
+    return Person(
+        fnr = fnr,
+        navn = Navn(
+            fornavn = navn.fornavn,
+            mellomnavn = navn.mellomnavn,
+            etternavn = navn.etternavn
+        ),
+        bostedsadresse = bostedsadresse?.let { it ->
+            Bostedsadresse(
+                coAdressenavn = it.coAdressenavn,
+                vegadresse = it.vegadresse?.let { vegadresse ->
+                    Vegadresse(
+                        husnummer = vegadresse.husnummer,
+                        husbokstav = vegadresse.husbokstav,
+                        bruksenhetsnummer = vegadresse.bruksenhetsnummer,
+                        adressenavn = vegadresse.adressenavn,
+                        tilleggsnavn = vegadresse.tilleggsnavn,
+                        postnummer = vegadresse.postnummer
+                    )
+                },
+                matrikkeladresse = it.matrikkeladresse?.let { matrikkeladresse ->
+                    Matrikkeladresse(
+                        bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
+                        tilleggsnavn = matrikkeladresse.tilleggsnavn,
+                        postnummer = matrikkeladresse.postnummer
+                    )
+                },
+                utenlandskAdresse = it.utenlandskAdresse?.let { utenlandskAdresse ->
+                    UtenlandskAdresse(
+                        adressenavnNummer = utenlandskAdresse.adressenavnNummer,
+                        bygningEtasjeLeilighet = utenlandskAdresse.bygningEtasjeLeilighet,
+                        postboksNummerNavn = utenlandskAdresse.postboksNummerNavn,
+                        postkode = utenlandskAdresse.postkode,
+                        bySted = utenlandskAdresse.bySted,
+                        regionDistriktOmraade = utenlandskAdresse.regionDistriktOmraade,
+                        landkode = utenlandskAdresse.landkode
+                    )
+                },
+                ukjentBosted = it.ukjentBosted?.let { ukjentBosted ->
+                    UkjentBosted(ukjentBosted.bostedskommune)
+                }
+            )
+        },
+        oppholdsadresse = oppholdsadresse?.let {
+            Oppholdsadresse(
+                coAdressenavn = it.coAdressenavn,
+                vegadresse = it.vegadresse?.let { vegadresse ->
+                    Vegadresse(
+                        husnummer = vegadresse.husnummer,
+                        husbokstav = vegadresse.husbokstav,
+                        bruksenhetsnummer = vegadresse.bruksenhetsnummer,
+                        adressenavn = vegadresse.adressenavn,
+                        tilleggsnavn = vegadresse.tilleggsnavn,
+                        postnummer = vegadresse.postnummer
+                    )
+                },
+                matrikkeladresse = it.matrikkeladresse?.let { matrikkeladresse ->
+                    Matrikkeladresse(
+                        bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
+                        tilleggsnavn = matrikkeladresse.tilleggsnavn,
+                        postnummer = matrikkeladresse.postnummer
+                    )
+                },
+                utenlandskAdresse = it.utenlandskAdresse?.let { utenlandskAdresse ->
+                    UtenlandskAdresse(
+                        adressenavnNummer = utenlandskAdresse.adressenavnNummer,
+                        bygningEtasjeLeilighet = utenlandskAdresse.bygningEtasjeLeilighet,
+                        postboksNummerNavn = utenlandskAdresse.postboksNummerNavn,
+                        postkode = utenlandskAdresse.postkode,
+                        bySted = utenlandskAdresse.bySted,
+                        regionDistriktOmraade = utenlandskAdresse.regionDistriktOmraade,
+                        landkode = utenlandskAdresse.landkode
+                    )
+                },
+                oppholdAnnetSted = it.oppholdAnnetSted
+            )
+        }
+    )
 }
