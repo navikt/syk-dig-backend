@@ -2,7 +2,7 @@ package no.nav.sykdig.digitalisering.pdl
 
 import com.netflix.graphql.dgs.client.GraphQLClient
 import com.netflix.graphql.dgs.client.HttpResponse
-import no.nav.sykdig.digitalisering.pdl.graphql.PdlQuery
+import no.nav.sykdig.digitalisering.pdl.graphql.PDL_QUERY
 import no.nav.sykdig.digitalisering.pdl.graphql.PdlResponse
 import no.nav.sykdig.logger
 import org.springframework.beans.factory.annotation.Value
@@ -37,8 +37,7 @@ class PdlClient(
     @Retryable
     fun hentPerson(fnr: String, sykmeldingId: String): Person {
         try {
-            val response =
-                client.executeQuery(PdlQuery(fnr).getQuery())
+            val response = client.executeQuery(PDL_QUERY, mapOf("ident" to fnr))
 
             val errors = response.errors
             errors.forEach { log.error("Feilmelding fra PDL: ${it.message} for $sykmeldingId") }

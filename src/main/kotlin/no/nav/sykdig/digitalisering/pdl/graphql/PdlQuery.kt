@@ -1,7 +1,6 @@
 package no.nav.sykdig.digitalisering.pdl.graphql
 
-data class PdlQuery(val fnr: String) {
-    private val query = """
+const val PDL_QUERY = """
         query(${"$"}ident: ID!){
               hentIdenter(ident: ${"$"}ident, historikk: false) {
                 identer {
@@ -19,8 +18,3 @@ data class PdlQuery(val fnr: String) {
               }
             }
         """
-
-    fun getQuery(): String {
-        return query
-    }
-}
