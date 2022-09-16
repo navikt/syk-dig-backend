@@ -43,7 +43,9 @@ class PdlClient(
             val errors = response.errors
             errors.forEach { log.error("Feilmelding fra PDL: ${it.message} for $sykmeldingId") }
 
-            val pdlPerson = response.dataAsObject(PdlQuery::class.java).hentPerson
+            val pdlResponse = response.dataAsObject(PdlQuery::class.java)
+            log.info("Hentet person: $pdlResponse")
+            val pdlPerson = pdlResponse.hentPerson
 
             if (pdlPerson == null || pdlPerson.navn.isEmpty()) {
                 log.error("Fant ikke navn for person i PDL $sykmeldingId")
