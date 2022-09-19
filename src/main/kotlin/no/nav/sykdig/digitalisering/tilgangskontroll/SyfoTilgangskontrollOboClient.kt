@@ -1,4 +1,4 @@
-package no.nav.sykdig.tilgangskontroll
+package no.nav.sykdig.digitalisering.tilgangskontroll
 
 import no.nav.sykdig.logger
 import org.springframework.beans.factory.annotation.Value

@@ -27,6 +27,7 @@ aiven-kafka:
 
 syfotilgangskontroll.url: http://syfotilgangskontroll
 saf.url: http://saf
+pdl.url: http://pdl
 
 no.nav.security.jwt:
   issuer:
@@ -47,6 +48,14 @@ no.nav.security.jwt:
         token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: saf-client
+        authentication:
+          client-id: client-id
+          client-secret: secretzz
+          client-auth-method: client_secret_basic
+      onbehalfof-pdl:
+        token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: pdl-client
         authentication:
           client-id: client-id
           client-secret: secretzz
