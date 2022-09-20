@@ -57,6 +57,9 @@ spec:
     inbound:
       rules:
         - application: syk-dig
+    outbound:
+      external:
+        - host: kodeverk.prod-fss-pub.nais.io
   ingresses:
     - "https://syk-dig-backend.intern.nav.no"
   leaderElection: true
