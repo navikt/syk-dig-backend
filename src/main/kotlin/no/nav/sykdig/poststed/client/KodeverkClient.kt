@@ -24,7 +24,6 @@ class KodeverkClient(
     fun hentKodeverk(callId: UUID): List<PostInformasjon> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
-        headers.accept = listOf(MediaType.APPLICATION_PDF)
         headers["Nav-Call-Id"] = callId.toString()
         headers["Nav-Consumer-Id"] = "syk-dig-backend"
 
