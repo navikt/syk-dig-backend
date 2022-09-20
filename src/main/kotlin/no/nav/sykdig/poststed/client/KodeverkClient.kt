@@ -16,7 +16,7 @@ import java.util.UUID
 @Component
 class KodeverkClient(
     @Value("\${kodeverk.url}") private val url: String,
-    private val plainTextUtf8RestTemplate: RestTemplate
+    private val kodeverkRestTemplate: RestTemplate
 ) {
     val log = logger()
 
@@ -28,7 +28,7 @@ class KodeverkClient(
         headers["Nav-Consumer-Id"] = "syk-dig-backend"
 
         try {
-            val response = plainTextUtf8RestTemplate.exchange(
+            val response = kodeverkRestTemplate.exchange(
                 "$url/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato=${LocalDate.now()}&spraak=nb",
                 HttpMethod.GET,
                 HttpEntity<Any>(headers),
