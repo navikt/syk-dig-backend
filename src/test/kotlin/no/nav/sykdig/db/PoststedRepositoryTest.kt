@@ -7,9 +7,15 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
+@Transactional
 class PoststedRepositoryTest : FellesTestOppsett() {
+    @Autowired
+    lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
     @Autowired
     lateinit var poststedRepository: PoststedRepository
 
@@ -28,7 +34,7 @@ class PoststedRepositoryTest : FellesTestOppsett() {
 
     @AfterEach
     fun after() {
-        poststedRepository.deleteAll()
+        namedParameterJdbcTemplate.update("DELETE FROM postinformasjon", MapSqlParameterSource())
     }
 
     @Test

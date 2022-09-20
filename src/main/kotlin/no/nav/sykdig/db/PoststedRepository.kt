@@ -2,7 +2,6 @@ package no.nav.sykdig.db
 
 import no.nav.sykdig.logger
 import no.nav.sykdig.poststed.PostInformasjon
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -91,10 +90,6 @@ class PoststedRepository(
                 )
             )
         }
-    }
-
-    fun deleteAll() {
-        namedParameterJdbcTemplate.update("DELETE FROM postinformasjon", MapSqlParameterSource())
     }
 }
 
