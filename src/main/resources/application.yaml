@@ -42,6 +42,7 @@ aiven-kafka:
 syfo-tilgangskontroll.url: ${SYFOTILGANGSKONTROLL_URL}
 saf.url: ${SAF_URL}
 pdl.url: ${PDL_URL}
+kodeverk.url: ${KODEVERK_URL}
 
 no.nav.security.jwt:
     issuer:

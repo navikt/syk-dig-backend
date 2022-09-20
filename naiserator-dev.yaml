@@ -59,6 +59,7 @@ spec:
         - application: syk-dig
   ingresses:
     - "https://syk-dig-backend.dev.intern.nav.no"
+  leaderElection: true
   env:
     - name: SYFOTILGANGSKONTROLL_URL
       value: https://syfo-tilgangskontroll.dev-fss-pub.nais.io
@@ -72,3 +73,5 @@ spec:
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: PDL_CLIENT_ID
       value: dev-fss.pdl.pdl-api
+    - name: KODEVERK_URL
+      value: https://kodeverk.dev-fss-pub.nais.io

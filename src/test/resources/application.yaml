@@ -28,6 +28,7 @@ aiven-kafka:
 syfotilgangskontroll.url: http://syfotilgangskontroll
 saf.url: http://saf
 pdl.url: http://pdl
+kodeverk.url: http://kodeverk
 
 no.nav.security.jwt:
   issuer:
@@ -64,3 +65,4 @@ no.nav.security.jwt:
 AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:teamsykmelding:syk-dig\",\"clientId\":\"syk-dig-client-id\"}]"
 
 logging.config: "classpath:logback-test.xml"
+elector.path: dont_look_for_leader
