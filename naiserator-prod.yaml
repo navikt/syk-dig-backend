@@ -57,8 +57,12 @@ spec:
     inbound:
       rules:
         - application: syk-dig
+    outbound:
+      external:
+        - host: kodeverk.prod-fss-pub.nais.io
   ingresses:
     - "https://syk-dig-backend.intern.nav.no"
+  leaderElection: true
   env:
     - name: SYFOTILGANGSKONTROLL_URL
       value: https://syfo-tilgangskontroll.prod-fss-pub.nais.io
@@ -72,3 +76,5 @@ spec:
       value: https://pdl-api.prod-fss-pub.nais.io/graphql
     - name: PDL_CLIENT_ID
       value: prod-fss.pdl.pdl-api
+    - name: KODEVERK_URL
+      value: https://kodeverk.prod-fss-pub.nais.io

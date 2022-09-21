@@ -29,7 +29,7 @@ repositories {
 }
 
 val postgresVersion = "42.5.0"
-val snakeYamlVersion = "1.31"
+val snakeYamlVersion = "1.32"
 val smCommonVersion = "1.cbb3aed"
 val tokenSupportVersion = "2.1.4"
 val testContainersVersion = "1.17.3"
@@ -38,6 +38,8 @@ val logstashLogbackEncoderVersion = "7.2"
 val javaJwtVersion = "4.0.0"
 val springBootResourceVersion = "2.7.3"
 val graphqlVersion = "19.2"
+val kafkaClientsVersion = "3.2.2"
+
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
@@ -48,6 +50,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.apache.kafka:kafka-clients:$kafkaClientsVersion")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-logging")
