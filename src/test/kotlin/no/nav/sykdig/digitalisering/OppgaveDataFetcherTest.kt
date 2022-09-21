@@ -8,7 +8,6 @@ import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.pdl.Vegadresse
-import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
 import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
@@ -32,9 +31,6 @@ class OppgaveDataFetcherTest {
     lateinit var oppgaveRepository: OppgaveRepository
 
     @MockBean
-    lateinit var safClient: SafClient
-
-    @MockBean
     lateinit var personService: PersonService
 
     @Autowired
@@ -49,9 +45,6 @@ class OppgaveDataFetcherTest {
         }
         Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer {
             true
-        }
-        Mockito.`when`(safClient.hentPdfFraSaf(anyString(), anyString(), anyString())).thenAnswer {
-            "pdf".toByteArray()
         }
         Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
             Person(
