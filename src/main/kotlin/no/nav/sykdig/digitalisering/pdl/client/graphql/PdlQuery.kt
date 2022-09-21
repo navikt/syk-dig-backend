@@ -1,4 +1,4 @@
-package no.nav.sykdig.digitalisering.pdl.graphql
+package no.nav.sykdig.digitalisering.pdl.client.graphql
 
 const val PDL_QUERY = """
     query(${"$"}ident: ID!){

@@ -35,13 +35,15 @@ data class Vegadresse(
     val bruksenhetsnummer: String? = null,
     val adressenavn: String? = null,
     val tilleggsnavn: String? = null,
-    val postnummer: String? = null
+    val postnummer: String? = null,
+    val poststed: String? = null
 )
 
 data class Matrikkeladresse(
     val bruksenhetsnummer: String? = null,
     val tilleggsnavn: String? = null,
-    val postnummer: String? = null
+    val postnummer: String? = null,
+    val poststed: String? = null
 )
 
 data class UtenlandskAdresse(
