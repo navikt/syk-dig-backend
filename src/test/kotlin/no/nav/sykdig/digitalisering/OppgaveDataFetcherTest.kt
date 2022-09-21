@@ -5,8 +5,8 @@ import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Navn
-import no.nav.sykdig.digitalisering.pdl.PdlClient
 import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.pdl.Vegadresse
 import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
@@ -35,7 +35,7 @@ class OppgaveDataFetcherTest {
     lateinit var safClient: SafClient
 
     @MockBean
-    lateinit var pdlClient: PdlClient
+    lateinit var personService: PersonService
 
     @Autowired
     lateinit var dgsQueryExecutor: DgsQueryExecutor
@@ -53,11 +53,11 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(safClient.hentPdfFraSaf(anyString(), anyString(), anyString())).thenAnswer {
             "pdf".toByteArray()
         }
-        Mockito.`when`(pdlClient.hentPerson(anyString(), anyString())).thenAnswer {
+        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
             Person(
                 "12345678910",
                 Navn("fornavn", null, "etternavn"),
-                Bostedsadresse(null, Vegadresse("7", null, null, "Gateveien", null, "1111"), null, null, null),
+                Bostedsadresse(null, Vegadresse("7", null, null, "Gateveien", null, "1111", "Stedet"), null, null, null),
                 null
             )
         }
