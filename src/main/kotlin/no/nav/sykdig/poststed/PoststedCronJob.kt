@@ -15,8 +15,7 @@ class PoststedCronJob(
 ) {
     val log = logger()
 
-//    @Scheduled(cron = "0 0 6 * * *")
-    @Scheduled(cron = "0 0,15,30,45 * * * *")
+    @Scheduled(cron = "0 0 6 * * *")
     fun run() {
         if (leaderElection.isLeader()) {
             val callId = UUID.randomUUID()
