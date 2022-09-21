@@ -77,3 +77,7 @@ no.nav.security.jwt:
                     client-auth-method: client_secret_basic
 
 logging.config: "classpath:logback.xml"
+
+dgs:
+    graphql:
+        path: /api/graphql
