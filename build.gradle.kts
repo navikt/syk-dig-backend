@@ -38,7 +38,7 @@ val logstashLogbackEncoderVersion = "7.2"
 val javaJwtVersion = "4.0.0"
 val springBootResourceVersion = "2.7.3"
 val graphqlVersion = "19.2"
-val kafkaClientsVersion = "3.2.2"
+val kafkaClientsVersion = "3.2.3"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
