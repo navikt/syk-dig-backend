@@ -27,7 +27,6 @@ type Digitaliseringsoppgave {
     oppgaveId: String!
     sykmeldingId: String!
     person: Person!
-    pdf: String
 }
 
 type Person {

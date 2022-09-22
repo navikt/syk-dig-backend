@@ -20,6 +20,7 @@ class SecurityConfiguration() {
                 .oauth2ResourceServer()
                 .jwt()
         }
+            .headers().frameOptions().sameOrigin().and()
             .csrf().disable()
             .build()
     }

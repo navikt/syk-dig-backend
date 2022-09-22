@@ -6,7 +6,6 @@ import com.netflix.graphql.dgs.InputArgument
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
-import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
 import no.nav.sykdig.generated.types.Adresse
 import no.nav.sykdig.generated.types.Digitaliseringsoppgave
@@ -18,7 +17,6 @@ import no.nav.sykdig.logger
 class OppgaveDataFetcher(
     private val syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient,
     private val oppgaveRepository: OppgaveRepository,
-    private val safClient: SafClient,
     private val personService: PersonService
 ) {
     private val log = logger()
@@ -38,11 +36,6 @@ class OppgaveDataFetcher(
                 )
             }
             try {
-                val pdf = safClient.hentPdfFraSaf(
-                    journalpostId = oppgave.journalpostId,
-                    dokumentInfoId = oppgave.dokumentInfoId ?: "",
-                    sykmeldingId = oppgave.sykmeldingId.toString()
-                )
                 val person = personService.hentPerson(fnr = oppgave.fnr, sykmeldingId = oppgave.sykmeldingId.toString())
                 return DigitaliseringsoppgaveRespons(
                     digitaliseringsoppgave = Digitaliseringsoppgave(
@@ -56,8 +49,7 @@ class OppgaveDataFetcher(
                             } else {
                                 emptyList()
                             }
-                        ),
-                        pdf = pdf.decodeToString()
+                        )
                     ),
                     error = null
                 )
