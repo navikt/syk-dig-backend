@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component
 
 @Component
 class PdlClient(
-    private val pdlGraphQLClient: CustomGraphQLClient
+    private val pdlGraphQlClient: CustomGraphQLClient
 ) {
     val log = logger()
 
     @Retryable
     fun hentPerson(fnr: String, sykmeldingId: String): PdlPerson {
         try {
-            val response = pdlGraphQLClient.executeQuery(PDL_QUERY, mapOf("ident" to fnr))
+            val response = pdlGraphQlClient.executeQuery(PDL_QUERY, mapOf("ident" to fnr))
 
             val errors = response.errors
             errors.forEach { log.error("Feilmelding fra PDL: ${it.message} for $sykmeldingId") }
