@@ -90,13 +90,13 @@ class DokarkivClient(
                     e
                 )
             }
-            throw RuntimeException("HttpClientErrorException fra Dokarkiv")
+            throw e
         } catch (e: HttpServerErrorException) {
             log.error(
                 "HttpServerErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved oppdatering: ${e.message}",
                 e
             )
-            throw RuntimeException("HttpServerErrorException fra Dokarkiv")
+            throw e
         }
     }
 
@@ -131,13 +131,13 @@ class DokarkivClient(
                     e
                 )
             }
-            throw RuntimeException("HttpClientErrorException fra Dokarkiv")
+            throw e
         } catch (e: HttpServerErrorException) {
             log.error(
                 "HttpServerErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved ferdigstilling: ${e.message}",
                 e
             )
-            throw RuntimeException("HttpServerErrorException fra Dokarkiv")
+            throw e
         }
     }
 }
