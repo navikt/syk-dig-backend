@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.saf
 
+import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -42,6 +43,7 @@ class SafClient(
         } catch (e: HttpClientErrorException) {
             if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
                 log.warn("Veileder har ikke tilgang til journalpostId $journalpostId: ${e.message}")
+                throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else {
                 log.error("HttpClientErrorException med responskode ${e.rawStatusCode} fra SAF: ${e.message}", e)
             }

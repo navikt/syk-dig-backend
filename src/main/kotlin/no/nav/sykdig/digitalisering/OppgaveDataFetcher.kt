@@ -3,7 +3,9 @@ package no.nav.sykdig.digitalisering
 import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
+import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import no.nav.sykdig.db.OppgaveRepository
+import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
@@ -28,7 +30,7 @@ class OppgaveDataFetcher(
         if (oppgave != null) {
             if (!syfoTilgangskontrollClient.sjekkTilgangVeileder(oppgave.fnr)) {
                 log.warn("Innlogget bruker har ikke tilgang til oppgave med id $oppgaveId")
-                throw RuntimeException("Innlogget bruker har ikke tilgang")
+                throw IkkeTilgangException("Innlogget bruker har ikke tilgang")
             }
             try {
                 val person = personService.hentPerson(fnr = oppgave.fnr, sykmeldingId = oppgave.sykmeldingId.toString())
@@ -55,7 +57,7 @@ class OppgaveDataFetcher(
             }
         } else {
             log.warn("Fant ikke oppgave med id $oppgaveId")
-            throw RuntimeException("Fant ikke oppgave")
+            throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
     }
 }
