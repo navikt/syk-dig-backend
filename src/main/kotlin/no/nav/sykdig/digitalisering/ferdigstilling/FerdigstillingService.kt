@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
 import no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.logger
 import org.springframework.stereotype.Component
@@ -8,11 +9,13 @@ import org.springframework.stereotype.Component
 @Component
 class FerdigstillingService(
     private val safJournalpostGraphQlClient: SafJournalpostGraphQlClient,
-    private val dokarkivClient: DokarkivClient
+    private val dokarkivClient: DokarkivClient,
+    private val oppgaveClient: OppgaveClient
 ) {
     val log = logger()
 
     fun ferdigstill(
+        oppgaveId: String,
         navnSykmelder: String?,
         land: String,
         fnr: String,
@@ -34,7 +37,7 @@ class FerdigstillingService(
                 sykmeldingId = sykmeldingId
             )
         }
-        // ferdigstill oppgave
+        oppgaveClient.ferdigstillOppgave(oppgaveId = oppgaveId, sykmeldingId = sykmeldingId)
         // ferdigstill i database
     }
 }

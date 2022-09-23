@@ -106,6 +106,19 @@ class AadRestTemplateConfiguration {
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
 
+    @Bean
+    fun oppgaveRestTemplate(
+        restTemplateBuilder: RestTemplateBuilder,
+        clientConfigurationProperties: ClientConfigurationProperties,
+        oAuth2AccessTokenService: OAuth2AccessTokenService
+    ): RestTemplate =
+        downstreamRestTemplate(
+            registrationName = "onbehalfof-oppgave",
+            restTemplateBuilder = restTemplateBuilder,
+            clientConfigurationProperties = clientConfigurationProperties,
+            oAuth2AccessTokenService = oAuth2AccessTokenService,
+        )
+
     private fun downstreamRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,

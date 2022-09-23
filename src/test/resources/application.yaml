@@ -30,6 +30,7 @@ saf.url: http://saf
 pdl.url: http://pdl
 kodeverk.url: http://kodeverk
 dokarkiv.url: http://dokarkiv
+oppgave.url: http://oppgave
 
 no.nav.security.jwt:
   issuer:
@@ -66,6 +67,14 @@ no.nav.security.jwt:
         token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: dokarkiv-client
+        authentication:
+          client-id: client-id
+          client-secret: secretzz
+          client-auth-method: client_secret_basic
+      onbehalfof-oppgave:
+        token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: oppgave-client
         authentication:
           client-id: client-id
           client-secret: secretzz
