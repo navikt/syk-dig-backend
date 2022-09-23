@@ -58,17 +58,16 @@ class OppgaveDataFetcherTest {
             """
             {
                 oppgave(oppgaveId: "123") {
-                    digitaliseringsoppgave {
-                        sykmeldingId                        
+                    person {
+                        fnr
                     }
-                    
                 }
             }
             """.trimIndent(),
-            "data.oppgave.digitaliseringsoppgave.sykmeldingId"
+            "data.oppgave.person.fnr"
         )
 
-        oppgave shouldBeEqualTo "555a874f-eaca-49eb-851a-2426a0798b66"
+        oppgave shouldBeEqualTo "12345678910"
     }
 }
 

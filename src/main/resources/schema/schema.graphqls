@@ -1,49 +1,44 @@
 type Query {
-    utenlandssykmelding(id: String!): [UtenlandsSykmelding!]!
-    arbeidsgivere: [Arbeidsgiver!]!
-    oppgave(oppgaveId: String!): DigitaliseringsoppgaveRespons
+    oppgave(oppgaveId: String!): Digitaliseringsoppgave!
 }
 
 type Mutation {
-    minMutation(arbeidsgiver: ArbeidsgiverInput!): Arbeidsgiver!
-}
-
-type UtenlandsSykmelding {
-    id: String!
-    fnr: String!
-}
-
-type Arbeidsgiver {
-    navn: String!
-    orgnummer: String
-}
-
-type DigitaliseringsoppgaveRespons {
-    digitaliseringsoppgave: Digitaliseringsoppgave,
-    error: String
+    lagre(
+        oppgaveId: String!
+        values: SykmeldingUnderArbeidValues!
+        status: SykmeldingUnderArbeidStatus!
+    ): Digitaliseringsoppgave!
 }
 
 type Digitaliseringsoppgave {
     oppgaveId: String!
-    sykmeldingId: String!
     person: Person!
+    type: SykmeldingsType!
+    values: SykmeldingUnderArbeid!
+}
+
+type SykmeldingUnderArbeid {
+    # TODO: Verdier som skal kunne endres fra frontenden som skal kunne ha default verdier
+    personNrPasient: String
+}
+
+input SykmeldingUnderArbeidValues {
+    # TODO: Verdier som skal kunne endres fra frontenden
+    personNrPasient: String!
+}
+
+enum SykmeldingUnderArbeidStatus {
+    UNDER_ARBEID
+    FERDIGSTILT
+}
+
+enum SykmeldingsType {
+    INNENLANDS
+    UTENLANDS
 }
 
 type Person {
     fnr: String!
     navn: String
-    adresser: [Adresse!]!
-}
-
-type Adresse {
-    gateadresse: String
-    postnummer: String
-    poststed: String
-    land: String
-    type: String
-}
-
-input ArbeidsgiverInput {
-    navn: String!
-    orgnummer: String
+    # TODO adresser
 }

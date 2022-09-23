@@ -3,14 +3,16 @@ package no.nav.sykdig.digitalisering
 import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
+import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import no.nav.sykdig.db.OppgaveRepository
+import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
-import no.nav.sykdig.generated.types.Adresse
 import no.nav.sykdig.generated.types.Digitaliseringsoppgave
-import no.nav.sykdig.generated.types.DigitaliseringsoppgaveRespons
 import no.nav.sykdig.generated.types.Person
+import no.nav.sykdig.generated.types.SykmeldingUnderArbeid
+import no.nav.sykdig.generated.types.SykmeldingsType
 import no.nav.sykdig.logger
 
 @DgsComponent
@@ -22,50 +24,40 @@ class OppgaveDataFetcher(
     private val log = logger()
 
     @DgsQuery(field = "oppgave")
-    fun getOppgave(@InputArgument oppgaveId: String): DigitaliseringsoppgaveRespons {
+    fun getOppgave(@InputArgument oppgaveId: String): Digitaliseringsoppgave {
 
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
-        // Mer presis feilhåndtering
-        // utvid format med SykmeldingUnderArbeid
         if (oppgave != null) {
             if (!syfoTilgangskontrollClient.sjekkTilgangVeileder(oppgave.fnr)) {
                 log.warn("Innlogget bruker har ikke tilgang til oppgave med id $oppgaveId")
-                return DigitaliseringsoppgaveRespons(
-                    digitaliseringsoppgave = null,
-                    error = "Ikke tilgang til oppgave"
-                )
+                throw IkkeTilgangException("Innlogget bruker har ikke tilgang")
             }
             try {
                 val person = personService.hentPerson(fnr = oppgave.fnr, sykmeldingId = oppgave.sykmeldingId.toString())
-                return DigitaliseringsoppgaveRespons(
-                    digitaliseringsoppgave = Digitaliseringsoppgave(
-                        oppgaveId = oppgave.oppgaveId,
-                        sykmeldingId = oppgave.sykmeldingId.toString(),
-                        person = Person(
-                            fnr = person.fnr,
-                            navn = person.navn.toFormattedNameString(),
-                            adresser = if (person.bostedsadresse?.vegadresse != null) {
-                                listOf(Adresse(gateadresse = person.bostedsadresse.vegadresse.adressenavn, postnummer = person.bostedsadresse.vegadresse.postnummer, poststed = person.bostedsadresse.vegadresse.poststed, land = null, type = "BOSTED"))
-                            } else {
-                                emptyList()
-                            }
-                        )
+                return Digitaliseringsoppgave(
+                    oppgaveId = oppgave.oppgaveId,
+                    person = Person(
+                        fnr = person.fnr,
+                        navn = person.navn.toFormattedNameString(),
                     ),
-                    error = null
+                    type = if (oppgave.type == "UTLAND") {
+                        SykmeldingsType.UTENLANDS
+                    } else {
+                        SykmeldingsType.INNENLANDS
+                    },
+                    values = oppgave.sykmelding?.let {
+                        SykmeldingUnderArbeid(
+                            personNrPasient = it.personNrPasient
+                        )
+                    } ?: SykmeldingUnderArbeid()
                 )
             } catch (e: Exception) {
                 log.error("Noe gikk galt ved henting av oppgave med id $oppgaveId")
-                return DigitaliseringsoppgaveRespons(
-                    digitaliseringsoppgave = null,
-                    error = "Noe gikk galt ved henting av oppgave"
-                )
+                throw RuntimeException("Noe gikk galt ved henting av oppgave")
             }
         } else {
             log.warn("Fant ikke oppgave med id $oppgaveId")
-            return DigitaliseringsoppgaveRespons(
-                digitaliseringsoppgave = null,
-                error = "Fant ikke oppgave"
-            )
+            throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
     }
 }

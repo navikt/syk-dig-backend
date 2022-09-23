@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
 
+import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -84,6 +85,7 @@ class DokarkivClient(
         } catch (e: HttpClientErrorException) {
             if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
                 log.warn("Veileder har ikke tilgang til å oppdatere journalpostId $journalpostId: ${e.message}")
+                throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else {
                 log.error(
                     "HttpClientErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved oppdatering: ${e.message}",
@@ -125,6 +127,7 @@ class DokarkivClient(
         } catch (e: HttpClientErrorException) {
             if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
                 log.warn("Veileder har ikke tilgang til å ferdigstille journalpostId $journalpostId: ${e.message}")
+                throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else {
                 log.error(
                     "HttpClientErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved ferdigstilling: ${e.message}",
