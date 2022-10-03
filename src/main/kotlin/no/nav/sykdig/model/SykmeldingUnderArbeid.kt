@@ -5,8 +5,8 @@ import java.time.LocalDateTime
 
 data class SykmeldingUnderArbeid(
     val sykmelding: Sykmelding?,
-    val personNrPasient: String,
-    val personNrLege: String?,
+    val fnrPasient: String,
+    val fnrLege: String?,
     val legeHprNr: String?,
     val navLogId: String,
     val msgId: String,

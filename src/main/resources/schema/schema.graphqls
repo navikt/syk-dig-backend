@@ -14,17 +14,27 @@ type Digitaliseringsoppgave {
     oppgaveId: String!
     person: Person!
     type: SykmeldingsType!
-    values: SykmeldingUnderArbeid!
+    values: OppgaveValues!
 }
 
-type SykmeldingUnderArbeid {
-    # TODO: Verdier som skal kunne endres fra frontenden som skal kunne ha default verdier
-    personNrPasient: String
+type OppgaveValues {
+    fnrPasient: String
+    behandletTidspunkt: String
+    skrevetLand: String
+    hoveddiagnose: DiagnoseValue
+    biDiagnoser: [DiagnoseValue!]
+}
+
+type DiagnoseValue {
+    kode: String!
+    system: String!
+    tekst: String
 }
 
 input SykmeldingUnderArbeidValues {
-    # TODO: Verdier som skal kunne endres fra frontenden
-    personNrPasient: String!
+    fnrPasient: String
+    behandletTidspunkt: String
+    skrevetLand: String
 }
 
 enum SykmeldingUnderArbeidStatus {
