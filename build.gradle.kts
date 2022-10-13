@@ -1,5 +1,6 @@
 import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
     id("org.springframework.boot") version "2.7.3"
@@ -84,4 +85,11 @@ tasks.withType<Test> {
 tasks.withType<GenerateJavaTask> {
     packageName = "no.nav.sykdig.generated"
     generateClient = true
+}
+
+configure<KtlintExtension> {
+    filter {
+        exclude("**/generated/**")
+        include("**/kotlin/**")
+    }
 }

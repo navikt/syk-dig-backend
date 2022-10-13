@@ -70,6 +70,6 @@ fun Navn.toFormattedNameString(): String {
 
 private fun capitalizeFirstLetter(string: String): String {
     return string.lowercase()
-        .split(" ").joinToString(" ") { it.capitalize() }
-        .split("-").joinToString("-") { it.capitalize() }.trimEnd()
+        .split(" ").joinToString(" ") { it.replaceFirstChar(Char::titlecase) }
+        .split("-").joinToString("-") { it.replaceFirstChar(Char::titlecase) }.trimEnd()
 }
