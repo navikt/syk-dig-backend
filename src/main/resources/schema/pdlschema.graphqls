@@ -33,6 +33,7 @@ type Vegadresse {
     bydelsnummer: String
     tilleggsnavn: String
     postnummer: String
+    poststed: String
 }
 
 type Matrikkeladresse {
@@ -40,6 +41,7 @@ type Matrikkeladresse {
     tilleggsnavn: String
     postnummer: String
     kommunenummer: String
+    poststed: String
 }
 
 type UkjentBosted {
