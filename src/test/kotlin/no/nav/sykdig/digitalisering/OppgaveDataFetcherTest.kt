@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering
 
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
+import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Navn
@@ -21,7 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.OffsetDateTime
 import java.util.UUID
 
-@SpringBootTest(classes = [DgsAutoConfiguration::class, OppgaveDataFetcher::class])
+@SpringBootTest(classes = [DgsAutoConfiguration::class, DgsExtendedScalarsAutoConfiguration::class, OppgaveDataFetcher::class])
 class OppgaveDataFetcherTest {
 
     @MockBean
@@ -40,7 +41,7 @@ class OppgaveDataFetcherTest {
     fun oppgave() {
         Mockito.`when`(oppgaveRepository.getOppgave("123")).thenAnswer {
             createDigitalseringsoppgaveDbModel(
-                sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66")
+                sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
             )
         }
         Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer {
@@ -50,8 +51,14 @@ class OppgaveDataFetcherTest {
             Person(
                 "12345678910",
                 Navn("fornavn", null, "etternavn"),
-                Bostedsadresse(null, Vegadresse("7", null, null, "Gateveien", null, "1111", "Stedet"), null, null, null),
-                null
+                Bostedsadresse(
+                    null,
+                    Vegadresse("7", null, null, "Gateveien", null, "1111", "Stedet"),
+                    null,
+                    null,
+                    null,
+                ),
+                null,
             )
         }
         val oppgave: String = dgsQueryExecutor.executeAndExtractJsonPath(

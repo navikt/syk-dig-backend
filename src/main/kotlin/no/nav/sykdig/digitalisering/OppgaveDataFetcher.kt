@@ -4,12 +4,25 @@ import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
+import no.nav.syfo.model.Periode
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
-import no.nav.sykdig.generated.types.*
+import no.nav.sykdig.generated.types.Bostedsadresse
+import no.nav.sykdig.generated.types.DiagnoseValue
+import no.nav.sykdig.generated.types.Digitaliseringsoppgave
+import no.nav.sykdig.generated.types.Matrikkeladresse
+import no.nav.sykdig.generated.types.OppgaveValues
+import no.nav.sykdig.generated.types.Oppholdsadresse
+import no.nav.sykdig.generated.types.PeriodeType
+import no.nav.sykdig.generated.types.PeriodeValue
+import no.nav.sykdig.generated.types.Person
+import no.nav.sykdig.generated.types.SykmeldingsType
+import no.nav.sykdig.generated.types.UkjentBosted
+import no.nav.sykdig.generated.types.UtenlandskAdresse
+import no.nav.sykdig.generated.types.Vegadresse
 import no.nav.sykdig.logger
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 
@@ -130,11 +143,10 @@ class OppgaveDataFetcher(
     }
 }
 
-private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues? =
+private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues =
     OppgaveValues(
         fnrPasient = this.fnrPasient,
-        // TODO implement custom scalars in GQL?
-        behandletTidspunkt = this.sykmelding?.behandletTidspunkt?.toString(),
+        behandletTidspunkt = this.sykmelding?.behandletTidspunkt,
         // ISO 3166-1 alpha-2, 2-letter country codes
         skrevetLand = this.utenlandskSykmelding?.land,
         hoveddiagnose = this.sykmelding?.medisinskVurdering?.hovedDiagnose?.let {
@@ -151,4 +163,22 @@ private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues? =
                 system = it.system,
             )
         },
+        perioder = this.sykmelding?.perioder?.map(Periode::mapToPeriodeValue),
     )
+
+private fun Periode.mapToPeriodeValue(): PeriodeValue {
+    val type: PeriodeType = when {
+        this.reisetilskudd -> PeriodeType.REISETILSKUDD
+        this.behandlingsdager != null -> PeriodeType.BEHANDLINGSDAGER
+        this.avventendeInnspillTilArbeidsgiver != null -> PeriodeType.AVVENTENDE
+        this.gradert != null -> PeriodeType.GRADERT
+        else -> PeriodeType.AKTIVITET_IKKE_MULIG
+    }
+
+    return PeriodeValue(
+        type = type,
+        fom = this.fom,
+        tom = this.tom,
+        grad = this.gradert?.grad,
+    )
+}

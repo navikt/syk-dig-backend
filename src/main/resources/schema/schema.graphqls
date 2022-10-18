@@ -17,12 +17,28 @@ type Digitaliseringsoppgave {
     values: OppgaveValues!
 }
 
+enum PeriodeType {
+    AKTIVITET_IKKE_MULIG
+    AVVENTENDE
+    BEHANDLINGSDAGER
+    GRADERT
+    REISETILSKUDD
+}
+
 type OppgaveValues {
     fnrPasient: String
-    behandletTidspunkt: String
+    behandletTidspunkt: DateTime
     skrevetLand: String
+    perioder: [PeriodeValue!]
     hoveddiagnose: DiagnoseValue
     biDiagnoser: [DiagnoseValue!]
+}
+
+type PeriodeValue {
+    type: PeriodeType!
+    fom: Date!
+    tom: Date!
+    grad: Int
 }
 
 type DiagnoseValue {
@@ -35,6 +51,21 @@ input SykmeldingUnderArbeidValues {
     fnrPasient: String
     behandletTidspunkt: String
     skrevetLand: String
+    perioder: [PeriodeInput!]
+    hovedDiagnose: DiagnoseInput
+    biDiagnoser: [DiagnoseInput!]
+}
+
+input DiagnoseInput {
+    kode: String!
+    system: String!
+}
+
+input PeriodeInput {
+    type: PeriodeType!
+    fom: Date!
+    tom: Date!
+    grad: Int
 }
 
 enum SykmeldingUnderArbeidStatus {
@@ -53,3 +84,7 @@ type Person {
     bostedsadresse: Bostedsadresse
     oppholdsadresse: Oppholdsadresse
 }
+
+scalar Date
+scalar DateTime
+scalar UUID
