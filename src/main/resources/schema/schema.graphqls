@@ -50,5 +50,6 @@ enum SykmeldingsType {
 type Person {
     fnr: String!
     navn: String
-    # TODO adresser
+    bostedsadresse: Bostedsadresse
+    oppholdsadresse: Oppholdsadresse
 }

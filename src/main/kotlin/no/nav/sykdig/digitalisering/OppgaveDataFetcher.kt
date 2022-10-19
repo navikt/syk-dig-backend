@@ -9,11 +9,7 @@ import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
-import no.nav.sykdig.generated.types.DiagnoseValue
-import no.nav.sykdig.generated.types.Digitaliseringsoppgave
-import no.nav.sykdig.generated.types.OppgaveValues
-import no.nav.sykdig.generated.types.Person
-import no.nav.sykdig.generated.types.SykmeldingsType
+import no.nav.sykdig.generated.types.*
 import no.nav.sykdig.logger
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 
@@ -41,6 +37,80 @@ class OppgaveDataFetcher(
                     person = Person(
                         fnr = person.fnr,
                         navn = person.navn.toFormattedNameString(),
+                        bostedsadresse = person.bostedsadresse?.let {
+                            Bostedsadresse(
+                                coAdressenavn = it.coAdressenavn,
+                                vegadresse = it.vegadresse?.let { vegadresse ->
+                                    Vegadresse(
+                                        husnummer = vegadresse.husnummer,
+                                        husbokstav = vegadresse.husbokstav,
+                                        bruksenhetsnummer = vegadresse.bruksenhetsnummer,
+                                        adressenavn = vegadresse.adressenavn,
+                                        tilleggsnavn = vegadresse.tilleggsnavn,
+                                        postnummer = vegadresse.postnummer,
+                                        poststed = vegadresse.poststed
+                                    )
+                                },
+                                matrikkeladresse = it.matrikkeladresse?.let { matrikkeladresse ->
+                                    Matrikkeladresse(
+                                        bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
+                                        tilleggsnavn = matrikkeladresse.tilleggsnavn,
+                                        postnummer = matrikkeladresse.postnummer,
+                                        poststed = matrikkeladresse.poststed
+                                    )
+                                },
+                                utenlandskAdresse = it.utenlandskAdresse?.let { utenlandskAdresse ->
+                                    UtenlandskAdresse(
+                                        adressenavnNummer = utenlandskAdresse.adressenavnNummer,
+                                        bygningEtasjeLeilighet = utenlandskAdresse.bygningEtasjeLeilighet,
+                                        postboksNummerNavn = utenlandskAdresse.postboksNummerNavn,
+                                        postkode = utenlandskAdresse.postkode,
+                                        bySted = utenlandskAdresse.bySted,
+                                        regionDistriktOmraade = utenlandskAdresse.regionDistriktOmraade,
+                                        landkode = utenlandskAdresse.landkode
+                                    )
+                                },
+                                ukjentBosted = it.ukjentBosted?.let { ukjentBosted ->
+                                    UkjentBosted(ukjentBosted.bostedskommune)
+                                }
+                            )
+                        },
+                        oppholdsadresse = person.oppholdsadresse?.let {
+                            Oppholdsadresse(
+                                coAdressenavn = it.coAdressenavn,
+                                vegadresse = it.vegadresse?.let { vegadresse ->
+                                    Vegadresse(
+                                        husnummer = vegadresse.husnummer,
+                                        husbokstav = vegadresse.husbokstav,
+                                        bruksenhetsnummer = vegadresse.bruksenhetsnummer,
+                                        adressenavn = vegadresse.adressenavn,
+                                        tilleggsnavn = vegadresse.tilleggsnavn,
+                                        postnummer = vegadresse.postnummer,
+                                        poststed = vegadresse.poststed
+                                    )
+                                },
+                                matrikkeladresse = it.matrikkeladresse?.let { matrikkeladresse ->
+                                    Matrikkeladresse(
+                                        bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
+                                        tilleggsnavn = matrikkeladresse.tilleggsnavn,
+                                        postnummer = matrikkeladresse.postnummer,
+                                        poststed = matrikkeladresse.poststed
+                                    )
+                                },
+                                utenlandskAdresse = it.utenlandskAdresse?.let { utenlandskAdresse ->
+                                    UtenlandskAdresse(
+                                        adressenavnNummer = utenlandskAdresse.adressenavnNummer,
+                                        bygningEtasjeLeilighet = utenlandskAdresse.bygningEtasjeLeilighet,
+                                        postboksNummerNavn = utenlandskAdresse.postboksNummerNavn,
+                                        postkode = utenlandskAdresse.postkode,
+                                        bySted = utenlandskAdresse.bySted,
+                                        regionDistriktOmraade = utenlandskAdresse.regionDistriktOmraade,
+                                        landkode = utenlandskAdresse.landkode
+                                    )
+                                },
+                                oppholdAnnetSted = it.oppholdAnnetSted
+                            )
+                        },
                     ),
                     type = if (oppgave.type == "UTLAND") {
                         SykmeldingsType.UTENLANDS
