@@ -44,6 +44,7 @@ val kafkaClientsVersion = "3.2.3"
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
+    implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

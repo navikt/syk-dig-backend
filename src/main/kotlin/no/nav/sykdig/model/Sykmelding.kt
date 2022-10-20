@@ -9,7 +9,7 @@ import no.nav.syfo.model.Periode
 import no.nav.syfo.model.Prognose
 import no.nav.syfo.model.SporsmalSvar
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 data class Sykmelding(
     val id: String,
@@ -25,7 +25,7 @@ data class Sykmelding(
     val meldingTilNAV: MeldingTilNAV?,
     val meldingTilArbeidsgiver: String?,
     val kontaktMedPasient: KontaktMedPasient?,
-    val behandletTidspunkt: LocalDateTime?,
+    val behandletTidspunkt: OffsetDateTime?,
     val behandler: Behandler?,
     val syketilfelleStartDato: LocalDate?
 )
