@@ -15,6 +15,7 @@ import no.nav.sykdig.generated.types.DiagnoseValue
 import no.nav.sykdig.generated.types.Digitaliseringsoppgave
 import no.nav.sykdig.generated.types.Matrikkeladresse
 import no.nav.sykdig.generated.types.OppgaveValues
+import no.nav.sykdig.generated.types.OppholdAnnetSted
 import no.nav.sykdig.generated.types.Oppholdsadresse
 import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.generated.types.PeriodeValue
@@ -36,7 +37,6 @@ class OppgaveDataFetcher(
 
     @DgsQuery(field = "oppgave")
     fun getOppgave(@InputArgument oppgaveId: String): Digitaliseringsoppgave {
-
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
         if (oppgave != null) {
             if (!syfoTilgangskontrollClient.sjekkTilgangVeileder(oppgave.fnr)) {
@@ -46,91 +46,16 @@ class OppgaveDataFetcher(
             try {
                 val person = personService.hentPerson(fnr = oppgave.fnr, sykmeldingId = oppgave.sykmeldingId.toString())
                 return Digitaliseringsoppgave(
-                    oppgaveId = oppgave.oppgaveId,
-                    person = Person(
+                    oppgaveId = oppgave.oppgaveId, person = Person(
                         fnr = person.fnr,
                         navn = person.navn.toFormattedNameString(),
-                        bostedsadresse = person.bostedsadresse?.let {
-                            Bostedsadresse(
-                                coAdressenavn = it.coAdressenavn,
-                                vegadresse = it.vegadresse?.let { vegadresse ->
-                                    Vegadresse(
-                                        husnummer = vegadresse.husnummer,
-                                        husbokstav = vegadresse.husbokstav,
-                                        bruksenhetsnummer = vegadresse.bruksenhetsnummer,
-                                        adressenavn = vegadresse.adressenavn,
-                                        tilleggsnavn = vegadresse.tilleggsnavn,
-                                        postnummer = vegadresse.postnummer,
-                                        poststed = vegadresse.poststed
-                                    )
-                                },
-                                matrikkeladresse = it.matrikkeladresse?.let { matrikkeladresse ->
-                                    Matrikkeladresse(
-                                        bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
-                                        tilleggsnavn = matrikkeladresse.tilleggsnavn,
-                                        postnummer = matrikkeladresse.postnummer,
-                                        poststed = matrikkeladresse.poststed
-                                    )
-                                },
-                                utenlandskAdresse = it.utenlandskAdresse?.let { utenlandskAdresse ->
-                                    UtenlandskAdresse(
-                                        adressenavnNummer = utenlandskAdresse.adressenavnNummer,
-                                        bygningEtasjeLeilighet = utenlandskAdresse.bygningEtasjeLeilighet,
-                                        postboksNummerNavn = utenlandskAdresse.postboksNummerNavn,
-                                        postkode = utenlandskAdresse.postkode,
-                                        bySted = utenlandskAdresse.bySted,
-                                        regionDistriktOmraade = utenlandskAdresse.regionDistriktOmraade,
-                                        landkode = utenlandskAdresse.landkode
-                                    )
-                                },
-                                ukjentBosted = it.ukjentBosted?.let { ukjentBosted ->
-                                    UkjentBosted(ukjentBosted.bostedskommune)
-                                }
-                            )
-                        },
-                        oppholdsadresse = person.oppholdsadresse?.let {
-                            Oppholdsadresse(
-                                coAdressenavn = it.coAdressenavn,
-                                vegadresse = it.vegadresse?.let { vegadresse ->
-                                    Vegadresse(
-                                        husnummer = vegadresse.husnummer,
-                                        husbokstav = vegadresse.husbokstav,
-                                        bruksenhetsnummer = vegadresse.bruksenhetsnummer,
-                                        adressenavn = vegadresse.adressenavn,
-                                        tilleggsnavn = vegadresse.tilleggsnavn,
-                                        postnummer = vegadresse.postnummer,
-                                        poststed = vegadresse.poststed
-                                    )
-                                },
-                                matrikkeladresse = it.matrikkeladresse?.let { matrikkeladresse ->
-                                    Matrikkeladresse(
-                                        bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
-                                        tilleggsnavn = matrikkeladresse.tilleggsnavn,
-                                        postnummer = matrikkeladresse.postnummer,
-                                        poststed = matrikkeladresse.poststed
-                                    )
-                                },
-                                utenlandskAdresse = it.utenlandskAdresse?.let { utenlandskAdresse ->
-                                    UtenlandskAdresse(
-                                        adressenavnNummer = utenlandskAdresse.adressenavnNummer,
-                                        bygningEtasjeLeilighet = utenlandskAdresse.bygningEtasjeLeilighet,
-                                        postboksNummerNavn = utenlandskAdresse.postboksNummerNavn,
-                                        postkode = utenlandskAdresse.postkode,
-                                        bySted = utenlandskAdresse.bySted,
-                                        regionDistriktOmraade = utenlandskAdresse.regionDistriktOmraade,
-                                        landkode = utenlandskAdresse.landkode
-                                    )
-                                },
-                                oppholdAnnetSted = it.oppholdAnnetSted
-                            )
-                        },
-                    ),
-                    type = if (oppgave.type == "UTLAND") {
+                        bostedsadresse = mapToBostedsAdresse(person),
+                        oppholdsadresse = mapToOppholdsAdresse(person),
+                    ), type = if (oppgave.type == "UTLAND") {
                         SykmeldingsType.UTENLANDS
                     } else {
                         SykmeldingsType.INNENLANDS
-                    },
-                    values = oppgave.sykmelding?.mapToOppgaveValues() ?: OppgaveValues()
+                    }, values = oppgave.sykmelding?.mapToOppgaveValues() ?: OppgaveValues()
                 )
             } catch (e: Exception) {
                 log.error("Noe gikk galt ved henting av oppgave med id $oppgaveId")
@@ -143,28 +68,27 @@ class OppgaveDataFetcher(
     }
 }
 
-private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues =
-    OppgaveValues(
-        fnrPasient = this.fnrPasient,
-        behandletTidspunkt = this.sykmelding?.behandletTidspunkt,
-        // ISO 3166-1 alpha-2, 2-letter country codes
-        skrevetLand = this.utenlandskSykmelding?.land,
-        hoveddiagnose = this.sykmelding?.medisinskVurdering?.hovedDiagnose?.let {
-            DiagnoseValue(
-                kode = it.kode,
-                tekst = it.tekst,
-                system = it.system,
-            )
-        },
-        biDiagnoser = this.sykmelding?.medisinskVurdering?.biDiagnoser?.map {
-            DiagnoseValue(
-                kode = it.kode,
-                tekst = it.tekst,
-                system = it.system,
-            )
-        },
-        perioder = this.sykmelding?.perioder?.map(Periode::mapToPeriodeValue),
-    )
+private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues = OppgaveValues(
+    fnrPasient = this.fnrPasient,
+    behandletTidspunkt = this.sykmelding?.behandletTidspunkt,
+    // ISO 3166-1 alpha-3, 3-letter country codes
+    skrevetLand = this.utenlandskSykmelding?.land,
+    hoveddiagnose = this.sykmelding?.medisinskVurdering?.hovedDiagnose?.let {
+        DiagnoseValue(
+            kode = it.kode,
+            tekst = it.tekst,
+            system = it.system,
+        )
+    },
+    biDiagnoser = this.sykmelding?.medisinskVurdering?.biDiagnoser?.map {
+        DiagnoseValue(
+            kode = it.kode,
+            tekst = it.tekst,
+            system = it.system,
+        )
+    },
+    perioder = this.sykmelding?.perioder?.map(Periode::mapToPeriodeValue),
+)
 
 private fun Periode.mapToPeriodeValue(): PeriodeValue {
     val type: PeriodeType = when {
@@ -182,3 +106,67 @@ private fun Periode.mapToPeriodeValue(): PeriodeValue {
         grad = this.gradert?.grad,
     )
 }
+
+private fun mapToOppholdsAdresse(person: no.nav.sykdig.digitalisering.pdl.Person): Oppholdsadresse? =
+    person.oppholdsadresse?.let {
+        when {
+            it.vegadresse != null -> Vegadresse(
+                husnummer = it.vegadresse.husnummer,
+                husbokstav = it.vegadresse.husbokstav,
+                adressenavn = it.vegadresse.adressenavn,
+                postnummer = it.vegadresse.postnummer,
+            )
+
+            it.matrikkeladresse != null -> Matrikkeladresse(
+                bruksenhetsnummer = it.matrikkeladresse.bruksenhetsnummer,
+                tilleggsnavn = it.matrikkeladresse.tilleggsnavn,
+                postnummer = it.matrikkeladresse.postnummer,
+            )
+
+            it.utenlandskAdresse != null -> UtenlandskAdresse(
+                adressenavnNummer = it.utenlandskAdresse.adressenavnNummer,
+                postboksNummerNavn = it.utenlandskAdresse.postboksNummerNavn,
+                postkode = it.utenlandskAdresse.postkode,
+                bySted = it.utenlandskAdresse.bySted,
+                landkode = it.utenlandskAdresse.landkode,
+            )
+
+            it.oppholdAnnetSted != null -> OppholdAnnetSted(
+                type = it.oppholdAnnetSted
+            )
+
+            else -> null
+        }
+    }
+
+private fun mapToBostedsAdresse(person: no.nav.sykdig.digitalisering.pdl.Person): Bostedsadresse? =
+    person.bostedsadresse?.let {
+        when {
+            it.vegadresse != null -> Vegadresse(
+                husnummer = it.vegadresse.husnummer,
+                husbokstav = it.vegadresse.husbokstav,
+                adressenavn = it.vegadresse.adressenavn,
+                postnummer = it.vegadresse.postnummer,
+            )
+
+            it.matrikkeladresse != null -> Matrikkeladresse(
+                bruksenhetsnummer = it.matrikkeladresse.bruksenhetsnummer,
+                tilleggsnavn = it.matrikkeladresse.tilleggsnavn,
+                postnummer = it.matrikkeladresse.postnummer,
+            )
+
+            it.utenlandskAdresse != null -> UtenlandskAdresse(
+                adressenavnNummer = it.utenlandskAdresse.adressenavnNummer,
+                postboksNummerNavn = it.utenlandskAdresse.postboksNummerNavn,
+                postkode = it.utenlandskAdresse.postkode,
+                bySted = it.utenlandskAdresse.bySted,
+                landkode = it.utenlandskAdresse.landkode,
+            )
+
+            it.ukjentBosted != null -> UkjentBosted(
+                bostedskommune = it.ukjentBosted.bostedskommune
+            )
+
+            else -> null
+        }
+    }

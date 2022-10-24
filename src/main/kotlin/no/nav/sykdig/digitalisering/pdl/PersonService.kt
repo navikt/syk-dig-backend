@@ -1,15 +1,13 @@
 package no.nav.sykdig.digitalisering.pdl
 
-import no.nav.sykdig.db.PoststedRepository
 import no.nav.sykdig.digitalisering.pdl.client.PdlClient
-import no.nav.sykdig.generated.types.PdlPerson
+import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlPerson
 import no.nav.sykdig.logger
 import org.springframework.stereotype.Component
 
 @Component
 class PersonService(
     private val pdlClient: PdlClient,
-    private val poststedRepository: PoststedRepository
 ) {
     val log = logger()
 
@@ -42,7 +40,6 @@ class PersonService(
                             adressenavn = vegadresse.adressenavn,
                             tilleggsnavn = vegadresse.tilleggsnavn,
                             postnummer = vegadresse.postnummer,
-                            poststed = vegadresse.postnummer?.let { postnummer -> poststedRepository.getPoststed(postnummer) }
                         )
                     },
                     matrikkeladresse = it.matrikkeladresse?.let { matrikkeladresse ->
@@ -50,7 +47,6 @@ class PersonService(
                             bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
                             tilleggsnavn = matrikkeladresse.tilleggsnavn,
                             postnummer = matrikkeladresse.postnummer,
-                            poststed = matrikkeladresse.postnummer?.let { postnummer -> poststedRepository.getPoststed(postnummer) }
                         )
                     },
                     utenlandskAdresse = it.utenlandskAdresse?.let { utenlandskAdresse ->
@@ -80,7 +76,6 @@ class PersonService(
                             adressenavn = vegadresse.adressenavn,
                             tilleggsnavn = vegadresse.tilleggsnavn,
                             postnummer = vegadresse.postnummer,
-                            poststed = vegadresse.postnummer?.let { postnummer -> poststedRepository.getPoststed(postnummer) }
                         )
                     },
                     matrikkeladresse = it.matrikkeladresse?.let { matrikkeladresse ->
@@ -88,7 +83,6 @@ class PersonService(
                             bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
                             tilleggsnavn = matrikkeladresse.tilleggsnavn,
                             postnummer = matrikkeladresse.postnummer,
-                            poststed = matrikkeladresse.postnummer?.let { postnummer -> poststedRepository.getPoststed(postnummer) }
                         )
                     },
                     utenlandskAdresse = it.utenlandskAdresse?.let { utenlandskAdresse ->

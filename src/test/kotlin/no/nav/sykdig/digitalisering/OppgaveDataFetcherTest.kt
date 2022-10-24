@@ -4,7 +4,9 @@ import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
 import no.nav.sykdig.db.OppgaveRepository
+import no.nav.sykdig.db.PoststedRepository
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
+import no.nav.sykdig.digitalisering.pdl.Matrikkeladresse
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.PersonService
@@ -22,7 +24,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.OffsetDateTime
 import java.util.UUID
 
-@SpringBootTest(classes = [DgsAutoConfiguration::class, DgsExtendedScalarsAutoConfiguration::class, OppgaveDataFetcher::class])
+@SpringBootTest(classes = [DgsAutoConfiguration::class, DgsExtendedScalarsAutoConfiguration::class, OppgaveDataFetcher::class, AdresseDataFetchers::class])
 class OppgaveDataFetcherTest {
 
     @MockBean
@@ -32,13 +34,16 @@ class OppgaveDataFetcherTest {
     lateinit var oppgaveRepository: OppgaveRepository
 
     @MockBean
+    lateinit var poststedRepository: PoststedRepository
+
+    @MockBean
     lateinit var personService: PersonService
 
     @Autowired
     lateinit var dgsQueryExecutor: DgsQueryExecutor
 
     @Test
-    fun oppgave() {
+    fun `querying oppgave`() {
         Mockito.`when`(oppgaveRepository.getOppgave("123")).thenAnswer {
             createDigitalseringsoppgaveDbModel(
                 sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
@@ -53,7 +58,7 @@ class OppgaveDataFetcherTest {
                 Navn("fornavn", null, "etternavn"),
                 Bostedsadresse(
                     null,
-                    Vegadresse("7", null, null, "Gateveien", null, "1111", "Stedet"),
+                    Vegadresse("7", null, null, "Gateveien", null, "1111"),
                     null,
                     null,
                     null,
@@ -75,6 +80,104 @@ class OppgaveDataFetcherTest {
         )
 
         oppgave shouldBeEqualTo "12345678910"
+    }
+
+    @Test
+    fun `querying oppgave with poststed on vegadresse should use adresse data fetcher`() {
+        Mockito.`when`(oppgaveRepository.getOppgave("123")).thenAnswer {
+            createDigitalseringsoppgaveDbModel(
+                sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+            )
+        }
+        Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer {
+            true
+        }
+        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
+            Person(
+                "12345678910",
+                Navn("fornavn", null, "etternavn"),
+                Bostedsadresse(
+                    null,
+                    Vegadresse("7", null, null, "Gateveien", null, "1111"),
+                    null,
+                    null,
+                    null,
+                ),
+                null,
+            )
+        }
+        Mockito.`when`(poststedRepository.getPoststed("1111")).thenAnswer {
+            "Oslo"
+        }
+        val poststed: String = dgsQueryExecutor.executeAndExtractJsonPath(
+            """
+            {
+                oppgave(oppgaveId: "123") {
+                    person {
+                        fnr
+                        bostedsadresse {
+                            __typename
+                            ... on Vegadresse {
+                                poststed
+                            }
+                        }
+                    }
+                }
+            }
+            """.trimIndent(),
+            "data.oppgave.person.bostedsadresse.poststed"
+        )
+
+        poststed shouldBeEqualTo "Oslo"
+    }
+
+    @Test
+    fun `querying oppgave with poststed on matrikkeladresse should use adresse data fetcher`() {
+        Mockito.`when`(oppgaveRepository.getOppgave("123")).thenAnswer {
+            createDigitalseringsoppgaveDbModel(
+                sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+            )
+        }
+        Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer {
+            true
+        }
+        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
+            Person(
+                "12345678910",
+                Navn("fornavn", null, "etternavn"),
+                Bostedsadresse(
+                    null,
+                    null,
+                    Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222"),
+                    null,
+                    null,
+                ),
+                null,
+            )
+        }
+        Mockito.`when`(poststedRepository.getPoststed("2222")).thenAnswer {
+            "Vestnes"
+        }
+        val poststed: String = dgsQueryExecutor.executeAndExtractJsonPath(
+            """
+            {
+                oppgave(oppgaveId: "123") {
+                    person {
+                        fnr
+                        bostedsadresse {
+                            __typename
+                            ... on Matrikkeladresse {
+                                poststed
+                            }
+                        }
+                    }
+                }
+            }
+            """.trimIndent(),
+            "data.oppgave.person.bostedsadresse.poststed"
+        )
+
+        poststed shouldBeEqualTo "Vestnes"
     }
 }
 
