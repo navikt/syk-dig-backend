@@ -14,9 +14,9 @@ import java.time.OffsetDateTime
 data class Sykmelding(
     val id: String,
     val msgId: String,
-    val medisinskVurdering: MedisinskVurdering?,
+    var medisinskVurdering: MedisinskVurdering?,
     val arbeidsgiver: Arbeidsgiver?,
-    val perioder: List<Periode>?,
+    var perioder: List<Periode>?,
     val prognose: Prognose?,
     val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
     val tiltakArbeidsplassen: String?,
@@ -25,7 +25,7 @@ data class Sykmelding(
     val meldingTilNAV: MeldingTilNAV?,
     val meldingTilArbeidsgiver: String?,
     val kontaktMedPasient: KontaktMedPasient?,
-    val behandletTidspunkt: OffsetDateTime?,
+    var behandletTidspunkt: OffsetDateTime?,
     val behandler: Behandler?,
     val syketilfelleStartDato: LocalDate?
 )

@@ -9,6 +9,7 @@ type Query {
 type Mutation {
     lagre(
         oppgaveId: String!
+        enhetId: String!
         values: SykmeldingUnderArbeidValues!
         status: SykmeldingUnderArbeidStatus!
     ): Digitaliseringsoppgave!

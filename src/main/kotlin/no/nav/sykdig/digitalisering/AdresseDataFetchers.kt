@@ -14,9 +14,9 @@ class AdresseDataFetchers(
 ) {
     @DgsData(parentType = DgsConstants.VEGADRESSE.TYPE_NAME, field = DgsConstants.VEGADRESSE.Poststed)
     fun vegadressePoststed(dfe: DataFetchingEnvironment): String? {
-        val vegadresse: Vegadresse = dfe.getSource();
+        val vegadresse: Vegadresse = dfe.getSource()
         if (vegadresse.postnummer == null) {
-            return null;
+            return null
         }
 
         return poststedRepository.getPoststed(vegadresse.postnummer)
@@ -24,9 +24,9 @@ class AdresseDataFetchers(
 
     @DgsData(parentType = DgsConstants.MATRIKKELADRESSE.TYPE_NAME, field = DgsConstants.MATRIKKELADRESSE.Poststed)
     fun matrikkeladressePoststed(dfe: DataFetchingEnvironment): String? {
-        val vegadresse: Matrikkeladresse = dfe.getSource();
+        val vegadresse: Matrikkeladresse = dfe.getSource()
         if (vegadresse.postnummer == null) {
-            return null;
+            return null
         }
 
         return poststedRepository.getPoststed(vegadresse.postnummer)

@@ -4,8 +4,8 @@ import no.nav.syfo.model.UtenlandskSykmelding
 import java.time.LocalDateTime
 
 data class SykmeldingUnderArbeid(
-    val sykmelding: Sykmelding?,
-    val fnrPasient: String,
+    val sykmelding: Sykmelding,
+    var fnrPasient: String,
     val fnrLege: String?,
     val legeHprNr: String?,
     val navLogId: String,
@@ -14,5 +14,5 @@ data class SykmeldingUnderArbeid(
     val legekontorHerId: String?,
     val legekontorOrgName: String?,
     val mottattDato: LocalDateTime?,
-    val utenlandskSykmelding: UtenlandskSykmelding?
+    var utenlandskSykmelding: UtenlandskSykmelding?
 )

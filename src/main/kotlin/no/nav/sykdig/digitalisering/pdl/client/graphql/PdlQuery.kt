@@ -66,17 +66,17 @@ const val PDL_QUERY = """
     }
 """
 
-data class PdlQuery (
+data class PdlQuery(
     val hentPerson: PdlPerson?,
 )
 
-data class PdlPerson (
+data class PdlPerson(
     val bostedsadresse: List<PdlBostedsadresse>,
     val navn: List<PdlNavn>,
-    val oppholdsadresse:List<PdlOppholdsadresse>,
+    val oppholdsadresse: List<PdlOppholdsadresse>,
 )
 
-data class PdlBostedsadresse (
+data class PdlBostedsadresse(
     val coAdressenavn: String?,
     val vegadresse: PdlVegadresse?,
     val matrikkeladresse: PdlMatrikkeladresse?,
@@ -84,7 +84,7 @@ data class PdlBostedsadresse (
     val ukjentBosted: PdlUkjentBosted?,
 )
 
-data class PdlOppholdsadresse (
+data class PdlOppholdsadresse(
     val coAdressenavn: String?,
     val utenlandskAdresse: PdlUtenlandskAdresse?,
     val vegadresse: PdlVegadresse?,
@@ -92,7 +92,7 @@ data class PdlOppholdsadresse (
     val oppholdAnnetSted: String?,
 )
 
-data class PdlVegadresse (
+data class PdlVegadresse(
     val husnummer: String?,
     val husbokstav: String?,
     val bruksenhetsnummer: String?,
@@ -104,7 +104,7 @@ data class PdlVegadresse (
     val poststed: String?,
 )
 
-data class PdlMatrikkeladresse (
+data class PdlMatrikkeladresse(
     val bruksenhetsnummer: String?,
     val tilleggsnavn: String?,
     val postnummer: String?,
@@ -112,7 +112,7 @@ data class PdlMatrikkeladresse (
     val poststed: String?,
 )
 
-data class PdlUkjentBosted (
+data class PdlUkjentBosted(
     val bostedskommune: String
 )
 
