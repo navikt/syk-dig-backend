@@ -20,6 +20,7 @@ type OppgaveValues {
     perioder: [PeriodeValue!]
     hoveddiagnose: DiagnoseValue
     biDiagnoser: [DiagnoseValue!]
+    harAndreRelevanteOpplysninger: Boolean
 }
 
 type PeriodeValue {
