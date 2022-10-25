@@ -1,0 +1,46 @@
+type Person {
+    fnr: String!
+    navn: String
+    bostedsadresse: Bostedsadresse
+    oppholdsadresse: Oppholdsadresse
+}
+
+union Bostedsadresse = Vegadresse | Matrikkeladresse | UtenlandskAdresse | UkjentBosted
+union Oppholdsadresse = Vegadresse | Matrikkeladresse | UtenlandskAdresse | OppholdAnnetSted
+
+type Vegadresse {
+    husnummer: String
+    husbokstav: String
+    adressenavn: String
+    postnummer: String
+    poststed: String
+}
+
+type Matrikkeladresse {
+    bruksenhetsnummer: String
+    tilleggsnavn: String
+    postnummer: String
+    poststed: String
+}
+
+type UkjentBosted {
+    bostedskommune: String
+}
+
+type OppholdAnnetSted {
+    type: String
+}
+
+type UtenlandskAdresse {
+    adressenavnNummer: String
+    postboksNummerNavn: String
+    postkode: String
+    bySted: String
+    landkode: String!
+}
+
+type Navn {
+    fornavn: String!
+    mellomnavn: String
+    etternavn: String!
+}

@@ -2,8 +2,8 @@ package no.nav.sykdig.digitalisering.pdl.client
 
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PDL_QUERY
-import no.nav.sykdig.generated.types.PdlPerson
-import no.nav.sykdig.generated.types.PdlQuery
+import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlPerson
+import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlQuery
 import no.nav.sykdig.logger
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component

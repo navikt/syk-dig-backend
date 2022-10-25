@@ -1,16 +1,16 @@
 package no.nav.sykdig.digitalisering.saf
 
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
+import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
 import no.nav.sykdig.digitalisering.saf.graphql.SAF_QUERY
-import no.nav.sykdig.generated.types.Journalstatus
-import no.nav.sykdig.generated.types.SafQuery
+import no.nav.sykdig.digitalisering.saf.graphql.SafQuery
 import no.nav.sykdig.logger
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 
 @Component
 class SafJournalpostGraphQlClient(
-    private val safGraphQlClient: CustomGraphQLClient
+    private val safGraphQlClient: CustomGraphQLClient,
 ) {
     val log = logger()
 
