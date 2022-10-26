@@ -88,6 +88,7 @@ private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues = OppgaveV
         )
     },
     perioder = this.sykmelding?.perioder?.map(Periode::mapToPeriodeValue),
+    harAndreRelevanteOpplysninger = this.utenlandskSykmelding?.andreRelevanteOpplysninger ?: false,
 )
 
 private fun Periode.mapToPeriodeValue(): PeriodeValue {
