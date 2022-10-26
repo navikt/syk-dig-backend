@@ -43,6 +43,7 @@ input SykmeldingUnderArbeidValues {
     perioder: [PeriodeInput!]
     hovedDiagnose: DiagnoseInput
     biDiagnoser: [DiagnoseInput!]
+    harAndreRelevanteOpplysninger: Boolean
 }
 
 input DiagnoseInput {
