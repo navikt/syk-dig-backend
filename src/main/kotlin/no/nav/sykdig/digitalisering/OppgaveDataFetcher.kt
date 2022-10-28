@@ -5,6 +5,7 @@ import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 import graphql.schema.DataFetchingEnvironment
+import no.nav.sykdig.digitalisering.exceptions.ClientException
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.DiagnoseInput
@@ -14,6 +15,8 @@ import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
 import java.time.OffsetDateTime
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 @DgsComponent
 class OppgaveDataFetcher(
@@ -81,12 +84,12 @@ private fun validateRegisterOppgaveValues(
     values: SykmeldingUnderArbeidValues,
 ): ValidatedOppgaveValues {
     val behandletTidspunkt = values.behandletTidspunkt.toOffsetDateTimeAtNoon()
-    requireNotNull(values.fnrPasient) { "fnr pasient må være satt" }
-    requireNotNull(behandletTidspunkt) { "behandlettidspunkt må være satt" }
-    requireNotNull(values.skrevetLand) { "skrevetland må være satt" }
-    requireNotNull(values.perioder) { "perioder må være satt" }
-    requireNotNull(values.hovedDiagnose) { "hoveddiagnose må være satt" }
-    requireNotNull(values.biDiagnoser) { "bidiagnoser må være satt" }
+    requireNotEmptyOrNull(values.fnrPasient) { "Fødselsnummer til pasient må være satt" }
+    requireNotEmptyOrNull(behandletTidspunkt) { "Tidspunkt for behandling må være satt" }
+    requireNotEmptyOrNull(values.skrevetLand) { "Landet sykmeldingen er skrevet må være satt" }
+    requireNotEmptyOrNull(values.perioder) { "Sykmeldingsperioder må være satt" }
+    requireNotEmptyOrNull(values.hovedDiagnose) { "Hoveddiagnose må være satt" }
+    requireNotEmptyOrNull(values.biDiagnoser) { "Bidiagnoser må være satt" }
 
     return ValidatedOppgaveValues(
         fnrPasient = values.fnrPasient,
@@ -96,4 +99,26 @@ private fun validateRegisterOppgaveValues(
         hovedDiagnose = values.hovedDiagnose,
         biDiagnoser = values.biDiagnoser,
     )
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <T : Any> requireNotEmptyOrNull(value: T?, lazyMessage: () -> Any): T {
+    contract {
+        returns() implies (value != null)
+    }
+
+    when {
+        value is String && value.isEmpty() -> {
+            throw ClientException(lazyMessage().toString())
+        }
+
+        value == null -> {
+            val message = lazyMessage()
+            throw ClientException(message.toString())
+        }
+
+        else -> {
+            return value
+        }
+    }
 }
