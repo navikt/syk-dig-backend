@@ -37,8 +37,8 @@ type DiagnoseValue {
 }
 
 input SykmeldingUnderArbeidValues {
-    fnrPasient: String
-    behandletTidspunkt: String
+    fnrPasient: String!
+    behandletTidspunkt: Date
     skrevetLand: String
     perioder: [PeriodeInput!]
     hovedDiagnose: DiagnoseInput

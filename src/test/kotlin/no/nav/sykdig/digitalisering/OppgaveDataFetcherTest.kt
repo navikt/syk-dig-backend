@@ -3,7 +3,7 @@ package no.nav.sykdig.digitalisering
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
-import no.nav.sykdig.db.OppgaveRepository
+import no.nav.sykdig.TestGraphQLContextContributor
 import no.nav.sykdig.db.PoststedRepository
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Matrikkeladresse
@@ -11,27 +11,36 @@ import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.pdl.Vegadresse
-import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
+import no.nav.sykdig.generated.types.DiagnoseInput
+import no.nav.sykdig.generated.types.PeriodeInput
+import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
+import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
 import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
+import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 
-@SpringBootTest(classes = [DgsAutoConfiguration::class, DgsExtendedScalarsAutoConfiguration::class, OppgaveDataFetcher::class, AdresseDataFetchers::class])
+@SpringBootTest(
+    classes = [
+        DgsAutoConfiguration::class,
+        DgsExtendedScalarsAutoConfiguration::class,
+        OppgaveDataFetcher::class,
+        AdresseDataFetchers::class,
+        TestGraphQLContextContributor::class,
+    ]
+)
 class OppgaveDataFetcherTest {
-
-    @MockBean
-    lateinit var syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient
-
-    @MockBean
-    lateinit var oppgaveRepository: OppgaveRepository
 
     @MockBean
     lateinit var poststedRepository: PoststedRepository
@@ -39,44 +48,34 @@ class OppgaveDataFetcherTest {
     @MockBean
     lateinit var personService: PersonService
 
+    @MockBean
+    lateinit var oppgaveService: OppgaveService
+
     @Autowired
     lateinit var dgsQueryExecutor: DgsQueryExecutor
 
     @Test
     fun `querying oppgave`() {
-        Mockito.`when`(oppgaveRepository.getOppgave("123")).thenAnswer {
+        Mockito.`when`(oppgaveService.getOppgave("123")).thenAnswer {
             createDigitalseringsoppgaveDbModel(
                 sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
             )
         }
-        Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer {
-            true
-        }
+
         Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
-            Person(
-                "12345678910",
-                Navn("fornavn", null, "etternavn"),
-                Bostedsadresse(
-                    null,
-                    Vegadresse("7", null, null, "Gateveien", null, "1111"),
-                    null,
-                    null,
-                    null,
-                ),
-                null,
-            )
+            createPerson()
         }
         val oppgave: String = dgsQueryExecutor.executeAndExtractJsonPath(
             """
             {
                 oppgave(oppgaveId: "123") {
-                    person {
-                        fnr
+                    values {
+                        fnrPasient                    
                     }
                 }
             }
             """.trimIndent(),
-            "data.oppgave.person.fnr"
+            "data.oppgave.values.fnrPasient"
         )
 
         oppgave shouldBeEqualTo "12345678910"
@@ -84,26 +83,15 @@ class OppgaveDataFetcherTest {
 
     @Test
     fun `querying oppgave with poststed on vegadresse should use adresse data fetcher`() {
-        Mockito.`when`(oppgaveRepository.getOppgave("123")).thenAnswer {
+        Mockito.`when`(oppgaveService.getOppgave("123")).thenAnswer {
             createDigitalseringsoppgaveDbModel(
                 sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
             )
         }
-        Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer {
-            true
-        }
+
         Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
-            Person(
-                "12345678910",
-                Navn("fornavn", null, "etternavn"),
-                Bostedsadresse(
-                    null,
-                    Vegadresse("7", null, null, "Gateveien", null, "1111"),
-                    null,
-                    null,
-                    null,
-                ),
-                null,
+            createPerson(
+                vegadresse = Vegadresse("7", null, null, "Gateveien", null, "1111"),
             )
         }
         Mockito.`when`(poststedRepository.getPoststed("1111")).thenAnswer {
@@ -113,8 +101,10 @@ class OppgaveDataFetcherTest {
             """
             {
                 oppgave(oppgaveId: "123") {
+                    values {
+                      fnrPasient
+                    }
                     person {
-                        fnr
                         bostedsadresse {
                             __typename
                             ... on Vegadresse {
@@ -125,7 +115,7 @@ class OppgaveDataFetcherTest {
                 }
             }
             """.trimIndent(),
-            "data.oppgave.person.bostedsadresse.poststed"
+            "data.oppgave.person.bostedsadresse.poststed",
         )
 
         poststed shouldBeEqualTo "Oslo"
@@ -133,26 +123,15 @@ class OppgaveDataFetcherTest {
 
     @Test
     fun `querying oppgave with poststed on matrikkeladresse should use adresse data fetcher`() {
-        Mockito.`when`(oppgaveRepository.getOppgave("123")).thenAnswer {
+        Mockito.`when`(oppgaveService.getOppgave("123")).thenAnswer {
             createDigitalseringsoppgaveDbModel(
                 sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
             )
         }
-        Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer {
-            true
-        }
+
         Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
-            Person(
-                "12345678910",
-                Navn("fornavn", null, "etternavn"),
-                Bostedsadresse(
-                    null,
-                    null,
-                    Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222"),
-                    null,
-                    null,
-                ),
-                null,
+            createPerson(
+                matrikkeladresse = Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222")
             )
         }
         Mockito.`when`(poststedRepository.getPoststed("2222")).thenAnswer {
@@ -162,8 +141,10 @@ class OppgaveDataFetcherTest {
             """
             {
                 oppgave(oppgaveId: "123") {
+                    values {
+                      fnrPasient
+                    }
                     person {
-                        fnr
                         bostedsadresse {
                             __typename
                             ... on Matrikkeladresse {
@@ -178,6 +159,115 @@ class OppgaveDataFetcherTest {
         )
 
         poststed shouldBeEqualTo "Vestnes"
+    }
+
+    @Test
+    fun `lagre oppgave UNDER_AREBID should update oppgave`() {
+        Mockito.`when`(oppgaveService.getOppgave("345")).thenAnswer {
+            createDigitalseringsoppgaveDbModel(
+                sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+            )
+        }
+
+        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
+            createPerson()
+        }
+
+        val result = dgsQueryExecutor.execute(
+            """
+            mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
+                lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
+                    oppgaveId
+                }
+            }
+            """.trimIndent(),
+            mapOf(
+                "id" to "345",
+                "enhetId" to "1234",
+                "values" to mapOf(
+                    "fnrPasient" to "testfnr-pasient",
+                    "behandletTidspunkt" to null,
+                    "skrevetLand" to null,
+                    "perioder" to null,
+                    "hovedDiagnose" to null,
+                    "biDiagnoser" to null,
+                ),
+                "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID
+            )
+        )
+
+        result.errors.size shouldBe 0
+        verify(
+            oppgaveService, times(1)
+        ).updateOppgave(
+            oppgaveId = "345",
+            values = SykmeldingUnderArbeidValues(fnrPasient = "testfnr-pasient"),
+            ident = "fake-test-ident",
+        )
+    }
+
+    @Test
+    fun `lagre oppgave with FERDIGSTILT should ferdigstille oppgave`() {
+        val person = createPerson()
+        val oppgave = createDigitalseringsoppgaveDbModel(
+            sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+        )
+
+        Mockito.`when`(oppgaveService.getOppgave("345")).thenAnswer { oppgave }
+        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer { person }
+
+        val result = dgsQueryExecutor.execute(
+            """
+            mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
+                lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
+                    oppgaveId
+                }
+            }
+            """.trimIndent(),
+            mapOf(
+                "id" to "345",
+                "enhetId" to "1234",
+                "values" to mapOf(
+                    "fnrPasient" to "testfnr-pasient",
+                    "behandletTidspunkt" to "2022-10-26",
+                    "skrevetLand" to "POL",
+                    "perioder" to emptyList<PeriodeInput>(),
+                    "hovedDiagnose" to mapOf(
+                        "kode" to "Køde",
+                        "system" to "ICDCPC12",
+                    ),
+                    "biDiagnoser" to emptyList<DiagnoseInput>(),
+                ),
+                "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT
+            )
+        )
+
+        result.errors.size shouldBe 0
+        verify(
+            oppgaveService, times(1)
+        ).ferigstillOppgave(
+            oppgaveId = "345",
+            ident = "fake-test-ident",
+            values = SykmeldingUnderArbeidValues(
+                fnrPasient = "testfnr-pasient",
+                behandletTidspunkt = LocalDate.parse("2022-10-26"),
+                skrevetLand = "POL",
+                perioder = emptyList(),
+                hovedDiagnose = DiagnoseInput(kode = "Køde", system = "ICDCPC12"),
+                biDiagnoser = emptyList(),
+            ),
+            validatedValues = ValidatedOppgaveValues(
+                fnrPasient = "testfnr-pasient",
+                behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z"),
+                skrevetLand = "POL",
+                perioder = emptyList(),
+                hovedDiagnose = DiagnoseInput(kode = "Køde", system = "ICDCPC12"),
+                biDiagnoser = emptyList(),
+            ),
+            enhetId = "1234",
+            person = person,
+            oppgave = oppgave,
+        )
     }
 }
 
@@ -205,4 +295,20 @@ fun createDigitalseringsoppgaveDbModel(
     sykmelding = sykmelding,
     endretAv = endretAv,
     timestamp = timestamp,
+)
+
+private fun createPerson(
+    vegadresse: Vegadresse? = null,
+    matrikkeladresse: Matrikkeladresse? = null,
+) = Person(
+    "12345678910",
+    Navn("fornavn", null, "etternavn"),
+    Bostedsadresse(
+        null,
+        vegadresse,
+        matrikkeladresse,
+        null,
+        null,
+    ),
+    null,
 )

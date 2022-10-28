@@ -6,6 +6,8 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
@@ -17,6 +19,9 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @AutoConfigureMetrics
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 abstract class FellesTestOppsett {
+
+    @Autowired
+    lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 
     @Autowired
     lateinit var oppgaveRepository: OppgaveRepository
@@ -48,6 +53,6 @@ abstract class FellesTestOppsett {
 
     @AfterAll
     fun opprydning() {
-        oppgaveRepository.deleteAll()
+        namedParameterJdbcTemplate.update("DELETE FROM sykmelding", MapSqlParameterSource())
     }
 }
