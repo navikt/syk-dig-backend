@@ -4,6 +4,7 @@ import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
 import no.nav.sykdig.TestGraphQLContextContributor
+import no.nav.sykdig.config.CustomDataFetchingExceptionHandler
 import no.nav.sykdig.db.PoststedRepository
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Matrikkeladresse
@@ -37,6 +38,7 @@ import java.util.UUID
         DgsExtendedScalarsAutoConfiguration::class,
         OppgaveDataFetcher::class,
         AdresseDataFetchers::class,
+        CustomDataFetchingExceptionHandler::class,
         TestGraphQLContextContributor::class,
     ]
 )
@@ -268,6 +270,47 @@ class OppgaveDataFetcherTest {
             person = person,
             oppgave = oppgave,
         )
+    }
+
+    @Test
+    fun `should throw ClientException when values are not validated correctly`() {
+        val person = createPerson()
+        val oppgave = createDigitalseringsoppgaveDbModel(
+            sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+        )
+
+        Mockito.`when`(oppgaveService.getOppgave("345")).thenAnswer { oppgave }
+        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer { person }
+
+        val result = dgsQueryExecutor.execute(
+            """
+            mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
+                lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
+                    oppgaveId
+                }
+            }
+            """.trimIndent(),
+            mapOf(
+                "id" to "345",
+                "enhetId" to "1234",
+                "values" to mapOf(
+                    "fnrPasient" to "testfnr-pasient",
+                    "behandletTidspunkt" to "2022-10-26",
+                    // empty string is not valid
+                    "skrevetLand" to "",
+                    "perioder" to emptyList<PeriodeInput>(),
+                    "hovedDiagnose" to mapOf(
+                        "kode" to "Køde",
+                        "system" to "ICDCPC12",
+                    ),
+                    "biDiagnoser" to emptyList<DiagnoseInput>(),
+                ),
+                "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT
+            )
+        )
+
+        result.errors.size shouldBe 1
+        result.errors[0].message shouldBeEqualTo "Landet sykmeldingen er skrevet må være satt"
     }
 }
 
