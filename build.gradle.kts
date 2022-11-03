@@ -90,6 +90,10 @@ tasks.withType<GenerateJavaTask> {
     generateClient = true
 }
 
+tasks.getByName<Jar>("jar") {
+    enabled = false
+}
+
 configure<KtlintExtension> {
     filter {
         exclude("**/generated/**")
