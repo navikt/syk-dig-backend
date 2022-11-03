@@ -33,6 +33,7 @@ class OppgaveService(
             throw IkkeTilgangException("Innlogget bruker har ikke tilgang")
         }
 
+        log.info("Hentet oppgave med id $oppgaveId")
         return oppgave
     }
 
@@ -52,7 +53,6 @@ class OppgaveService(
     ) {
         requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
 
-        oppgaveRepository.updateOppgave(oppgaveId, values, ident, true)
         ferdigstillingService.ferdigstill(
             oppgaveId = oppgaveId,
             navnSykmelder = person.navn.toFormattedNameString(),
@@ -63,5 +63,6 @@ class OppgaveService(
             journalpostId = oppgave.journalpostId,
             sykmeldingId = oppgave.sykmeldingId.toString(),
         )
+        oppgaveRepository.updateOppgave(oppgaveId, values, ident, true)
     }
 }

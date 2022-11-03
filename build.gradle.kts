@@ -41,6 +41,7 @@ val springBootResourceVersion = "2.7.5"
 val graphqlVersion = "19.2"
 val kafkaClientsVersion = "3.3.1"
 val springSecurityWebVersion = "5.7.5"
+val okhttp3version = "4.10.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
@@ -68,6 +69,7 @@ dependencies {
     implementation("org.springframework.security:spring-security-web:$springSecurityWebVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springBootResourceVersion")
+    implementation("com.squareup.okhttp3:okhttp:$okhttp3version")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:kafka:$testContainersVersion")

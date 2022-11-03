@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
@@ -98,13 +99,18 @@ class AadRestTemplateConfiguration {
         restTemplateBuilder: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,
         oAuth2AccessTokenService: OAuth2AccessTokenService
-    ): RestTemplate =
-        downstreamRestTemplate(
+    ): RestTemplate {
+        val restTemplate = downstreamRestTemplate(
             registrationName = "onbehalfof-dokarkiv",
             restTemplateBuilder = restTemplateBuilder,
             clientConfigurationProperties = clientConfigurationProperties,
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
+        // Bruker OkHttp til requests for å støtte PATCH.
+        val requestFactory = OkHttp3ClientHttpRequestFactory()
+        restTemplate.requestFactory = requestFactory
+        return restTemplate
+    }
 
     @Bean
     fun oppgaveRestTemplate(

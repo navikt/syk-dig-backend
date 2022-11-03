@@ -25,7 +25,7 @@ class SafGraphQlConfiguration {
             httpHeaders.contentType = MediaType.APPLICATION_JSON
 
             val response =
-                safRestTemplate.exchange(url, HttpMethod.POST, HttpEntity(body, httpHeaders), String::class.java)
+                safRestTemplate.exchange("$url/graphql", HttpMethod.POST, HttpEntity(body, httpHeaders), String::class.java)
 
             HttpResponse(response.statusCodeValue, response.body)
         }

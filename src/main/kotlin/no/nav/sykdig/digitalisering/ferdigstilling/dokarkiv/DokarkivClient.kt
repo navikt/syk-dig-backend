@@ -118,7 +118,7 @@ class DokarkivClient(
         )
         try {
             dokarkivRestTemplate.exchange(
-                "$url/$journalpostId",
+                "$url/$journalpostId/ferdigstill",
                 HttpMethod.PATCH,
                 HttpEntity(body, headers),
                 String::class.java

@@ -13,6 +13,7 @@ import no.nav.sykdig.generated.types.Digitaliseringsoppgave
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
+import no.nav.sykdig.logger
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
 import java.time.OffsetDateTime
 import kotlin.contracts.ExperimentalContracts
@@ -23,6 +24,8 @@ class OppgaveDataFetcher(
     private val oppgaveService: OppgaveService,
     private val personService: PersonService,
 ) {
+    val log = logger()
+
     @DgsQuery(field = DgsConstants.QUERY.Oppgave)
     fun getOppgave(@InputArgument oppgaveId: String): Digitaliseringsoppgave {
         val oppgave = oppgaveService.getOppgave(oppgaveId)
@@ -60,8 +63,10 @@ class OppgaveDataFetcher(
                 person = person,
                 oppgave = oppgave
             )
+            log.info("Ferdigstilt oppgave med id $oppgaveId")
         } else {
             oppgaveService.updateOppgave(oppgaveId, values, ident)
+            log.info("Lagret oppgave med id $oppgaveId")
         }
 
         return mapToDigitaliseringsoppgave(
