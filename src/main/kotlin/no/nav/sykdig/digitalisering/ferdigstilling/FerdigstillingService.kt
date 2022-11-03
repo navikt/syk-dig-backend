@@ -38,6 +38,6 @@ class FerdigstillingService(
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgaveId, sykmeldingId = sykmeldingId)
-        // ferdigstill i database
+        // skriv til topic
     }
 }
