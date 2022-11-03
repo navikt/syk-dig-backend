@@ -3,10 +3,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "2.7.3"
+    id("org.springframework.boot") version "2.7.5"
     id("io.spring.dependency-management") version "1.0.13.RELEASE"
-    kotlin("jvm") version "1.7.10"
-    kotlin("plugin.spring") version "1.7.10"
+    kotlin("jvm") version "1.7.20"
+    kotlin("plugin.spring") version "1.7.20"
     id("com.netflix.dgs.codegen") version "5.1.17"
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
@@ -30,16 +30,17 @@ repositories {
 }
 
 val postgresVersion = "42.5.0"
-val snakeYamlVersion = "1.32"
-val smCommonVersion = "1.cbb3aed"
-val tokenSupportVersion = "2.1.4"
-val testContainersVersion = "1.17.3"
-val kluentVersion = "1.68"
+val snakeYamlVersion = "1.33"
+val smCommonVersion = "1.ea531b3"
+val tokenSupportVersion = "2.1.7"
+val testContainersVersion = "1.17.4"
+val kluentVersion = "1.72"
 val logstashLogbackEncoderVersion = "7.2"
-val javaJwtVersion = "4.0.0"
-val springBootResourceVersion = "2.7.3"
+val javaJwtVersion = "4.2.1"
+val springBootResourceVersion = "2.7.5"
 val graphqlVersion = "19.2"
-val kafkaClientsVersion = "3.2.3"
+val kafkaClientsVersion = "3.3.1"
+val springSecurityWebVersion = "5.7.5"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
@@ -64,6 +65,7 @@ dependencies {
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("com.auth0:java-jwt:$javaJwtVersion")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.security:spring-security-web:$springSecurityWebVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springBootResourceVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
