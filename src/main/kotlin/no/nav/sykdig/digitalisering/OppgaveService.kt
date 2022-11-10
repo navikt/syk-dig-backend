@@ -94,9 +94,8 @@ class OppgaveService(
             person = person,
             sykmeldingId = oppgave.sykmeldingId.toString(),
             datoOpprettet = oppgave.opprettet.toLocalDateTime(),
-            journalpostId = oppgave.journalpostId,
-
-            )
+            journalpostId = oppgave.journalpostId
+        )
 
         val healthInformation = extractHelseOpplysningerArbeidsuforhet(fellesformat)
         val msgHead = fellesformat.get<XMLMsgHead>()

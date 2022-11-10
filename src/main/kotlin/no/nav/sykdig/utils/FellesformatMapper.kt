@@ -26,6 +26,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import no.nav.syfo.model.SporsmalSvar
 import no.nav.sykdig.digitalisering.ValidatedOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.generated.types.PeriodeInput
@@ -102,7 +103,7 @@ fun mapToFellesformat(
                             content = XMLRefDoc.Content().apply {
                                 any.add(
                                     HelseOpplysningerArbeidsuforhet().apply {
-                                        syketilfelleStartDato = tilSyketilfelleStartDato(oppgave,validatedValues)
+                                        syketilfelleStartDato = tilSyketilfelleStartDato(oppgave, validatedValues)
                                         pasient = HelseOpplysningerArbeidsuforhet.Pasient().apply {
                                             navn = NavnType().apply {
                                                 fornavn = person.navn.fornavn
@@ -128,22 +129,25 @@ fun mapToFellesformat(
                                             periode.addAll(tilPeriodeListe(validatedValues.perioder))
                                         }
                                         prognose = null
-                                        utdypendeOpplysninger = if (oppgave.sykmelding?.sykmelding?.utdypendeOpplysninger?.isNotEmpty() == true) flaggScanHarUtdypendeOpplysninger() else null
+                                        utdypendeOpplysninger =
+                                            if (oppgave.sykmelding?.sykmelding?.utdypendeOpplysninger?.isNotEmpty() == true) tilUtdypendeOpplysninger(
+                                                oppgave.sykmelding.sykmelding.utdypendeOpplysninger
+                                            ) else null
                                         tiltak = null
-                                        meldingTilNav = HelseOpplysningerArbeidsuforhet.MeldingTilNav().apply {
-                                            isBistandNAVUmiddelbart = false
-                                            beskrivBistandNAV = ""
-                                        }
+                                        meldingTilNav = null
                                         meldingTilArbeidsgiver = ""
                                         kontaktMedPasient = HelseOpplysningerArbeidsuforhet.KontaktMedPasient().apply {
                                             kontaktDato = oppgave.sykmelding?.sykmelding?.kontaktMedPasient?.kontaktDato
-                                            begrunnIkkeKontakt = oppgave.sykmelding?.sykmelding?.kontaktMedPasient?.begrunnelseIkkeKontakt
-                                            behandletDato = oppgave.sykmelding?.sykmelding?.behandletTidspunkt?.toLocalDateTime()
+                                            begrunnIkkeKontakt =
+                                                oppgave.sykmelding?.sykmelding?.kontaktMedPasient?.begrunnelseIkkeKontakt
+                                            behandletDato =
+                                                oppgave.sykmelding?.sykmelding?.behandletTidspunkt?.toLocalDateTime()
                                         }
                                         behandler = null
                                         avsenderSystem = HelseOpplysningerArbeidsuforhet.AvsenderSystem().apply {
                                             systemNavn = "Papirsykmelding"
-                                            systemVersjon = journalpostId // Dette er nødvendig for at vi skal slippe å opprette generert PDF for papirsykmeldinger i syfosmsak
+                                            systemVersjon =
+                                                journalpostId
                                         }
                                         strekkode = "123456789qwerty"
                                     }
@@ -157,38 +161,56 @@ fun mapToFellesformat(
     }
 }
 
+fun tilUtdypendeOpplysninger(utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>):
+        HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger {
+    return HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger().apply {
+        spmGruppe.addAll(tilSpmGruppe(utdypendeOpplysninger))
+    }
 
-fun tilSyketilfelleStartDato(oppgave: DigitaliseringsoppgaveDbModel, validatedValues: ValidatedOppgaveValues): LocalDate {
-    // Bruk innsendt syketilfelleStartDato, eller fall tilbake til dato fra perioder hvis ikke satt
-    return oppgave.sykmelding?.sykmelding?.syketilfelleStartDato
-        ?: validatedValues.perioder.stream().map(PeriodeInput::fom).min(LocalDate::compareTo).get()
 }
 
+fun tilSpmGruppe(utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>): List<HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.SpmGruppe> {
 
-fun flaggScanHarUtdypendeOpplysninger(): HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger {
-    return HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger().apply {
-        spmGruppe.add(
+    val listeSpmGruppe = ArrayList<HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.SpmGruppe>()
+
+    utdypendeOpplysninger.map {
+        listeSpmGruppe.add(
             HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.SpmGruppe().apply {
-                spmGruppeId = "6.1"
-                spmGruppeTekst = "Utdypende opplysninger ved 7/8,17 og 39 uker"
-                spmSvar.add(
+                spmGruppeId = it.key
+                spmGruppeTekst = it.key
+                spmSvar.addAll(it.value.map {
                     DynaSvarType().apply {
-                        spmTekst = "Utdypende opplysninger"
+                        spmId = it.key
+                        spmTekst = it.value.sporsmal
                         restriksjon = DynaSvarType.Restriksjon().apply {
-                            restriksjonskode.add(
-                                CS().apply {
-                                    dn = RestrictionCode.RESTRICTED_FOR_EMPLOYER.text
-                                    v = RestrictionCode.RESTRICTED_FOR_EMPLOYER.codeValue
-                                }
-                            )
+                            it.value.restriksjoner.map {
+                                restriksjonskode.add(
+                                    CS().apply {
+                                        v = it.codeValue
+                                        dn = it.text
+                                    }
+                                )
+                            }
                         }
-                        spmId = "6.1.1"
-                        svarTekst = "Papirsykmeldingen inneholder utdypende opplysninger."
+                        svarTekst = it.value.svar
                     }
-                )
+                })
             }
         )
     }
+
+
+    return listeSpmGruppe
+
+}
+
+
+fun tilSyketilfelleStartDato(
+    oppgave: DigitaliseringsoppgaveDbModel,
+    validatedValues: ValidatedOppgaveValues
+): LocalDate {
+    return oppgave.sykmelding?.sykmelding?.syketilfelleStartDato
+        ?: validatedValues.perioder.stream().map(PeriodeInput::fom).min(LocalDate::compareTo).get()
 }
 
 fun tilPeriodeListe(perioder: List<PeriodeInput>): List<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode> {
@@ -218,8 +240,8 @@ fun tilHelseOpplysningerArbeidsuforhetPeriode(periode: PeriodeInput): HelseOpply
         }
 
         behandlingsdager = HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.Behandlingsdager().apply {
-                antallBehandlingsdagerUke = antallBehanldingsDager(periode)
-            }
+            antallBehandlingsdagerUke = antallBehanldingsDager(periode)
+        }
 
         isReisetilskudd = periode.type == PeriodeType.REISETILSKUDD
     }
@@ -237,14 +259,17 @@ fun tilArbeidsgiver(arbeidsgiver: Arbeidsgiver?): HelseOpplysningerArbeidsuforhe
                     dn = "Én arbeidsgiver"
                     v = "1"
                 }
+
                 HarArbeidsgiver.FLERE_ARBEIDSGIVERE -> CS().apply {
                     dn = "Flere arbeidsgivere"
                     v = "2"
                 }
+
                 HarArbeidsgiver.INGEN_ARBEIDSGIVER -> CS().apply {
                     dn = "Ingen arbeidsgiver"
                     v = "3"
                 }
+
                 else -> {
                     throw RuntimeException("Arbeidsgiver type er ukjent, skal ikke kunne skje")
                 }
@@ -294,12 +319,3 @@ fun toMedisinskVurderingDiagnode(diagnose: Diagnose): CV =
         v = diagnose.kode
         dn = diagnose.tekst
     }
-
-enum class RestrictionCode(override val codeValue: String, override val text: String, override val oid: String = "2.16.578.1.12.4.1.1.8134") : Kodeverk {
-    RESTRICTED_FOR_EMPLOYER("A", "Informasjonen skal ikke vises arbeidsgiver")
-}
-interface Kodeverk {
-    val codeValue: String
-    val text: String
-    val oid: String
-}
