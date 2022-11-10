@@ -1,4 +1,4 @@
-package no.nav.syfo.service
+package no.nav.sykdig.utils
 
 import no.nav.helse.sm2013.Address
 import no.nav.helse.sm2013.ArsakType
@@ -98,7 +98,6 @@ fun CV.toDiagnose() = Diagnose(s, v, dn)
 
 fun ArsakType.toAnnenFraversArsak() = AnnenFraversArsak(
     beskrivelse = beskriv,
-    // TODO: Remove if-wrapping whenever the EPJ systems stops sending garbage data
     grunn = arsakskode.mapNotNull { code ->
         if (code.v == null || code.v == "0") {
             null
@@ -108,21 +107,24 @@ fun ArsakType.toAnnenFraversArsak() = AnnenFraversArsak(
     }
 )
 
-// TODO: Remove if-wrapping whenever the EPJ systems stops sending garbage data
+
 fun CS.toMedisinskArsakType() = if (v == null || v == "0") { null } else { MedisinskArsakType.values().first { it.codeValue == v.trim() } }
 
-// TODO: Remove if-wrapping whenever the EPJ systems stops sending garbage data
+
 fun CS.toArbeidsrelatertArsakType() = if (v == null || v == "0") { null } else { ArbeidsrelatertArsakType.values().first { it.codeValue == v } }
 
-// TODO: Remove mapNotNull whenever the EPJ systems stops sending garbage data
-fun HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.toMap() =
-    spmGruppe.map { spmGruppe ->
-        spmGruppe.spmGruppeId to spmGruppe.spmSvar
-            .map { svar -> svar.spmId to SporsmalSvar(sporsmal = svar.spmTekst, svar = svar.svarTekst, restriksjoner = svar.restriksjon?.restriksjonskode?.mapNotNull(CS::toSvarRestriksjon) ?: listOf()) }
-            .toMap()
-    }.toMap()
 
-// TODO: Remove if-wrapping whenever the EPJ systems stops sending garbage data
+fun HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.toMap() =
+    spmGruppe.associate { spmGruppe ->
+        spmGruppe.spmGruppeId to spmGruppe.spmSvar.associate { svar ->
+            svar.spmId to SporsmalSvar(
+                sporsmal = svar.spmTekst,
+                svar = svar.svarTekst,
+                restriksjoner = svar.restriksjon?.restriksjonskode?.mapNotNull(CS::toSvarRestriksjon) ?: listOf()
+            )
+        }
+    }
+
 fun CS.toSvarRestriksjon() =
     if (v.isNullOrBlank()) { null } else { SvarRestriksjon.values().first { it.codeValue == v } }
 
@@ -134,13 +136,13 @@ fun Address.toAdresse() = Adresse(
     land = country?.v
 )
 
-// TODO: Remove mapNotNull whenever the EPJ systems stops sending garbage data
+
 fun ArsakType.toArbeidsrelatertArsak() = ArbeidsrelatertArsak(
     beskrivelse = beskriv,
     arsak = arsakskode.mapNotNull(CS::toArbeidsrelatertArsakType)
 )
 
-// TODO: Remove mapNotNull whenever the EPJ systems stops sending garbage data
+
 fun ArsakType.toMedisinskArsak() = MedisinskArsak(
     beskrivelse = beskriv,
     arsak = arsakskode.mapNotNull(CS::toMedisinskArsakType)

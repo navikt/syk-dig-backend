@@ -4,7 +4,7 @@ import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import no.nav.helse.msgHead.XMLMsgHead
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.syfo.model.UtenlandskSykmelding
-import no.nav.syfo.service.toSykmelding
+import no.nav.sykdig.utils.toSykmelding
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
