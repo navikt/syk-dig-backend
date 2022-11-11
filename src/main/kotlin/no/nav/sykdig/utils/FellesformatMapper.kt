@@ -26,6 +26,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import no.nav.helse.sm2013.Address
+import no.nav.helse.sm2013.TeleCom
+import no.nav.helse.sm2013.URL
+import no.nav.syfo.model.Behandler
 import no.nav.syfo.model.SporsmalSvar
 import no.nav.sykdig.digitalisering.ValidatedOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
@@ -143,7 +147,7 @@ fun mapToFellesformat(
                                             behandletDato =
                                                 oppgave.sykmelding?.sykmelding?.behandletTidspunkt?.toLocalDateTime()
                                         }
-                                        behandler = null
+                                        behandler = tilBehandler(oppgave.sykmelding?.sykmelding?.behandler)
                                         avsenderSystem = HelseOpplysningerArbeidsuforhet.AvsenderSystem().apply {
                                             systemNavn = "Papirsykmelding"
                                             systemVersjon =
@@ -161,6 +165,46 @@ fun mapToFellesformat(
     }
 }
 
+fun tilBehandler(behandler: Behandler?): HelseOpplysningerArbeidsuforhet.Behandler =
+    HelseOpplysningerArbeidsuforhet.Behandler().apply {
+        navn = NavnType().apply {
+            fornavn = behandler?.fornavn
+            mellomnavn = behandler?.mellomnavn
+            etternavn = behandler?.etternavn
+        }
+        id.addAll(
+            listOf(
+                Ident().apply {
+                    id = behandler?.fnr
+                    typeId = CV().apply {
+                        dn = "Fødselsnummer"
+                        s = "2.16.578.1.12.4.1.1.8327"
+                        v = "FNR"
+                    }
+                },
+                Ident().apply {
+                    id = behandler?.hpr
+                    typeId = CV().apply {
+                        dn = "HPR-nummer"
+                        s = "2.16.578.1.12.4.1.1.8116"
+                        v = "HPR"
+                    }
+                }
+            )
+        )
+        adresse = Address()
+        kontaktInfo.add(
+            TeleCom().apply {
+                typeTelecom = CS().apply {
+                    v = "HP"
+                    dn = "Hovedtelefon"
+                }
+                teleAddress = URL().apply {
+                    v = "tel:55553336"
+                }
+            }
+        )
+    }
 fun tilUtdypendeOpplysninger(utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>):
         HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger {
     return HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger().apply {
