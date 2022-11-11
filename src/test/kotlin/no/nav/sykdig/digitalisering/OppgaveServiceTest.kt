@@ -8,9 +8,11 @@ import no.nav.syfo.model.Adresse
 
 import no.nav.syfo.model.AktivitetIkkeMulig
 import no.nav.syfo.model.Arbeidsgiver
+import no.nav.syfo.model.AvsenderSystem
 import no.nav.syfo.model.Behandler
 import no.nav.syfo.model.Diagnose
 import no.nav.syfo.model.HarArbeidsgiver
+import no.nav.syfo.model.KontaktMedPasient
 import no.nav.syfo.model.MedisinskVurdering
 import no.nav.syfo.model.Periode
 import no.nav.syfo.model.UtenlandskSykmelding
@@ -28,6 +30,7 @@ import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import no.nav.sykdig.model.Sykmelding
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldNotBeEqualTo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,40 +53,50 @@ class OppgaveServiceTest {
     @Test
     fun `map to receivedSykmelding`() {
 
+        val fnrPasient = "12345678910"
+        val fnrLege = ""
+        val sykmeldingId = UUID.randomUUID()
+        val journalPostId = "452234"
+        val houvedDiagnose = Diagnose(
+            system = "2.16.578.1.12.4.1.1.7170",
+            kode = "A070",
+            tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
+        )
+
+        val datoOpprette = OffsetDateTime.now()
+
         val oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService, syfoTilgangskontrollClient)
 
         val validatedValues = ValidatedOppgaveValues(
-            fnrPasient = "12345678910",
+            fnrPasient = fnrPasient,
             behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z"),
             skrevetLand = "POL",
-            perioder =  listOf(PeriodeInput(
-                type = PeriodeType.AKTIVITET_IKKE_MULIG,
-                fom = LocalDate.of(2019, Month.AUGUST, 15),
-                tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-               grad = 100
-            )),
-            hovedDiagnose = DiagnoseInput(kode = "A070", system = "2.16.578.1.12.4.1.1.7170"),
+            perioder = listOf(
+                PeriodeInput(
+                    type = PeriodeType.AKTIVITET_IKKE_MULIG,
+                    fom = LocalDate.of(2019, Month.AUGUST, 15),
+                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
+                    grad = 100
+                )
+            ),
+            hovedDiagnose = DiagnoseInput(kode = houvedDiagnose.kode, system = houvedDiagnose.system),
             biDiagnoser = emptyList(),
         )
         val oppgave = DigitaliseringsoppgaveDbModel(
             oppgaveId = "123",
-            fnr = "12345678910",
-            journalpostId = "journalPostId",
+            fnr = fnrPasient,
+            journalpostId = journalPostId,
             dokumentInfoId = null,
-            opprettet = OffsetDateTime.now(),
+            opprettet = datoOpprette,
             ferdigstilt = null,
-            sykmeldingId = UUID.randomUUID(),
+            sykmeldingId = sykmeldingId,
             type = "type",
             sykmelding = SykmeldingUnderArbeid(
                 sykmelding = Sykmelding(
-                    id = "1213",
+                    id = sykmeldingId.toString(),
                     msgId = "1553--213-12-123",
                     medisinskVurdering = MedisinskVurdering(
-                        hovedDiagnose = Diagnose(
-                            system = "2.16.578.1.12.4.1.1.7170",
-                            kode = "A070",
-                            tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
-                        ),
+                        hovedDiagnose = houvedDiagnose,
                         biDiagnoser = listOf(),
                         svangerskap = false,
                         yrkesskade = false,
@@ -114,14 +127,24 @@ class OppgaveServiceTest {
                     meldingTilArbeidsgiver = null,
                     kontaktMedPasient = null,
                     behandletTidspunkt = OffsetDateTime.now(),
-                    behandler = Behandler("Per", "", "Person", "123", "", "", "", Adresse(null, null, null, null, null), ""),
+                    behandler = Behandler(
+                        "Per",
+                        "",
+                        "Person",
+                        "",
+                        fnrLege,
+                        "",
+                        "",
+                        Adresse(null, null, null, null, null),
+                        ""
+                    ),
                     syketilfelleStartDato = null
                 ),
-                fnrPasient = "12345678910",
-                fnrLege = "231555533",
+                fnrPasient = fnrPasient,
+                fnrLege = fnrLege,
                 legeHprNr = null,
-                navLogId = UUID.randomUUID().toString(),
-                msgId = UUID.randomUUID().toString(),
+                navLogId = sykmeldingId.toString(),
+                msgId = sykmeldingId.toString(),
                 legekontorOrgNr = null,
                 legekontorHerId = null,
                 legekontorOrgName = null,
@@ -136,7 +159,7 @@ class OppgaveServiceTest {
             timestamp = OffsetDateTime.now()
         )
         val person = Person(
-            "12345678910",
+            fnrPasient,
             Navn("fornavn", null, "etternavn"),
             Bostedsadresse(
                 null,
@@ -153,7 +176,37 @@ class OppgaveServiceTest {
         val receivedSykmelding =
             oppgaveService.mapToReceivedSykmelding(validatedValues, oppgave, person, harAndreRelevanteOpplysninger)
 
-        receivedSykmelding.personNrPasient shouldBeEqualTo "12345678910"
+        receivedSykmelding.personNrPasient shouldBeEqualTo fnrPasient
+        receivedSykmelding.personNrLege shouldBeEqualTo fnrLege
+        receivedSykmelding.navLogId shouldBeEqualTo sykmeldingId.toString()
+        receivedSykmelding.msgId shouldBeEqualTo sykmeldingId.toString()
+        receivedSykmelding.legekontorOrgName shouldBeEqualTo ""
+        receivedSykmelding.mottattDato.toLocalDate() shouldBeEqualTo datoOpprette.toLocalDate()
+        receivedSykmelding.tssid shouldBeEqualTo null
+        receivedSykmelding.sykmelding.pasientAktoerId shouldBeEqualTo ""
+        receivedSykmelding.sykmelding.medisinskVurdering shouldNotBeEqualTo null
+        receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose shouldBeEqualTo houvedDiagnose
+        receivedSykmelding.sykmelding.skjermesForPasient shouldBeEqualTo false
+        receivedSykmelding.sykmelding.arbeidsgiver shouldNotBeEqualTo null
+        receivedSykmelding.sykmelding.perioder.size shouldBeEqualTo 1
+        receivedSykmelding.sykmelding.prognose shouldBeEqualTo null
+        receivedSykmelding.sykmelding.utdypendeOpplysninger shouldBeEqualTo emptyMap()
+        receivedSykmelding.sykmelding.tiltakArbeidsplassen shouldBeEqualTo null
+        receivedSykmelding.sykmelding.tiltakNAV shouldBeEqualTo null
+        receivedSykmelding.sykmelding.andreTiltak shouldBeEqualTo null
+        receivedSykmelding.sykmelding.meldingTilNAV?.bistandUmiddelbart shouldBeEqualTo null
+        receivedSykmelding.sykmelding.meldingTilArbeidsgiver shouldBeEqualTo null
+        receivedSykmelding.sykmelding.kontaktMedPasient shouldBeEqualTo KontaktMedPasient(
+            null,
+            null
+        )
+        receivedSykmelding.sykmelding.behandletTidspunkt.toLocalDate() shouldBeEqualTo datoOpprette.toLocalDate()
+        receivedSykmelding.sykmelding.behandler shouldNotBeEqualTo null
+        receivedSykmelding.sykmelding.avsenderSystem shouldBeEqualTo AvsenderSystem("Papirsykmelding", journalPostId)
+        receivedSykmelding.sykmelding.syketilfelleStartDato shouldBeEqualTo LocalDate.of(2019, 8, 15)
+        receivedSykmelding.sykmelding.signaturDato.toLocalDate() shouldBeEqualTo datoOpprette.toLocalDate()
+        receivedSykmelding.sykmelding.navnFastlege shouldBeEqualTo null
+
 
     }
 }

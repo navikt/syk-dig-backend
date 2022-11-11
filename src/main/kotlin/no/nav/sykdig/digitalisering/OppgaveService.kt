@@ -122,7 +122,7 @@ class OppgaveService(
             mottattDato = oppgave.opprettet.toLocalDateTime(),
             rulesetVersion = healthInformation.regelSettVersjon,
             fellesformat = fellesformatMarshaller.toString(fellesformat),
-            tssid = "",
+            tssid = null,
             merknader = null,
             partnerreferanse = null,
             legeHelsepersonellkategori = null,

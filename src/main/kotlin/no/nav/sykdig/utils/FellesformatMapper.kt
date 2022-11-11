@@ -139,7 +139,7 @@ fun mapToFellesformat(
                                             ) else null
                                         tiltak = null
                                         meldingTilNav = null
-                                        meldingTilArbeidsgiver = ""
+                                        meldingTilArbeidsgiver = null
                                         kontaktMedPasient = HelseOpplysningerArbeidsuforhet.KontaktMedPasient().apply {
                                             kontaktDato = oppgave.sykmelding?.sykmelding?.kontaktMedPasient?.kontaktDato
                                             begrunnIkkeKontakt =
