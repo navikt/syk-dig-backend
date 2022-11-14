@@ -154,9 +154,9 @@ fun HelseOpplysningerArbeidsuforhet.KontaktMedPasient.toKontaktMedPasient() = Ko
 )
 
 fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler(aktoerId: String) = Behandler(
-    fornavn = navn.fornavn,
+    fornavn = navn.fornavn ?: "",
     mellomnavn = navn.mellomnavn,
-    etternavn = navn.etternavn,
+    etternavn = navn.etternavn ?: "",
     aktoerId = aktoerId,
     fnr = id.find { it.typeId.v == "FNR" }?.id ?: id.find { it.typeId.v == "DNR" }?.id!!,
     hpr = id.find { it.typeId.v == "HPR" }?.id,

@@ -45,7 +45,6 @@ class FerdigstillingService(
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgaveId, sykmeldingId = sykmeldingId)
 
-        // skriv til topic
         try {
             sykmeldingOKProducer.send(
                 ProducerRecord(okSykmeldingTopic, receivedSykmelding.sykmelding.id, receivedSykmelding)
