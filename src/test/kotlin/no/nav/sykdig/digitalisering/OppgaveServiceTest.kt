@@ -1,11 +1,6 @@
 package no.nav.sykdig.digitalisering
 
-import java.time.LocalDate
-import java.time.Month
-import java.time.OffsetDateTime
-import java.util.UUID
 import no.nav.syfo.model.Adresse
-
 import no.nav.syfo.model.AktivitetIkkeMulig
 import no.nav.syfo.model.Arbeidsgiver
 import no.nav.syfo.model.AvsenderSystem
@@ -36,6 +31,10 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
 import org.springframework.boot.test.context.SpringBootTest
+import java.time.LocalDate
+import java.time.Month
+import java.time.OffsetDateTime
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMetrics
@@ -206,7 +205,5 @@ class OppgaveServiceTest {
         receivedSykmelding.sykmelding.syketilfelleStartDato shouldBeEqualTo LocalDate.of(2019, 8, 15)
         receivedSykmelding.sykmelding.signaturDato shouldBeEqualTo datoOpprette.toLocalDateTime()
         receivedSykmelding.sykmelding.navnFastlege shouldBeEqualTo null
-
-
     }
 }

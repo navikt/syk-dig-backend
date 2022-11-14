@@ -107,12 +107,9 @@ fun ArsakType.toAnnenFraversArsak() = AnnenFraversArsak(
     }
 )
 
-
 fun CS.toMedisinskArsakType() = if (v == null || v == "0") { null } else { MedisinskArsakType.values().first { it.codeValue == v.trim() } }
 
-
 fun CS.toArbeidsrelatertArsakType() = if (v == null || v == "0") { null } else { ArbeidsrelatertArsakType.values().first { it.codeValue == v } }
-
 
 fun HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.toMap() =
     spmGruppe.associate { spmGruppe ->
@@ -136,12 +133,10 @@ fun Address.toAdresse() = Adresse(
     land = country?.v
 )
 
-
 fun ArsakType.toArbeidsrelatertArsak() = ArbeidsrelatertArsak(
     beskrivelse = beskriv,
     arsak = arsakskode.mapNotNull(CS::toArbeidsrelatertArsakType)
 )
-
 
 fun ArsakType.toMedisinskArsak() = MedisinskArsak(
     beskrivelse = beskriv,

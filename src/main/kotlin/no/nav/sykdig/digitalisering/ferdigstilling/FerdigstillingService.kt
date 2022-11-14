@@ -6,12 +6,9 @@ import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.logger
 import no.nav.sykdig.oppgavemottak.kafka.okSykmeldingTopic
-import no.nav.sykdig.oppgavemottak.kafka.sykDigOppgaveTopic
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
 
 @Component
 class FerdigstillingService(

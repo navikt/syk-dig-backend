@@ -56,7 +56,6 @@ class AivenKafkaConfig(
         return KafkaProducer<String, ReceivedSykmelding>(configs)
     }
 
-
     fun commonConfig() = mapOf(
         BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers
     ) + securityConfig()
@@ -97,4 +96,3 @@ class AivenKafkaConfig(
 
 const val sykDigOppgaveTopic = "teamsykmelding.syk-dig-oppgave"
 const val okSykmeldingTopic = "teamsykmelding.ok-sykmelding"
-

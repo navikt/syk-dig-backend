@@ -8,8 +8,6 @@ import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
 import javax.xml.bind.Marshaller.JAXB_ENCODING
 
-
-
 val fellesformatMarshaller: Marshaller = JAXBContext.newInstance(XMLEIFellesformat::class.java, XMLMsgHead::class.java, HelseOpplysningerArbeidsuforhet::class.java).createMarshaller()
     .apply { setProperty(JAXB_ENCODING, "UTF-8") }
 

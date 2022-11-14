@@ -54,7 +54,7 @@ class OppgaveDataFetcher(
 
         if (status == SykmeldingUnderArbeidStatus.FERDIGSTILT) {
             val validatedValues = validateRegisterOppgaveValues(values)
-            oppgaveService.ferigstillOppgave(
+            oppgaveService.ferdigstillOppgave(
                 oppgaveId = oppgaveId,
                 ident = ident,
                 values = values,

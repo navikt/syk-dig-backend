@@ -4,7 +4,6 @@ import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import no.nav.helse.msgHead.XMLMsgHead
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.syfo.model.UtenlandskSykmelding
-import no.nav.sykdig.utils.toSykmelding
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
@@ -19,6 +18,7 @@ import no.nav.sykdig.utils.fellesformatMarshaller
 import no.nav.sykdig.utils.get
 import no.nav.sykdig.utils.mapToFellesformat
 import no.nav.sykdig.utils.toString
+import no.nav.sykdig.utils.toSykmelding
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -51,7 +51,7 @@ class OppgaveService(
     }
 
     @Transactional
-    fun ferigstillOppgave(
+    fun ferdigstillOppgave(
         oppgaveId: String,
         ident: String,
         values: SykmeldingUnderArbeidValues,
@@ -133,6 +133,5 @@ class OppgaveService(
                 harAndreRelevanteOpplysninger ?: false
             )
         )
-
     }
 }
