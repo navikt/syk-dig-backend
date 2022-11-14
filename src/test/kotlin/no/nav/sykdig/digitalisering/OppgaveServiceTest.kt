@@ -63,12 +63,13 @@ class OppgaveServiceTest {
         )
 
         val datoOpprette = OffsetDateTime.parse("2022-11-14T12:00:00Z")
+        val behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z")
 
         val oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService, syfoTilgangskontrollClient)
 
         val validatedValues = ValidatedOppgaveValues(
             fnrPasient = fnrPasient,
-            behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z"),
+            behandletTidspunkt = behandletTidspunkt,
             skrevetLand = "POL",
             perioder = listOf(
                 PeriodeInput(
@@ -199,7 +200,7 @@ class OppgaveServiceTest {
             null,
             null
         )
-        receivedSykmelding.sykmelding.behandletTidspunkt shouldBeEqualTo datoOpprette.toLocalDateTime()
+        receivedSykmelding.sykmelding.behandletTidspunkt shouldBeEqualTo behandletTidspunkt.toLocalDateTime()
         receivedSykmelding.sykmelding.behandler shouldNotBeEqualTo null
         receivedSykmelding.sykmelding.avsenderSystem shouldBeEqualTo AvsenderSystem("syk-dig", journalPostId)
         receivedSykmelding.sykmelding.syketilfelleStartDato shouldBeEqualTo LocalDate.of(2019, 8, 15)

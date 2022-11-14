@@ -144,8 +144,7 @@ fun mapToFellesformat(
                                             kontaktDato = oppgave.sykmelding?.sykmelding?.kontaktMedPasient?.kontaktDato
                                             begrunnIkkeKontakt =
                                                 oppgave.sykmelding?.sykmelding?.kontaktMedPasient?.begrunnelseIkkeKontakt
-                                            behandletDato =
-                                                oppgave.sykmelding?.sykmelding?.behandletTidspunkt?.toLocalDateTime()
+                                            behandletDato = validatedValues.behandletTidspunkt.toLocalDateTime()
                                         }
                                         behandler = tilBehandler(oppgave.sykmelding?.sykmelding?.behandler)
                                         avsenderSystem = HelseOpplysningerArbeidsuforhet.AvsenderSystem().apply {
