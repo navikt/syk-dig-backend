@@ -1,12 +1,8 @@
 package no.nav.sykdig.digitalisering
 
-import no.nav.syfo.model.Adresse
 import no.nav.syfo.model.AktivitetIkkeMulig
-import no.nav.syfo.model.Arbeidsgiver
 import no.nav.syfo.model.AvsenderSystem
-import no.nav.syfo.model.Behandler
 import no.nav.syfo.model.Diagnose
-import no.nav.syfo.model.HarArbeidsgiver
 import no.nav.syfo.model.KontaktMedPasient
 import no.nav.syfo.model.MedisinskVurdering
 import no.nav.syfo.model.Periode
@@ -34,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDate
 import java.time.Month
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -50,19 +47,19 @@ class OppgaveServiceTest {
     lateinit var syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient
 
     @Test
-    fun `map to receivedSykmelding`() {
+    fun `map utenlandsk sykmelding to receivedSykmelding`() {
 
         val fnrPasient = "12345678910"
         val fnrLege = ""
         val sykmeldingId = UUID.randomUUID()
         val journalPostId = "452234"
-        val houvedDiagnose = Diagnose(
+        val hoveddiagnose = Diagnose(
             system = "2.16.578.1.12.4.1.1.7170",
             kode = "A070",
             tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
         )
 
-        val datoOpprette = OffsetDateTime.parse("2022-11-14T12:00:00Z")
+        val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
         val behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z")
 
         val oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService, syfoTilgangskontrollClient)
@@ -79,31 +76,31 @@ class OppgaveServiceTest {
                     grad = 100
                 )
             ),
-            hovedDiagnose = DiagnoseInput(kode = houvedDiagnose.kode, system = houvedDiagnose.system),
+            hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
         )
         val oppgave = DigitaliseringsoppgaveDbModel(
             oppgaveId = "123",
             fnr = fnrPasient,
             journalpostId = journalPostId,
-            dokumentInfoId = null,
-            opprettet = datoOpprette,
-            ferdigstilt = null,
+            dokumentInfoId = "321",
+            opprettet = datoOpprettet,
+            ferdigstilt = OffsetDateTime.now(ZoneOffset.UTC),
             sykmeldingId = sykmeldingId,
-            type = "type",
+            type = "UTLAND",
             sykmelding = SykmeldingUnderArbeid(
                 sykmelding = Sykmelding(
                     id = sykmeldingId.toString(),
                     msgId = "1553--213-12-123",
                     medisinskVurdering = MedisinskVurdering(
-                        hovedDiagnose = houvedDiagnose,
+                        hovedDiagnose = hoveddiagnose,
                         biDiagnoser = listOf(),
                         svangerskap = false,
                         yrkesskade = false,
                         yrkesskadeDato = null,
                         annenFraversArsak = null
                     ),
-                    arbeidsgiver = Arbeidsgiver(HarArbeidsgiver.EN_ARBEIDSGIVER, "NAV ikt", "Utvikler", 100),
+                    arbeidsgiver = null,
                     perioder = listOf(
                         Periode(
                             fom = LocalDate.of(2019, Month.AUGUST, 15),
@@ -119,25 +116,15 @@ class OppgaveServiceTest {
                         )
                     ),
                     prognose = null,
-                    utdypendeOpplysninger = emptyMap(),
+                    utdypendeOpplysninger = null,
                     tiltakArbeidsplassen = null,
                     tiltakNAV = null,
                     andreTiltak = null,
                     meldingTilNAV = null,
                     meldingTilArbeidsgiver = null,
                     kontaktMedPasient = null,
-                    behandletTidspunkt = datoOpprette,
-                    behandler = Behandler(
-                        "Per",
-                        "",
-                        "Person",
-                        "",
-                        fnrLege,
-                        "",
-                        "",
-                        Adresse(null, null, null, null, null),
-                        ""
-                    ),
+                    behandletTidspunkt = behandletTidspunkt,
+                    behandler = null,
                     syketilfelleStartDato = null
                 ),
                 fnrPasient = fnrPasient,
@@ -156,7 +143,7 @@ class OppgaveServiceTest {
 
             ),
             endretAv = "test testesen",
-            timestamp = datoOpprette
+            timestamp = datoOpprettet
         )
         val person = Person(
             fnrPasient,
@@ -181,11 +168,11 @@ class OppgaveServiceTest {
         receivedSykmelding.navLogId shouldBeEqualTo sykmeldingId.toString()
         receivedSykmelding.msgId shouldBeEqualTo sykmeldingId.toString()
         receivedSykmelding.legekontorOrgName shouldBeEqualTo ""
-        receivedSykmelding.mottattDato shouldBeEqualTo datoOpprette.toLocalDateTime()
+        receivedSykmelding.mottattDato shouldBeEqualTo datoOpprettet.toLocalDateTime()
         receivedSykmelding.tssid shouldBeEqualTo null
         receivedSykmelding.sykmelding.pasientAktoerId shouldBeEqualTo ""
         receivedSykmelding.sykmelding.medisinskVurdering shouldNotBeEqualTo null
-        receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose shouldBeEqualTo houvedDiagnose
+        receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose shouldBeEqualTo hoveddiagnose
         receivedSykmelding.sykmelding.skjermesForPasient shouldBeEqualTo false
         receivedSykmelding.sykmelding.arbeidsgiver shouldNotBeEqualTo null
         receivedSykmelding.sykmelding.perioder.size shouldBeEqualTo 1
@@ -204,7 +191,7 @@ class OppgaveServiceTest {
         receivedSykmelding.sykmelding.behandler shouldNotBeEqualTo null
         receivedSykmelding.sykmelding.avsenderSystem shouldBeEqualTo AvsenderSystem("syk-dig", journalPostId)
         receivedSykmelding.sykmelding.syketilfelleStartDato shouldBeEqualTo LocalDate.of(2019, 8, 15)
-        receivedSykmelding.sykmelding.signaturDato shouldBeEqualTo datoOpprette.toLocalDateTime()
+        receivedSykmelding.sykmelding.signaturDato shouldBeEqualTo datoOpprettet.toLocalDateTime()
         receivedSykmelding.sykmelding.navnFastlege shouldBeEqualTo null
     }
 }

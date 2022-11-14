@@ -158,7 +158,7 @@ fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler(aktoerId: String) = Be
     mellomnavn = navn.mellomnavn,
     etternavn = navn.etternavn ?: "",
     aktoerId = aktoerId,
-    fnr = id.find { it.typeId.v == "FNR" }?.id ?: id.find { it.typeId.v == "DNR" }?.id!!,
+    fnr = id.find { it.typeId.v == "FNR" }?.id ?: id.find { it.typeId.v == "DNR" }?.id ?: "",
     hpr = id.find { it.typeId.v == "HPR" }?.id,
     her = id.find { it.typeId.v == "HER" }?.id,
     adresse = adresse.toAdresse(),
