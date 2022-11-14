@@ -63,7 +63,7 @@ class OppgaveServiceTest {
             tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
         )
 
-        val datoOpprette = OffsetDateTime.now()
+        val datoOpprette = OffsetDateTime.parse("2022-11-14T12:00:00Z")
 
         val oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService, syfoTilgangskontrollClient)
 
@@ -126,7 +126,7 @@ class OppgaveServiceTest {
                     meldingTilNAV = null,
                     meldingTilArbeidsgiver = null,
                     kontaktMedPasient = null,
-                    behandletTidspunkt = OffsetDateTime.now(),
+                    behandletTidspunkt = datoOpprette,
                     behandler = Behandler(
                         "Per",
                         "",
@@ -156,7 +156,7 @@ class OppgaveServiceTest {
 
             ),
             endretAv = "test testesen",
-            timestamp = OffsetDateTime.now()
+            timestamp = datoOpprette
         )
         val person = Person(
             fnrPasient,
@@ -181,7 +181,7 @@ class OppgaveServiceTest {
         receivedSykmelding.navLogId shouldBeEqualTo sykmeldingId.toString()
         receivedSykmelding.msgId shouldBeEqualTo sykmeldingId.toString()
         receivedSykmelding.legekontorOrgName shouldBeEqualTo ""
-        receivedSykmelding.mottattDato.toLocalDate() shouldBeEqualTo datoOpprette.toLocalDate()
+        receivedSykmelding.mottattDato shouldBeEqualTo datoOpprette.toLocalDateTime()
         receivedSykmelding.tssid shouldBeEqualTo null
         receivedSykmelding.sykmelding.pasientAktoerId shouldBeEqualTo ""
         receivedSykmelding.sykmelding.medisinskVurdering shouldNotBeEqualTo null
@@ -200,11 +200,11 @@ class OppgaveServiceTest {
             null,
             null
         )
-        receivedSykmelding.sykmelding.behandletTidspunkt.toLocalDate() shouldBeEqualTo datoOpprette.toLocalDate()
+        receivedSykmelding.sykmelding.behandletTidspunkt shouldBeEqualTo datoOpprette.toLocalDateTime()
         receivedSykmelding.sykmelding.behandler shouldNotBeEqualTo null
-        receivedSykmelding.sykmelding.avsenderSystem shouldBeEqualTo AvsenderSystem("Papirsykmelding", journalPostId)
+        receivedSykmelding.sykmelding.avsenderSystem shouldBeEqualTo AvsenderSystem("syk-dig", journalPostId)
         receivedSykmelding.sykmelding.syketilfelleStartDato shouldBeEqualTo LocalDate.of(2019, 8, 15)
-        receivedSykmelding.sykmelding.signaturDato.toLocalDate() shouldBeEqualTo datoOpprette.toLocalDate()
+        receivedSykmelding.sykmelding.signaturDato shouldBeEqualTo datoOpprette.toLocalDateTime()
         receivedSykmelding.sykmelding.navnFastlege shouldBeEqualTo null
 
 

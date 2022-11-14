@@ -149,7 +149,7 @@ fun mapToFellesformat(
                                         }
                                         behandler = tilBehandler(oppgave.sykmelding?.sykmelding?.behandler)
                                         avsenderSystem = HelseOpplysningerArbeidsuforhet.AvsenderSystem().apply {
-                                            systemNavn = "Papirsykmelding"
+                                            systemNavn = "syk-dig"
                                             systemVersjon =
                                                 journalpostId
                                         }
