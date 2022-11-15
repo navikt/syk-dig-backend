@@ -1,6 +1,7 @@
 package no.nav.sykdig.oppgavemottak.kafka
 
 import no.nav.syfo.model.ReceivedSykmelding
+import no.nav.sykdig.utils.JacksonKafkaSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -33,22 +34,10 @@ class AivenKafkaConfig(
     private val PKCS12 = "PKCS12"
 
     @Bean
-    fun sykepengesoknadProducer(): KafkaProducer<String, String> {
-        val configs = mapOf(
-            KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-            VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-            ACKS_CONFIG to "all",
-            RETRIES_CONFIG to 10,
-            RETRY_BACKOFF_MS_CONFIG to 100
-        ) + commonConfig()
-        return KafkaProducer<String, String>(configs)
-    }
-
-    @Bean
     fun sykmeldingOKProducer(): KafkaProducer<String, ReceivedSykmelding> {
         val configs = mapOf(
             KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-            VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+            VALUE_SERIALIZER_CLASS_CONFIG to JacksonKafkaSerializer::class.java,
             ACKS_CONFIG to "all",
             RETRIES_CONFIG to 10,
             RETRY_BACKOFF_MS_CONFIG to 100
