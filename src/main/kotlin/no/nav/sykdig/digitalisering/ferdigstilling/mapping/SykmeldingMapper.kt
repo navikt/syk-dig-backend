@@ -1,4 +1,4 @@
-package no.nav.sykdig.utils
+package no.nav.sykdig.digitalisering.ferdigstilling.mapping
 
 import no.nav.helse.sm2013.Address
 import no.nav.helse.sm2013.ArsakType
