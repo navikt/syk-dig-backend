@@ -296,25 +296,18 @@ fun tilArbeidsgiver(arbeidsgiver: Arbeidsgiver?): HelseOpplysningerArbeidsuforhe
     HelseOpplysningerArbeidsuforhet.Arbeidsgiver().apply {
         harArbeidsgiver =
             when (arbeidsgiver?.harArbeidsgiver) {
-                HarArbeidsgiver.EN_ARBEIDSGIVER -> CS().apply {
-                    dn = "Én arbeidsgiver"
-                    v = "1"
-                }
-
                 HarArbeidsgiver.FLERE_ARBEIDSGIVERE -> CS().apply {
                     dn = "Flere arbeidsgivere"
                     v = "2"
                 }
-
                 HarArbeidsgiver.INGEN_ARBEIDSGIVER -> CS().apply {
                     dn = "Ingen arbeidsgiver"
                     v = "3"
                 }
-
                 else -> {
                     CS().apply {
-                        dn = "Ingen arbeidsgiver"
-                        v = "3"
+                        dn = "Én arbeidsgiver"
+                        v = "1"
                     }
                 }
             }
