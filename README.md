@@ -48,31 +48,42 @@ Alternatively, the variables can be configured via environment variables:
 
 or the command line:
 
-```
+``` bash
 ./gradlew -PgithubUser=x-access-token -PgithubPassword=[token]
 ```
 
 ### Building the application
 #### Compile and package application
-To build locally and run the integration tests you can simply run `./gradlew bootJar` or  on windows 
+To build locally and run the integration tests you can simply run 
+``` bash
+./gradlew bootJar
+```
+or  on windows 
 `gradlew.bat bootJar`
 
 #### Creating a docker image
-Creating a docker image should be as simple as `docker build -t syk-dig-backend .`
+Creating a docker image should be as simple as
+``` bash 
+docker build -t syk-dig-backend .
+```
 
 #### Running a docker image
-`docker run --rm -it -p 8080:8080 syk-dig-backend`
+``` bash
+docker run --rm -it -p 8080:8080 syk-dig-backend
+```
 
 ### Upgrading the gradle wrapper
 Find the newest version of gradle here: https://gradle.org/releases/ Then run this command:
 
-```./gradlew wrapper --gradle-version $gradleVersjon```
+``` bash
+./gradlew wrapper --gradle-version $gradleVersjon
+```
 
 ### Contact
 
-This project is maintained by navikt/teamsykmelding
+This project is maintained by [CODEOWNERS](CODEOWNERS)
 
-Questions and/or feature requests? Please create an [issue](https://github.com/navikt/syfosmmottak/issues).
+Questions and/or feature requests? Please create an [issue](https://github.com/navikt/syk-dig-backend/issues).
 
 If you work in [@navikt](https://github.com/navikt) you can reach us at the Slack
 channel [#team-sykmelding](https://nav-it.slack.com/archives/CMA3XV997).
