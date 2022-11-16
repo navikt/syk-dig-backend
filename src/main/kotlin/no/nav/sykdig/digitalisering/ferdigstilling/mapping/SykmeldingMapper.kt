@@ -51,7 +51,7 @@ fun HelseOpplysningerArbeidsuforhet.toSykmelding(
     meldingTilArbeidsgiver = meldingTilArbeidsgiver,
     kontaktMedPasient = kontaktMedPasient.toKontaktMedPasient(),
     behandletTidspunkt = kontaktMedPasient.behandletDato,
-    behandler = behandler.toBehandler(legeAktoerId),
+    behandler = behandler.toBehandler(),
     avsenderSystem = avsenderSystem.toAvsenderSystem(),
     syketilfelleStartDato = syketilfelleStartDato,
     signaturDato = signaturDato,
@@ -153,11 +153,11 @@ fun HelseOpplysningerArbeidsuforhet.KontaktMedPasient.toKontaktMedPasient() = Ko
     begrunnelseIkkeKontakt = begrunnIkkeKontakt
 )
 
-fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler(aktoerId: String) = Behandler(
+fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler() = Behandler(
     fornavn = navn.fornavn ?: "",
     mellomnavn = navn.mellomnavn,
     etternavn = navn.etternavn ?: "",
-    aktoerId = aktoerId,
+    aktoerId = "",
     fnr = id.find { it.typeId.v == "FNR" }?.id ?: id.find { it.typeId.v == "DNR" }?.id ?: "",
     hpr = id.find { it.typeId.v == "HPR" }?.id,
     her = id.find { it.typeId.v == "HER" }?.id,

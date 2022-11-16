@@ -23,6 +23,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import no.nav.helse.sm2013.Address
+import no.nav.helse.sm2013.TeleCom
+import no.nav.helse.sm2013.URL
+import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeType
 
 fun mapToFellesformat(
@@ -111,7 +115,7 @@ fun mapToFellesformat(
                                             }
                                         }
                                         arbeidsgiver = tilArbeidsgiver()
-                                        medisinskVurdering = null
+                                        medisinskVurdering = tilMedisinskVurdering(validatedValues.hovedDiagnose, validatedValues.biDiagnoser)
                                         aktivitet = HelseOpplysningerArbeidsuforhet.Aktivitet().apply {
                                             periode.addAll(tilPeriodeListe(validatedValues.perioder))
                                         }
@@ -125,7 +129,7 @@ fun mapToFellesformat(
                                             begrunnIkkeKontakt = null
                                             behandletDato = validatedValues.behandletTidspunkt.toLocalDateTime()
                                         }
-                                        behandler = null
+                                        behandler = tilBehandler()
                                         avsenderSystem = HelseOpplysningerArbeidsuforhet.AvsenderSystem().apply {
                                             systemNavn = "syk-dig"
                                             systemVersjon =
@@ -143,8 +147,58 @@ fun mapToFellesformat(
     }
 }
 
+fun tilBehandler(): HelseOpplysningerArbeidsuforhet.Behandler =
+    HelseOpplysningerArbeidsuforhet.Behandler().apply {
+        navn = NavnType().apply {
+            fornavn = ""
+            mellomnavn = ""
+            etternavn = ""
+        }
+        adresse = Address()
+        kontaktInfo.add(
+            TeleCom().apply {
+                typeTelecom = CS().apply {
+                    v = "HP"
+                    dn = "Hovedtelefon"
+                }
+                teleAddress = URL().apply {
+                    v = "tel:55553336"
+                }
+            }
+        )
+    }
 
+fun tilMedisinskVurdering(hovedDiagnoseInput: DiagnoseInput, biDiagnoserInput: List<DiagnoseInput>):
+        HelseOpplysningerArbeidsuforhet.MedisinskVurdering {
 
+    val biDiagnoseListe: List<CV> = biDiagnoserInput.map {
+        toMedisinskVurderingDiagnode(it)
+    }
+
+    return HelseOpplysningerArbeidsuforhet.MedisinskVurdering().apply {
+        hovedDiagnose = HelseOpplysningerArbeidsuforhet.MedisinskVurdering.HovedDiagnose().apply {
+            diagnosekode = toMedisinskVurderingDiagnode(hovedDiagnoseInput)
+        }
+        if (biDiagnoseListe.isNotEmpty()){
+            biDiagnoser = HelseOpplysningerArbeidsuforhet.MedisinskVurdering.BiDiagnoser().apply {
+                diagnosekode.addAll(biDiagnoseListe)
+            }
+        }
+
+        isSkjermesForPasient = false
+        annenFraversArsak = null
+        isSvangerskap = false
+        isYrkesskade = false
+        yrkesskadeDato = null
+    }
+}
+
+fun toMedisinskVurderingDiagnode(diagnose: DiagnoseInput): CV =
+    CV().apply {
+        s = diagnose.system
+        v = diagnose.kode
+        dn = ""
+    }
 
 fun tilSyketilfelleStartDato(
     validatedValues: ValidatedOppgaveValues

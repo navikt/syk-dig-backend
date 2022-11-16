@@ -183,7 +183,11 @@ class FerdigstillingServiceTest {
         receivedSykmelding.tssid shouldBeEqualTo null
         receivedSykmelding.sykmelding.pasientAktoerId shouldBeEqualTo ""
         receivedSykmelding.sykmelding.medisinskVurdering shouldNotBeEqualTo null
-        receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose shouldBeEqualTo hoveddiagnose
+        receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose shouldBeEqualTo Diagnose(
+            system = "2.16.578.1.12.4.1.1.7170",
+            kode = "A070",
+            tekst = ""
+        )
         receivedSykmelding.sykmelding.skjermesForPasient shouldBeEqualTo false
         receivedSykmelding.sykmelding.arbeidsgiver shouldNotBeEqualTo null
         receivedSykmelding.sykmelding.perioder.size shouldBeEqualTo 1
@@ -195,7 +199,7 @@ class FerdigstillingServiceTest {
         receivedSykmelding.sykmelding.meldingTilNAV?.bistandUmiddelbart shouldBeEqualTo null
         receivedSykmelding.sykmelding.meldingTilArbeidsgiver shouldBeEqualTo null
         receivedSykmelding.sykmelding.kontaktMedPasient shouldBeEqualTo KontaktMedPasient(
-            null,
+            behandletTidspunkt.toLocalDate(),
             null
         )
         receivedSykmelding.sykmelding.behandletTidspunkt shouldBeEqualTo behandletTidspunkt.toLocalDateTime()
