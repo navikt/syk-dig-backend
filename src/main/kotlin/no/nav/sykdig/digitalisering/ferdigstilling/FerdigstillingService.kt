@@ -1,6 +1,5 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
-import java.time.LocalDateTime
 import no.nav.helse.msgHead.XMLMsgHead
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.syfo.model.UtenlandskSykmelding
@@ -21,6 +20,7 @@ import no.nav.sykdig.oppgavemottak.kafka.okSykmeldingTopic
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 class FerdigstillingService(
@@ -55,7 +55,7 @@ class FerdigstillingService(
             opprettet = opprettet
         )
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpostId)) {
-            log.info("Journalpost med id ${journalpostId} er allerede ferdigstilt, sykmeldingId $sykmeldingId")
+            log.info("Journalpost med id $journalpostId er allerede ferdigstilt, sykmeldingId $sykmeldingId")
         } else {
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
                 navnSykmelder = navnSykmelder,

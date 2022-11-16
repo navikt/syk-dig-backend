@@ -11,23 +11,23 @@ import no.nav.helse.msgHead.XMLOrganisation
 import no.nav.helse.msgHead.XMLReceiver
 import no.nav.helse.msgHead.XMLRefDoc
 import no.nav.helse.msgHead.XMLSender
+import no.nav.helse.sm2013.Address
 import no.nav.helse.sm2013.CS
 import no.nav.helse.sm2013.CV
 import no.nav.helse.sm2013.HelseOpplysningerArbeidsuforhet
 import no.nav.helse.sm2013.Ident
 import no.nav.helse.sm2013.NavnType
+import no.nav.helse.sm2013.TeleCom
+import no.nav.helse.sm2013.URL
 import no.nav.sykdig.digitalisering.ValidatedOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
+import no.nav.sykdig.generated.types.PeriodeType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
-import no.nav.helse.sm2013.Address
-import no.nav.helse.sm2013.TeleCom
-import no.nav.helse.sm2013.URL
-import no.nav.sykdig.generated.types.DiagnoseInput
-import no.nav.sykdig.generated.types.PeriodeType
 
 fun mapToFellesformat(
     validatedValues: ValidatedOppgaveValues,
@@ -172,7 +172,7 @@ fun tilBehandler(): HelseOpplysningerArbeidsuforhet.Behandler =
     }
 
 fun tilMedisinskVurdering(hovedDiagnoseInput: DiagnoseInput, biDiagnoserInput: List<DiagnoseInput>):
-        HelseOpplysningerArbeidsuforhet.MedisinskVurdering {
+    HelseOpplysningerArbeidsuforhet.MedisinskVurdering {
 
     val biDiagnoseListe: List<CV> = biDiagnoserInput.map {
         toMedisinskVurderingDiagnose(it)
