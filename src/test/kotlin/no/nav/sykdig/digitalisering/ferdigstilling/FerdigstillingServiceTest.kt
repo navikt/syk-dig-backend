@@ -95,7 +95,7 @@ class FerdigstillingServiceTest {
                         LocalDate.now().minusWeeks(2)
                     )
                 ),
-                hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
+                hovedDiagnose = DiagnoseInput("A070", "ICD10"),
                 biDiagnoser = emptyList()
             ),
             harAndreRelevanteOpplysninger = false,
@@ -125,7 +125,7 @@ class FerdigstillingServiceTest {
         val sykmeldingId = UUID.randomUUID()
         val journalPostId = "452234"
         val hoveddiagnose = Diagnose(
-            system = "2.16.578.1.12.4.1.1.7170",
+            system = "ICD10",
             kode = "A070",
             tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
         )
@@ -184,7 +184,7 @@ class FerdigstillingServiceTest {
         receivedSykmelding.sykmelding.pasientAktoerId shouldBeEqualTo ""
         receivedSykmelding.sykmelding.medisinskVurdering shouldNotBeEqualTo null
         receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose shouldBeEqualTo Diagnose(
-            system = "2.16.578.1.12.4.1.1.7170",
+            system = "2.16.578.1.12.4.1.1.7110",
             kode = "A070",
             tekst = ""
         )

@@ -172,12 +172,12 @@ fun tilMedisinskVurdering(hovedDiagnoseInput: DiagnoseInput, biDiagnoserInput: L
         HelseOpplysningerArbeidsuforhet.MedisinskVurdering {
 
     val biDiagnoseListe: List<CV> = biDiagnoserInput.map {
-        toMedisinskVurderingDiagnode(it)
+        toMedisinskVurderingDiagnose(it)
     }
 
     return HelseOpplysningerArbeidsuforhet.MedisinskVurdering().apply {
         hovedDiagnose = HelseOpplysningerArbeidsuforhet.MedisinskVurdering.HovedDiagnose().apply {
-            diagnosekode = toMedisinskVurderingDiagnode(hovedDiagnoseInput)
+            diagnosekode = toMedisinskVurderingDiagnose(hovedDiagnoseInput)
         }
         if (biDiagnoseListe.isNotEmpty()){
             biDiagnoser = HelseOpplysningerArbeidsuforhet.MedisinskVurdering.BiDiagnoser().apply {
@@ -193,12 +193,23 @@ fun tilMedisinskVurdering(hovedDiagnoseInput: DiagnoseInput, biDiagnoserInput: L
     }
 }
 
-fun toMedisinskVurderingDiagnode(diagnose: DiagnoseInput): CV =
+fun toMedisinskVurderingDiagnose(diagnose: DiagnoseInput): CV =
     CV().apply {
-        s = diagnose.system
+        s = toDiagnoseKithSystem(diagnose.system)
         v = diagnose.kode
         dn = ""
     }
+
+fun toDiagnoseKithSystem(diagnoseSystem : String): String {
+    return if (DiagnoseSystem.ICD_10.sykdigCode == diagnoseSystem){
+        DiagnoseSystem.ICD_10.kithCode
+    }
+    else if (DiagnoseSystem.ICPC_2.sykdigCode == diagnoseSystem)
+        DiagnoseSystem.ICPC_2.kithCode
+    else {
+        throw RuntimeException("Ukjent diagnose kode")
+    }
+}
 
 fun tilSyketilfelleStartDato(
     validatedValues: ValidatedOppgaveValues
@@ -272,3 +283,8 @@ fun tilArbeidsgiver(): HelseOpplysningerArbeidsuforhet.Arbeidsgiver =
         yrkesbetegnelse = ""
         stillingsprosent = null
     }
+
+enum class DiagnoseSystem(val kithCode: String, val sykdigCode: String) {
+    ICPC_2("2.16.578.1.12.4.1.1.7170", "ICPC2"),
+    ICD_10("2.16.578.1.12.4.1.1.7110", "ICD10")
+}
