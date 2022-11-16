@@ -30,12 +30,13 @@ import no.nav.syfo.model.SporsmalSvar
 import no.nav.sykdig.digitalisering.ValidatedOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.generated.types.PeriodeInput
-import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import java.util.stream.Collectors
+import no.nav.syfo.model.Periode
 
 fun mapToFellesformat(
     oppgave: DigitaliseringsoppgaveDbModel,
@@ -130,7 +131,7 @@ fun mapToFellesformat(
                                                 false
                                             )
                                         aktivitet = HelseOpplysningerArbeidsuforhet.Aktivitet().apply {
-                                            periode.addAll(tilPeriodeListe(validatedValues.perioder))
+                                            periode.addAll(tilPeriodeListe(oppgave.sykmelding?.sykmelding?.perioder))
                                         }
                                         prognose = null
                                         utdypendeOpplysninger =
@@ -254,40 +255,87 @@ fun tilSyketilfelleStartDato(
         ?: validatedValues.perioder.stream().map(PeriodeInput::fom).min(LocalDate::compareTo).get()
 }
 
-fun tilPeriodeListe(perioder: List<PeriodeInput>): List<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode> {
+fun tilPeriodeListe(perioder: List<Periode>?): List<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode> {
     return ArrayList<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode>().apply {
-        addAll(
-            perioder.map {
-                tilHelseOpplysningerArbeidsuforhetPeriode(it)
-            }
-        )
+        if (perioder != null) {
+            addAll(
+                perioder.map {
+                    tilHelseOpplysningerArbeidsuforhetPeriode(it)
+                }
+            )
+        }
     }
 }
 
-fun tilHelseOpplysningerArbeidsuforhetPeriode(periode: PeriodeInput): HelseOpplysningerArbeidsuforhet.Aktivitet.Periode =
+fun tilHelseOpplysningerArbeidsuforhetPeriode(periode: Periode): HelseOpplysningerArbeidsuforhet.Aktivitet.Periode =
     HelseOpplysningerArbeidsuforhet.Aktivitet.Periode().apply {
         periodeFOMDato = periode.fom
         periodeTOMDato = periode.tom
-        aktivitetIkkeMulig = null
-        avventendeSykmelding = null
+        aktivitetIkkeMulig = if (periode.aktivitetIkkeMulig != null) {
+            HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.AktivitetIkkeMulig().apply {
+                medisinskeArsaker = if (periode.aktivitetIkkeMulig?.medisinskArsak != null) {
+                    ArsakType().apply {
+                        beskriv = periode.aktivitetIkkeMulig?.medisinskArsak?.beskrivelse
+                        arsakskode.addAll(
+                            periode.aktivitetIkkeMulig!!.medisinskArsak!!.arsak.stream().map {
+                                CS().apply {
+                                    v = it.codeValue
+                                    dn = it.text
+                                }
+                            }.collect(Collectors.toList())
+                        )
+                    }
+                } else {
+                    null
+                }
+                arbeidsplassen = if (periode.aktivitetIkkeMulig?.arbeidsrelatertArsak != null) {
+                    ArsakType().apply {
+                        beskriv = periode.aktivitetIkkeMulig?.arbeidsrelatertArsak?.beskrivelse
+                        arsakskode.addAll(
+                            periode.aktivitetIkkeMulig!!.arbeidsrelatertArsak!!.arsak.stream().map {
+                                CS().apply {
+                                    v = it.codeValue
+                                    dn = it.text
+                                }
+                            }.collect(Collectors.toList())
+                        )
+                    }
+                } else {
+                    null
+                }
+            }
+        } else {
+            null
+        }
+        avventendeSykmelding = if (periode.avventendeInnspillTilArbeidsgiver != null) {
+            HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.AvventendeSykmelding().apply {
+                innspillTilArbeidsgiver = periode.avventendeInnspillTilArbeidsgiver
+            }
+        } else {
+            null
+        }
 
-        gradertSykmelding = if (periode.type == PeriodeType.GRADERT) {
+        gradertSykmelding = if (periode.gradert != null) {
             HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.GradertSykmelding().apply {
-                sykmeldingsgrad = periode.grad!!
+                sykmeldingsgrad = periode.gradert!!.grad
                 isReisetilskudd = false
             }
         } else {
             null
         }
 
-        behandlingsdager = HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.Behandlingsdager().apply {
+        behandlingsdager = if (periode.behandlingsdager != null) {
+            HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.Behandlingsdager().apply {
             antallBehandlingsdagerUke = antallBehanldingsDager(periode)
+            }
+        } else {
+            null
         }
 
-        isReisetilskudd = periode.type == PeriodeType.REISETILSKUDD
+        isReisetilskudd = periode.reisetilskudd
     }
 
-fun antallBehanldingsDager(periode: PeriodeInput): Int =
+fun antallBehanldingsDager(periode: Periode): Int =
     (periode.fom..periode.tom).daysBetween().toInt()
 
 fun ClosedRange<LocalDate>.daysBetween(): Long = ChronoUnit.DAYS.between(start, endInclusive)
