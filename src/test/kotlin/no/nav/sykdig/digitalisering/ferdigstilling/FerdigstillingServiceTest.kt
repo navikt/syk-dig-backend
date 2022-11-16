@@ -63,6 +63,7 @@ class FerdigstillingServiceTest {
         val sykmeldingId = UUID.randomUUID()
         val journalpostId = "9898"
         val dokumentInfoId = "111"
+        val oppgaveId = "123"
         val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt("9898")).thenAnswer { false }
 
@@ -101,7 +102,8 @@ class FerdigstillingServiceTest {
             sykmeldingId = sykmeldingId.toString(),
             journalpostId = journalpostId,
             opprettet = datoOpprettet.toLocalDateTime(),
-            dokumentInfoId = dokumentInfoId
+            dokumentInfoId = dokumentInfoId,
+            oppgaveId = oppgaveId
         )
 
         verify(dokarkivClient).oppdaterOgFerdigstillJournalpost(
