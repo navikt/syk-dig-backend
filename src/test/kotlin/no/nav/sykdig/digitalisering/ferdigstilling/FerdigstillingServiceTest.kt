@@ -199,7 +199,7 @@ class FerdigstillingServiceTest {
         receivedSykmelding.sykmelding.meldingTilNAV?.bistandUmiddelbart shouldBeEqualTo null
         receivedSykmelding.sykmelding.meldingTilArbeidsgiver shouldBeEqualTo null
         receivedSykmelding.sykmelding.kontaktMedPasient shouldBeEqualTo KontaktMedPasient(
-            behandletTidspunkt.toLocalDate(),
+            null,
             null
         )
         receivedSykmelding.sykmelding.behandletTidspunkt shouldBeEqualTo behandletTidspunkt.toLocalDateTime()

@@ -115,7 +115,10 @@ fun mapToFellesformat(
                                             }
                                         }
                                         arbeidsgiver = tilArbeidsgiver()
-                                        medisinskVurdering = tilMedisinskVurdering(validatedValues.hovedDiagnose, validatedValues.biDiagnoser)
+                                        medisinskVurdering = tilMedisinskVurdering(
+                                            validatedValues.hovedDiagnose,
+                                            validatedValues.biDiagnoser
+                                        )
                                         aktivitet = HelseOpplysningerArbeidsuforhet.Aktivitet().apply {
                                             periode.addAll(tilPeriodeListe(validatedValues.perioder))
                                         }
@@ -125,7 +128,7 @@ fun mapToFellesformat(
                                         meldingTilNav = null
                                         meldingTilArbeidsgiver = null
                                         kontaktMedPasient = HelseOpplysningerArbeidsuforhet.KontaktMedPasient().apply {
-                                            kontaktDato = validatedValues.behandletTidspunkt.toLocalDate()
+                                            kontaktDato = null
                                             begrunnIkkeKontakt = null
                                             behandletDato = validatedValues.behandletTidspunkt.toLocalDateTime()
                                         }
@@ -179,7 +182,7 @@ fun tilMedisinskVurdering(hovedDiagnoseInput: DiagnoseInput, biDiagnoserInput: L
         hovedDiagnose = HelseOpplysningerArbeidsuforhet.MedisinskVurdering.HovedDiagnose().apply {
             diagnosekode = toMedisinskVurderingDiagnose(hovedDiagnoseInput)
         }
-        if (biDiagnoseListe.isNotEmpty()){
+        if (biDiagnoseListe.isNotEmpty()) {
             biDiagnoser = HelseOpplysningerArbeidsuforhet.MedisinskVurdering.BiDiagnoser().apply {
                 diagnosekode.addAll(biDiagnoseListe)
             }
@@ -200,11 +203,10 @@ fun toMedisinskVurderingDiagnose(diagnose: DiagnoseInput): CV =
         dn = ""
     }
 
-fun toDiagnoseKithSystem(diagnoseSystem : String): String {
-    return if (DiagnoseSystem.ICD_10.sykdigCode == diagnoseSystem){
+fun toDiagnoseKithSystem(diagnoseSystem: String): String {
+    return if (DiagnoseSystem.ICD_10.sykdigCode == diagnoseSystem) {
         DiagnoseSystem.ICD_10.kithCode
-    }
-    else if (DiagnoseSystem.ICPC_2.sykdigCode == diagnoseSystem)
+    } else if (DiagnoseSystem.ICPC_2.sykdigCode == diagnoseSystem)
         DiagnoseSystem.ICPC_2.kithCode
     else {
         throw RuntimeException("Ukjent diagnose kode")
@@ -220,10 +222,10 @@ fun tilSyketilfelleStartDato(
 fun tilPeriodeListe(perioder: List<PeriodeInput>): List<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode> {
     return ArrayList<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode>().apply {
         addAll(
-                perioder.map {
-                    tilHelseOpplysningerArbeidsuforhetPeriode(it)
-                }
-            )
+            perioder.map {
+                tilHelseOpplysningerArbeidsuforhetPeriode(it)
+            }
+        )
     }
 }
 
@@ -258,7 +260,7 @@ fun tilHelseOpplysningerArbeidsuforhetPeriode(periode: PeriodeInput): HelseOpply
 
         behandlingsdager = if (periode.type == PeriodeType.BEHANDLINGSDAGER) {
             HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.Behandlingsdager().apply {
-            antallBehandlingsdagerUke = antallBehanldingsDager(periode)
+                antallBehandlingsdagerUke = antallBehanldingsDager(periode)
             }
         } else {
             null
