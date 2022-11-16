@@ -59,7 +59,12 @@ class OppgaveService(
             oppgave = oppgave,
             sykmeldt = person,
             validatedValues = validatedValues,
-            harAndreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger
+            harAndreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger,
+            sykmeldingId = oppgave.sykmeldingId.toString(),
+            journalpostId = oppgave.journalpostId,
+            opprettet = oppgave.opprettet.toLocalDateTime(),
+            dokumentInfoId = oppgave.dokumentInfoId,
+            oppgaveId = oppgave.oppgaveId
         )
         oppgaveRepository.updateOppgave(oppgaveId, values, ident, true)
     }

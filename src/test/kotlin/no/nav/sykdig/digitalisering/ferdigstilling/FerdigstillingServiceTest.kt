@@ -1,13 +1,9 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
-import no.nav.syfo.model.AktivitetIkkeMulig
 import no.nav.syfo.model.AvsenderSystem
 import no.nav.syfo.model.Diagnose
 import no.nav.syfo.model.KontaktMedPasient
-import no.nav.syfo.model.MedisinskVurdering
-import no.nav.syfo.model.Periode
 import no.nav.syfo.model.ReceivedSykmelding
-import no.nav.syfo.model.UtenlandskSykmelding
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.ValidatedOppgaveValues
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
@@ -20,9 +16,6 @@ import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
-import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
-import no.nav.sykdig.model.Sykmelding
-import no.nav.sykdig.model.SykmeldingUnderArbeid
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -47,10 +40,13 @@ import java.util.UUID
 class FerdigstillingServiceTest {
     @MockBean
     lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
+
     @MockBean
     lateinit var dokarkivClient: DokarkivClient
+
     @MockBean
     lateinit var oppgaveClient: OppgaveClient
+
     @Autowired
     lateinit var sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>
 
@@ -58,19 +54,29 @@ class FerdigstillingServiceTest {
 
     @BeforeEach
     fun setup() {
-        ferdigstillingService = FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer)
+        ferdigstillingService =
+            FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer)
     }
 
     @Test
     fun ferdigstillOppdatererDokarkivOppgaveOgTopic() {
         val sykmeldingId = UUID.randomUUID()
+        val journalpostId = "9898"
+        val dokumentInfoId = "111"
+        val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt("9898")).thenAnswer { false }
 
         ferdigstillingService.ferdigstill(
             navnSykmelder = "Fornavn Etternavn",
             land = "SWE",
             enhet = "2990",
-            oppgave = createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910", sykmeldingId = sykmeldingId, journalpostId = "9898", dokumentInfoId = "111"),
+            oppgave = createDigitalseringsoppgaveDbModel(
+                oppgaveId = "123",
+                fnr = "12345678910",
+                sykmeldingId = sykmeldingId,
+                journalpostId = journalpostId,
+                dokumentInfoId = dokumentInfoId
+            ),
             sykmeldt = Person(
                 fnr = "12345678910",
                 navn = Navn("Fornavn", null, "Etternavn"),
@@ -81,14 +87,32 @@ class FerdigstillingServiceTest {
                 fnrPasient = "12345678910",
                 behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
                 skrevetLand = "SWE",
-                perioder = listOf(PeriodeInput(PeriodeType.AKTIVITET_IKKE_MULIG, LocalDate.now().minusMonths(1), LocalDate.now().minusWeeks(2))),
+                perioder = listOf(
+                    PeriodeInput(
+                        PeriodeType.AKTIVITET_IKKE_MULIG,
+                        LocalDate.now().minusMonths(1),
+                        LocalDate.now().minusWeeks(2)
+                    )
+                ),
                 hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
                 biDiagnoser = emptyList()
             ),
-            harAndreRelevanteOpplysninger = false
+            harAndreRelevanteOpplysninger = false,
+            sykmeldingId = sykmeldingId.toString(),
+            journalpostId = journalpostId,
+            opprettet = datoOpprettet.toLocalDateTime(),
+            dokumentInfoId = dokumentInfoId
         )
 
-        verify(dokarkivClient).oppdaterOgFerdigstillJournalpost("Fornavn Etternavn", "SWE", "12345678910", "2990", "111", "9898", sykmeldingId.toString())
+        verify(dokarkivClient).oppdaterOgFerdigstillJournalpost(
+            "Fornavn Etternavn",
+            "SWE",
+            "12345678910",
+            "2990",
+            "111",
+            "9898",
+            sykmeldingId.toString()
+        )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
     }
 
@@ -122,72 +146,7 @@ class FerdigstillingServiceTest {
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
         )
-        val oppgave = DigitaliseringsoppgaveDbModel(
-            oppgaveId = "123",
-            fnr = fnrPasient,
-            journalpostId = journalPostId,
-            dokumentInfoId = "321",
-            opprettet = datoOpprettet,
-            ferdigstilt = OffsetDateTime.now(ZoneOffset.UTC),
-            sykmeldingId = sykmeldingId,
-            type = "UTLAND",
-            sykmelding = SykmeldingUnderArbeid(
-                sykmelding = Sykmelding(
-                    id = sykmeldingId.toString(),
-                    msgId = "1553--213-12-123",
-                    medisinskVurdering = MedisinskVurdering(
-                        hovedDiagnose = hoveddiagnose,
-                        biDiagnoser = listOf(),
-                        svangerskap = false,
-                        yrkesskade = false,
-                        yrkesskadeDato = null,
-                        annenFraversArsak = null
-                    ),
-                    arbeidsgiver = null,
-                    perioder = listOf(
-                        Periode(
-                            fom = LocalDate.of(2019, Month.AUGUST, 15),
-                            tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                            aktivitetIkkeMulig = AktivitetIkkeMulig(
-                                medisinskArsak = null,
-                                arbeidsrelatertArsak = null
-                            ),
-                            avventendeInnspillTilArbeidsgiver = null,
-                            behandlingsdager = null,
-                            gradert = null,
-                            reisetilskudd = false
-                        )
-                    ),
-                    prognose = null,
-                    utdypendeOpplysninger = null,
-                    tiltakArbeidsplassen = null,
-                    tiltakNAV = null,
-                    andreTiltak = null,
-                    meldingTilNAV = null,
-                    meldingTilArbeidsgiver = null,
-                    kontaktMedPasient = null,
-                    behandletTidspunkt = behandletTidspunkt,
-                    behandler = null,
-                    syketilfelleStartDato = null
-                ),
-                fnrPasient = fnrPasient,
-                fnrLege = fnrLege,
-                legeHprNr = null,
-                navLogId = sykmeldingId.toString(),
-                msgId = sykmeldingId.toString(),
-                legekontorOrgNr = null,
-                legekontorHerId = null,
-                legekontorOrgName = null,
-                mottattDato = null,
-                utenlandskSykmelding = UtenlandskSykmelding(
-                    land = "POL",
-                    andreRelevanteOpplysninger = false
-                )
 
-            ),
-            endretAv = "test testesen",
-            timestamp = datoOpprettet
-        )
         val person = Person(
             fnrPasient,
             Navn("fornavn", null, "etternavn"),
@@ -204,7 +163,14 @@ class FerdigstillingServiceTest {
         val harAndreRelevanteOpplysninger = false
 
         val receivedSykmelding =
-            ferdigstillingService.mapToReceivedSykmelding(validatedValues, oppgave, person, harAndreRelevanteOpplysninger)
+            ferdigstillingService.mapToReceivedSykmelding(
+                validatedValues,
+                person,
+                harAndreRelevanteOpplysninger,
+                sykmeldingId.toString(),
+                journalPostId,
+                datoOpprettet.toLocalDateTime()
+            )
 
         receivedSykmelding.personNrPasient shouldBeEqualTo fnrPasient
         receivedSykmelding.personNrLege shouldBeEqualTo fnrLege
