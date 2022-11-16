@@ -1,4 +1,4 @@
-package no.nav.sykdig.utils
+package no.nav.sykdig.digitalisering.ferdigstilling.mapping
 
 import no.nav.helse.eiFellesformat.XMLEIFellesformat
 import no.nav.helse.msgHead.XMLCS
@@ -11,6 +11,7 @@ import no.nav.helse.msgHead.XMLOrganisation
 import no.nav.helse.msgHead.XMLReceiver
 import no.nav.helse.msgHead.XMLRefDoc
 import no.nav.helse.msgHead.XMLSender
+import no.nav.helse.sm2013.Address
 import no.nav.helse.sm2013.ArsakType
 import no.nav.helse.sm2013.CS
 import no.nav.helse.sm2013.CV
@@ -18,24 +19,23 @@ import no.nav.helse.sm2013.DynaSvarType
 import no.nav.helse.sm2013.HelseOpplysningerArbeidsuforhet
 import no.nav.helse.sm2013.Ident
 import no.nav.helse.sm2013.NavnType
+import no.nav.helse.sm2013.TeleCom
+import no.nav.helse.sm2013.URL
 import no.nav.syfo.model.Arbeidsgiver
+import no.nav.syfo.model.Behandler
 import no.nav.syfo.model.Diagnose
 import no.nav.syfo.model.HarArbeidsgiver
 import no.nav.syfo.model.MedisinskVurdering
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.temporal.ChronoUnit
-import no.nav.helse.sm2013.Address
-import no.nav.helse.sm2013.TeleCom
-import no.nav.helse.sm2013.URL
-import no.nav.syfo.model.Behandler
 import no.nav.syfo.model.SporsmalSvar
 import no.nav.sykdig.digitalisering.ValidatedOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 
 fun mapToFellesformat(
     oppgave: DigitaliseringsoppgaveDbModel,
@@ -144,8 +144,7 @@ fun mapToFellesformat(
                                             kontaktDato = oppgave.sykmelding?.sykmelding?.kontaktMedPasient?.kontaktDato
                                             begrunnIkkeKontakt =
                                                 oppgave.sykmelding?.sykmelding?.kontaktMedPasient?.begrunnelseIkkeKontakt
-                                            behandletDato =
-                                                oppgave.sykmelding?.sykmelding?.behandletTidspunkt?.toLocalDateTime()
+                                            behandletDato = validatedValues.behandletTidspunkt.toLocalDateTime()
                                         }
                                         behandler = tilBehandler(oppgave.sykmelding?.sykmelding?.behandler)
                                         avsenderSystem = HelseOpplysningerArbeidsuforhet.AvsenderSystem().apply {
@@ -206,11 +205,10 @@ fun tilBehandler(behandler: Behandler?): HelseOpplysningerArbeidsuforhet.Behandl
         )
     }
 fun tilUtdypendeOpplysninger(utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>):
-        HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger {
+    HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger {
     return HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger().apply {
         spmGruppe.addAll(tilSpmGruppe(utdypendeOpplysninger))
     }
-
 }
 
 fun tilSpmGruppe(utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>): List<HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.SpmGruppe> {
@@ -222,32 +220,31 @@ fun tilSpmGruppe(utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>):
             HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.SpmGruppe().apply {
                 spmGruppeId = it.key
                 spmGruppeTekst = it.key
-                spmSvar.addAll(it.value.map {
-                    DynaSvarType().apply {
-                        spmId = it.key
-                        spmTekst = it.value.sporsmal
-                        restriksjon = DynaSvarType.Restriksjon().apply {
-                            it.value.restriksjoner.map {
-                                restriksjonskode.add(
-                                    CS().apply {
-                                        v = it.codeValue
-                                        dn = it.text
-                                    }
-                                )
+                spmSvar.addAll(
+                    it.value.map {
+                        DynaSvarType().apply {
+                            spmId = it.key
+                            spmTekst = it.value.sporsmal
+                            restriksjon = DynaSvarType.Restriksjon().apply {
+                                it.value.restriksjoner.map {
+                                    restriksjonskode.add(
+                                        CS().apply {
+                                            v = it.codeValue
+                                            dn = it.text
+                                        }
+                                    )
+                                }
                             }
+                            svarTekst = it.value.svar
                         }
-                        svarTekst = it.value.svar
                     }
-                })
+                )
             }
         )
     }
 
-
     return listeSpmGruppe
-
 }
-
 
 fun tilSyketilfelleStartDato(
     oppgave: DigitaliseringsoppgaveDbModel,
@@ -299,29 +296,25 @@ fun tilArbeidsgiver(arbeidsgiver: Arbeidsgiver?): HelseOpplysningerArbeidsuforhe
     HelseOpplysningerArbeidsuforhet.Arbeidsgiver().apply {
         harArbeidsgiver =
             when (arbeidsgiver?.harArbeidsgiver) {
-                HarArbeidsgiver.EN_ARBEIDSGIVER -> CS().apply {
-                    dn = "Én arbeidsgiver"
-                    v = "1"
-                }
-
                 HarArbeidsgiver.FLERE_ARBEIDSGIVERE -> CS().apply {
                     dn = "Flere arbeidsgivere"
                     v = "2"
                 }
-
                 HarArbeidsgiver.INGEN_ARBEIDSGIVER -> CS().apply {
                     dn = "Ingen arbeidsgiver"
                     v = "3"
                 }
-
                 else -> {
-                    throw RuntimeException("Arbeidsgiver type er ukjent, skal ikke kunne skje")
+                    CS().apply {
+                        dn = "Én arbeidsgiver"
+                        v = "1"
+                    }
                 }
             }
 
-        navnArbeidsgiver = arbeidsgiver.navn
-        yrkesbetegnelse = arbeidsgiver.yrkesbetegnelse
-        stillingsprosent = arbeidsgiver.stillingsprosent
+        navnArbeidsgiver = arbeidsgiver?.navn
+        yrkesbetegnelse = arbeidsgiver?.yrkesbetegnelse
+        stillingsprosent = arbeidsgiver?.stillingsprosent
     }
 
 fun tilMedisinskVurdering(

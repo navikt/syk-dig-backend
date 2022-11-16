@@ -71,7 +71,7 @@ spec:
     - name: SAF_URL
       value: https://saf.dev-fss-pub.nais.io
     - name: SAF_CLIENT_ID
-      value: dev-fss.teamdokumenthandtering.saf
+      value: dev-fss.teamdokumenthandtering.saf-q1
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: PDL_CLIENT_ID

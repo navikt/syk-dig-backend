@@ -1,212 +1,136 @@
 package no.nav.sykdig.digitalisering
 
-import java.time.LocalDate
-import java.time.Month
-import java.time.OffsetDateTime
-import java.util.UUID
-import no.nav.syfo.model.Adresse
-
-import no.nav.syfo.model.AktivitetIkkeMulig
-import no.nav.syfo.model.Arbeidsgiver
-import no.nav.syfo.model.AvsenderSystem
-import no.nav.syfo.model.Behandler
-import no.nav.syfo.model.Diagnose
-import no.nav.syfo.model.HarArbeidsgiver
-import no.nav.syfo.model.KontaktMedPasient
-import no.nav.syfo.model.MedisinskVurdering
-import no.nav.syfo.model.Periode
-import no.nav.syfo.model.UtenlandskSykmelding
+import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.db.OppgaveRepository
+import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
-import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
-import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
-import no.nav.sykdig.model.Sykmelding
-import no.nav.sykdig.model.SykmeldingUnderArbeid
+import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
+import org.amshove.kluent.internal.assertFailsWith
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.beans.factory.annotation.Autowired
+import org.mockito.Mockito
 import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMetrics
 @SpringBootTest(classes = [SykDigBackendApplication::class])
-class OppgaveServiceTest {
-    @Autowired
-    lateinit var oppgaveRepository: OppgaveRepository
-
-    @Autowired
+@Transactional
+class OppgaveServiceTest : FellesTestOppsett() {
+    @MockBean
     lateinit var ferdigstillingService: FerdigstillingService
-
-    @Autowired
+    @MockBean
     lateinit var syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient
 
+    lateinit var oppgaveService: OppgaveService
+
+    @BeforeEach
+    fun setup() {
+        oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService, syfoTilgangskontrollClient)
+        oppgaveRepository.lagreOppgave(createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"))
+        Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer { true }
+    }
+
+    @AfterEach
+    fun after() {
+        namedParameterJdbcTemplate.update("DELETE FROM sykmelding", MapSqlParameterSource())
+        namedParameterJdbcTemplate.update("DELETE FROM oppgave", MapSqlParameterSource())
+    }
+
     @Test
-    fun `map to receivedSykmelding`() {
+    fun henterOppgaveFraDb() {
+        val oppgave = oppgaveService.getOppgave("123")
 
-        val fnrPasient = "12345678910"
-        val fnrLege = ""
-        val sykmeldingId = UUID.randomUUID()
-        val journalPostId = "452234"
-        val houvedDiagnose = Diagnose(
-            system = "2.16.578.1.12.4.1.1.7170",
-            kode = "A070",
-            tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
-        )
+        oppgave.fnr shouldBeEqualTo "12345678910"
+        oppgave.endretAv shouldBeEqualTo "A123456"
+        oppgave.type shouldBeEqualTo "UTLAND"
+        oppgave.sykmelding shouldBeEqualTo null
+        oppgave.ferdigstilt shouldBeEqualTo null
+    }
 
-        val datoOpprette = OffsetDateTime.parse("2022-11-14T12:00:00Z")
+    @Test
+    fun feilmeldingHvisIkkeTilgangTilOppgave() {
+        Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer { false }
 
-        val oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService, syfoTilgangskontrollClient)
+        assertFailsWith<IkkeTilgangException> {
+            oppgaveService.getOppgave("123")
+        }
+    }
 
-        val validatedValues = ValidatedOppgaveValues(
-            fnrPasient = fnrPasient,
-            behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z"),
-            skrevetLand = "POL",
-            perioder = listOf(
-                PeriodeInput(
-                    type = PeriodeType.AKTIVITET_IKKE_MULIG,
-                    fom = LocalDate.of(2019, Month.AUGUST, 15),
-                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                    grad = 100
-                )
-            ),
-            hovedDiagnose = DiagnoseInput(kode = houvedDiagnose.kode, system = houvedDiagnose.system),
-            biDiagnoser = emptyList(),
-        )
-        val oppgave = DigitaliseringsoppgaveDbModel(
+    @Test
+    fun oppdatererOppgaveIDb() {
+        oppgaveService.updateOppgave(
             oppgaveId = "123",
-            fnr = fnrPasient,
-            journalpostId = journalPostId,
-            dokumentInfoId = null,
-            opprettet = datoOpprette,
-            ferdigstilt = null,
-            sykmeldingId = sykmeldingId,
-            type = "type",
-            sykmelding = SykmeldingUnderArbeid(
-                sykmelding = Sykmelding(
-                    id = sykmeldingId.toString(),
-                    msgId = "1553--213-12-123",
-                    medisinskVurdering = MedisinskVurdering(
-                        hovedDiagnose = houvedDiagnose,
-                        biDiagnoser = listOf(),
-                        svangerskap = false,
-                        yrkesskade = false,
-                        yrkesskadeDato = null,
-                        annenFraversArsak = null
-                    ),
-                    arbeidsgiver = Arbeidsgiver(HarArbeidsgiver.EN_ARBEIDSGIVER, "NAV ikt", "Utvikler", 100),
-                    perioder = listOf(
-                        Periode(
-                            fom = LocalDate.of(2019, Month.AUGUST, 15),
-                            tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                            aktivitetIkkeMulig = AktivitetIkkeMulig(
-                                medisinskArsak = null,
-                                arbeidsrelatertArsak = null
-                            ),
-                            avventendeInnspillTilArbeidsgiver = null,
-                            behandlingsdager = null,
-                            gradert = null,
-                            reisetilskudd = false
-                        )
-                    ),
-                    prognose = null,
-                    utdypendeOpplysninger = emptyMap(),
-                    tiltakArbeidsplassen = null,
-                    tiltakNAV = null,
-                    andreTiltak = null,
-                    meldingTilNAV = null,
-                    meldingTilArbeidsgiver = null,
-                    kontaktMedPasient = null,
-                    behandletTidspunkt = datoOpprette,
-                    behandler = Behandler(
-                        "Per",
-                        "",
-                        "Person",
-                        "",
-                        fnrLege,
-                        "",
-                        "",
-                        Adresse(null, null, null, null, null),
-                        ""
-                    ),
-                    syketilfelleStartDato = null
-                ),
-                fnrPasient = fnrPasient,
-                fnrLege = fnrLege,
-                legeHprNr = null,
-                navLogId = sykmeldingId.toString(),
-                msgId = sykmeldingId.toString(),
-                legekontorOrgNr = null,
-                legekontorHerId = null,
-                legekontorOrgName = null,
-                mottattDato = null,
-                utenlandskSykmelding = UtenlandskSykmelding(
-                    land = "POL",
-                    andreRelevanteOpplysninger = false
-                )
-
+            values = SykmeldingUnderArbeidValues(
+                fnrPasient = "12345678910",
+                skrevetLand = "SWE",
+                hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170")
             ),
-            endretAv = "test testesen",
-            timestamp = datoOpprette
+            ident = "X987654"
         )
-        val person = Person(
-            fnrPasient,
-            Navn("fornavn", null, "etternavn"),
-            Bostedsadresse(
-                null,
-                null,
-                null,
-                null,
-                null,
+
+        val oppdatertOppgave = oppgaveService.getOppgave("123")
+        oppdatertOppgave.fnr shouldBeEqualTo "12345678910"
+        oppdatertOppgave.endretAv shouldBeEqualTo "X987654"
+        oppdatertOppgave.type shouldBeEqualTo "UTLAND"
+        oppdatertOppgave.sykmelding?.fnrPasient shouldBeEqualTo "12345678910"
+        oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land shouldBeEqualTo "SWE"
+        oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode shouldBeEqualTo "A070"
+        oppdatertOppgave.ferdigstilt shouldBeEqualTo null
+    }
+
+    @Test
+    fun ferdigstillerOppgaveIDb() {
+        oppgaveService.ferdigstillOppgave(
+            oppgaveId = "123",
+            ident = "X987654",
+            values = SykmeldingUnderArbeidValues(
+                fnrPasient = "12345678910",
+                skrevetLand = "SWE",
+                hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
+                harAndreRelevanteOpplysninger = false
             ),
-            null,
+            validatedValues = ValidatedOppgaveValues(
+                fnrPasient = "12345678910",
+                behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
+                skrevetLand = "SWE",
+                perioder = listOf(PeriodeInput(PeriodeType.AKTIVITET_IKKE_MULIG, LocalDate.now().minusMonths(1), LocalDate.now().minusWeeks(2))),
+                hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
+                biDiagnoser = emptyList()
+            ),
+            enhetId = "2990",
+            person = Person(
+                fnr = "12345678910",
+                navn = Navn("Fornavn", null, "Etternavn"),
+                bostedsadresse = null,
+                oppholdsadresse = null
+            ),
+            oppgave = oppgaveService.getOppgave("123")
         )
 
-        val harAndreRelevanteOpplysninger = false
-
-        val receivedSykmelding =
-            oppgaveService.mapToReceivedSykmelding(validatedValues, oppgave, person, harAndreRelevanteOpplysninger)
-
-        receivedSykmelding.personNrPasient shouldBeEqualTo fnrPasient
-        receivedSykmelding.personNrLege shouldBeEqualTo fnrLege
-        receivedSykmelding.navLogId shouldBeEqualTo sykmeldingId.toString()
-        receivedSykmelding.msgId shouldBeEqualTo sykmeldingId.toString()
-        receivedSykmelding.legekontorOrgName shouldBeEqualTo ""
-        receivedSykmelding.mottattDato shouldBeEqualTo datoOpprette.toLocalDateTime()
-        receivedSykmelding.tssid shouldBeEqualTo null
-        receivedSykmelding.sykmelding.pasientAktoerId shouldBeEqualTo ""
-        receivedSykmelding.sykmelding.medisinskVurdering shouldNotBeEqualTo null
-        receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose shouldBeEqualTo houvedDiagnose
-        receivedSykmelding.sykmelding.skjermesForPasient shouldBeEqualTo false
-        receivedSykmelding.sykmelding.arbeidsgiver shouldNotBeEqualTo null
-        receivedSykmelding.sykmelding.perioder.size shouldBeEqualTo 1
-        receivedSykmelding.sykmelding.prognose shouldBeEqualTo null
-        receivedSykmelding.sykmelding.utdypendeOpplysninger shouldBeEqualTo emptyMap()
-        receivedSykmelding.sykmelding.tiltakArbeidsplassen shouldBeEqualTo null
-        receivedSykmelding.sykmelding.tiltakNAV shouldBeEqualTo null
-        receivedSykmelding.sykmelding.andreTiltak shouldBeEqualTo null
-        receivedSykmelding.sykmelding.meldingTilNAV?.bistandUmiddelbart shouldBeEqualTo null
-        receivedSykmelding.sykmelding.meldingTilArbeidsgiver shouldBeEqualTo null
-        receivedSykmelding.sykmelding.kontaktMedPasient shouldBeEqualTo KontaktMedPasient(
-            null,
-            null
-        )
-        receivedSykmelding.sykmelding.behandletTidspunkt shouldBeEqualTo datoOpprette.toLocalDateTime()
-        receivedSykmelding.sykmelding.behandler shouldNotBeEqualTo null
-        receivedSykmelding.sykmelding.avsenderSystem shouldBeEqualTo AvsenderSystem("syk-dig", journalPostId)
-        receivedSykmelding.sykmelding.syketilfelleStartDato shouldBeEqualTo LocalDate.of(2019, 8, 15)
-        receivedSykmelding.sykmelding.signaturDato shouldBeEqualTo datoOpprette.toLocalDateTime()
-        receivedSykmelding.sykmelding.navnFastlege shouldBeEqualTo null
-
-
+        val oppdatertOppgave = oppgaveService.getOppgave("123")
+        oppdatertOppgave.fnr shouldBeEqualTo "12345678910"
+        oppdatertOppgave.endretAv shouldBeEqualTo "X987654"
+        oppdatertOppgave.type shouldBeEqualTo "UTLAND"
+        oppdatertOppgave.sykmelding?.fnrPasient shouldBeEqualTo "12345678910"
+        oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land shouldBeEqualTo "SWE"
+        oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode shouldBeEqualTo "A070"
+        oppdatertOppgave.ferdigstilt shouldNotBeEqualTo null
     }
 }

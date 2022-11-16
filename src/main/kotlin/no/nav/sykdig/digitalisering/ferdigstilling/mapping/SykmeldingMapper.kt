@@ -1,4 +1,4 @@
-package no.nav.sykdig.utils
+package no.nav.sykdig.digitalisering.ferdigstilling.mapping
 
 import no.nav.helse.sm2013.Address
 import no.nav.helse.sm2013.ArsakType
@@ -107,12 +107,9 @@ fun ArsakType.toAnnenFraversArsak() = AnnenFraversArsak(
     }
 )
 
-
 fun CS.toMedisinskArsakType() = if (v == null || v == "0") { null } else { MedisinskArsakType.values().first { it.codeValue == v.trim() } }
 
-
 fun CS.toArbeidsrelatertArsakType() = if (v == null || v == "0") { null } else { ArbeidsrelatertArsakType.values().first { it.codeValue == v } }
-
 
 fun HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.toMap() =
     spmGruppe.associate { spmGruppe ->
@@ -136,12 +133,10 @@ fun Address.toAdresse() = Adresse(
     land = country?.v
 )
 
-
 fun ArsakType.toArbeidsrelatertArsak() = ArbeidsrelatertArsak(
     beskrivelse = beskriv,
     arsak = arsakskode.mapNotNull(CS::toArbeidsrelatertArsakType)
 )
-
 
 fun ArsakType.toMedisinskArsak() = MedisinskArsak(
     beskrivelse = beskriv,
@@ -159,11 +154,11 @@ fun HelseOpplysningerArbeidsuforhet.KontaktMedPasient.toKontaktMedPasient() = Ko
 )
 
 fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler(aktoerId: String) = Behandler(
-    fornavn = navn.fornavn,
+    fornavn = navn.fornavn ?: "",
     mellomnavn = navn.mellomnavn,
-    etternavn = navn.etternavn,
+    etternavn = navn.etternavn ?: "",
     aktoerId = aktoerId,
-    fnr = id.find { it.typeId.v == "FNR" }?.id ?: id.find { it.typeId.v == "DNR" }?.id!!,
+    fnr = id.find { it.typeId.v == "FNR" }?.id ?: id.find { it.typeId.v == "DNR" }?.id ?: "",
     hpr = id.find { it.typeId.v == "HPR" }?.id,
     her = id.find { it.typeId.v == "HER" }?.id,
     adresse = adresse.toAdresse(),

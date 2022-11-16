@@ -45,8 +45,8 @@ val okhttp3version = "4.10.0"
 val fellesformatVersion = "2019.07.30-12-26-5c924ef4f04022bbb850aaf299eb8e4464c1ca6a"
 val sykmelding2013Version = "2019.07.30-12-26-5c924ef4f04022bbb850aaf299eb8e4464c1ca6a"
 val kithHodemeldingVersion = "2019.07.30-12-26-5c924ef4f04022bbb850aaf299eb8e4464c1ca6a"
-val jaxbApiVersion = "2.1"
-val jaxbVersion = "2.3.0.1"
+val jaxbApiVersion = "2.3.1"
+val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
 
@@ -70,12 +70,12 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.yaml:snakeyaml:$snakeYamlVersion") // overstyrer sårbar dependency
     implementation("no.nav.helse:syfosm-common-models:$smCommonVersion")
-    implementation ("no.nav.helse.xml:xmlfellesformat:$fellesformatVersion")
-    implementation ("no.nav.helse.xml:sm2013:$sykmelding2013Version")
-    implementation ("no.nav.helse.xml:kith-hodemelding:$kithHodemeldingVersion")
-    implementation ("javax.xml.bind:jaxb-api:$jaxbApiVersion")
-    implementation ("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
-    implementation ("javax.activation:activation:$javaxActivationVersion")
+    implementation("no.nav.helse.xml:xmlfellesformat:$fellesformatVersion")
+    implementation("no.nav.helse.xml:sm2013:$sykmelding2013Version")
+    implementation("no.nav.helse.xml:kith-hodemelding:$kithHodemeldingVersion")
+    implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
+    implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
+    implementation("javax.activation:activation:$javaxActivationVersion")
     implementation("com.migesok:jaxb-java-time-adapters:$javaTimeAdapterVersion")
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("com.auth0:java-jwt:$javaJwtVersion")

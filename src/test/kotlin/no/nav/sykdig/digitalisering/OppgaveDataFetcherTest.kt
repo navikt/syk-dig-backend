@@ -247,7 +247,7 @@ class OppgaveDataFetcherTest {
         result.errors.size shouldBe 0
         verify(
             oppgaveService, times(1)
-        ).ferigstillOppgave(
+        ).ferdigstillOppgave(
             oppgaveId = "345",
             ident = "fake-test-ident",
             values = SykmeldingUnderArbeidValues(
@@ -322,9 +322,9 @@ fun createDigitalseringsoppgaveDbModel(
     opprettet: OffsetDateTime = OffsetDateTime.now(),
     ferdigstilt: OffsetDateTime? = null,
     sykmeldingId: UUID = UUID.randomUUID(),
-    type: String = "type",
+    type: String = "UTLAND",
     sykmelding: SykmeldingUnderArbeid? = null,
-    endretAv: String = "test testesen",
+    endretAv: String = "A123456",
     timestamp: OffsetDateTime = OffsetDateTime.now(),
 ) = DigitaliseringsoppgaveDbModel(
     oppgaveId = oppgaveId,

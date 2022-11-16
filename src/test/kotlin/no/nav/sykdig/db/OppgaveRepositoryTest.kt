@@ -21,7 +21,7 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
         oppgaveRepository.lagreOppgave(
             createDigitalseringsoppgaveDbModel(
                 oppgaveId = "345",
-                fnr = "saksbehandler-fnr",
+                fnr = "sykmeldt-fnr",
             )
         )
     }
@@ -66,7 +66,7 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
         )
         val oppgave = oppgaveRepository.getOppgave("345")
 
-        oppgave?.fnr shouldBeEqualTo "saksbehandler-fnr"
+        oppgave?.fnr shouldBeEqualTo "sykmeldt-fnr"
         oppgave?.endretAv shouldBeEqualTo "fake-test-ident"
         oppgave?.ferdigstilt shouldBeEqualTo null
         oppgave?.sykmelding?.fnrPasient shouldBeEqualTo "nytt-fnr-pasient"
