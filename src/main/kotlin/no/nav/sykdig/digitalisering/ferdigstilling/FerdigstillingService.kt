@@ -107,7 +107,6 @@ class FerdigstillingService(
         val sykmelding = healthInformation.toSykmelding(
             sykmeldingId = sykmeldingId,
             pasientAktoerId = "",
-            legeAktoerId = "",
             msgId = sykmeldingId,
             signaturDato = msgHead.msgInfo.genDate
         )

@@ -19,7 +19,9 @@ import no.nav.helse.sm2013.Ident
 import no.nav.helse.sm2013.NavnType
 import no.nav.helse.sm2013.TeleCom
 import no.nav.helse.sm2013.URL
+import no.nav.syfo.sm.Diagnosekoder
 import no.nav.sykdig.digitalisering.ValidatedOppgaveValues
+import no.nav.sykdig.digitalisering.exceptions.MappingException
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
@@ -200,16 +202,30 @@ fun toMedisinskVurderingDiagnose(diagnose: DiagnoseInput): CV =
     CV().apply {
         s = toDiagnoseKithSystem(diagnose.system)
         v = diagnose.kode
-        dn = ""
+        dn = getTextFromDiagnose(diagnose.kode, diagnose.system)
     }
 
+fun getTextFromDiagnose(kode: String, diagnoseSystem: String): String {
+    return when (diagnoseSystem) {
+        "ICD10" -> {
+            Diagnosekoder.icd10[kode]!!.text
+        }
+        "ICPC2" -> {
+            Diagnosekoder.icpc2[kode]!!.text
+        }
+        else -> {
+            throw MappingException("Ukjent diagnose kode")
+        }
+    }
+}
+
 fun toDiagnoseKithSystem(diagnoseSystem: String): String {
-    return if (DiagnoseSystem.ICD_10.sykdigCode == diagnoseSystem) {
-        DiagnoseSystem.ICD_10.kithCode
-    } else if (DiagnoseSystem.ICPC_2.sykdigCode == diagnoseSystem)
-        DiagnoseSystem.ICPC_2.kithCode
+    return if ("ICD10" == diagnoseSystem) {
+        "2.16.578.1.12.4.1.1.7110"
+    } else if ("ICPC2" == diagnoseSystem)
+        "2.16.578.1.12.4.1.1.7170"
     else {
-        throw RuntimeException("Ukjent diagnose kode")
+        throw MappingException("Ukjent diagnose system")
     }
 }
 
@@ -285,8 +301,3 @@ fun tilArbeidsgiver(): HelseOpplysningerArbeidsuforhet.Arbeidsgiver =
         yrkesbetegnelse = ""
         stillingsprosent = null
     }
-
-enum class DiagnoseSystem(val kithCode: String, val sykdigCode: String) {
-    ICPC_2("2.16.578.1.12.4.1.1.7170", "ICPC2"),
-    ICD_10("2.16.578.1.12.4.1.1.7110", "ICD10")
-}

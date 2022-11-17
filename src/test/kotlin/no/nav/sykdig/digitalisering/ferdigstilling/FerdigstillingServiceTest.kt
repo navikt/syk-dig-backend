@@ -186,7 +186,7 @@ class FerdigstillingServiceTest {
         receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose shouldBeEqualTo Diagnose(
             system = "2.16.578.1.12.4.1.1.7110",
             kode = "A070",
-            tekst = ""
+            tekst = "Balantidiasis"
         )
         receivedSykmelding.sykmelding.skjermesForPasient shouldBeEqualTo false
         receivedSykmelding.sykmelding.arbeidsgiver shouldNotBeEqualTo null
