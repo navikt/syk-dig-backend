@@ -21,6 +21,7 @@ import no.nav.helse.sm2013.TeleCom
 import no.nav.helse.sm2013.URL
 import no.nav.syfo.sm.Diagnosekoder
 import no.nav.sykdig.digitalisering.ValidatedOppgaveValues
+import no.nav.sykdig.digitalisering.exceptions.MappingException
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
@@ -29,7 +30,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
-import no.nav.sykdig.digitalisering.exceptions.MappingException
 
 fun mapToFellesformat(
     validatedValues: ValidatedOppgaveValues,
