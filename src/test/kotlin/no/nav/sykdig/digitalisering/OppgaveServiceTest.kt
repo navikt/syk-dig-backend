@@ -2,16 +2,15 @@ package no.nav.sykdig.digitalisering
 
 import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
+import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
-import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
+import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
-import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
-import org.amshove.kluent.internal.assertFailsWith
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
 import org.junit.jupiter.api.AfterEach
@@ -36,15 +35,22 @@ class OppgaveServiceTest : FellesTestOppsett() {
     @MockBean
     lateinit var ferdigstillingService: FerdigstillingService
     @MockBean
-    lateinit var syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient
+    lateinit var personService: PersonService
 
     lateinit var oppgaveService: OppgaveService
 
     @BeforeEach
     fun setup() {
-        oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService, syfoTilgangskontrollClient)
+        oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService, personService)
         oppgaveRepository.lagreOppgave(createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"))
-        Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer { true }
+        Mockito.`when`(personService.hentPerson("12345678910", "123")).thenReturn(
+            Person(
+                fnr = "12345678910",
+                navn = Navn("Fornavn", null, "Etternavn"),
+                bostedsadresse = null,
+                oppholdsadresse = null
+            )
+        )
     }
 
     @AfterEach
@@ -65,22 +71,17 @@ class OppgaveServiceTest : FellesTestOppsett() {
     }
 
     @Test
-    fun feilmeldingHvisIkkeTilgangTilOppgave() {
-        Mockito.`when`(syfoTilgangskontrollClient.sjekkTilgangVeileder("12345678910")).thenAnswer { false }
-
-        assertFailsWith<IkkeTilgangException> {
-            oppgaveService.getOppgave("123")
-        }
-    }
-
-    @Test
     fun oppdatererOppgaveIDb() {
         oppgaveService.updateOppgave(
             oppgaveId = "123",
-            values = SykmeldingUnderArbeidValues(
+            registerOppgaveValues = UferdigRegisterOppgaveValues(
                 fnrPasient = "12345678910",
                 skrevetLand = "SWE",
-                hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170")
+                hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
+                behandletTidspunkt = null,
+                perioder = null,
+                biDiagnoser = null,
+                harAndreRelevanteOpplysninger = null
             ),
             ident = "X987654"
         )
@@ -100,28 +101,16 @@ class OppgaveServiceTest : FellesTestOppsett() {
         oppgaveService.ferdigstillOppgave(
             oppgaveId = "123",
             ident = "X987654",
-            values = SykmeldingUnderArbeidValues(
-                fnrPasient = "12345678910",
-                skrevetLand = "SWE",
-                hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
-                harAndreRelevanteOpplysninger = false
-            ),
-            validatedValues = ValidatedOppgaveValues(
+            values = FerdistilltRegisterOppgaveValues(
                 fnrPasient = "12345678910",
                 behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
                 skrevetLand = "SWE",
                 perioder = listOf(PeriodeInput(PeriodeType.AKTIVITET_IKKE_MULIG, LocalDate.now().minusMonths(1), LocalDate.now().minusWeeks(2))),
                 hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
-                biDiagnoser = emptyList()
+                biDiagnoser = emptyList(),
+                harAndreRelevanteOpplysninger = null,
             ),
-            enhetId = "2990",
-            person = Person(
-                fnr = "12345678910",
-                navn = Navn("Fornavn", null, "Etternavn"),
-                bostedsadresse = null,
-                oppholdsadresse = null
-            ),
-            oppgave = oppgaveService.getOppgave("123")
+            enhetId = "2990"
         )
 
         val oppdatertOppgave = oppgaveService.getOppgave("123")

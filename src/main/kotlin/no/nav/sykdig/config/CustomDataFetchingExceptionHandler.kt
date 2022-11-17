@@ -8,6 +8,7 @@ import graphql.execution.DataFetcherExceptionHandlerResult
 import no.nav.sykdig.digitalisering.exceptions.ClientException
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.logger
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
 import java.util.concurrent.CompletableFuture
 
@@ -30,18 +31,11 @@ class CustomDataFetchingExceptionHandler : DataFetcherExceptionHandler {
 
                 CompletableFuture.completedFuture(result)
             }
-
+            is AccessDeniedException -> {
+                handleNoAccess(handlerParameters)
+            }
             is IkkeTilgangException -> {
-                val debugInfo: MutableMap<String, Any> = HashMap()
-                debugInfo["tilgang"] = "false"
-                val graphqlError: GraphQLError = TypedGraphQLError.newPermissionDeniedBuilder()
-                    .message("Innlogget bruker har ikke tilgang")
-                    .debugInfo(debugInfo)
-                    .path(handlerParameters.path).build()
-                val result: DataFetcherExceptionHandlerResult = DataFetcherExceptionHandlerResult.newResult()
-                    .error(graphqlError)
-                    .build()
-                CompletableFuture.completedFuture(result)
+                handleNoAccess(handlerParameters)
             }
 
             else -> {
@@ -55,5 +49,18 @@ class CustomDataFetchingExceptionHandler : DataFetcherExceptionHandler {
                 CompletableFuture.completedFuture(result)
             }
         }
+    }
+
+    private fun handleNoAccess(handlerParameters: DataFetcherExceptionHandlerParameters): CompletableFuture<DataFetcherExceptionHandlerResult> {
+        val debugInfo: MutableMap<String, Any> = HashMap()
+        debugInfo["tilgang"] = "false"
+        val graphqlError: GraphQLError = TypedGraphQLError.newPermissionDeniedBuilder()
+            .message("Innlogget bruker har ikke tilgang")
+            .debugInfo(debugInfo)
+            .path(handlerParameters.path).build()
+        val result: DataFetcherExceptionHandlerResult = DataFetcherExceptionHandlerResult.newResult()
+            .error(graphqlError)
+            .build()
+        return CompletableFuture.completedFuture(result)
     }
 }

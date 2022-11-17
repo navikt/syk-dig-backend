@@ -6,14 +6,13 @@ import no.nav.syfo.model.Gradert
 import no.nav.syfo.model.MedisinskVurdering
 import no.nav.syfo.model.Periode
 import no.nav.syfo.model.UtenlandskSykmelding
+import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
-import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
-import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
+import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.model.Sykmelding
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 import no.nav.sykdig.objectMapper
-import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
 import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -28,7 +27,7 @@ import java.util.UUID
 @Transactional
 @Repository
 class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate) {
-    fun lagreOppgave(digitaliseringsoppgave: DigitaliseringsoppgaveDbModel) {
+    fun lagreOppgave(digitaliseringsoppgave: OppgaveDbModel) {
         namedParameterJdbcTemplate.update(
             """
             INSERT INTO oppgave(oppgave_id, fnr, journalpost_id, dokumentinfo_id, opprettet, ferdigstilt)
@@ -61,7 +60,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         )
     }
 
-    fun getOppgave(oppgaveId: String): DigitaliseringsoppgaveDbModel? {
+    fun getOppgave(oppgaveId: String): OppgaveDbModel? {
         return namedParameterJdbcTemplate.query(
             """SELECT o.oppgave_id,
                            fnr,
@@ -89,13 +88,11 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
 
     @Transactional
     fun updateOppgave(
-        oppgaveId: String,
-        values: SykmeldingUnderArbeidValues,
+        oppgave: OppgaveDbModel,
+        sykmelding: SykmeldingUnderArbeid,
         ident: String,
         ferdigstilles: Boolean,
     ) {
-        val oppgave = getOppgave(oppgaveId) ?: throw IllegalStateException("Oppgave can't not exist at this point")
-        val sykmelding = toSykmelding(oppgave, values)
 
         if (ferdigstilles) {
             namedParameterJdbcTemplate.update(
@@ -105,7 +102,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 WHERE oppgave_id = :oppgave_id
                 """.trimIndent(),
                 mapOf(
-                    "oppgave_id" to oppgaveId,
+                    "oppgave_id" to oppgave.oppgaveId,
                     "ferdigstilt" to Timestamp.from(Instant.now()),
                 )
             )
@@ -117,7 +114,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             """.trimIndent(),
             mapOf(
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
-                "oppgave_id" to oppgaveId,
+                "oppgave_id" to oppgave.oppgaveId,
                 "type" to oppgave.type,
                 "endret_av" to ident,
                 "timestamp" to Timestamp.from(Instant.now()),
@@ -128,8 +125,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
 }
 
 fun toSykmelding(
-    oppgave: DigitaliseringsoppgaveDbModel,
-    values: SykmeldingUnderArbeidValues,
+    oppgave: OppgaveDbModel,
+    values: RegisterOppgaveValues,
 ): SykmeldingUnderArbeid {
     if (oppgave.sykmelding == null) {
         val msgId = UUID.randomUUID().toString()
@@ -148,7 +145,7 @@ fun toSykmelding(
                 meldingTilNAV = null,
                 meldingTilArbeidsgiver = null,
                 kontaktMedPasient = null,
-                behandletTidspunkt = values.behandletTidspunkt.toOffsetDateTimeAtNoon(),
+                behandletTidspunkt = values.behandletTidspunkt,
                 behandler = null,
                 syketilfelleStartDato = null,
             ),
@@ -161,22 +158,25 @@ fun toSykmelding(
             legekontorHerId = null,
             legekontorOrgName = null,
             mottattDato = null,
-            utenlandskSykmelding = if (values.skrevetLand != null) UtenlandskSykmelding(
-                land = values.skrevetLand,
-                andreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger ?: false,
-            ) else null,
+            utenlandskSykmelding = toUtenlandskSykmelding(values),
         )
     } else {
         val sykmelding: SykmeldingUnderArbeid = oppgave.sykmelding
         sykmelding.sykmelding.medisinskVurdering = values.mapToMedisinskVurdering()
         sykmelding.sykmelding.perioder = values.perioder.mapToPerioder()
-        sykmelding.sykmelding.behandletTidspunkt = values.behandletTidspunkt.toOffsetDateTimeAtNoon()
+        sykmelding.sykmelding.behandletTidspunkt = values.behandletTidspunkt
         sykmelding.fnrPasient = values.fnrPasient
-        sykmelding.utenlandskSykmelding = if (values.skrevetLand != null) UtenlandskSykmelding(
-            land = values.skrevetLand,
-            andreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger ?: false
-        ) else null
+        sykmelding.utenlandskSykmelding = toUtenlandskSykmelding(values)
         return sykmelding
+    }
+}
+
+private fun toUtenlandskSykmelding(values: RegisterOppgaveValues): UtenlandskSykmelding? {
+    return values.skrevetLand?.let { skrevetLand ->
+        UtenlandskSykmelding(
+            land = skrevetLand,
+            andreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger ?: false,
+        )
     }
 }
 
@@ -199,7 +199,7 @@ private fun List<PeriodeInput>?.mapToPerioder(): List<Periode>? = this?.map {
     )
 }
 
-private fun SykmeldingUnderArbeidValues.mapToMedisinskVurdering() = MedisinskVurdering(
+private fun RegisterOppgaveValues.mapToMedisinskVurdering() = MedisinskVurdering(
     hovedDiagnose = hovedDiagnose?.let {
         Diagnose(
             kode = it.kode,
@@ -225,8 +225,8 @@ fun SykmeldingUnderArbeid.toPGObject() = PGobject().also {
     it.value = objectMapper.writeValueAsString(this)
 }
 
-private fun ResultSet.toDigitaliseringsoppgave(): DigitaliseringsoppgaveDbModel =
-    DigitaliseringsoppgaveDbModel(
+private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
+    OppgaveDbModel(
         oppgaveId = getString("oppgave_id"),
         fnr = getString("fnr"),
         journalpostId = getString("journalpost_id"),
