@@ -73,6 +73,7 @@ dependencies {
     implementation("no.nav.helse.xml:xmlfellesformat:$fellesformatVersion")
     implementation("no.nav.helse.xml:sm2013:$sykmelding2013Version")
     implementation("no.nav.helse.xml:kith-hodemelding:$kithHodemeldingVersion")
+    implementation("no.nav.helse:syfosm-common-diagnosis-codes:$smCommonVersion")
     implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
     implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
     implementation("javax.activation:activation:$javaxActivationVersion")
