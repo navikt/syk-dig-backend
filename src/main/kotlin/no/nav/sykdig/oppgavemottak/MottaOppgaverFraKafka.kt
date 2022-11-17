@@ -14,21 +14,25 @@ class MottaOppgaverFraKafka(val oppgaveRepository: OppgaveRepository) {
     fun lagre(sykmeldingId: String, digitaliseringsoppgave: DigitaliseringsoppgaveKafka) {
         log.info("Mottatt oppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
         val opprettet = OffsetDateTime.now(ZoneOffset.UTC)
-        oppgaveRepository.lagreOppgave(
-            DigitaliseringsoppgaveDbModel(
-                oppgaveId = digitaliseringsoppgave.oppgaveId,
-                fnr = digitaliseringsoppgave.fnr,
-                journalpostId = digitaliseringsoppgave.journalpostId,
-                dokumentInfoId = digitaliseringsoppgave.dokumentInfoId,
-                opprettet = opprettet,
-                ferdigstilt = null,
-                sykmeldingId = UUID.fromString(sykmeldingId),
-                type = digitaliseringsoppgave.type,
-                sykmelding = null,
-                endretAv = "syk-dig-backend",
-                timestamp = opprettet
+        if (oppgaveRepository.getOppgave(digitaliseringsoppgave.oppgaveId) != null) {
+            oppgaveRepository.lagreOppgave(
+                DigitaliseringsoppgaveDbModel(
+                    oppgaveId = digitaliseringsoppgave.oppgaveId,
+                    fnr = digitaliseringsoppgave.fnr,
+                    journalpostId = digitaliseringsoppgave.journalpostId,
+                    dokumentInfoId = digitaliseringsoppgave.dokumentInfoId,
+                    opprettet = opprettet,
+                    ferdigstilt = null,
+                    sykmeldingId = UUID.fromString(sykmeldingId),
+                    type = digitaliseringsoppgave.type,
+                    sykmelding = null,
+                    endretAv = "syk-dig-backend",
+                    timestamp = opprettet
+                )
             )
-        )
+        } else {
+            log.info("Det finnes allerede ein digitaliseringsoppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
+        }
     }
 }
 
