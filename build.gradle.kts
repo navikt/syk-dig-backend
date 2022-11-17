@@ -91,26 +91,36 @@ dependencies {
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
+tasks {
+    withType<KotlinCompile> {
+        kotlinOptions {
+            freeCompilerArgs = listOf("-Xjsr305=strict")
+            jvmTarget = "17"
+        }
+    }
+
+    withType<Test> {
+        useJUnitPlatform()
+        testLogging {
+            events("skipped", "failed")
+            showStackTraces = true
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        }
+    }
+
+    withType<GenerateJavaTask> {
+        packageName = "no.nav.sykdig.generated"
+        generateClient = true
+    }
+
+    getByName<Jar>("jar") {
+        enabled = false
+    }
+
+    "check" {
+        dependsOn("ktlintFormat")
     }
 }
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
-tasks.withType<GenerateJavaTask> {
-    packageName = "no.nav.sykdig.generated"
-    generateClient = true
-}
-
-tasks.getByName<Jar>("jar") {
-    enabled = false
-}
-
 configure<KtlintExtension> {
     filter {
         exclude("**/generated/**")

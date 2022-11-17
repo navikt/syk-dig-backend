@@ -31,7 +31,6 @@ import java.time.LocalDateTime
 fun HelseOpplysningerArbeidsuforhet.toSykmelding(
     sykmeldingId: String,
     pasientAktoerId: String,
-    legeAktoerId: String,
     msgId: String,
     signaturDato: LocalDateTime
 ) = Sykmelding(
