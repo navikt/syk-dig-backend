@@ -31,7 +31,7 @@ class MottaOppgaverFraKafka(val oppgaveRepository: OppgaveRepository) {
                 )
             )
         } else {
-            log.info("Det finnes allerede ein digitaliseringsoppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
+            log.warn("Det finnes allerede ein digitaliseringsoppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
         }
     }
 }
