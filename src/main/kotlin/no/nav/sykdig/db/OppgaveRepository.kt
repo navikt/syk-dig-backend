@@ -74,10 +74,10 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                            endret_av,
                            timestamp
                     FROM oppgave AS o
-                             LEFT OUTER JOIN sykmelding AS s ON o.oppgave_id = s.oppgave_id
+                             INNER JOIN sykmelding AS s ON o.oppgave_id = s.oppgave_id
                         AND s.timestamp = (SELECT MAX(timestamp)
                                            FROM sykmelding
-                                           WHERE s.oppgave_id = o.oppgave_id)
+                                           WHERE oppgave_id = o.oppgave_id)
                     WHERE o.oppgave_id = :oppgave_id;
             """,
             mapOf("oppgave_id" to oppgaveId)
