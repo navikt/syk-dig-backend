@@ -31,7 +31,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         namedParameterJdbcTemplate.update(
             """
             INSERT INTO oppgave(oppgave_id, fnr, journalpost_id, dokumentinfo_id, opprettet, ferdigstilt)
-            VALUES (:oppgave_id, :fnr, :journalpost_id, :dokumentinfo_id, :opprettet, :ferdigstilt)
+            VALUES (:oppgave_id, :fnr, :journalpost_id, :dokumentinfo_id, :opprettet, :ferdigstilt) on conflict(oppgave_id) do nothing ;
         """,
             MapSqlParameterSource()
                 .addValue("oppgave_id", digitaliseringsoppgave.oppgaveId)
@@ -47,7 +47,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         namedParameterJdbcTemplate.update(
             """
             INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
-            VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
+            VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp) on conflict (sykmelding_id, timestamp) do nothing;
         """,
             mapOf(
                 "sykmelding_id" to digitaliseringsoppgave.sykmeldingId,

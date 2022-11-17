@@ -40,4 +40,19 @@ class MottaOppgaverFraKafkaTest : FellesTestOppsett() {
         oppgave.endretAv shouldBeEqualTo "syk-dig-backend"
         oppgave.timestamp.toLocalDate() shouldBeEqualTo LocalDate.now()
     }
+
+    @Test
+    fun testInsertDuplicateOppgave() {
+        val sykmeldingId = UUID.randomUUID().toString()
+        val digitaliseringsoppgaveKafka = DigitaliseringsoppgaveKafka(
+            oppgaveId = "1234",
+            fnr = "12345678910",
+            journalpostId = "11",
+            dokumentInfoId = null,
+            type = "UTLAND"
+        )
+
+        mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)
+        mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)
+    }
 }
