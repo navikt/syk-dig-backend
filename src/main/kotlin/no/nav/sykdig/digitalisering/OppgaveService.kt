@@ -52,7 +52,7 @@ class OppgaveService(
 
         oppgaveRepository.updateOppgave(oppgave, sykmelding, ident, true)
         ferdigstillingService.ferdigstill(
-            navnSykmelder = null, // TODO: finn ut hvor man skal få dette navnet fra
+            navnSykmelder = values.skrevetLand, // TODO: finn ut hvor man skal få dette navnet fra
             enhet = enhetId,
             oppgave = oppgave,
             sykmeldt = sykmeldt,
