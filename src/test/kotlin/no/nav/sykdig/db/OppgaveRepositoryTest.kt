@@ -2,10 +2,11 @@ package no.nav.sykdig.db
 
 import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
+import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
-import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
+import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,31 +36,35 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
 
     @Test
     fun `should update oppgave`() {
+        val preOppgave = oppgaveRepository.getOppgave("345")!!
         oppgaveRepository.updateOppgave(
-            oppgaveId = "345",
-            values = SykmeldingUnderArbeidValues(
-                fnrPasient = "nytt-fnr-pasient",
-                behandletTidspunkt = LocalDate.parse("2020-01-01"),
-                skrevetLand = "ZMB",
-                perioder = listOf(
-                    PeriodeInput(
-                        type = PeriodeType.AKTIVITET_IKKE_MULIG,
-                        fom = LocalDate.parse("2020-01-01"),
-                        tom = LocalDate.parse("2020-01-15"),
+            oppgave = preOppgave,
+            sykmelding = toSykmelding(
+                preOppgave,
+                UferdigRegisterOppgaveValues(
+                    fnrPasient = "nytt-fnr-pasient",
+                    behandletTidspunkt = LocalDate.parse("2020-01-01").toOffsetDateTimeAtNoon(),
+                    skrevetLand = "ZMB",
+                    perioder = listOf(
+                        PeriodeInput(
+                            type = PeriodeType.AKTIVITET_IKKE_MULIG,
+                            fom = LocalDate.parse("2020-01-01"),
+                            tom = LocalDate.parse("2020-01-15"),
+                        ),
+                        PeriodeInput(
+                            type = PeriodeType.GRADERT,
+                            fom = LocalDate.parse("2021-01-01"),
+                            tom = LocalDate.parse("2021-01-15"),
+                            grad = 68,
+                        )
                     ),
-                    PeriodeInput(
-                        type = PeriodeType.GRADERT,
-                        fom = LocalDate.parse("2021-01-01"),
-                        tom = LocalDate.parse("2021-01-15"),
-                        grad = 68,
-                    )
-                ),
-                hovedDiagnose = DiagnoseInput(kode = "Z00", system = "ICPC-2"),
-                biDiagnoser = listOf(
-                    DiagnoseInput(kode = "Z01", system = "ICPC-22"),
-                    DiagnoseInput(kode = "Z02", system = "ICPC-23"),
-                ),
-                harAndreRelevanteOpplysninger = true,
+                    hovedDiagnose = DiagnoseInput(kode = "Z00", system = "ICPC-2"),
+                    biDiagnoser = listOf(
+                        DiagnoseInput(kode = "Z01", system = "ICPC-22"),
+                        DiagnoseInput(kode = "Z02", system = "ICPC-23"),
+                    ),
+                    harAndreRelevanteOpplysninger = true,
+                )
             ),
             ident = "fake-test-ident",
             false,

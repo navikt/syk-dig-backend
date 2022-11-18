@@ -16,21 +16,19 @@ import no.nav.sykdig.generated.types.SykmeldingsType
 import no.nav.sykdig.generated.types.UkjentBosted
 import no.nav.sykdig.generated.types.UtenlandskAdresse
 import no.nav.sykdig.generated.types.Vegadresse
-import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 
 fun mapToDigitaliseringsoppgave(
-    oppgave: DigitaliseringsoppgaveDbModel,
-    person: no.nav.sykdig.digitalisering.pdl.Person,
+    oppgave: SykDigOppgave,
 ) = Digitaliseringsoppgave(
-    oppgaveId = oppgave.oppgaveId,
+    oppgaveId = oppgave.oppgaveDbModel.oppgaveId,
     person = Person(
-        navn = person.navn.toFormattedNameString(),
-        bostedsadresse = mapToBostedsadresse(person),
-        oppholdsadresse = mapToOppholdsadresse(person),
+        navn = oppgave.person.navn.toFormattedNameString(),
+        bostedsadresse = mapToBostedsadresse(oppgave.person),
+        oppholdsadresse = mapToOppholdsadresse(oppgave.person),
     ),
-    type = if (oppgave.type == "UTLAND") SykmeldingsType.UTENLANDS else SykmeldingsType.INNENLANDS,
-    values = oppgave.sykmelding?.mapToOppgaveValues() ?: OppgaveValues(fnrPasient = oppgave.fnr)
+    type = if (oppgave.oppgaveDbModel.type == "UTLAND") SykmeldingsType.UTENLANDS else SykmeldingsType.INNENLANDS,
+    values = oppgave.oppgaveDbModel.sykmelding?.mapToOppgaveValues() ?: OppgaveValues(fnrPasient = oppgave.oppgaveDbModel.fnr)
 )
 
 private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues = OppgaveValues(

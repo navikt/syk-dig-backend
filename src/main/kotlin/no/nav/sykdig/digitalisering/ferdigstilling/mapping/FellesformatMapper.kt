@@ -20,8 +20,8 @@ import no.nav.helse.sm2013.NavnType
 import no.nav.helse.sm2013.TeleCom
 import no.nav.helse.sm2013.URL
 import no.nav.syfo.sm.Diagnosekoder
-import no.nav.sykdig.digitalisering.ValidatedOppgaveValues
 import no.nav.sykdig.digitalisering.exceptions.MappingException
+import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
@@ -32,7 +32,7 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 fun mapToFellesformat(
-    validatedValues: ValidatedOppgaveValues,
+    validatedValues: FerdistilltRegisterOppgaveValues,
     person: Person,
     sykmeldingId: String,
     datoOpprettet: LocalDateTime?,
@@ -230,7 +230,7 @@ fun toDiagnoseKithSystem(diagnoseSystem: String): String {
 }
 
 fun tilSyketilfelleStartDato(
-    validatedValues: ValidatedOppgaveValues
+    validatedValues: FerdistilltRegisterOppgaveValues
 ): LocalDate {
     return validatedValues.perioder.stream().map(PeriodeInput::fom).min(LocalDate::compareTo).get()
 }

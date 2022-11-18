@@ -1,33 +1,39 @@
 package no.nav.sykdig.digitalisering
-
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
 import no.nav.sykdig.TestGraphQLContextContributor
 import no.nav.sykdig.config.CustomDataFetchingExceptionHandler
 import no.nav.sykdig.db.PoststedRepository
+import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Matrikkeladresse
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
-import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.pdl.Vegadresse
+import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
-import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
-import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
+import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
+import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -36,37 +42,46 @@ import java.util.UUID
     classes = [
         DgsAutoConfiguration::class,
         DgsExtendedScalarsAutoConfiguration::class,
-        OppgaveDataFetcher::class,
+        DigitaliseringsoppgaveDataFetcher::class,
         AdresseDataFetchers::class,
         CustomDataFetchingExceptionHandler::class,
         TestGraphQLContextContributor::class,
+        OppgaveSecurityService::class,
     ]
 )
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 class OppgaveDataFetcherTest {
-
     @MockBean
     lateinit var poststedRepository: PoststedRepository
-
     @MockBean
-    lateinit var personService: PersonService
-
+    lateinit var oppgaveService: DigitaliseringsoppgaveService
     @MockBean
-    lateinit var oppgaveService: OppgaveService
-
+    lateinit var securityService: OppgaveSecurityService
     @Autowired
     lateinit var dgsQueryExecutor: DgsQueryExecutor
 
+    @BeforeEach
+    fun before() {
+        val authentication: Authentication = Mockito.mock(Authentication::class.java)
+        val securityContext: SecurityContext = Mockito.mock(SecurityContext::class.java)
+        Mockito.`when`(securityContext.getAuthentication()).thenReturn(authentication)
+        SecurityContextHolder.setContext(securityContext)
+        Mockito.`when`(authentication.isAuthenticated).thenReturn(true)
+        Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { true }
+    }
+
     @Test
     fun `querying oppgave`() {
-        Mockito.`when`(oppgaveService.getOppgave("123")).thenAnswer {
-            createDigitalseringsoppgaveDbModel(
-                sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+
+        Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
+            SykDigOppgave(
+                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
+                person = createPerson()
             )
         }
 
-        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
-            createPerson()
-        }
         val oppgave: String = dgsQueryExecutor.executeAndExtractJsonPath(
             """
             {
@@ -84,16 +99,42 @@ class OppgaveDataFetcherTest {
     }
 
     @Test
-    fun `querying oppgave with poststed on vegadresse should use adresse data fetcher`() {
-        Mockito.`when`(oppgaveService.getOppgave("123")).thenAnswer {
-            createDigitalseringsoppgaveDbModel(
-                sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+    fun `querying oppgave no access to oppgave`() {
+        Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { false }
+        Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
+            SykDigOppgave(
+                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
+                person = createPerson()
             )
         }
 
-        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
-            createPerson(
-                vegadresse = Vegadresse("7", null, null, "Gateveien", null, "1111"),
+        val result = dgsQueryExecutor.execute(
+            """
+            {
+                oppgave(oppgaveId: "123") {
+                    values {
+                        fnrPasient                    
+                    }
+                }
+            }
+            """.trimIndent(),
+        )
+        result.errors.size shouldBe 1
+        result.errors[0].message shouldBeEqualTo "Innlogget bruker har ikke tilgang"
+    }
+
+    @Test
+    fun `querying oppgave with poststed on vegadresse should use adresse data fetcher`() {
+        Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
+            SykDigOppgave(
+                createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
+                person = createPerson(
+                    vegadresse = Vegadresse("7", null, null, "Gateveien", null, "1111"),
+                )
             )
         }
         Mockito.`when`(poststedRepository.getPoststed("1111")).thenAnswer {
@@ -125,17 +166,17 @@ class OppgaveDataFetcherTest {
 
     @Test
     fun `querying oppgave with poststed on matrikkeladresse should use adresse data fetcher`() {
-        Mockito.`when`(oppgaveService.getOppgave("123")).thenAnswer {
-            createDigitalseringsoppgaveDbModel(
-                sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+        Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
+            SykDigOppgave(
+                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
+                person = createPerson(
+                    matrikkeladresse = Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222")
+                )
             )
         }
 
-        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
-            createPerson(
-                matrikkeladresse = Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222")
-            )
-        }
         Mockito.`when`(poststedRepository.getPoststed("2222")).thenAnswer {
             "Vestnes"
         }
@@ -165,14 +206,13 @@ class OppgaveDataFetcherTest {
 
     @Test
     fun `lagre oppgave UNDER_AREBID should update oppgave`() {
-        Mockito.`when`(oppgaveService.getOppgave("345")).thenAnswer {
-            createDigitalseringsoppgaveDbModel(
-                sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+        Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
+            SykDigOppgave(
+                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
+                person = createPerson()
             )
-        }
-
-        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer {
-            createPerson()
         }
 
         val result = dgsQueryExecutor.execute(
@@ -203,20 +243,60 @@ class OppgaveDataFetcherTest {
             oppgaveService, times(1)
         ).updateOppgave(
             oppgaveId = "345",
-            values = SykmeldingUnderArbeidValues(fnrPasient = "testfnr-pasient"),
+            values = UferdigRegisterOppgaveValues(fnrPasient = "testfnr-pasient", null, null, null, null, null, null),
             ident = "fake-test-ident",
         )
     }
 
     @Test
-    fun `lagre oppgave with FERDIGSTILT should ferdigstille oppgave`() {
-        val person = createPerson()
-        val oppgave = createDigitalseringsoppgaveDbModel(
-            sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-        )
+    fun `lager oppgave uten tilgang`() {
+        Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { false }
+        Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
+            SykDigOppgave(
+                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
+                person = createPerson()
+            )
+        }
 
-        Mockito.`when`(oppgaveService.getOppgave("345")).thenAnswer { oppgave }
-        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer { person }
+        val result = dgsQueryExecutor.execute(
+            """
+            mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
+                lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
+                    oppgaveId
+                }
+            }
+            """.trimIndent(),
+            mapOf(
+                "id" to "345",
+                "enhetId" to "1234",
+                "values" to mapOf(
+                    "fnrPasient" to "testfnr-pasient",
+                    "behandletTidspunkt" to null,
+                    "skrevetLand" to null,
+                    "perioder" to null,
+                    "hovedDiagnose" to null,
+                    "biDiagnoser" to null,
+                ),
+                "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID
+            )
+        )
+        result.errors.size shouldBe 1
+        result.errors[0].message shouldBeEqualTo "Innlogget bruker har ikke tilgang"
+    }
+
+    @Test
+    fun `lagre oppgave with FERDIGSTILT should ferdigstille oppgave`() {
+
+        Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
+            SykDigOppgave(
+                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
+                person = createPerson()
+            )
+        }
 
         val result = dgsQueryExecutor.execute(
             """
@@ -250,37 +330,29 @@ class OppgaveDataFetcherTest {
         ).ferdigstillOppgave(
             oppgaveId = "345",
             ident = "fake-test-ident",
-            values = SykmeldingUnderArbeidValues(
+            values = FerdistilltRegisterOppgaveValues(
                 fnrPasient = "testfnr-pasient",
-                behandletTidspunkt = LocalDate.parse("2022-10-26"),
+                behandletTidspunkt = LocalDate.parse("2022-10-26").toOffsetDateTimeAtNoon()!!,
                 skrevetLand = "POL",
                 perioder = emptyList(),
                 hovedDiagnose = DiagnoseInput(kode = "Køde", system = "ICDCPC12"),
                 biDiagnoser = emptyList(),
-            ),
-            validatedValues = ValidatedOppgaveValues(
-                fnrPasient = "testfnr-pasient",
-                behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z"),
-                skrevetLand = "POL",
-                perioder = emptyList(),
-                hovedDiagnose = DiagnoseInput(kode = "Køde", system = "ICDCPC12"),
-                biDiagnoser = emptyList(),
+                harAndreRelevanteOpplysninger = null
             ),
             enhetId = "1234",
-            person = person,
-            oppgave = oppgave,
         )
     }
 
     @Test
     fun `should throw ClientException when values are not validated correctly`() {
-        val person = createPerson()
-        val oppgave = createDigitalseringsoppgaveDbModel(
-            sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-        )
-
-        Mockito.`when`(oppgaveService.getOppgave("345")).thenAnswer { oppgave }
-        Mockito.`when`(personService.hentPerson(anyString(), anyString())).thenAnswer { person }
+        Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
+            SykDigOppgave(
+                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
+                person = createPerson()
+            )
+        }
 
         val result = dgsQueryExecutor.execute(
             """
@@ -326,7 +398,7 @@ fun createDigitalseringsoppgaveDbModel(
     sykmelding: SykmeldingUnderArbeid? = null,
     endretAv: String = "A123456",
     timestamp: OffsetDateTime = OffsetDateTime.now(),
-) = DigitaliseringsoppgaveDbModel(
+) = OppgaveDbModel(
     oppgaveId = oppgaveId,
     fnr = fnr,
     journalpostId = journalpostId,

@@ -2,6 +2,12 @@ package no.nav.sykdig.digitalisering.pdl.client.graphql
 
 const val PDL_QUERY = """
     query(${"$"}ident: ID!){
+        identer: hentIdenter(ident: ${"$"}ident, historikk: false) {
+                identer {
+                    ident
+                    gruppe
+                }
+            }
         hentPerson(ident: ${"$"}ident) {
             navn(historikk: false) {
                 fornavn
@@ -68,8 +74,15 @@ const val PDL_QUERY = """
 
 data class PdlQuery(
     val hentPerson: PdlPerson?,
+    val identer: PdlIdenter?
 )
-
+data class PdlIdenter(
+    val identer: List<PdlIdent>
+)
+data class PdlIdent(
+    val ident: String,
+    val gruppe: String
+)
 data class PdlPerson(
     val bostedsadresse: List<PdlBostedsadresse>,
     val navn: List<PdlNavn>,

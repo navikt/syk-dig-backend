@@ -6,37 +6,34 @@ import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 import graphql.schema.DataFetchingEnvironment
 import no.nav.sykdig.digitalisering.exceptions.ClientException
-import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
+import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.generated.DgsConstants
-import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.Digitaliseringsoppgave
-import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
 import no.nav.sykdig.logger
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
-import java.time.OffsetDateTime
+import org.springframework.security.access.prepost.PreAuthorize
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 @DgsComponent
-class OppgaveDataFetcher(
-    private val oppgaveService: OppgaveService,
-    private val personService: PersonService,
+class DigitaliseringsoppgaveDataFetcher(
+    val digitaliseringsoppgaveService: DigitaliseringsoppgaveService
 ) {
-    val log = logger()
-
-    @DgsQuery(field = DgsConstants.QUERY.Oppgave)
-    fun getOppgave(@InputArgument oppgaveId: String): Digitaliseringsoppgave {
-        val oppgave = oppgaveService.getOppgave(oppgaveId)
-        val person = personService.hentPerson(
-            fnr = oppgave.fnr,
-            sykmeldingId = oppgave.sykmeldingId.toString()
-        )
-
-        return mapToDigitaliseringsoppgave(oppgave, person)
+    companion object {
+        private val log = logger()
     }
 
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @DgsQuery(field = DgsConstants.QUERY.Oppgave)
+    fun getOppgave(@InputArgument oppgaveId: String): Digitaliseringsoppgave {
+        return mapToDigitaliseringsoppgave(digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId))
+    }
+
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.Lagre)
     fun lagreOppgave(
         @InputArgument oppgaveId: String,
@@ -45,49 +42,35 @@ class OppgaveDataFetcher(
         @InputArgument status: SykmeldingUnderArbeidStatus,
         dfe: DataFetchingEnvironment,
     ): Digitaliseringsoppgave {
-        val ident: String = dfe.graphQlContext.get("username")
-        val oppgave = oppgaveService.getOppgave(oppgaveId)
-        val person = personService.hentPerson(
-            fnr = oppgave.fnr,
-            sykmeldingId = oppgave.sykmeldingId.toString(),
-        )
 
-        if (status == SykmeldingUnderArbeidStatus.FERDIGSTILT) {
-            val validatedValues = validateRegisterOppgaveValues(values)
-            oppgaveService.ferdigstillOppgave(
-                oppgaveId = oppgaveId,
-                ident = ident,
-                values = values,
-                validatedValues = validatedValues,
-                enhetId = enhetId,
-                person = person,
-                oppgave = oppgave
-            )
-            log.info("Ferdigstilt oppgave med id $oppgaveId")
-        } else {
-            oppgaveService.updateOppgave(oppgaveId, values, ident)
-            log.info("Lagret oppgave med id $oppgaveId")
+        val ident: String = dfe.graphQlContext.get("username")
+
+        when (status) {
+            SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
+                val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
+                digitaliseringsoppgaveService.ferdigstillOppgave(
+                    oppgaveId = oppgaveId,
+                    ident = ident,
+                    values = ferdistilltRegisterOppgaveValues,
+                    enhetId = enhetId
+                ).also { log.info("Ferdigstilt oppgave med id $oppgaveId") }
+            }
+            SykmeldingUnderArbeidStatus.UNDER_ARBEID -> {
+                val uferdigRegisterOppgaveValues = uferdigRegisterOppgaveValus(values)
+                digitaliseringsoppgaveService.updateOppgave(
+                    oppgaveId = oppgaveId,
+                    values = uferdigRegisterOppgaveValues,
+                    ident = ident
+                ).also { log.info("Lagret oppgave med id $oppgaveId") }
+            }
         }
 
-        return mapToDigitaliseringsoppgave(
-            oppgave = oppgaveService.getOppgave(oppgaveId),
-            person = person
-        )
+        return mapToDigitaliseringsoppgave(digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId))
     }
 }
-
-data class ValidatedOppgaveValues(
-    val fnrPasient: String,
-    val behandletTidspunkt: OffsetDateTime,
-    val skrevetLand: String,
-    val perioder: List<PeriodeInput>,
-    val hovedDiagnose: DiagnoseInput,
-    val biDiagnoser: List<DiagnoseInput>,
-)
-
 private fun validateRegisterOppgaveValues(
     values: SykmeldingUnderArbeidValues,
-): ValidatedOppgaveValues {
+): FerdistilltRegisterOppgaveValues {
     val behandletTidspunkt = values.behandletTidspunkt.toOffsetDateTimeAtNoon()
     requireNotEmptyOrNull(values.fnrPasient) { "Fødselsnummer til pasient må være satt" }
     requireNotEmptyOrNull(behandletTidspunkt) { "Tidspunkt for behandling må være satt" }
@@ -96,13 +79,26 @@ private fun validateRegisterOppgaveValues(
     requireNotEmptyOrNull(values.hovedDiagnose) { "Hoveddiagnose må være satt" }
     requireNotEmptyOrNull(values.biDiagnoser) { "Bidiagnoser må være satt" }
 
-    return ValidatedOppgaveValues(
+    return FerdistilltRegisterOppgaveValues(
         fnrPasient = values.fnrPasient,
         behandletTidspunkt = behandletTidspunkt,
         skrevetLand = values.skrevetLand,
         perioder = values.perioder,
         hovedDiagnose = values.hovedDiagnose,
         biDiagnoser = values.biDiagnoser,
+        harAndreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger
+    )
+}
+
+private fun uferdigRegisterOppgaveValus(sykmeldingUnderArbeidValues: SykmeldingUnderArbeidValues): RegisterOppgaveValues {
+    return UferdigRegisterOppgaveValues(
+        fnrPasient = sykmeldingUnderArbeidValues.fnrPasient,
+        behandletTidspunkt = sykmeldingUnderArbeidValues.behandletTidspunkt.toOffsetDateTimeAtNoon(),
+        skrevetLand = sykmeldingUnderArbeidValues.skrevetLand,
+        perioder = sykmeldingUnderArbeidValues.perioder,
+        hovedDiagnose = sykmeldingUnderArbeidValues.hovedDiagnose,
+        biDiagnoser = sykmeldingUnderArbeidValues.biDiagnoser,
+        harAndreRelevanteOpplysninger = sykmeldingUnderArbeidValues.harAndreRelevanteOpplysninger
     )
 }
 

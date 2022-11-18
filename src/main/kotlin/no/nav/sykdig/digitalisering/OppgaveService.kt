@@ -2,14 +2,13 @@ package no.nav.sykdig.digitalisering
 
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import no.nav.sykdig.db.OppgaveRepository
-import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
+import no.nav.sykdig.db.toSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
-import no.nav.sykdig.digitalisering.pdl.Person
-import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
-import no.nav.sykdig.digitalisering.tilgangskontroll.SyfoTilgangskontrollOboClient
-import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
+import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
+import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.logger
-import no.nav.sykdig.model.DigitaliseringsoppgaveDbModel
+import no.nav.sykdig.model.OppgaveDbModel
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,55 +16,47 @@ import org.springframework.transaction.annotation.Transactional
 class OppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val ferdigstillingService: FerdigstillingService,
-    private val syfoTilgangskontrollClient: SyfoTilgangskontrollOboClient,
+    private val personService: PersonService,
 ) {
     private val log = logger()
 
-    fun getOppgave(oppgaveId: String): DigitaliseringsoppgaveDbModel {
+    fun getOppgave(oppgaveId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
         if (oppgave == null) {
             log.warn("Fant ikke oppgave med id $oppgaveId")
             throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
-
-        if (!syfoTilgangskontrollClient.sjekkTilgangVeileder(oppgave.fnr)) {
-            log.warn("Innlogget bruker har ikke tilgang til oppgave med id $oppgaveId")
-            throw IkkeTilgangException("Innlogget bruker har ikke tilgang")
-        }
-
         log.info("Hentet oppgave med id $oppgaveId")
         return oppgave
     }
 
-    fun updateOppgave(oppgaveId: String, values: SykmeldingUnderArbeidValues, ident: String) {
-        oppgaveRepository.updateOppgave(oppgaveId, values, ident, false)
+    fun updateOppgave(oppgaveId: String, registerOppgaveValues: RegisterOppgaveValues, ident: String) {
+        val oppgave = getOppgave(oppgaveId)
+        val sykmelding = toSykmelding(oppgave, registerOppgaveValues)
+        oppgaveRepository.updateOppgave(oppgave, sykmelding, ident, false)
     }
 
     @Transactional
     fun ferdigstillOppgave(
         oppgaveId: String,
         ident: String,
-        values: SykmeldingUnderArbeidValues,
-        validatedValues: ValidatedOppgaveValues,
+        values: FerdistilltRegisterOppgaveValues,
         enhetId: String,
-        person: Person,
-        oppgave: DigitaliseringsoppgaveDbModel,
     ) {
+        val oppgave = getOppgave(oppgaveId)
+        val sykmeldt = personService.hentPerson(
+            fnr = values.fnrPasient,
+            sykmeldingId = oppgave.sykmeldingId.toString()
+        )
+        val sykmelding = toSykmelding(oppgave, values)
 
+        oppgaveRepository.updateOppgave(oppgave, sykmelding, ident, true)
         ferdigstillingService.ferdigstill(
-            navnSykmelder = person.navn.toFormattedNameString(),
-            land = validatedValues.skrevetLand,
+            navnSykmelder = values.skrevetLand, // TODO: finn ut hvor man skal få dette navnet fra
             enhet = enhetId,
             oppgave = oppgave,
-            sykmeldt = person,
-            validatedValues = validatedValues,
-            harAndreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger,
-            sykmeldingId = oppgave.sykmeldingId.toString(),
-            journalpostId = oppgave.journalpostId,
-            opprettet = oppgave.opprettet.toLocalDateTime(),
-            dokumentInfoId = oppgave.dokumentInfoId,
-            oppgaveId = oppgave.oppgaveId
+            sykmeldt = sykmeldt,
+            validatedValues = values,
         )
-        oppgaveRepository.updateOppgave(oppgaveId, values, ident, true)
     }
 }

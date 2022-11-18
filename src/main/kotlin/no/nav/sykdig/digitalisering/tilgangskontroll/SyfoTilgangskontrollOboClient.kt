@@ -38,7 +38,6 @@ class SyfoTilgangskontrollOboClient(
             )
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
-
             return if (e.rawStatusCode == 403) {
                 false
             } else {

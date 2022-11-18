@@ -5,10 +5,11 @@ import no.nav.syfo.model.Diagnose
 import no.nav.syfo.model.KontaktMedPasient
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.digitalisering.ValidatedOppgaveValues
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
 import no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
@@ -63,13 +64,10 @@ class FerdigstillingServiceTest {
         val sykmeldingId = UUID.randomUUID()
         val journalpostId = "9898"
         val dokumentInfoId = "111"
-        val oppgaveId = "123"
-        val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt("9898")).thenAnswer { false }
 
         ferdigstillingService.ferdigstill(
             navnSykmelder = "Fornavn Etternavn",
-            land = "SWE",
             enhet = "2990",
             oppgave = createDigitalseringsoppgaveDbModel(
                 oppgaveId = "123",
@@ -84,7 +82,7 @@ class FerdigstillingServiceTest {
                 bostedsadresse = null,
                 oppholdsadresse = null
             ),
-            validatedValues = ValidatedOppgaveValues(
+            validatedValues = FerdistilltRegisterOppgaveValues(
                 fnrPasient = "12345678910",
                 behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
                 skrevetLand = "SWE",
@@ -96,14 +94,9 @@ class FerdigstillingServiceTest {
                     )
                 ),
                 hovedDiagnose = DiagnoseInput("A070", "ICD10"),
-                biDiagnoser = emptyList()
+                biDiagnoser = emptyList(),
+                harAndreRelevanteOpplysninger = null
             ),
-            harAndreRelevanteOpplysninger = false,
-            sykmeldingId = sykmeldingId.toString(),
-            journalpostId = journalpostId,
-            opprettet = datoOpprettet.toLocalDateTime(),
-            dokumentInfoId = dokumentInfoId,
-            oppgaveId = oppgaveId
         )
 
         verify(dokarkivClient).oppdaterOgFerdigstillJournalpost(
@@ -133,7 +126,7 @@ class FerdigstillingServiceTest {
         val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
         val behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z")
 
-        val validatedValues = ValidatedOppgaveValues(
+        val validatedValues = FerdistilltRegisterOppgaveValues(
             fnrPasient = fnrPasient,
             behandletTidspunkt = behandletTidspunkt,
             skrevetLand = "POL",
@@ -147,6 +140,7 @@ class FerdigstillingServiceTest {
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
+            harAndreRelevanteOpplysninger = null,
         )
 
         val person = Person(
@@ -164,15 +158,14 @@ class FerdigstillingServiceTest {
 
         val harAndreRelevanteOpplysninger = false
 
-        val receivedSykmelding =
-            ferdigstillingService.mapToReceivedSykmelding(
-                validatedValues,
-                person,
-                harAndreRelevanteOpplysninger,
-                sykmeldingId.toString(),
-                journalPostId,
-                datoOpprettet.toLocalDateTime()
-            )
+        val receivedSykmelding = mapToReceivedSykmelding(
+            validatedValues,
+            person,
+            harAndreRelevanteOpplysninger,
+            sykmeldingId.toString(),
+            journalPostId,
+            datoOpprettet.toLocalDateTime()
+        )
 
         receivedSykmelding.personNrPasient shouldBeEqualTo fnrPasient
         receivedSykmelding.personNrLege shouldBeEqualTo fnrLege
