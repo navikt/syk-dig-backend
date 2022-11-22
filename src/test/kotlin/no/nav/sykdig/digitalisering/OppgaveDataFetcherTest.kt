@@ -5,6 +5,7 @@ import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
 import no.nav.sykdig.TestGraphQLContextContributor
 import no.nav.sykdig.config.CustomDataFetchingExceptionHandler
 import no.nav.sykdig.db.PoststedRepository
+import no.nav.sykdig.digitalisering.api.DigitaliseringsoppgaveDataFetcher
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
@@ -64,7 +65,7 @@ class OppgaveDataFetcherTest {
     fun before() {
         val authentication: Authentication = Mockito.mock(Authentication::class.java)
         val securityContext: SecurityContext = Mockito.mock(SecurityContext::class.java)
-        Mockito.`when`(securityContext.getAuthentication()).thenReturn(authentication)
+        Mockito.`when`(securityContext.authentication).thenReturn(authentication)
         SecurityContextHolder.setContext(securityContext)
         Mockito.`when`(authentication.isAuthenticated).thenReturn(true)
         Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { true }
@@ -227,7 +228,7 @@ class OppgaveDataFetcherTest {
                 "id" to "345",
                 "enhetId" to "1234",
                 "values" to mapOf(
-                    "fnrPasient" to "testfnr-pasient",
+                    "fnrPasient" to "20086600138",
                     "behandletTidspunkt" to null,
                     "skrevetLand" to null,
                     "perioder" to null,
@@ -243,7 +244,7 @@ class OppgaveDataFetcherTest {
             oppgaveService, times(1)
         ).updateOppgave(
             oppgaveId = "345",
-            values = UferdigRegisterOppgaveValues(fnrPasient = "testfnr-pasient", null, null, null, null, null, null),
+            values = UferdigRegisterOppgaveValues(fnrPasient = "20086600138", null, null, null, null, null, null),
             ident = "fake-test-ident",
         )
     }
@@ -272,7 +273,7 @@ class OppgaveDataFetcherTest {
                 "id" to "345",
                 "enhetId" to "1234",
                 "values" to mapOf(
-                    "fnrPasient" to "testfnr-pasient",
+                    "fnrPasient" to "20086600138",
                     "behandletTidspunkt" to null,
                     "skrevetLand" to null,
                     "perioder" to null,
@@ -310,13 +311,13 @@ class OppgaveDataFetcherTest {
                 "id" to "345",
                 "enhetId" to "1234",
                 "values" to mapOf(
-                    "fnrPasient" to "testfnr-pasient",
+                    "fnrPasient" to "20086600138",
                     "behandletTidspunkt" to "2022-10-26",
                     "skrevetLand" to "POL",
                     "perioder" to emptyList<PeriodeInput>(),
                     "hovedDiagnose" to mapOf(
-                        "kode" to "Køde",
-                        "system" to "ICDCPC12",
+                        "kode" to "Z09",
+                        "system" to "ICPC2",
                     ),
                     "biDiagnoser" to emptyList<DiagnoseInput>(),
                 ),
@@ -331,11 +332,11 @@ class OppgaveDataFetcherTest {
             oppgaveId = "345",
             ident = "fake-test-ident",
             values = FerdistilltRegisterOppgaveValues(
-                fnrPasient = "testfnr-pasient",
+                fnrPasient = "20086600138",
                 behandletTidspunkt = LocalDate.parse("2022-10-26").toOffsetDateTimeAtNoon()!!,
                 skrevetLand = "POL",
                 perioder = emptyList(),
-                hovedDiagnose = DiagnoseInput(kode = "Køde", system = "ICDCPC12"),
+                hovedDiagnose = DiagnoseInput(kode = "Z09", system = "ICPC2"),
                 biDiagnoser = emptyList(),
                 harAndreRelevanteOpplysninger = null
             ),

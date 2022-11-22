@@ -1,20 +1,25 @@
-package no.nav.sykdig.digitalisering
+package no.nav.sykdig.digitalisering.api
 
 import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 import graphql.schema.DataFetchingEnvironment
+import no.nav.sykdig.digitalisering.DigitaliseringsoppgaveService
 import no.nav.sykdig.digitalisering.exceptions.ClientException
+import no.nav.sykdig.digitalisering.mapToDigitaliseringsoppgave
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.generated.DgsConstants
+import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.Digitaliseringsoppgave
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
 import no.nav.sykdig.logger
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
+import no.nav.sykdig.utils.validateDiagnose
+import no.nav.sykdig.utils.validatePersonAndDNumber
 import org.springframework.security.access.prepost.PreAuthorize
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -79,6 +84,10 @@ private fun validateRegisterOppgaveValues(
     requireNotEmptyOrNull(values.hovedDiagnose) { "Hoveddiagnose må være satt" }
     requireNotEmptyOrNull(values.biDiagnoser) { "Bidiagnoser må være satt" }
 
+    validateFnr(values.fnrPasient)
+    validateHovedDiagnose(values.hovedDiagnose)
+    validateBiDiagnoser(values.biDiagnoser)
+
     return FerdistilltRegisterOppgaveValues(
         fnrPasient = values.fnrPasient,
         behandletTidspunkt = behandletTidspunkt,
@@ -88,6 +97,28 @@ private fun validateRegisterOppgaveValues(
         biDiagnoser = values.biDiagnoser,
         harAndreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger
     )
+}
+
+private fun validateFnr(fnr: String) {
+    if (!validatePersonAndDNumber(fnr)) {
+        throw ClientException("fnr paserer ikke modulus11 kontrollen")
+    }
+}
+
+private fun validateHovedDiagnose(houvedDiagnose: DiagnoseInput?) {
+
+    if (houvedDiagnose != null) {
+        validateDiagnose(houvedDiagnose)
+    }
+}
+
+private fun validateBiDiagnoser(biDiagnoser: List<DiagnoseInput>?) {
+
+    if (!biDiagnoser.isNullOrEmpty()) {
+        biDiagnoser.forEach { biDiagnose ->
+            validateDiagnose(biDiagnose)
+        }
+    }
 }
 
 private fun uferdigRegisterOppgaveValus(sykmeldingUnderArbeidValues: SykmeldingUnderArbeidValues): RegisterOppgaveValues {
@@ -103,7 +134,7 @@ private fun uferdigRegisterOppgaveValus(sykmeldingUnderArbeidValues: SykmeldingU
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun <T : Any> requireNotEmptyOrNull(value: T?, lazyMessage: () -> Any): T {
+inline fun <T : Any> requireNotEmptyOrNull(value: T?, lazyMessage: () -> Any): T {
     contract {
         returns() implies (value != null)
     }
