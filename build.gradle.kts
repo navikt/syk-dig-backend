@@ -49,7 +49,7 @@ val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
-val springContextIndexerVersion = "6.0.6"
+val springContextIndexerVersion = "6.0.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
