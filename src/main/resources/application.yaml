@@ -1,14 +1,11 @@
 server:
     port: 8080
     shutdown: graceful
+    tomcat:
+        threads:
+            max: 100
 
 spring:
-    jpa:
-        properties:
-            hibernate:
-              temp:
-                use_jdbc_metadata_defaults: false
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
     main:
         banner-mode: 'off'
     profiles:
