@@ -3,6 +3,8 @@ server:
     shutdown: graceful
 
 spring:
+    jmx:
+        enabled: false
     main:
         banner-mode: 'off'
         lazy-initialization: true
