@@ -3,11 +3,14 @@ server:
     shutdown: graceful
 
 spring:
-    jmx:
-        enabled: false
+    jpa:
+        properties:
+            hibernate:
+              temp:
+                use_jdbc_metadata_defaults: false
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
     main:
         banner-mode: 'off'
-        lazy-initialization: true
     profiles:
         active: default
     flyway:
