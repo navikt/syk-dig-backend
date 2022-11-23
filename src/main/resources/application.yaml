@@ -3,7 +3,9 @@ server:
     shutdown: graceful
 
 spring:
-    main.banner-mode: 'off'
+    main:
+        banner-mode: 'off'
+        lazy-initialization: true
     profiles:
         active: default
     flyway:
