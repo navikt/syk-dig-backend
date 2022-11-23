@@ -1,13 +1,11 @@
 server:
     port: 8080
     shutdown: graceful
-    tomcat:
-        threads:
-            max: 100
 
 spring:
     main:
         banner-mode: 'off'
+        lazy-initialization: true
     profiles:
         active: default
     flyway:
