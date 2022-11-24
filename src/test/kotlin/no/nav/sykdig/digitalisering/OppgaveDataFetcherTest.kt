@@ -20,8 +20,6 @@ import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
-import org.amshove.kluent.shouldBe
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -38,6 +36,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
+import org.junit.jupiter.api.Assertions.assertEquals
 
 @SpringBootTest(
     classes = [
@@ -96,7 +95,7 @@ class OppgaveDataFetcherTest {
             "data.oppgave.values.fnrPasient"
         )
 
-        oppgave shouldBeEqualTo "12345678910"
+        assertEquals("12345678910", oppgave)
     }
 
     @Test
@@ -122,8 +121,8 @@ class OppgaveDataFetcherTest {
             }
             """.trimIndent(),
         )
-        result.errors.size shouldBe 1
-        result.errors[0].message shouldBeEqualTo "Innlogget bruker har ikke tilgang"
+        assertEquals(1, result.errors.size)
+        assertEquals("Innlogget bruker har ikke tilgang", result.errors[0].message)
     }
 
     @Test
@@ -161,8 +160,7 @@ class OppgaveDataFetcherTest {
             """.trimIndent(),
             "data.oppgave.person.bostedsadresse.poststed",
         )
-
-        poststed shouldBeEqualTo "Oslo"
+        assertEquals("Oslo", poststed)
     }
 
     @Test
@@ -202,7 +200,7 @@ class OppgaveDataFetcherTest {
             "data.oppgave.person.bostedsadresse.poststed"
         )
 
-        poststed shouldBeEqualTo "Vestnes"
+        assertEquals("Vestnes", poststed)
     }
 
     @Test
@@ -239,7 +237,7 @@ class OppgaveDataFetcherTest {
             )
         )
 
-        result.errors.size shouldBe 0
+        assertEquals(0, result.errors.size)
         verify(
             oppgaveService, times(1)
         ).updateOppgave(
@@ -283,8 +281,8 @@ class OppgaveDataFetcherTest {
                 "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID
             )
         )
-        result.errors.size shouldBe 1
-        result.errors[0].message shouldBeEqualTo "Innlogget bruker har ikke tilgang"
+        assertEquals(1, result.errors.size)
+        assertEquals("Innlogget bruker har ikke tilgang",  result.errors[0].message)
     }
 
     @Test
@@ -325,7 +323,7 @@ class OppgaveDataFetcherTest {
             )
         )
 
-        result.errors.size shouldBe 0
+        assertEquals(0, result.errors.size)
         verify(
             oppgaveService, times(1)
         ).ferdigstillOppgave(
@@ -382,8 +380,8 @@ class OppgaveDataFetcherTest {
             )
         )
 
-        result.errors.size shouldBe 1
-        result.errors[0].message shouldBeEqualTo "Landet sykmeldingen er skrevet må være satt"
+        assertEquals(1, result.errors.size)
+        assertEquals("Landet sykmeldingen er skrevet må være satt", result.errors[0].message)
     }
 }
 

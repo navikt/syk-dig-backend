@@ -11,8 +11,6 @@ import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldNotBeEqualTo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -26,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import org.junit.jupiter.api.Assertions.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMetrics
@@ -63,11 +62,12 @@ class OppgaveServiceTest : FellesTestOppsett() {
     fun henterOppgaveFraDb() {
         val oppgave = oppgaveService.getOppgave("123")
 
-        oppgave.fnr shouldBeEqualTo "12345678910"
-        oppgave.endretAv shouldBeEqualTo "A123456"
-        oppgave.type shouldBeEqualTo "UTLAND"
-        oppgave.sykmelding shouldBeEqualTo null
-        oppgave.ferdigstilt shouldBeEqualTo null
+        assertEquals("12345678910", oppgave.fnr)
+        assertEquals("12345678910", oppgave.fnr)
+        assertEquals("A123456", oppgave.endretAv)
+        assertEquals("UTLAND", oppgave.type)
+        assertEquals(null,oppgave.sykmelding)
+        assertEquals(null, oppgave.ferdigstilt)
     }
 
     @Test
@@ -87,13 +87,14 @@ class OppgaveServiceTest : FellesTestOppsett() {
         )
 
         val oppdatertOppgave = oppgaveService.getOppgave("123")
-        oppdatertOppgave.fnr shouldBeEqualTo "12345678910"
-        oppdatertOppgave.endretAv shouldBeEqualTo "X987654"
-        oppdatertOppgave.type shouldBeEqualTo "UTLAND"
-        oppdatertOppgave.sykmelding?.fnrPasient shouldBeEqualTo "12345678910"
-        oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land shouldBeEqualTo "SWE"
-        oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode shouldBeEqualTo "A070"
-        oppdatertOppgave.ferdigstilt shouldBeEqualTo null
+
+        assertEquals("12345678910",oppdatertOppgave.fnr)
+        assertEquals("X987654",oppdatertOppgave.endretAv)
+        assertEquals("UTLAND", oppdatertOppgave.type)
+        assertEquals("12345678910", oppdatertOppgave.sykmelding?.fnrPasient)
+        assertEquals("SWE", oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land)
+        assertEquals("A070", oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode)
+        assertEquals(null, oppdatertOppgave.ferdigstilt)
     }
 
     @Test
@@ -114,12 +115,12 @@ class OppgaveServiceTest : FellesTestOppsett() {
         )
 
         val oppdatertOppgave = oppgaveService.getOppgave("123")
-        oppdatertOppgave.fnr shouldBeEqualTo "12345678910"
-        oppdatertOppgave.endretAv shouldBeEqualTo "X987654"
-        oppdatertOppgave.type shouldBeEqualTo "UTLAND"
-        oppdatertOppgave.sykmelding?.fnrPasient shouldBeEqualTo "12345678910"
-        oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land shouldBeEqualTo "SWE"
-        oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode shouldBeEqualTo "A070"
-        oppdatertOppgave.ferdigstilt shouldNotBeEqualTo null
+        assertEquals("12345678910", oppdatertOppgave.fnr)
+        assertEquals("X987654", oppdatertOppgave.endretAv)
+        assertEquals("UTLAND", oppdatertOppgave.type)
+        assertEquals("12345678910", oppdatertOppgave.sykmelding?.fnrPasient)
+        assertEquals("SWE", oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land)
+        assertEquals("A070",  oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode)
+        assertEquals(null, oppdatertOppgave.ferdigstilt)
     }
 }

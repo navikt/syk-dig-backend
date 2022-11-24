@@ -2,7 +2,6 @@ package no.nav.sykdig.db
 
 import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.poststed.PostInformasjon
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -10,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 
 @Transactional
 class PoststedRepositoryTest : FellesTestOppsett() {
@@ -38,21 +39,21 @@ class PoststedRepositoryTest : FellesTestOppsett() {
     fun getPoststedHenterPoststed() {
         val poststed = poststedRepository.getPoststed("5341")
 
-        poststed shouldBeEqualTo "STRAUME"
+        assertEquals("STRAUME", poststed)
     }
 
     @Test
     fun getPoststedGirNullHvisPostnummerIkkeFinnes() {
         val poststed = poststedRepository.getPoststed("0101")
 
-        poststed shouldBeEqualTo null
+        assertEquals(null, poststed)
     }
 
     @Test
     fun getAllePoststederHenterAllePoststeder() {
         val allePoststeder = poststedRepository.getAllePoststeder()
 
-        allePoststeder.size shouldBeEqualTo 5
+        assertEquals(5, allePoststeder.size)
     }
 
     @Test
@@ -68,8 +69,9 @@ class PoststedRepositoryTest : FellesTestOppsett() {
         )
 
         val allePoststeder = poststedRepository.getAllePoststeder()
-        allePoststeder.size shouldBeEqualTo 4
-        allePoststeder.find { it.postnummer == "5341" } shouldBeEqualTo null
+        assertEquals(4, allePoststeder.size)
+        assertEquals(null, allePoststeder.find { it.postnummer == "5341" })
+
     }
 
     @Test
@@ -87,8 +89,8 @@ class PoststedRepositoryTest : FellesTestOppsett() {
         )
 
         val allePoststeder = poststedRepository.getAllePoststeder()
-        allePoststeder.size shouldBeEqualTo 6
-        allePoststeder.find { it.postnummer == "0502" }?.poststed shouldBeEqualTo "OSLO"
+        assertEquals(6, allePoststeder.size)
+        assertEquals("OSLO",  allePoststeder.find { it.postnummer == "0502" }?.poststed)
     }
 
     @Test
@@ -105,10 +107,10 @@ class PoststedRepositoryTest : FellesTestOppsett() {
         )
 
         val allePoststeder = poststedRepository.getAllePoststeder()
-        allePoststeder.size shouldBeEqualTo 5
-        allePoststeder.find { it.postnummer == "0502" }?.poststed shouldBeEqualTo "OSLO"
-        allePoststeder.find { it.postnummer == "5449" } shouldBeEqualTo null
-        allePoststeder.find { it.postnummer == "9609" }?.poststed shouldBeEqualTo "SENJA"
+        assertEquals(5, allePoststeder.size)
+        assertEquals("OSLO", allePoststeder.find { it.postnummer == "0502" }?.poststed)
+        assertEquals(null,  allePoststeder.find { it.postnummer == "5449" })
+        assertEquals("SENJA", allePoststeder.find { it.postnummer == "9609" }?.poststed)
     }
 
     @Test
@@ -127,6 +129,6 @@ class PoststedRepositoryTest : FellesTestOppsett() {
         )
 
         val allePoststederOppdatert = poststedRepository.getAllePoststeder()
-        allePoststederOppdatert shouldBeEqualTo allePoststeder
+        assertEquals(allePoststeder, allePoststederOppdatert)
     }
 }

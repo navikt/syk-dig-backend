@@ -5,8 +5,8 @@ import org.jlleitschuh.gradle.ktlint.KtlintExtension
 plugins {
     id("org.springframework.boot") version "2.7.5"
     id("io.spring.dependency-management") version "1.1.0"
-    kotlin("jvm") version "1.7.20"
-    kotlin("plugin.spring") version "1.7.20"
+    kotlin("jvm") version "1.7.21"
+    kotlin("plugin.spring") version "1.7.21"
     id("com.netflix.dgs.codegen") version "5.1.17"
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
@@ -34,7 +34,6 @@ val snakeYamlVersion = "1.33"
 val smCommonVersion = "1.ea531b3"
 val tokenSupportVersion = "2.1.7"
 val testContainersVersion = "1.17.4"
-val kluentVersion = "1.72"
 val logstashLogbackEncoderVersion = "7.2"
 val javaJwtVersion = "4.2.1"
 val springBootResourceVersion = "2.7.5"
@@ -49,11 +48,9 @@ val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
-val springContextIndexerVersion = "6.0.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
-    compileOnly("org.springframework:spring-context-indexer:$springContextIndexerVersion")
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
@@ -90,7 +87,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
-    testImplementation("org.amshove.kluent:kluent:$kluentVersion")
 }
 
 tasks {

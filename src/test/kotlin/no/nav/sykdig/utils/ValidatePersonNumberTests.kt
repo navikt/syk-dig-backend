@@ -1,6 +1,6 @@
 package no.nav.sykdig.utils
 
-import org.amshove.kluent.shouldBeEqualTo
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ValidatePersonNumberTests {
@@ -12,7 +12,7 @@ class ValidatePersonNumberTests {
 
         val result = validatePersonDNumberMod11(validFnr)
 
-        result shouldBeEqualTo true
+        assertEquals(true, result)
     }
 
     @Test
@@ -22,7 +22,7 @@ class ValidatePersonNumberTests {
 
         val result = validatePersonDNumberMod11(invalidFnr)
 
-        result shouldBeEqualTo false
+        assertEquals(false, result)
     }
 
     @Test
@@ -32,6 +32,6 @@ class ValidatePersonNumberTests {
 
         val result = validatePersonDNumberMod11(invalidFnr)
 
-        result shouldBeEqualTo false
+        assertEquals(false, result)
     }
 }
