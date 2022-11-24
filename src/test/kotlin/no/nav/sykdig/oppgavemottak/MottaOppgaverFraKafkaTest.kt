@@ -1,8 +1,7 @@
 package no.nav.sykdig.oppgavemottak
 
 import no.nav.sykdig.FellesTestOppsett
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldNotBeEqualTo
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -27,18 +26,17 @@ class MottaOppgaverFraKafkaTest : FellesTestOppsett() {
 
         val oppgave = oppgaveRepository.getOppgave("1234")
 
-        oppgave shouldNotBeEqualTo null
-        oppgave!!.oppgaveId shouldBeEqualTo "1234"
-        oppgave.fnr shouldBeEqualTo "12345678910"
-        oppgave.journalpostId shouldBeEqualTo "11"
-        oppgave.dokumentInfoId shouldBeEqualTo null
-        oppgave.opprettet.toLocalDate() shouldBeEqualTo LocalDate.now()
-        oppgave.ferdigstilt shouldBeEqualTo null
-        oppgave.sykmeldingId.toString() shouldBeEqualTo sykmeldingId
-        oppgave.type shouldBeEqualTo "UTLAND"
-        oppgave.sykmelding shouldBeEqualTo null
-        oppgave.endretAv shouldBeEqualTo "syk-dig-backend"
-        oppgave.timestamp.toLocalDate() shouldBeEqualTo LocalDate.now()
+        assertEquals("1234", oppgave!!.oppgaveId)
+        assertEquals("12345678910", oppgave.fnr)
+        assertEquals("11", oppgave.journalpostId)
+        assertEquals(null, oppgave.dokumentInfoId)
+        assertEquals(LocalDate.now(), oppgave.opprettet.toLocalDate())
+        assertEquals(null, oppgave.ferdigstilt)
+        assertEquals(sykmeldingId, oppgave.sykmeldingId.toString())
+        assertEquals("UTLAND", oppgave.type)
+        assertEquals(null, oppgave.sykmelding)
+        assertEquals("syk-dig-backend", oppgave.endretAv)
+        assertEquals(LocalDate.now(), oppgave.timestamp.toLocalDate())
     }
 
     @Test

@@ -4,6 +4,7 @@ import no.nav.syfo.model.AvsenderSystem
 import no.nav.syfo.model.Diagnose
 import no.nav.syfo.model.KontaktMedPasient
 import no.nav.syfo.model.ReceivedSykmelding
+import no.nav.syfo.model.SporsmalSvar
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
 import no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv.DokarkivClient
@@ -17,9 +18,8 @@ import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldNotBeEqualTo
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -167,39 +167,44 @@ class FerdigstillingServiceTest {
             datoOpprettet.toLocalDateTime()
         )
 
-        receivedSykmelding.personNrPasient shouldBeEqualTo fnrPasient
-        receivedSykmelding.personNrLege shouldBeEqualTo fnrLege
-        receivedSykmelding.navLogId shouldBeEqualTo sykmeldingId.toString()
-        receivedSykmelding.msgId shouldBeEqualTo sykmeldingId.toString()
-        receivedSykmelding.legekontorOrgName shouldBeEqualTo ""
-        receivedSykmelding.mottattDato shouldBeEqualTo datoOpprettet.toLocalDateTime()
-        receivedSykmelding.tssid shouldBeEqualTo null
-        receivedSykmelding.sykmelding.pasientAktoerId shouldBeEqualTo ""
-        receivedSykmelding.sykmelding.medisinskVurdering shouldNotBeEqualTo null
-        receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose shouldBeEqualTo Diagnose(
-            system = "2.16.578.1.12.4.1.1.7110",
-            kode = "A070",
-            tekst = "Balantidiasis"
+        assertEquals(fnrPasient, receivedSykmelding.personNrPasient)
+        assertEquals(fnrLege, receivedSykmelding.personNrLege)
+        assertEquals(sykmeldingId.toString(), receivedSykmelding.navLogId)
+        assertEquals(sykmeldingId.toString(), receivedSykmelding.msgId)
+        assertEquals("", receivedSykmelding.legekontorOrgName)
+        assertEquals(datoOpprettet.toLocalDateTime(), receivedSykmelding.mottattDato)
+        assertEquals(null, receivedSykmelding.tssid)
+        assertEquals("", receivedSykmelding.sykmelding.pasientAktoerId)
+        assertEquals(
+            Diagnose(
+                system = "2.16.578.1.12.4.1.1.7110",
+                kode = "A070",
+                tekst = "Balantidiasis"
+            ),
+            receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose
         )
-        receivedSykmelding.sykmelding.skjermesForPasient shouldBeEqualTo false
-        receivedSykmelding.sykmelding.arbeidsgiver shouldNotBeEqualTo null
-        receivedSykmelding.sykmelding.perioder.size shouldBeEqualTo 1
-        receivedSykmelding.sykmelding.prognose shouldBeEqualTo null
-        receivedSykmelding.sykmelding.utdypendeOpplysninger shouldBeEqualTo emptyMap()
-        receivedSykmelding.sykmelding.tiltakArbeidsplassen shouldBeEqualTo null
-        receivedSykmelding.sykmelding.tiltakNAV shouldBeEqualTo null
-        receivedSykmelding.sykmelding.andreTiltak shouldBeEqualTo null
-        receivedSykmelding.sykmelding.meldingTilNAV?.bistandUmiddelbart shouldBeEqualTo null
-        receivedSykmelding.sykmelding.meldingTilArbeidsgiver shouldBeEqualTo null
-        receivedSykmelding.sykmelding.kontaktMedPasient shouldBeEqualTo KontaktMedPasient(
-            null,
-            null
+
+        assertEquals(false, receivedSykmelding.sykmelding.skjermesForPasient)
+        assertEquals(1, receivedSykmelding.sykmelding.perioder.size)
+        assertEquals(null, receivedSykmelding.sykmelding.prognose)
+        assertEquals(emptyMap<String, Map<String, SporsmalSvar>>(), receivedSykmelding.sykmelding.utdypendeOpplysninger)
+        assertEquals(null, receivedSykmelding.sykmelding.tiltakArbeidsplassen)
+        assertEquals(null, receivedSykmelding.sykmelding.tiltakNAV)
+        assertEquals(null, receivedSykmelding.sykmelding.andreTiltak)
+        assertEquals(null, receivedSykmelding.sykmelding.meldingTilNAV?.bistandUmiddelbart)
+        assertEquals(null, receivedSykmelding.sykmelding.meldingTilArbeidsgiver)
+        assertEquals(
+            KontaktMedPasient(
+                null,
+                null
+            ),
+            receivedSykmelding.sykmelding.kontaktMedPasient
         )
-        receivedSykmelding.sykmelding.behandletTidspunkt shouldBeEqualTo behandletTidspunkt.toLocalDateTime()
-        receivedSykmelding.sykmelding.behandler shouldNotBeEqualTo null
-        receivedSykmelding.sykmelding.avsenderSystem shouldBeEqualTo AvsenderSystem("syk-dig", journalPostId)
-        receivedSykmelding.sykmelding.syketilfelleStartDato shouldBeEqualTo LocalDate.of(2019, 8, 15)
-        receivedSykmelding.sykmelding.signaturDato shouldBeEqualTo datoOpprettet.toLocalDateTime()
-        receivedSykmelding.sykmelding.navnFastlege shouldBeEqualTo null
+
+        assertEquals(behandletTidspunkt.toLocalDateTime(), receivedSykmelding.sykmelding.behandletTidspunkt)
+        assertEquals(AvsenderSystem("syk-dig", journalPostId), receivedSykmelding.sykmelding.avsenderSystem)
+        assertEquals(LocalDate.of(2019, 8, 15), receivedSykmelding.sykmelding.syketilfelleStartDato)
+        assertEquals(datoOpprettet.toLocalDateTime(), receivedSykmelding.sykmelding.signaturDato)
+        assertEquals(null, receivedSykmelding.sykmelding.navnFastlege)
     }
 }

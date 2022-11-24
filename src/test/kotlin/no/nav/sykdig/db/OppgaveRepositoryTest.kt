@@ -7,7 +7,7 @@ import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
-import org.amshove.kluent.shouldBeEqualTo
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.transaction.annotation.Transactional
@@ -31,7 +31,7 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
     fun `should get oppgave`() {
         val oppgave = oppgaveRepository.getOppgave("345")
 
-        "345" shouldBeEqualTo oppgave?.oppgaveId
+        assertEquals("345", oppgave?.oppgaveId)
     }
 
     @Test
@@ -71,23 +71,24 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
         )
         val oppgave = oppgaveRepository.getOppgave("345")
 
-        oppgave?.fnr shouldBeEqualTo "sykmeldt-fnr"
-        oppgave?.endretAv shouldBeEqualTo "fake-test-ident"
-        oppgave?.ferdigstilt shouldBeEqualTo null
-        oppgave?.sykmelding?.fnrPasient shouldBeEqualTo "nytt-fnr-pasient"
-        oppgave?.sykmelding?.sykmelding?.behandletTidspunkt shouldBeEqualTo OffsetDateTime.parse("2020-01-01T12:00:00Z")
-        oppgave?.sykmelding?.utenlandskSykmelding?.land shouldBeEqualTo "ZMB"
-        oppgave?.sykmelding?.utenlandskSykmelding?.andreRelevanteOpplysninger shouldBeEqualTo true
-        oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode shouldBeEqualTo "Z00"
-        oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.system shouldBeEqualTo "ICPC-2"
-        oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(0)?.kode shouldBeEqualTo "Z01"
-        oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(0)?.system shouldBeEqualTo "ICPC-22"
-        oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(1)?.kode shouldBeEqualTo "Z02"
-        oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(1)?.system shouldBeEqualTo "ICPC-23"
-        oppgave?.sykmelding?.sykmelding?.perioder?.get(0)?.fom shouldBeEqualTo LocalDate.parse("2020-01-01")
-        oppgave?.sykmelding?.sykmelding?.perioder?.get(0)?.tom shouldBeEqualTo LocalDate.parse("2020-01-15")
-        oppgave?.sykmelding?.sykmelding?.perioder?.get(1)?.fom shouldBeEqualTo LocalDate.parse("2021-01-01")
-        oppgave?.sykmelding?.sykmelding?.perioder?.get(1)?.tom shouldBeEqualTo LocalDate.parse("2021-01-15")
-        oppgave?.sykmelding?.sykmelding?.perioder?.get(1)?.gradert?.grad shouldBeEqualTo 68
+        assertEquals("sykmeldt-fnr", oppgave?.fnr)
+        assertEquals("fake-test-ident", oppgave?.endretAv)
+        assertEquals(null, oppgave?.ferdigstilt)
+        assertEquals("nytt-fnr-pasient", oppgave?.sykmelding?.fnrPasient)
+        assertEquals(OffsetDateTime.parse("2020-01-01T12:00:00Z"), oppgave?.sykmelding?.sykmelding?.behandletTidspunkt)
+        assertEquals("ZMB", oppgave?.sykmelding?.utenlandskSykmelding?.land)
+        assertEquals(true, oppgave?.sykmelding?.utenlandskSykmelding?.andreRelevanteOpplysninger)
+        assertEquals("Z00", oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode)
+        assertEquals("ICPC-2", oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.system)
+        assertEquals("ICPC-2", oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.system)
+        assertEquals("Z01", oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(0)?.kode)
+        assertEquals("ICPC-22", oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(0)?.system)
+        assertEquals("Z02", oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(1)?.kode)
+        assertEquals("ICPC-23", oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(1)?.system)
+        assertEquals(LocalDate.parse("2020-01-01"), oppgave?.sykmelding?.sykmelding?.perioder?.get(0)?.fom)
+        assertEquals(LocalDate.parse("2020-01-15"), oppgave?.sykmelding?.sykmelding?.perioder?.get(0)?.tom)
+        assertEquals(LocalDate.parse("2021-01-01"), oppgave?.sykmelding?.sykmelding?.perioder?.get(1)?.fom)
+        assertEquals(LocalDate.parse("2021-01-15"), oppgave?.sykmelding?.sykmelding?.perioder?.get(1)?.tom)
+        assertEquals(68, oppgave?.sykmelding?.sykmelding?.perioder?.get(1)?.gradert?.grad)
     }
 }

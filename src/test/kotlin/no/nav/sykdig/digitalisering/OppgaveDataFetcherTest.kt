@@ -5,6 +5,7 @@ import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
 import no.nav.sykdig.TestGraphQLContextContributor
 import no.nav.sykdig.config.CustomDataFetchingExceptionHandler
 import no.nav.sykdig.db.PoststedRepository
+import no.nav.sykdig.digitalisering.api.DigitaliseringsoppgaveDataFetcher
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
@@ -19,8 +20,7 @@ import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
-import org.amshove.kluent.shouldBe
-import org.amshove.kluent.shouldBeEqualTo
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -64,7 +64,7 @@ class OppgaveDataFetcherTest {
     fun before() {
         val authentication: Authentication = Mockito.mock(Authentication::class.java)
         val securityContext: SecurityContext = Mockito.mock(SecurityContext::class.java)
-        Mockito.`when`(securityContext.getAuthentication()).thenReturn(authentication)
+        Mockito.`when`(securityContext.authentication).thenReturn(authentication)
         SecurityContextHolder.setContext(securityContext)
         Mockito.`when`(authentication.isAuthenticated).thenReturn(true)
         Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { true }
@@ -95,7 +95,7 @@ class OppgaveDataFetcherTest {
             "data.oppgave.values.fnrPasient"
         )
 
-        oppgave shouldBeEqualTo "12345678910"
+        assertEquals("12345678910", oppgave)
     }
 
     @Test
@@ -121,8 +121,8 @@ class OppgaveDataFetcherTest {
             }
             """.trimIndent(),
         )
-        result.errors.size shouldBe 1
-        result.errors[0].message shouldBeEqualTo "Innlogget bruker har ikke tilgang"
+        assertEquals(1, result.errors.size)
+        assertEquals("Innlogget bruker har ikke tilgang", result.errors[0].message)
     }
 
     @Test
@@ -160,8 +160,7 @@ class OppgaveDataFetcherTest {
             """.trimIndent(),
             "data.oppgave.person.bostedsadresse.poststed",
         )
-
-        poststed shouldBeEqualTo "Oslo"
+        assertEquals("Oslo", poststed)
     }
 
     @Test
@@ -201,7 +200,7 @@ class OppgaveDataFetcherTest {
             "data.oppgave.person.bostedsadresse.poststed"
         )
 
-        poststed shouldBeEqualTo "Vestnes"
+        assertEquals("Vestnes", poststed)
     }
 
     @Test
@@ -227,7 +226,7 @@ class OppgaveDataFetcherTest {
                 "id" to "345",
                 "enhetId" to "1234",
                 "values" to mapOf(
-                    "fnrPasient" to "testfnr-pasient",
+                    "fnrPasient" to "20086600138",
                     "behandletTidspunkt" to null,
                     "skrevetLand" to null,
                     "perioder" to null,
@@ -238,12 +237,12 @@ class OppgaveDataFetcherTest {
             )
         )
 
-        result.errors.size shouldBe 0
+        assertEquals(0, result.errors.size)
         verify(
             oppgaveService, times(1)
         ).updateOppgave(
             oppgaveId = "345",
-            values = UferdigRegisterOppgaveValues(fnrPasient = "testfnr-pasient", null, null, null, null, null, null),
+            values = UferdigRegisterOppgaveValues(fnrPasient = "20086600138", null, null, null, null, null, null),
             ident = "fake-test-ident",
         )
     }
@@ -272,7 +271,7 @@ class OppgaveDataFetcherTest {
                 "id" to "345",
                 "enhetId" to "1234",
                 "values" to mapOf(
-                    "fnrPasient" to "testfnr-pasient",
+                    "fnrPasient" to "20086600138",
                     "behandletTidspunkt" to null,
                     "skrevetLand" to null,
                     "perioder" to null,
@@ -282,8 +281,8 @@ class OppgaveDataFetcherTest {
                 "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID
             )
         )
-        result.errors.size shouldBe 1
-        result.errors[0].message shouldBeEqualTo "Innlogget bruker har ikke tilgang"
+        assertEquals(1, result.errors.size)
+        assertEquals("Innlogget bruker har ikke tilgang", result.errors[0].message)
     }
 
     @Test
@@ -310,13 +309,13 @@ class OppgaveDataFetcherTest {
                 "id" to "345",
                 "enhetId" to "1234",
                 "values" to mapOf(
-                    "fnrPasient" to "testfnr-pasient",
+                    "fnrPasient" to "20086600138",
                     "behandletTidspunkt" to "2022-10-26",
                     "skrevetLand" to "POL",
                     "perioder" to emptyList<PeriodeInput>(),
                     "hovedDiagnose" to mapOf(
-                        "kode" to "Køde",
-                        "system" to "ICDCPC12",
+                        "kode" to "Z09",
+                        "system" to "ICPC2",
                     ),
                     "biDiagnoser" to emptyList<DiagnoseInput>(),
                 ),
@@ -324,18 +323,18 @@ class OppgaveDataFetcherTest {
             )
         )
 
-        result.errors.size shouldBe 0
+        assertEquals(0, result.errors.size)
         verify(
             oppgaveService, times(1)
         ).ferdigstillOppgave(
             oppgaveId = "345",
             ident = "fake-test-ident",
             values = FerdistilltRegisterOppgaveValues(
-                fnrPasient = "testfnr-pasient",
+                fnrPasient = "20086600138",
                 behandletTidspunkt = LocalDate.parse("2022-10-26").toOffsetDateTimeAtNoon()!!,
                 skrevetLand = "POL",
                 perioder = emptyList(),
-                hovedDiagnose = DiagnoseInput(kode = "Køde", system = "ICDCPC12"),
+                hovedDiagnose = DiagnoseInput(kode = "Z09", system = "ICPC2"),
                 biDiagnoser = emptyList(),
                 harAndreRelevanteOpplysninger = null
             ),
@@ -381,8 +380,8 @@ class OppgaveDataFetcherTest {
             )
         )
 
-        result.errors.size shouldBe 1
-        result.errors[0].message shouldBeEqualTo "Landet sykmeldingen er skrevet må være satt"
+        assertEquals(1, result.errors.size)
+        assertEquals("Landet sykmeldingen er skrevet må være satt", result.errors[0].message)
     }
 }
 
