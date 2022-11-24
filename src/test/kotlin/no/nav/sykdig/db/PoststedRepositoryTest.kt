@@ -3,14 +3,13 @@ package no.nav.sykdig.db
 import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.poststed.PostInformasjon
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertEquals
 
 @Transactional
 class PoststedRepositoryTest : FellesTestOppsett() {
@@ -71,7 +70,6 @@ class PoststedRepositoryTest : FellesTestOppsett() {
         val allePoststeder = poststedRepository.getAllePoststeder()
         assertEquals(4, allePoststeder.size)
         assertEquals(null, allePoststeder.find { it.postnummer == "5341" })
-
     }
 
     @Test
@@ -90,7 +88,7 @@ class PoststedRepositoryTest : FellesTestOppsett() {
 
         val allePoststeder = poststedRepository.getAllePoststeder()
         assertEquals(6, allePoststeder.size)
-        assertEquals("OSLO",  allePoststeder.find { it.postnummer == "0502" }?.poststed)
+        assertEquals("OSLO", allePoststeder.find { it.postnummer == "0502" }?.poststed)
     }
 
     @Test
@@ -109,7 +107,7 @@ class PoststedRepositoryTest : FellesTestOppsett() {
         val allePoststeder = poststedRepository.getAllePoststeder()
         assertEquals(5, allePoststeder.size)
         assertEquals("OSLO", allePoststeder.find { it.postnummer == "0502" }?.poststed)
-        assertEquals(null,  allePoststeder.find { it.postnummer == "5449" })
+        assertEquals(null, allePoststeder.find { it.postnummer == "5449" })
         assertEquals("SENJA", allePoststeder.find { it.postnummer == "9609" }?.poststed)
     }
 

@@ -4,6 +4,7 @@ import no.nav.syfo.model.AvsenderSystem
 import no.nav.syfo.model.Diagnose
 import no.nav.syfo.model.KontaktMedPasient
 import no.nav.syfo.model.ReceivedSykmelding
+import no.nav.syfo.model.SporsmalSvar
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
 import no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv.DokarkivClient
@@ -18,6 +19,7 @@ import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -32,8 +34,6 @@ import java.time.Month
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
-import no.nav.syfo.model.SporsmalSvar
-import org.junit.jupiter.api.Assertions.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMetrics
@@ -169,18 +169,21 @@ class FerdigstillingServiceTest {
 
         assertEquals(fnrPasient, receivedSykmelding.personNrPasient)
         assertEquals(fnrLege, receivedSykmelding.personNrLege)
-        assertEquals(sykmeldingId.toString(),  receivedSykmelding.navLogId)
+        assertEquals(sykmeldingId.toString(), receivedSykmelding.navLogId)
         assertEquals(sykmeldingId.toString(), receivedSykmelding.msgId)
         assertEquals("", receivedSykmelding.legekontorOrgName)
         assertEquals(datoOpprettet.toLocalDateTime(), receivedSykmelding.mottattDato)
         assertEquals(null, receivedSykmelding.tssid)
         assertEquals("", receivedSykmelding.sykmelding.pasientAktoerId)
         assertEquals(null, receivedSykmelding.sykmelding.medisinskVurdering)
-        assertEquals(Diagnose(
-            system = "2.16.578.1.12.4.1.1.7110",
-            kode = "A070",
-            tekst = "Balantidiasis"
-        ),  receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose)
+        assertEquals(
+            Diagnose(
+                system = "2.16.578.1.12.4.1.1.7110",
+                kode = "A070",
+                tekst = "Balantidiasis"
+            ),
+            receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose
+        )
 
         assertEquals(false, receivedSykmelding.sykmelding.skjermesForPasient)
         assertEquals(null, receivedSykmelding.sykmelding.arbeidsgiver)
@@ -192,10 +195,13 @@ class FerdigstillingServiceTest {
         assertEquals(null, receivedSykmelding.sykmelding.andreTiltak)
         assertEquals(null, receivedSykmelding.sykmelding.meldingTilNAV?.bistandUmiddelbart)
         assertEquals(null, receivedSykmelding.sykmelding.meldingTilArbeidsgiver)
-        assertEquals(KontaktMedPasient(
-            null,
-            null
-        ), receivedSykmelding.sykmelding.kontaktMedPasient)
+        assertEquals(
+            KontaktMedPasient(
+                null,
+                null
+            ),
+            receivedSykmelding.sykmelding.kontaktMedPasient
+        )
 
         assertEquals(behandletTidspunkt.toLocalDateTime(), receivedSykmelding.sykmelding.behandletTidspunkt)
         assertEquals(null, receivedSykmelding.sykmelding.behandler)

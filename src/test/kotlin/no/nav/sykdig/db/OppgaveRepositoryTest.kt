@@ -7,12 +7,12 @@ import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.OffsetDateTime
-import org.junit.jupiter.api.Assertions.assertEquals
 
 @Transactional
 class OppgaveRepositoryTest : FellesTestOppsett() {
@@ -72,7 +72,7 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
         val oppgave = oppgaveRepository.getOppgave("345")
 
         assertEquals("sykmeldt-fnr", oppgave?.fnr)
-        assertEquals("fake-test-ident",  oppgave?.endretAv)
+        assertEquals("fake-test-ident", oppgave?.endretAv)
         assertEquals(null, oppgave?.ferdigstilt)
         assertEquals("nytt-fnr-pasient", oppgave?.sykmelding?.fnrPasient)
         assertEquals(OffsetDateTime.parse("2020-01-01T12:00:00Z"), oppgave?.sykmelding?.sykmelding?.behandletTidspunkt)

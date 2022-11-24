@@ -20,6 +20,7 @@ import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -36,7 +37,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
-import org.junit.jupiter.api.Assertions.assertEquals
 
 @SpringBootTest(
     classes = [
@@ -282,7 +282,7 @@ class OppgaveDataFetcherTest {
             )
         )
         assertEquals(1, result.errors.size)
-        assertEquals("Innlogget bruker har ikke tilgang",  result.errors[0].message)
+        assertEquals("Innlogget bruker har ikke tilgang", result.errors[0].message)
     }
 
     @Test

@@ -1,11 +1,11 @@
 package no.nav.sykdig.oppgavemottak
 
 import no.nav.sykdig.FellesTestOppsett
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.UUID
-import org.junit.jupiter.api.Assertions.assertEquals
 
 class MottaOppgaverFraKafkaTest : FellesTestOppsett() {
     @Autowired
@@ -33,8 +33,8 @@ class MottaOppgaverFraKafkaTest : FellesTestOppsett() {
         assertEquals(null, oppgave.dokumentInfoId)
         assertEquals(LocalDate.now(), oppgave.opprettet.toLocalDate())
         assertEquals(null, oppgave.ferdigstilt)
-        assertEquals(sykmeldingId,  oppgave.sykmeldingId.toString())
-        assertEquals("UTLAND",  oppgave.type)
+        assertEquals(sykmeldingId, oppgave.sykmeldingId.toString())
+        assertEquals("UTLAND", oppgave.type)
         assertEquals(null, oppgave.sykmelding)
         assertEquals("syk-dig-backend", oppgave.endretAv)
         assertEquals(LocalDate.now(), oppgave.timestamp.toLocalDate())

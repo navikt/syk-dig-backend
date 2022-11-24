@@ -12,6 +12,7 @@ import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import org.junit.jupiter.api.Assertions.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMetrics
@@ -66,7 +66,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
         assertEquals("12345678910", oppgave.fnr)
         assertEquals("A123456", oppgave.endretAv)
         assertEquals("UTLAND", oppgave.type)
-        assertEquals(null,oppgave.sykmelding)
+        assertEquals(null, oppgave.sykmelding)
         assertEquals(null, oppgave.ferdigstilt)
     }
 
@@ -88,8 +88,8 @@ class OppgaveServiceTest : FellesTestOppsett() {
 
         val oppdatertOppgave = oppgaveService.getOppgave("123")
 
-        assertEquals("12345678910",oppdatertOppgave.fnr)
-        assertEquals("X987654",oppdatertOppgave.endretAv)
+        assertEquals("12345678910", oppdatertOppgave.fnr)
+        assertEquals("X987654", oppdatertOppgave.endretAv)
         assertEquals("UTLAND", oppdatertOppgave.type)
         assertEquals("12345678910", oppdatertOppgave.sykmelding?.fnrPasient)
         assertEquals("SWE", oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land)
@@ -120,7 +120,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
         assertEquals("UTLAND", oppdatertOppgave.type)
         assertEquals("12345678910", oppdatertOppgave.sykmelding?.fnrPasient)
         assertEquals("SWE", oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land)
-        assertEquals("A070",  oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode)
+        assertEquals("A070", oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode)
         assertEquals(null, oppdatertOppgave.ferdigstilt)
     }
 }
