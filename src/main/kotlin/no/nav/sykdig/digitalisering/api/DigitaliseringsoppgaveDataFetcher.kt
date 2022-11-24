@@ -101,7 +101,7 @@ private fun validateRegisterOppgaveValues(
 
 private fun validateFnr(fnr: String) {
     if (!validatePersonAndDNumber(fnr)) {
-        throw ClientException("fnr paserer ikke modulus11 kontrollen")
+        throw ClientException("Fødselsnummer til pasient er ikke gyldig")
     }
 }
 
