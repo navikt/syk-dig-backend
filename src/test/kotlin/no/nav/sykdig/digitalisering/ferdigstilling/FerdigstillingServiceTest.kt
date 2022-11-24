@@ -175,7 +175,6 @@ class FerdigstillingServiceTest {
         assertEquals(datoOpprettet.toLocalDateTime(), receivedSykmelding.mottattDato)
         assertEquals(null, receivedSykmelding.tssid)
         assertEquals("", receivedSykmelding.sykmelding.pasientAktoerId)
-        assertEquals(null, receivedSykmelding.sykmelding.medisinskVurdering)
         assertEquals(
             Diagnose(
                 system = "2.16.578.1.12.4.1.1.7110",
@@ -186,7 +185,6 @@ class FerdigstillingServiceTest {
         )
 
         assertEquals(false, receivedSykmelding.sykmelding.skjermesForPasient)
-        assertEquals(null, receivedSykmelding.sykmelding.arbeidsgiver)
         assertEquals(1, receivedSykmelding.sykmelding.perioder.size)
         assertEquals(null, receivedSykmelding.sykmelding.prognose)
         assertEquals(emptyMap<String, Map<String, SporsmalSvar>>(), receivedSykmelding.sykmelding.utdypendeOpplysninger)
@@ -204,7 +202,6 @@ class FerdigstillingServiceTest {
         )
 
         assertEquals(behandletTidspunkt.toLocalDateTime(), receivedSykmelding.sykmelding.behandletTidspunkt)
-        assertEquals(null, receivedSykmelding.sykmelding.behandler)
         assertEquals(AvsenderSystem("syk-dig", journalPostId), receivedSykmelding.sykmelding.avsenderSystem)
         assertEquals(LocalDate.of(2019, 8, 15), receivedSykmelding.sykmelding.syketilfelleStartDato)
         assertEquals(datoOpprettet.toLocalDateTime(), receivedSykmelding.sykmelding.signaturDato)

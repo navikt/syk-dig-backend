@@ -26,7 +26,6 @@ class MottaOppgaverFraKafkaTest : FellesTestOppsett() {
 
         val oppgave = oppgaveRepository.getOppgave("1234")
 
-        assertEquals(null, oppgave)
         assertEquals("1234", oppgave!!.oppgaveId)
         assertEquals("12345678910", oppgave.fnr)
         assertEquals("11", oppgave.journalpostId)

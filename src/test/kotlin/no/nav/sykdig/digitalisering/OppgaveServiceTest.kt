@@ -13,6 +13,7 @@ import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -121,6 +122,6 @@ class OppgaveServiceTest : FellesTestOppsett() {
         assertEquals("12345678910", oppdatertOppgave.sykmelding?.fnrPasient)
         assertEquals("SWE", oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land)
         assertEquals("A070", oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode)
-        assertEquals(null, oppdatertOppgave.ferdigstilt)
+        assertNotEquals(null, oppdatertOppgave.ferdigstilt)
     }
 }
