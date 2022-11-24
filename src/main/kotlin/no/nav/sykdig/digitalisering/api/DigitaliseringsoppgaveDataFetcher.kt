@@ -19,7 +19,6 @@ import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
 import no.nav.sykdig.logger
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
 import no.nav.sykdig.utils.validateDiagnose
-import no.nav.sykdig.utils.validatePersonAndDNumber
 import org.springframework.security.access.prepost.PreAuthorize
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -84,7 +83,6 @@ private fun validateRegisterOppgaveValues(
     requireNotEmptyOrNull(values.hovedDiagnose) { "Hoveddiagnose må være satt" }
     requireNotEmptyOrNull(values.biDiagnoser) { "Bidiagnoser må være satt" }
 
-    validateFnr(values.fnrPasient)
     validateHovedDiagnose(values.hovedDiagnose)
     validateBiDiagnoser(values.biDiagnoser)
 
@@ -97,12 +95,6 @@ private fun validateRegisterOppgaveValues(
         biDiagnoser = values.biDiagnoser,
         harAndreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger
     )
-}
-
-private fun validateFnr(fnr: String) {
-    if (!validatePersonAndDNumber(fnr)) {
-        throw ClientException("Fødselsnummer til pasient er ikke gyldig")
-    }
 }
 
 private fun validateHovedDiagnose(houvedDiagnose: DiagnoseInput?) {
