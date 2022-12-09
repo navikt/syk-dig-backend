@@ -14,7 +14,7 @@ enum PeriodeType {
 }
 
 type OppgaveValues {
-    fnrPasient: String
+    fnrPasient: String!
     behandletTidspunkt: DateTime
     skrevetLand: String
     perioder: [PeriodeValue!]
