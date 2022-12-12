@@ -36,8 +36,13 @@ class OppgaveService(
         oppgaveRepository.updateOppgave(oppgave, sykmelding, ident, false)
     }
 
-    fun ferdigstillOppgaveGosys(oppgaveId: String) {
-        oppgaveRepository.ferdigstillOppgave(oppgaveId)
+    fun ferdigstillOppgaveGosys(
+        oppgave: OppgaveDbModel,
+        values: FerdistilltRegisterOppgaveValues,
+        ident: String
+    ) {
+        val sykmelding = toSykmelding(oppgave, values)
+        oppgaveRepository.updateOppgave(oppgave, sykmelding, ident, true)
     }
 
     @Transactional

@@ -74,10 +74,15 @@ class DigitaliseringsoppgaveDataFetcher(
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
-    fun oppgaveTilbakeTilGosys(@InputArgument oppgaveId: String, dfe: DataFetchingEnvironment): Digitaliseringsoppgave {
+    fun oppgaveTilbakeTilGosys(
+        @InputArgument oppgaveId: String,
+        @InputArgument values: SykmeldingUnderArbeidValues,
+        dfe: DataFetchingEnvironment
+    ): Digitaliseringsoppgave {
         val ident: String = dfe.graphQlContext.get("username")
+        val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
         return mapToDigitaliseringsoppgave(
-            digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(oppgaveId, ident)
+            digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(oppgaveId, ident, ferdistilltRegisterOppgaveValues)
         )
     }
 }
