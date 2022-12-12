@@ -36,6 +36,10 @@ class OppgaveService(
         oppgaveRepository.updateOppgave(oppgave, sykmelding, ident, false)
     }
 
+    fun ferdigstillOppgaveGosys(oppgaveId: String){
+        oppgaveRepository.ferdigstillOppgave(oppgaveId)
+    }
+
     @Transactional
     fun ferdigstillOppgave(
         oppgaveId: String,

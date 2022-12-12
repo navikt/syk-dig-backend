@@ -14,3 +14,10 @@ type Mutation {
         status: SykmeldingUnderArbeidStatus!
     ): Digitaliseringsoppgave
 }
+
+type Tilgosys {
+    tilgosys(
+        oppgaveId: String!
+        enhetId: String!
+    ): Digitaliseringsoppgave
+}

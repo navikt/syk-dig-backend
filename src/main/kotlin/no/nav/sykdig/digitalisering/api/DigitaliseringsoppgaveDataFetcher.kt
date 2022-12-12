@@ -71,7 +71,17 @@ class DigitaliseringsoppgaveDataFetcher(
 
         return mapToDigitaliseringsoppgave(digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId))
     }
+
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @DgsQuery(field = DgsConstants.TILGOSYS.Tilgosys)
+    fun tilgosys(@InputArgument oppgaveId: String, dfe: DataFetchingEnvironment) {
+        val ident: String = dfe.graphQlContext.get("username")
+        digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(oppgaveId, ident)
+    }
+
 }
+
+
 private fun validateRegisterOppgaveValues(
     values: SykmeldingUnderArbeidValues,
 ): FerdistilltRegisterOppgaveValues {
