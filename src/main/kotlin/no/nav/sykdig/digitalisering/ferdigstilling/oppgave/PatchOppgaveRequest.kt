@@ -7,7 +7,6 @@ data class PatchFerdigStillOppgaveRequest(
     val mappeId: Int? = null
 )
 
-
 data class PatchToGosysOppgaveRequest(
     val versjon: Int,
     val status: Oppgavestatus,

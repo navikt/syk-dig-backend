@@ -126,8 +126,7 @@ class OppgaveClient(
                 String::class.java
             )
             log.info("OppdaterOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
-        }
-        catch (e: HttpClientErrorException) {
+        } catch (e: HttpClientErrorException) {
             if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
                 log.warn("Veileder har ikke tilgang til å oppdaterOppgave oppgaveId $oppgaveId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
@@ -145,6 +144,5 @@ class OppgaveClient(
             )
             throw e
         }
-
     }
 }

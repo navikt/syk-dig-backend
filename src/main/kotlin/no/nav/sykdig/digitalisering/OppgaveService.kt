@@ -36,7 +36,7 @@ class OppgaveService(
         oppgaveRepository.updateOppgave(oppgave, sykmelding, ident, false)
     }
 
-    fun ferdigstillOppgaveGosys(oppgaveId: String){
+    fun ferdigstillOppgaveGosys(oppgaveId: String) {
         oppgaveRepository.ferdigstillOppgave(oppgaveId)
     }
 

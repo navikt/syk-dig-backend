@@ -14,7 +14,9 @@ class SendTilGosysService(
     ) {
         val oppgave = oppgaveClient.getOppgave(oppgaveId, sykmeldingId)
 
-        oppgaveClient.oppdaterOppgave(oppgaveId, sykmeldingId, oppgave.versjon, oppgave.status,
-            "FS22", veilederIdent )
+        oppgaveClient.oppdaterOppgave(
+            oppgaveId, sykmeldingId, oppgave.versjon, oppgave.status,
+            "FS22", veilederIdent
+        )
     }
 }

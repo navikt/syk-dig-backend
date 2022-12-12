@@ -77,11 +77,10 @@ class DigitaliseringsoppgaveDataFetcher(
     fun oppgaveTilbakeTilGosys(@InputArgument oppgaveId: String, dfe: DataFetchingEnvironment): Digitaliseringsoppgave {
         val ident: String = dfe.graphQlContext.get("username")
         return mapToDigitaliseringsoppgave(
-            digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(oppgaveId, ident))
+            digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(oppgaveId, ident)
+        )
     }
-
 }
-
 
 private fun validateRegisterOppgaveValues(
     values: SykmeldingUnderArbeidValues,

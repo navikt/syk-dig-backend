@@ -89,14 +89,13 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     @Transactional
     fun ferdigstillOppgave(
         oppgaveId: String
-    )
-    {
+    ) {
         namedParameterJdbcTemplate.update(
             """
                 UPDATE oppgave
                 SET ferdigstilt = :ferdigstilt
                 WHERE oppgave_id = :oppgave_id
-                """.trimIndent(),
+            """.trimIndent(),
             mapOf(
                 "oppgave_id" to oppgaveId,
                 "ferdigstilt" to Timestamp.from(Instant.now()),
