@@ -13,4 +13,9 @@ type Mutation {
         values: SykmeldingUnderArbeidValues!
         status: SykmeldingUnderArbeidStatus!
     ): Digitaliseringsoppgave
+
+    oppgaveTilbakeTilGosys(
+        oppgaveId: String!
+        values: SykmeldingUnderArbeidValues!
+    ): Digitaliseringsoppgave
 }
