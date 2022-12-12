@@ -13,11 +13,6 @@ type Mutation {
         values: SykmeldingUnderArbeidValues!
         status: SykmeldingUnderArbeidStatus!
     ): Digitaliseringsoppgave
-}
 
-type Tilgosys {
-    tilgosys(
-        oppgaveId: String!
-        enhetId: String!
-    ): Digitaliseringsoppgave
+    oppgaveTilbakeTilGosys(oppgaveId: String!): Digitaliseringsoppgave
 }
