@@ -5,6 +5,7 @@ import no.nav.syfo.model.Diagnose
 import no.nav.syfo.model.KontaktMedPasient
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.syfo.model.SporsmalSvar
+import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
 import no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv.DokarkivClient
@@ -38,7 +39,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMetrics
 @SpringBootTest(classes = [SykDigBackendApplication::class])
-class FerdigstillingServiceTest {
+class FerdigstillingServiceTest : FellesTestOppsett() {
     @MockBean
     lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
 
