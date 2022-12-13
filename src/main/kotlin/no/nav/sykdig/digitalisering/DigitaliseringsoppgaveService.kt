@@ -1,18 +1,18 @@
 package no.nav.sykdig.digitalisering
 
-import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.SendTilGosysService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.metrics.MetricRegister
 import org.springframework.stereotype.Service
 
 @Service
 class DigitaliseringsoppgaveService(
     private val oppgaveService: OppgaveService,
-    private val ferdigstillingService: FerdigstillingService,
     private val sendTilGosysService: SendTilGosysService,
-    private val personService: PersonService
+    private val personService: PersonService,
+    private val metricRegister: MetricRegister
 ) {
 
     fun getDigitaiseringsoppgave(oppgaveId: String): SykDigOppgave {
@@ -35,6 +35,7 @@ class DigitaliseringsoppgaveService(
         enhetId: String
     ) {
         oppgaveService.ferdigstillOppgave(oppgaveId, ident, values, enhetId)
+        metricRegister.FERDIGSTILT_OPPGAVE.increment()
     }
 
     fun ferdigstillOppgaveSendTilGosys(
@@ -52,6 +53,7 @@ class DigitaliseringsoppgaveService(
         oppgaveService.ferdigstillOppgaveGosys(oppgave, values, ident)
         val updatedOppgave = oppgaveService.getOppgave(oppgaveId)
 
+        metricRegister.SENDT_TIL_GOSYS.increment()
         return SykDigOppgave(updatedOppgave, sykmeldt)
     }
 }

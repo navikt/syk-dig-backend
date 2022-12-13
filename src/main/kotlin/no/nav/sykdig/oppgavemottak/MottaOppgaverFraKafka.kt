@@ -2,6 +2,7 @@ package no.nav.sykdig.oppgavemottak
 
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.logger
+import no.nav.sykdig.metrics.MetricRegister
 import no.nav.sykdig.model.OppgaveDbModel
 import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
@@ -9,7 +10,10 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 @Component
-class MottaOppgaverFraKafka(val oppgaveRepository: OppgaveRepository) {
+class MottaOppgaverFraKafka(
+    private val oppgaveRepository: OppgaveRepository,
+    private val metricRegister: MetricRegister
+) {
     val log = logger()
     fun lagre(sykmeldingId: String, digitaliseringsoppgave: DigitaliseringsoppgaveKafka) {
         log.info("Mottatt oppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
@@ -29,6 +33,7 @@ class MottaOppgaverFraKafka(val oppgaveRepository: OppgaveRepository) {
                 timestamp = opprettet
             )
         )
+        metricRegister.MOTTATT_OPPGAVE.increment()
     }
 }
 
