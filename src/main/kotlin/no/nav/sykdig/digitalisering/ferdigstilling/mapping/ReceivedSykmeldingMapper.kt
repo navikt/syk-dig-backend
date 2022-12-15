@@ -25,7 +25,7 @@ fun mapToReceivedSykmelding(
 
     val sykmelding = extractHelseOpplysningerArbeidsuforhet(fellesformat).toSykmelding(
         sykmeldingId = sykmeldingId,
-        pasientAktoerId = "", // TODO: Hva skal vi gjøre her?
+        pasientAktoerId = sykmeldt.aktorId,
         msgId = sykmeldingId,
         signaturDato = opprettet
     )
@@ -34,7 +34,7 @@ fun mapToReceivedSykmelding(
         sykmelding = sykmelding,
         personNrPasient = sykmeldt.fnr,
         tlfPasient = null,
-        personNrLege = "", // TODO: Hva skal vi gjøre med dette?
+        personNrLege = "", // Denne skal være blank siden vi ikke har fnr for lege, men feltet er påkrevd i formatet
         navLogId = sykmeldingId,
         msgId = sykmeldingId,
         legekontorOrgNr = null,

@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering.pdl
 data class Person(
     val fnr: String,
     val navn: Navn,
+    val aktorId: String,
     val bostedsadresse: Bostedsadresse?,
     val oppholdsadresse: Oppholdsadresse?
 )
