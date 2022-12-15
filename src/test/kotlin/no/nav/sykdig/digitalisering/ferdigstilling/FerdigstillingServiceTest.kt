@@ -80,6 +80,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             sykmeldt = Person(
                 fnr = "12345678910",
                 navn = Navn("Fornavn", null, "Etternavn"),
+                aktorId = "aktorid",
                 bostedsadresse = null,
                 oppholdsadresse = null
             ),
@@ -147,6 +148,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val person = Person(
             fnrPasient,
             Navn("fornavn", null, "etternavn"),
+            "aktorid",
             Bostedsadresse(
                 null,
                 null,
@@ -175,7 +177,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         assertEquals("", receivedSykmelding.legekontorOrgName)
         assertEquals(datoOpprettet.toLocalDateTime(), receivedSykmelding.mottattDato)
         assertEquals(null, receivedSykmelding.tssid)
-        assertEquals("", receivedSykmelding.sykmelding.pasientAktoerId)
+        assertEquals("aktorid", receivedSykmelding.sykmelding.pasientAktoerId)
         assertEquals(
             Diagnose(
                 system = "2.16.578.1.12.4.1.1.7110",

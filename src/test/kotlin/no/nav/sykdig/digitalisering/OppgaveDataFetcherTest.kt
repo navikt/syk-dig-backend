@@ -417,6 +417,7 @@ private fun createPerson(
 ) = Person(
     "12345678910",
     Navn("fornavn", null, "etternavn"),
+    "aktorid",
     Bostedsadresse(
         null,
         vegadresse,

@@ -1,7 +1,7 @@
 package no.nav.sykdig.digitalisering.pdl
 
 import no.nav.sykdig.digitalisering.pdl.client.PdlClient
-import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlPerson
+import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlResponse
 import no.nav.sykdig.logger
 import org.springframework.stereotype.Component
 
@@ -12,15 +12,15 @@ class PersonService(
     val log = logger()
 
     fun hentPerson(fnr: String, sykmeldingId: String): Person {
-        val person = pdlClient.hentPerson(fnr, sykmeldingId)
+        val pdlResponse = pdlClient.hentPerson(fnr, sykmeldingId)
 
-        return mapPdlPersonTilPerson(fnr, person)
+        return mapPdlResponseTilPerson(fnr, pdlResponse)
     }
 
-    fun mapPdlPersonTilPerson(fnr: String, pdlPerson: PdlPerson): Person {
-        val navn = pdlPerson.navn.first()
-        val bostedsadresse = pdlPerson.bostedsadresse.firstOrNull()
-        val oppholdsadresse = pdlPerson.oppholdsadresse.firstOrNull()
+    fun mapPdlResponseTilPerson(fnr: String, pdlResponse: PdlResponse): Person {
+        val navn = pdlResponse.hentPerson!!.navn.first()
+        val bostedsadresse = pdlResponse.hentPerson.bostedsadresse.firstOrNull()
+        val oppholdsadresse = pdlResponse.hentPerson.oppholdsadresse.firstOrNull()
 
         return Person(
             fnr = fnr,
@@ -29,6 +29,7 @@ class PersonService(
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn
             ),
+            aktorId = pdlResponse.identer!!.identer.first { it.gruppe == "AKTORID" }.ident,
             bostedsadresse = bostedsadresse?.let {
                 Bostedsadresse(
                     coAdressenavn = it.coAdressenavn,

@@ -72,7 +72,7 @@ const val PDL_QUERY = """
     }
 """
 
-data class PdlQuery(
+data class PdlResponse(
     val hentPerson: PdlPerson?,
     val identer: PdlIdenter?
 )

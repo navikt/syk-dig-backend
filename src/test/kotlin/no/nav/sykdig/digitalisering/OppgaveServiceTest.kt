@@ -47,6 +47,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
             Person(
                 fnr = "12345678910",
                 navn = Navn("Fornavn", null, "Etternavn"),
+                aktorId = "aktorid",
                 bostedsadresse = null,
                 oppholdsadresse = null
             )
