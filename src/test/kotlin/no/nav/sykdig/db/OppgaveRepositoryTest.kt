@@ -91,4 +91,22 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
         assertEquals(LocalDate.parse("2021-01-15"), oppgave?.sykmelding?.sykmelding?.perioder?.get(1)?.tom)
         assertEquals(68, oppgave?.sykmelding?.sykmelding?.perioder?.get(1)?.gradert?.grad)
     }
+
+    @Test
+    fun `should ferdigstill oppgave and update sykmelding`() {
+
+        val saksbehandlerIdent = "Z212313"
+
+        val preOppgave = oppgaveRepository.getOppgave("345")!!
+
+        oppgaveRepository.ferdigstillOppgaveGosys(preOppgave, saksbehandlerIdent, null)
+
+        val oppgave = oppgaveRepository.getOppgave("345")
+
+
+        assertEquals("sykmeldt-fnr", oppgave?.fnr)
+        assertEquals("Z212313", oppgave?.endretAv)
+        assertEquals(LocalDate.now(), oppgave?.ferdigstilt?.toLocalDate())
+        assertEquals(null, oppgave?.sykmelding)
+    }
 }
