@@ -103,7 +103,6 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
 
         val oppgave = oppgaveRepository.getOppgave("345")
 
-
         assertEquals("sykmeldt-fnr", oppgave?.fnr)
         assertEquals("Z212313", oppgave?.endretAv)
         assertEquals(LocalDate.now(), oppgave?.ferdigstilt?.toLocalDate())
