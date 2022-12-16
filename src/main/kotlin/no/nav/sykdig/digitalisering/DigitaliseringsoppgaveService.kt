@@ -49,7 +49,7 @@ class DigitaliseringsoppgaveService(
         )
 
         sendTilGosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), ident)
-        oppgaveService.ferdigstillOppgaveGosys(oppgave.oppgaveId, ident)
+        oppgaveService.ferdigstillOppgaveGosys(oppgave, ident)
         val updatedOppgave = oppgaveService.getOppgave(oppgaveId)
 
         metricRegister.SENDT_TIL_GOSYS.increment()

@@ -37,10 +37,15 @@ class OppgaveService(
     }
 
     fun ferdigstillOppgaveGosys(
-        oppgaveId: String,
+        oppgave: OppgaveDbModel,
         ident: String
     ) {
-        oppgaveRepository.ferdigstillOppgave(oppgaveId, ident)
+        val sykmelding = oppgaveRepository.getLastSykmelding(oppgave.oppgaveId)
+        if (sykmelding == null) {
+            log.warn("Fant ikke sykmelding med id ${oppgave.oppgaveId}")
+            throw DgsEntityNotFoundException("Fant ikke sykmelding")
+        }
+        oppgaveRepository.ferdigstillOppgave(oppgave, ident, sykmelding)
     }
 
     @Transactional
