@@ -130,6 +130,17 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     ) {
         namedParameterJdbcTemplate.update(
             """
+                UPDATE sykmelding
+                SET endret_av = :endret_av, timestamp = :timestamp
+                WHERE oppgave_id = :oppgave_id
+            """.trimIndent(),
+            mapOf(
+                "endret_av" to ident,
+                "timestamp" to Timestamp.from(Instant.now()),
+            )
+        )
+        namedParameterJdbcTemplate.update(
+            """
                 UPDATE oppgave
                 SET ferdigstilt = :ferdigstilt
                 WHERE oppgave_id = :oppgave_id
