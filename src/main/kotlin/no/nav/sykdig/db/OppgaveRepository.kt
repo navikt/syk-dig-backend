@@ -122,6 +122,58 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             )
         )
     }
+
+    @Transactional
+    fun ferdigstillOppgaveGosys(
+        oppgave: OppgaveDbModel,
+        ident: String,
+        sykmelding: SykmeldingUnderArbeid?,
+    ) {
+        namedParameterJdbcTemplate.update(
+            """
+                INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
+                VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
+            """.trimIndent(),
+            mapOf(
+                "sykmelding_id" to oppgave.sykmeldingId.toString(),
+                "oppgave_id" to oppgave.oppgaveId,
+                "type" to oppgave.type,
+                "endret_av" to ident,
+                "timestamp" to Timestamp.from(Instant.now()),
+                "sykmelding" to sykmelding?.toPGObject(),
+            )
+        )
+        namedParameterJdbcTemplate.update(
+            """
+                UPDATE oppgave
+                SET ferdigstilt = :ferdigstilt
+                WHERE oppgave_id = :oppgave_id
+            """.trimIndent(),
+            mapOf(
+                "oppgave_id" to oppgave.oppgaveId,
+                "ferdigstilt" to Timestamp.from(Instant.now()),
+            )
+        )
+    }
+
+    @Transactional
+    fun getLastSykmelding(
+        oppgaveId: String,
+    ): SykmeldingUnderArbeid? {
+        return namedParameterJdbcTemplate.query(
+            """SELECT s.sykmelding
+                    FROM sykmelding AS s
+                             INNER JOIN oppgave AS o ON s.oppgave_id = o.oppgave_id
+                        AND s.timestamp = (SELECT MAX(timestamp)
+                                           FROM sykmelding
+                                           WHERE oppgave_id = o.oppgave_id)
+                    WHERE s.oppgave_id = :oppgave_id;
+            """,
+            mapOf("oppgave_id" to oppgaveId)
+        ) { resultSet, _ ->
+            resultSet.toSykmeldingUnderArbeid()
+        }.firstOrNull()
+    }
 }
 
 fun toSykmelding(
@@ -239,3 +291,5 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
         endretAv = getString("endret_av"),
         timestamp = getTimestamp("timestamp").toInstant().atOffset(ZoneOffset.UTC)
     )
+private fun ResultSet.toSykmeldingUnderArbeid(): SykmeldingUnderArbeid =
+    objectMapper.readValue(getString("sykmelding"), SykmeldingUnderArbeid::class.java)

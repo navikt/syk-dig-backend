@@ -16,6 +16,5 @@ type Mutation {
 
     oppgaveTilbakeTilGosys(
         oppgaveId: String!
-        values: SykmeldingUnderArbeidValues!
     ): Digitaliseringsoppgave
 }

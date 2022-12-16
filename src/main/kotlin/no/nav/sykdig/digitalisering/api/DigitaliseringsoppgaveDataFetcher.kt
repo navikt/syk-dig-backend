@@ -76,13 +76,11 @@ class DigitaliseringsoppgaveDataFetcher(
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
     fun oppgaveTilbakeTilGosys(
         @InputArgument oppgaveId: String,
-        @InputArgument values: SykmeldingUnderArbeidValues,
         dfe: DataFetchingEnvironment
     ): Digitaliseringsoppgave {
         val ident: String = dfe.graphQlContext.get("username")
-        val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
         return mapToDigitaliseringsoppgave(
-            digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(oppgaveId, ident, ferdistilltRegisterOppgaveValues)
+            digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(oppgaveId, ident)
         )
     }
 }
