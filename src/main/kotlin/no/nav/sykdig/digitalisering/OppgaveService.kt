@@ -41,11 +41,7 @@ class OppgaveService(
         ident: String
     ) {
         val sykmelding = oppgaveRepository.getLastSykmelding(oppgave.oppgaveId)
-        if (sykmelding == null) {
-            log.warn("Fant ikke sykmelding med id ${oppgave.oppgaveId}")
-            throw DgsEntityNotFoundException("Fant ikke sykmelding")
-        }
-        oppgaveRepository.ferdigstillOppgave(oppgave, ident, sykmelding)
+        oppgaveRepository.ferdigstillOppgaveGosys(oppgave, ident, sykmelding)
     }
 
     @Transactional

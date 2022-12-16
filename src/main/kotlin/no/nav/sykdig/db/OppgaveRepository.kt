@@ -124,22 +124,11 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     }
 
     @Transactional
-    fun ferdigstillOppgave(
+    fun ferdigstillOppgaveGosys(
         oppgave: OppgaveDbModel,
         ident: String,
-        sykmelding: SykmeldingUnderArbeid,
+        sykmelding: SykmeldingUnderArbeid?,
     ) {
-        namedParameterJdbcTemplate.update(
-            """
-                UPDATE sykmelding
-                SET endret_av = :endret_av, timestamp = :timestamp
-                WHERE oppgave_id = :oppgave_id
-            """.trimIndent(),
-            mapOf(
-                "endret_av" to ident,
-                "timestamp" to Timestamp.from(Instant.now()),
-            )
-        )
         namedParameterJdbcTemplate.update(
             """
                 INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
@@ -151,7 +140,18 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 "type" to oppgave.type,
                 "endret_av" to ident,
                 "timestamp" to Timestamp.from(Instant.now()),
-                "sykmelding" to sykmelding.toPGObject(),
+                "sykmelding" to sykmelding?.toPGObject(),
+            )
+        )
+        namedParameterJdbcTemplate.update(
+            """
+                UPDATE oppgave
+                SET ferdigstilt = :ferdigstilt
+                WHERE oppgave_id = :oppgave_id
+            """.trimIndent(),
+            mapOf(
+                "oppgave_id" to oppgave.oppgaveId,
+                "ferdigstilt" to Timestamp.from(Instant.now()),
             )
         )
     }
