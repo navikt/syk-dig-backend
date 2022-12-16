@@ -41,7 +41,6 @@ class DigitaliseringsoppgaveService(
     fun ferdigstillOppgaveSendTilGosys(
         oppgaveId: String,
         ident: String,
-        values: FerdistilltRegisterOppgaveValues
     ): SykDigOppgave {
         val oppgave = oppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
@@ -50,7 +49,7 @@ class DigitaliseringsoppgaveService(
         )
 
         sendTilGosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), ident)
-        oppgaveService.ferdigstillOppgaveGosys(oppgave, values, ident)
+        oppgaveService.ferdigstillOppgaveGosys(oppgave.oppgaveId, ident)
         val updatedOppgave = oppgaveService.getOppgave(oppgaveId)
 
         metricRegister.SENDT_TIL_GOSYS.increment()
