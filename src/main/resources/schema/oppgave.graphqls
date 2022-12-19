@@ -1,8 +1,21 @@
+union DigitaliseringsoppgaveResult = Digitaliseringsoppgave | DigitaliseringsoppgaveStatus
+
 type Digitaliseringsoppgave {
     oppgaveId: String!
     person: Person!
     type: SykmeldingsType!
     values: OppgaveValues!
+}
+
+type DigitaliseringsoppgaveStatus {
+    oppgaveId: String!
+    status: DigitaliseringsoppgaveStatusEnum!
+}
+
+enum DigitaliseringsoppgaveStatusEnum {
+    FERDIGSTILT
+    IKKE_EN_SYKMELDING
+    FINNES_IKKE
 }
 
 enum PeriodeType {

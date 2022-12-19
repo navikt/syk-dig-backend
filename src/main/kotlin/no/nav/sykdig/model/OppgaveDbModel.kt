@@ -10,6 +10,7 @@ data class OppgaveDbModel(
     val dokumentInfoId: String?,
     val opprettet: OffsetDateTime,
     val ferdigstilt: OffsetDateTime?,
+    val tilbakeTilGosys: Boolean,
     val sykmeldingId: UUID,
     val type: String,
     val sykmelding: SykmeldingUnderArbeid?,

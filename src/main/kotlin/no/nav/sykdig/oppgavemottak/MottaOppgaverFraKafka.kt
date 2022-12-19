@@ -26,6 +26,7 @@ class MottaOppgaverFraKafka(
                 dokumentInfoId = digitaliseringsoppgave.dokumentInfoId,
                 opprettet = opprettet,
                 ferdigstilt = null,
+                tilbakeTilGosys = false,
                 sykmeldingId = UUID.fromString(sykmeldingId),
                 type = digitaliseringsoppgave.type,
                 sykmelding = null,
