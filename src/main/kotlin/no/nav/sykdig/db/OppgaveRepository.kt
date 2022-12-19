@@ -291,5 +291,9 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
         endretAv = getString("endret_av"),
         timestamp = getTimestamp("timestamp").toInstant().atOffset(ZoneOffset.UTC)
     )
-private fun ResultSet.toSykmeldingUnderArbeid(): SykmeldingUnderArbeid =
-    objectMapper.readValue(getString("sykmelding"), SykmeldingUnderArbeid::class.java)
+
+private fun ResultSet.toSykmeldingUnderArbeid(): SykmeldingUnderArbeid? {
+    val sykmeldingJsonb: String = getString("sykmelding") ?: return null
+
+    return objectMapper.readValue(sykmeldingJsonb, SykmeldingUnderArbeid::class.java)
+}
