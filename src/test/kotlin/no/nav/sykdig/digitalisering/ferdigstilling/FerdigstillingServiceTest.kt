@@ -21,6 +21,8 @@ import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -137,7 +139,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                     type = PeriodeType.AKTIVITET_IKKE_MULIG,
                     fom = LocalDate.of(2019, Month.AUGUST, 15),
                     tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                    grad = 100
+                    grad = null
                 )
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
@@ -209,5 +211,125 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         assertEquals(LocalDate.of(2019, 8, 15), receivedSykmelding.sykmelding.syketilfelleStartDato)
         assertEquals(datoOpprettet.toLocalDateTime(), receivedSykmelding.sykmelding.signaturDato)
         assertEquals(null, receivedSykmelding.sykmelding.navnFastlege)
+    }
+
+    @Test
+    fun `map utenlandsk sykmelding with gradert periode to receivedSykmelding with gradert periode`() {
+        val fnrPasient = "12345678910"
+        val fnrLege = ""
+        val sykmeldingId = UUID.randomUUID()
+        val journalPostId = "452234"
+        val hoveddiagnose = Diagnose(
+            system = "ICD10",
+            kode = "A070",
+            tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
+        )
+
+        val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
+        val behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z")
+
+        val validatedValues = FerdistilltRegisterOppgaveValues(
+            fnrPasient = fnrPasient,
+            behandletTidspunkt = behandletTidspunkt,
+            skrevetLand = "POL",
+            perioder = listOf(
+                PeriodeInput(
+                    type = PeriodeType.GRADERT,
+                    fom = LocalDate.of(2019, Month.AUGUST, 15),
+                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
+                    grad = 69
+                )
+            ),
+            hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
+            biDiagnoser = emptyList(),
+            harAndreRelevanteOpplysninger = null,
+        )
+
+        val person = Person(
+            fnrPasient,
+            Navn("fornavn", null, "etternavn"),
+            "aktorid",
+            Bostedsadresse(
+                null,
+                null,
+                null,
+                null,
+                null,
+            ),
+            null,
+        )
+
+        val harAndreRelevanteOpplysninger = false
+        val receivedSykmelding = mapToReceivedSykmelding(
+            validatedValues,
+            person,
+            harAndreRelevanteOpplysninger,
+            sykmeldingId.toString(),
+            journalPostId,
+            datoOpprettet.toLocalDateTime()
+        )
+
+        assertEquals(1, receivedSykmelding.sykmelding.perioder.size)
+        assertNotNull(receivedSykmelding.sykmelding.perioder.first().gradert)
+    }
+
+    @Test
+    fun `should throw illegal state if it tries to map a bad gradert periode`() {
+        val fnrPasient = "12345678910"
+        val fnrLege = ""
+        val sykmeldingId = UUID.randomUUID()
+        val journalPostId = "452234"
+        val hoveddiagnose = Diagnose(
+            system = "ICD10",
+            kode = "A070",
+            tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
+        )
+
+        val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
+        val behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z")
+
+        val validatedValues = FerdistilltRegisterOppgaveValues(
+            fnrPasient = fnrPasient,
+            behandletTidspunkt = behandletTidspunkt,
+            skrevetLand = "POL",
+            perioder = listOf(
+                PeriodeInput(
+                    type = PeriodeType.GRADERT,
+                    fom = LocalDate.of(2019, Month.AUGUST, 15),
+                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
+                    grad = 120
+                )
+            ),
+            hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
+            biDiagnoser = emptyList(),
+            harAndreRelevanteOpplysninger = null,
+        )
+
+        val person = Person(
+            fnrPasient,
+            Navn("fornavn", null, "etternavn"),
+            "aktorid",
+            Bostedsadresse(
+                null,
+                null,
+                null,
+                null,
+                null,
+            ),
+            null,
+        )
+
+        val harAndreRelevanteOpplysninger = false
+        val exception = assertThrows(IllegalStateException::class.java) {
+            mapToReceivedSykmelding(
+                validatedValues,
+                person,
+                harAndreRelevanteOpplysninger,
+                sykmeldingId.toString(),
+                journalPostId,
+                datoOpprettet.toLocalDateTime()
+            )
+        }
+        assertEquals(exception.message, "Gradert sykmelding må ha grad")
     }
 }
