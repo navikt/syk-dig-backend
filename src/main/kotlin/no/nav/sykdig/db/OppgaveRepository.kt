@@ -68,6 +68,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                            dokumentinfo_id,
                            opprettet,
                            ferdigstilt,
+                           tilbake_til_gosys,
                            sykmelding_id,
                            type,
                            s.sykmelding,
@@ -146,12 +147,14 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         namedParameterJdbcTemplate.update(
             """
                 UPDATE oppgave
-                SET ferdigstilt = :ferdigstilt
+                SET ferdigstilt = :ferdigstilt,
+                    tilbake_til_gosys = :tilbake_til_gosys
                 WHERE oppgave_id = :oppgave_id
             """.trimIndent(),
             mapOf(
                 "oppgave_id" to oppgave.oppgaveId,
                 "ferdigstilt" to Timestamp.from(Instant.now()),
+                "tilbake_til_gosys" to true,
             )
         )
     }
@@ -285,6 +288,7 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
         dokumentInfoId = getString("dokumentinfo_id"),
         opprettet = getTimestamp("opprettet").toInstant().atOffset(ZoneOffset.UTC),
         ferdigstilt = getTimestamp("ferdigstilt")?.toInstant()?.atOffset(ZoneOffset.UTC),
+        tilbakeTilGosys = getBoolean("tilbake_til_gosys"),
         sykmeldingId = UUID.fromString(getString("sykmelding_id")),
         type = getString("type"),
         sykmelding = getString("sykmelding")?.let { objectMapper.readValue(it, SykmeldingUnderArbeid::class.java) },

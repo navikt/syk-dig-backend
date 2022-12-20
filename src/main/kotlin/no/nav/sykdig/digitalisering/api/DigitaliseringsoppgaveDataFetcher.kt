@@ -4,6 +4,7 @@ import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
+import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import graphql.schema.DataFetchingEnvironment
 import no.nav.sykdig.digitalisering.DigitaliseringsoppgaveService
 import no.nav.sykdig.digitalisering.exceptions.ClientException
@@ -13,7 +14,9 @@ import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.DiagnoseInput
-import no.nav.sykdig.generated.types.Digitaliseringsoppgave
+import no.nav.sykdig.generated.types.DigitaliseringsoppgaveResult
+import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatus
+import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatusEnum
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
 import no.nav.sykdig.logger
@@ -25,7 +28,7 @@ import kotlin.contracts.contract
 
 @DgsComponent
 class DigitaliseringsoppgaveDataFetcher(
-    val digitaliseringsoppgaveService: DigitaliseringsoppgaveService
+    val digitaliseringsoppgaveService: DigitaliseringsoppgaveService,
 ) {
     companion object {
         private val log = logger()
@@ -33,8 +36,29 @@ class DigitaliseringsoppgaveDataFetcher(
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsQuery(field = DgsConstants.QUERY.Oppgave)
-    fun getOppgave(@InputArgument oppgaveId: String): Digitaliseringsoppgave {
-        return mapToDigitaliseringsoppgave(digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId))
+    fun getOppgave(@InputArgument oppgaveId: String): DigitaliseringsoppgaveResult {
+        try {
+            val oppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId)
+
+            if (oppgave.oppgaveDbModel.tilbakeTilGosys) {
+                return DigitaliseringsoppgaveStatus(
+                    oppgaveId = oppgaveId,
+                    status = DigitaliseringsoppgaveStatusEnum.IKKE_EN_SYKMELDING,
+                )
+            } else if (oppgave.oppgaveDbModel.ferdigstilt != null) {
+                return DigitaliseringsoppgaveStatus(
+                    oppgaveId = oppgaveId,
+                    status = DigitaliseringsoppgaveStatusEnum.FERDIGSTILT,
+                )
+            }
+
+            return mapToDigitaliseringsoppgave(oppgave)
+        } catch (error: DgsEntityNotFoundException) {
+            return DigitaliseringsoppgaveStatus(
+                oppgaveId = oppgaveId,
+                status = DigitaliseringsoppgaveStatusEnum.FINNES_IKKE,
+            )
+        }
     }
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
@@ -45,10 +69,9 @@ class DigitaliseringsoppgaveDataFetcher(
         @InputArgument values: SykmeldingUnderArbeidValues,
         @InputArgument status: SykmeldingUnderArbeidStatus,
         dfe: DataFetchingEnvironment,
-    ): Digitaliseringsoppgave {
+    ): DigitaliseringsoppgaveResult {
 
         val ident: String = dfe.graphQlContext.get("username")
-
         when (status) {
             SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
                 val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
@@ -58,7 +81,13 @@ class DigitaliseringsoppgaveDataFetcher(
                     values = ferdistilltRegisterOppgaveValues,
                     enhetId = enhetId
                 ).also { log.info("Ferdigstilt oppgave med id $oppgaveId") }
+
+                return DigitaliseringsoppgaveStatus(
+                    oppgaveId = oppgaveId,
+                    status = DigitaliseringsoppgaveStatusEnum.FERDIGSTILT,
+                )
             }
+
             SykmeldingUnderArbeidStatus.UNDER_ARBEID -> {
                 val uferdigRegisterOppgaveValues = uferdigRegisterOppgaveValus(values)
                 digitaliseringsoppgaveService.updateOppgave(
@@ -66,22 +95,29 @@ class DigitaliseringsoppgaveDataFetcher(
                     values = uferdigRegisterOppgaveValues,
                     ident = ident
                 ).also { log.info("Lagret oppgave med id $oppgaveId") }
+
+                return mapToDigitaliseringsoppgave(digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId))
             }
         }
-
-        return mapToDigitaliseringsoppgave(digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId))
     }
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
     fun oppgaveTilbakeTilGosys(
         @InputArgument oppgaveId: String,
-        dfe: DataFetchingEnvironment
-    ): Digitaliseringsoppgave {
+        dfe: DataFetchingEnvironment,
+    ): DigitaliseringsoppgaveStatus {
         val ident: String = dfe.graphQlContext.get("username")
-        return mapToDigitaliseringsoppgave(
-            digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(oppgaveId, ident)
-        )
+        val updatedOppgave = digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(oppgaveId, ident)
+
+        if (updatedOppgave.oppgaveDbModel.tilbakeTilGosys) {
+            return DigitaliseringsoppgaveStatus(
+                oppgaveId = oppgaveId,
+                status = DigitaliseringsoppgaveStatusEnum.IKKE_EN_SYKMELDING,
+            )
+        } else {
+            throw IllegalStateException("Oppgave med id $oppgaveId ble ikke sendt tilbake til Gosys")
+        }
     }
 }
 

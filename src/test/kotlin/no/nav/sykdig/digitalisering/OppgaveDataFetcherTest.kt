@@ -72,7 +72,6 @@ class OppgaveDataFetcherTest {
 
     @Test
     fun `querying oppgave`() {
-
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel = createDigitalseringsoppgaveDbModel(
@@ -86,8 +85,10 @@ class OppgaveDataFetcherTest {
             """
             {
                 oppgave(oppgaveId: "123") {
-                    values {
-                        fnrPasient                    
+                    ... on Digitaliseringsoppgave {
+                        values {
+                            fnrPasient                    
+                        }
                     }
                 }
             }
@@ -96,6 +97,63 @@ class OppgaveDataFetcherTest {
         )
 
         assertEquals("12345678910", oppgave)
+    }
+
+    @Test
+    fun `querying oppgave when ferdigstilt should return status`() {
+        Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
+            SykDigOppgave(
+                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ferdigstilt = OffsetDateTime.now(),
+                ),
+                person = createPerson()
+            )
+        }
+
+        val status: String = dgsQueryExecutor.executeAndExtractJsonPath(
+            """
+            {
+                oppgave(oppgaveId: "123") {
+                    ... on DigitaliseringsoppgaveStatus {
+                        status
+                    }
+                }
+            }
+            """.trimIndent(),
+            "data.oppgave.status"
+        )
+
+        assertEquals(status, "FERDIGSTILT")
+    }
+
+    @Test
+    fun `querying oppgave when sendt to gosys should return status`() {
+        Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
+            SykDigOppgave(
+                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ferdigstilt = OffsetDateTime.now(),
+                    tilbakeTilGosys = true,
+                ),
+                person = createPerson()
+            )
+        }
+
+        val status: String = dgsQueryExecutor.executeAndExtractJsonPath(
+            """
+            {
+                oppgave(oppgaveId: "123") {
+                    ... on DigitaliseringsoppgaveStatus {
+                        status
+                    }
+                }
+            }
+            """.trimIndent(),
+            "data.oppgave.status"
+        )
+
+        assertEquals(status, "IKKE_EN_SYKMELDING")
     }
 
     @Test
@@ -114,8 +172,10 @@ class OppgaveDataFetcherTest {
             """
             {
                 oppgave(oppgaveId: "123") {
-                    values {
-                        fnrPasient                    
+                    ... on Digitaliseringsoppgave {
+                        values {
+                            fnrPasient                    
+                        }
                     }
                 }
             }
@@ -144,14 +204,16 @@ class OppgaveDataFetcherTest {
             """
             {
                 oppgave(oppgaveId: "123") {
-                    values {
-                      fnrPasient
-                    }
-                    person {
-                        bostedsadresse {
-                            __typename
-                            ... on Vegadresse {
-                                poststed
+                    ... on Digitaliseringsoppgave {
+                        values {
+                          fnrPasient
+                        }
+                        person {
+                            bostedsadresse {
+                                __typename
+                                ... on Vegadresse {
+                                    poststed
+                                }
                             }
                         }
                     }
@@ -183,14 +245,16 @@ class OppgaveDataFetcherTest {
             """
             {
                 oppgave(oppgaveId: "123") {
-                    values {
-                      fnrPasient
-                    }
-                    person {
-                        bostedsadresse {
-                            __typename
-                            ... on Matrikkeladresse {
-                                poststed
+                    ... on Digitaliseringsoppgave {
+                        values {
+                          fnrPasient
+                        }
+                        person {
+                            bostedsadresse {
+                                __typename
+                                ... on Matrikkeladresse {
+                                    poststed
+                                }
                             }
                         }
                     }
@@ -218,7 +282,9 @@ class OppgaveDataFetcherTest {
             """
             mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
                 lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
-                    oppgaveId
+                    ... on Digitaliseringsoppgave {
+                        oppgaveId
+                    }
                 }
             }
             """.trimIndent(),
@@ -263,7 +329,9 @@ class OppgaveDataFetcherTest {
             """
             mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
                 lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
-                    oppgaveId
+                    ... on Digitaliseringsoppgave {
+                        oppgaveId
+                    }
                 }
             }
             """.trimIndent(),
@@ -301,7 +369,9 @@ class OppgaveDataFetcherTest {
             """
             mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
                 lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
-                    oppgaveId
+                    ... on Digitaliseringsoppgave {
+                        oppgaveId
+                    }
                 }
             }
             """.trimIndent(),
@@ -357,7 +427,9 @@ class OppgaveDataFetcherTest {
             """
             mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
                 lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
-                    oppgaveId
+                    ... on Digitaliseringsoppgave {
+                        oppgaveId
+                    }
                 }
             }
             """.trimIndent(),
@@ -392,6 +464,7 @@ fun createDigitalseringsoppgaveDbModel(
     dokumentInfoId: String? = null,
     opprettet: OffsetDateTime = OffsetDateTime.now(),
     ferdigstilt: OffsetDateTime? = null,
+    tilbakeTilGosys: Boolean = false,
     sykmeldingId: UUID = UUID.randomUUID(),
     type: String = "UTLAND",
     sykmelding: SykmeldingUnderArbeid? = null,
@@ -404,6 +477,7 @@ fun createDigitalseringsoppgaveDbModel(
     dokumentInfoId = dokumentInfoId,
     opprettet = opprettet,
     ferdigstilt = ferdigstilt,
+    tilbakeTilGosys = tilbakeTilGosys,
     sykmeldingId = sykmeldingId,
     type = type,
     sykmelding = sykmelding,

@@ -3,7 +3,7 @@ scalar DateTime
 scalar UUID
 
 type Query {
-    oppgave(oppgaveId: String!): Digitaliseringsoppgave!
+    oppgave(oppgaveId: String!): DigitaliseringsoppgaveResult
 }
 
 type Mutation {
@@ -12,9 +12,9 @@ type Mutation {
         enhetId: String!
         values: SykmeldingUnderArbeidValues!
         status: SykmeldingUnderArbeidStatus!
-    ): Digitaliseringsoppgave
+    ): DigitaliseringsoppgaveResult
 
     oppgaveTilbakeTilGosys(
         oppgaveId: String!
-    ): Digitaliseringsoppgave
+    ): DigitaliseringsoppgaveStatus
 }
