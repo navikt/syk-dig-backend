@@ -36,7 +36,7 @@ fun mapToFellesformat(
     person: Person,
     sykmeldingId: String,
     datoOpprettet: LocalDateTime?,
-    journalpostId: String
+    journalpostId: String,
 ): XMLEIFellesformat {
     return XMLEIFellesformat().apply {
         any.add(
@@ -210,9 +210,11 @@ fun getTextFromDiagnose(kode: String, diagnoseSystem: String): String {
         "ICD10" -> {
             Diagnosekoder.icd10[kode]!!.text
         }
+
         "ICPC2" -> {
             Diagnosekoder.icpc2[kode]!!.text
         }
+
         else -> {
             throw MappingException("Ukjent diagnose kode")
         }
@@ -230,20 +232,15 @@ fun toDiagnoseKithSystem(diagnoseSystem: String): String {
 }
 
 fun tilSyketilfelleStartDato(
-    validatedValues: FerdistilltRegisterOppgaveValues
+    validatedValues: FerdistilltRegisterOppgaveValues,
 ): LocalDate {
     return validatedValues.perioder.stream().map(PeriodeInput::fom).min(LocalDate::compareTo).get()
 }
 
-fun tilPeriodeListe(perioder: List<PeriodeInput>): List<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode> {
-    return ArrayList<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode>().apply {
-        addAll(
-            perioder.map {
-                tilHelseOpplysningerArbeidsuforhetPeriode(it)
-            }
-        )
+fun tilPeriodeListe(perioder: List<PeriodeInput>): List<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode> =
+    perioder.map {
+        tilHelseOpplysningerArbeidsuforhetPeriode(it)
     }
-}
 
 fun tilHelseOpplysningerArbeidsuforhetPeriode(periode: PeriodeInput): HelseOpplysningerArbeidsuforhet.Aktivitet.Periode =
     HelseOpplysningerArbeidsuforhet.Aktivitet.Periode().apply {
@@ -265,7 +262,11 @@ fun tilHelseOpplysningerArbeidsuforhetPeriode(periode: PeriodeInput): HelseOpply
             null
         }
 
-        gradertSykmelding = if (periode.type == PeriodeType.GRADERT && periode.grad != null && periode.grad > 100) {
+        gradertSykmelding = if (periode.type == PeriodeType.GRADERT) {
+            if (periode.grad == null || periode.grad >= 100) {
+                throw IllegalStateException("Gradert sykmelding må ha grad")
+            }
+
             HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.GradertSykmelding().apply {
                 sykmeldingsgrad = periode.grad
                 isReisetilskudd = false
