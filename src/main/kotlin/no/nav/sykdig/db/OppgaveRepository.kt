@@ -243,14 +243,13 @@ private fun List<PeriodeInput>?.mapToPerioder(): List<Periode>? = this?.map {
             medisinskArsak = null,
             arbeidsrelatertArsak = null,
         ) else null,
-        behandlingsdager = if (it.type == PeriodeType.BEHANDLINGSDAGER) 1 else null,
+        behandlingsdager = null,
         gradert = if (it.type == PeriodeType.GRADERT) Gradert(
             grad = it.grad ?: throw IllegalStateException("Gradert periode must have grad"),
             reisetilskudd = false,
         ) else null,
-        reisetilskudd = it.type == PeriodeType.REISETILSKUDD,
-        // TODO: implemntere tekstfelt i frontend
-        avventendeInnspillTilArbeidsgiver = if (it.type === PeriodeType.AVVENTENDE) "TODO: må komme fra frontend" else null,
+        reisetilskudd = false,
+        avventendeInnspillTilArbeidsgiver = null
     )
 }
 

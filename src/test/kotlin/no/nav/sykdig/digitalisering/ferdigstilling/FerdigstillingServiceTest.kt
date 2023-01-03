@@ -216,7 +216,6 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
     @Test
     fun `map utenlandsk sykmelding with gradert periode to receivedSykmelding with gradert periode`() {
         val fnrPasient = "12345678910"
-        val fnrLege = ""
         val sykmeldingId = UUID.randomUUID()
         val journalPostId = "452234"
         val hoveddiagnose = Diagnose(
@@ -276,7 +275,6 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
     @Test
     fun `should throw illegal state if it tries to map a bad gradert periode`() {
         val fnrPasient = "12345678910"
-        val fnrLege = ""
         val sykmeldingId = UUID.randomUUID()
         val journalPostId = "452234"
         val hoveddiagnose = Diagnose(

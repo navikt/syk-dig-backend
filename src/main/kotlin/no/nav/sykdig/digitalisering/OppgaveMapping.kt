@@ -56,9 +56,6 @@ private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues = OppgaveV
 
 private fun Periode.mapToPeriodeValue(): PeriodeValue {
     val type: PeriodeType = when {
-        this.reisetilskudd -> PeriodeType.REISETILSKUDD
-        this.behandlingsdager != null -> PeriodeType.BEHANDLINGSDAGER
-        this.avventendeInnspillTilArbeidsgiver != null -> PeriodeType.AVVENTENDE
         this.gradert != null -> PeriodeType.GRADERT
         else -> PeriodeType.AKTIVITET_IKKE_MULIG
     }

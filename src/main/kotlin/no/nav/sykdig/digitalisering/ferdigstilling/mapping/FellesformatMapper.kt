@@ -29,7 +29,6 @@ import no.nav.sykdig.generated.types.PeriodeType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.temporal.ChronoUnit
 
 fun mapToFellesformat(
     validatedValues: FerdistilltRegisterOppgaveValues,
@@ -254,14 +253,7 @@ fun tilHelseOpplysningerArbeidsuforhetPeriode(periode: PeriodeInput): HelseOpply
         } else {
             null
         }
-        avventendeSykmelding = if (periode.type == PeriodeType.AVVENTENDE) {
-            HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.AvventendeSykmelding().apply {
-                innspillTilArbeidsgiver = null
-            }
-        } else {
-            null
-        }
-
+        avventendeSykmelding = null
         gradertSykmelding = if (periode.type == PeriodeType.GRADERT) {
             if (periode.grad == null || periode.grad >= 100) {
                 throw IllegalStateException("Gradert sykmelding må ha grad")
@@ -274,22 +266,9 @@ fun tilHelseOpplysningerArbeidsuforhetPeriode(periode: PeriodeInput): HelseOpply
         } else {
             null
         }
-
-        behandlingsdager = if (periode.type == PeriodeType.BEHANDLINGSDAGER) {
-            HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.Behandlingsdager().apply {
-                antallBehandlingsdagerUke = antallBehanldingsDager(periode)
-            }
-        } else {
-            null
-        }
-
-        isReisetilskudd = periode.type == PeriodeType.REISETILSKUDD
+        behandlingsdager = null
+        isReisetilskudd = false
     }
-
-fun antallBehanldingsDager(periode: PeriodeInput): Int =
-    (periode.fom..periode.tom).daysBetween().toInt()
-
-fun ClosedRange<LocalDate>.daysBetween(): Long = ChronoUnit.DAYS.between(start, endInclusive)
 
 fun tilArbeidsgiver(): HelseOpplysningerArbeidsuforhet.Arbeidsgiver =
     HelseOpplysningerArbeidsuforhet.Arbeidsgiver().apply {
