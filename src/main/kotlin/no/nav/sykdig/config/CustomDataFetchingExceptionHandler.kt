@@ -18,10 +18,9 @@ class CustomDataFetchingExceptionHandler : DataFetcherExceptionHandler {
 
     override fun handleException(handlerParameters: DataFetcherExceptionHandlerParameters): CompletableFuture<DataFetcherExceptionHandlerResult> {
         // When handling the exceptions on for GQL, because we are hiding any internal exceptions from the client, we need to log them
-        logger.error(handlerParameters.exception.message, handlerParameters.exception)
-
         return when (handlerParameters.exception) {
             is ClientException -> {
+                logger.warn(handlerParameters.exception.message, handlerParameters.exception)
                 val graphqlError = TypedGraphQLError.newBuilder()
                     .message(handlerParameters.exception.message)
                     .build()
@@ -32,13 +31,16 @@ class CustomDataFetchingExceptionHandler : DataFetcherExceptionHandler {
                 CompletableFuture.completedFuture(result)
             }
             is AccessDeniedException -> {
+                logger.warn(handlerParameters.exception.message, handlerParameters.exception)
                 handleNoAccess(handlerParameters)
             }
             is IkkeTilgangException -> {
+                logger.warn(handlerParameters.exception.message, handlerParameters.exception)
                 handleNoAccess(handlerParameters)
             }
 
             else -> {
+                logger.error(handlerParameters.exception.message, handlerParameters.exception)
                 val graphqlError = TypedGraphQLError.newInternalErrorBuilder()
                     .message("En ukjent feil har oppstått. Vennligst prøv igjen senere.")
                     .build()
