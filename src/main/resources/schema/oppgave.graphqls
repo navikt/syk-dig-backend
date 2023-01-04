@@ -20,10 +20,7 @@ enum DigitaliseringsoppgaveStatusEnum {
 
 enum PeriodeType {
     AKTIVITET_IKKE_MULIG
-    AVVENTENDE
-    BEHANDLINGSDAGER
     GRADERT
-    REISETILSKUDD
 }
 
 type OppgaveValues {

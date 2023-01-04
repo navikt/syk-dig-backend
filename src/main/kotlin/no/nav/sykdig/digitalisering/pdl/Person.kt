@@ -1,11 +1,14 @@
 package no.nav.sykdig.digitalisering.pdl
 
+import java.time.LocalDate
+
 data class Person(
     val fnr: String,
     val navn: Navn,
     val aktorId: String,
     val bostedsadresse: Bostedsadresse?,
-    val oppholdsadresse: Oppholdsadresse?
+    val oppholdsadresse: Oppholdsadresse?,
+    val fodselsdato: LocalDate?
 )
 
 data class Navn(

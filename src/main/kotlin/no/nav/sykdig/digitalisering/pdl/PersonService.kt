@@ -4,6 +4,7 @@ import no.nav.sykdig.digitalisering.pdl.client.PdlClient
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlResponse
 import no.nav.sykdig.logger
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class PersonService(
@@ -29,6 +30,7 @@ class PersonService(
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn
             ),
+            fodselsdato = pdlResponse.hentPerson.foedsel?.first()?.foedselsdato?.let { LocalDate.parse(it) },
             aktorId = pdlResponse.identer!!.identer.first { it.gruppe == "AKTORID" }.ident,
             bostedsadresse = bostedsadresse?.let {
                 Bostedsadresse(

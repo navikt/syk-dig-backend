@@ -1,9 +1,12 @@
 package no.nav.sykdig.digitalisering
 
+import no.nav.sykdig.digitalisering.exceptions.ClientException
 import no.nav.sykdig.digitalisering.ferdigstilling.SendTilGosysService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.digitalisering.regelvalidering.RegelvalideringService
+import no.nav.sykdig.logger
 import no.nav.sykdig.metrics.MetricRegister
 import org.springframework.stereotype.Service
 
@@ -12,8 +15,11 @@ class DigitaliseringsoppgaveService(
     private val oppgaveService: OppgaveService,
     private val sendTilGosysService: SendTilGosysService,
     private val personService: PersonService,
-    private val metricRegister: MetricRegister
+    private val metricRegister: MetricRegister,
+    private val regelvalideringService: RegelvalideringService
 ) {
+
+    private val log = logger()
 
     fun getDigitaiseringsoppgave(oppgaveId: String): SykDigOppgave {
         val oppgave = oppgaveService.getOppgave(oppgaveId)
@@ -34,7 +40,17 @@ class DigitaliseringsoppgaveService(
         values: FerdistilltRegisterOppgaveValues,
         enhetId: String
     ) {
-        oppgaveService.ferdigstillOppgave(oppgaveId, ident, values, enhetId)
+        val oppgave = oppgaveService.getOppgave(oppgaveId)
+        val sykmeldt = personService.hentPerson(
+            fnr = oppgave.fnr,
+            sykmeldingId = oppgave.sykmeldingId.toString()
+        )
+        val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
+        if (valideringsresultat.isNotEmpty()) {
+            log.warn("Ferdigstilling av oppgave med id $oppgaveId feilet pga regelsjekk")
+            throw ClientException(valideringsresultat.joinToString())
+        }
+        oppgaveService.ferdigstillOppgave(oppgave, ident, values, enhetId, sykmeldt)
         metricRegister.FERDIGSTILT_OPPGAVE.increment()
     }
 

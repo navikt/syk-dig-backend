@@ -6,7 +6,7 @@ import no.nav.sykdig.db.toSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
-import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.logger
 import no.nav.sykdig.model.OppgaveDbModel
 import org.springframework.stereotype.Service
@@ -15,8 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class OppgaveService(
     private val oppgaveRepository: OppgaveRepository,
-    private val ferdigstillingService: FerdigstillingService,
-    private val personService: PersonService,
+    private val ferdigstillingService: FerdigstillingService
 ) {
     private val log = logger()
 
@@ -46,16 +45,12 @@ class OppgaveService(
 
     @Transactional
     fun ferdigstillOppgave(
-        oppgaveId: String,
+        oppgave: OppgaveDbModel,
         ident: String,
         values: FerdistilltRegisterOppgaveValues,
         enhetId: String,
+        sykmeldt: Person
     ) {
-        val oppgave = getOppgave(oppgaveId)
-        val sykmeldt = personService.hentPerson(
-            fnr = values.fnrPasient,
-            sykmeldingId = oppgave.sykmeldingId.toString()
-        )
         val sykmelding = toSykmelding(oppgave, values)
 
         oppgaveRepository.updateOppgave(oppgave, sykmelding, ident, true)

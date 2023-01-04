@@ -146,10 +146,10 @@ private fun validateRegisterOppgaveValues(
     )
 }
 
-private fun validateHovedDiagnose(houvedDiagnose: DiagnoseInput?) {
+private fun validateHovedDiagnose(hovedDiagnose: DiagnoseInput?) {
 
-    if (houvedDiagnose != null) {
-        validateDiagnose(houvedDiagnose)
+    if (hovedDiagnose != null) {
+        validateDiagnose(hovedDiagnose)
     }
 }
 
