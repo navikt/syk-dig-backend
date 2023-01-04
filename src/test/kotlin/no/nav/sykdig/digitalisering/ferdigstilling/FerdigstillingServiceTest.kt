@@ -84,7 +84,8 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 navn = Navn("Fornavn", null, "Etternavn"),
                 aktorId = "aktorid",
                 bostedsadresse = null,
-                oppholdsadresse = null
+                oppholdsadresse = null,
+                fodselsdato = LocalDate.of(1970, 1, 1)
             ),
             validatedValues = FerdistilltRegisterOppgaveValues(
                 fnrPasient = "12345678910",
@@ -159,6 +160,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 null,
             ),
             null,
+            LocalDate.of(1970, 1, 1)
         )
 
         val harAndreRelevanteOpplysninger = false
@@ -256,6 +258,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 null,
             ),
             null,
+            LocalDate.of(1970, 1, 1)
         )
 
         val harAndreRelevanteOpplysninger = false
@@ -315,6 +318,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 null,
             ),
             null,
+            LocalDate.of(1970, 1, 1)
         )
 
         val harAndreRelevanteOpplysninger = false

@@ -7,7 +7,6 @@ import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
-import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.mockito.Mockito
 import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -34,24 +32,13 @@ import java.time.ZoneOffset
 class OppgaveServiceTest : FellesTestOppsett() {
     @MockBean
     lateinit var ferdigstillingService: FerdigstillingService
-    @MockBean
-    lateinit var personService: PersonService
 
     lateinit var oppgaveService: OppgaveService
 
     @BeforeEach
     fun setup() {
-        oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService, personService)
+        oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService)
         oppgaveRepository.lagreOppgave(createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"))
-        Mockito.`when`(personService.hentPerson("12345678910", "123")).thenReturn(
-            Person(
-                fnr = "12345678910",
-                navn = Navn("Fornavn", null, "Etternavn"),
-                aktorId = "aktorid",
-                bostedsadresse = null,
-                oppholdsadresse = null
-            )
-        )
     }
 
     @AfterEach
@@ -102,7 +89,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
     @Test
     fun ferdigstillerOppgaveIDb() {
         oppgaveService.ferdigstillOppgave(
-            oppgaveId = "123",
+            oppgave = createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"),
             ident = "X987654",
             values = FerdistilltRegisterOppgaveValues(
                 fnrPasient = "12345678910",
@@ -113,7 +100,15 @@ class OppgaveServiceTest : FellesTestOppsett() {
                 biDiagnoser = emptyList(),
                 harAndreRelevanteOpplysninger = null,
             ),
-            enhetId = "2990"
+            enhetId = "2990",
+            sykmeldt = Person(
+                fnr = "12345678910",
+                navn = Navn("Fornavn", null, "Etternavn"),
+                aktorId = "aktorid",
+                bostedsadresse = null,
+                oppholdsadresse = null,
+                fodselsdato = LocalDate.of(1980, 5, 5)
+            )
         )
 
         val oppdatertOppgave = oppgaveService.getOppgave("123")

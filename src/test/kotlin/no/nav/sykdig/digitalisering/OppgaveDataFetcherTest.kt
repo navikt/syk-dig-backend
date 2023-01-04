@@ -500,4 +500,5 @@ private fun createPerson(
         null,
     ),
     null,
+    LocalDate.of(1970, 1, 1)
 )
