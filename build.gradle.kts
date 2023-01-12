@@ -3,10 +3,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "2.7.5"
+    id("org.springframework.boot") version "2.7.6"
     id("io.spring.dependency-management") version "1.1.0"
-    kotlin("jvm") version "1.7.21"
-    kotlin("plugin.spring") version "1.7.21"
+    kotlin("jvm") version "1.8.0"
+    kotlin("plugin.spring") version "1.8.0"
     id("com.netflix.dgs.codegen") version "5.1.17"
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
@@ -29,14 +29,14 @@ repositories {
     }
 }
 
-val postgresVersion = "42.5.0"
+val postgresVersion = "42.5.1"
 val snakeYamlVersion = "1.33"
-val smCommonVersion = "1.ea531b3"
+val smCommonVersion = "1.d6548c5"
 val tokenSupportVersion = "2.1.7"
 val testContainersVersion = "1.17.4"
 val logstashLogbackEncoderVersion = "7.2"
 val javaJwtVersion = "4.2.1"
-val springBootResourceVersion = "2.7.5"
+val springBootResourceVersion = "2.7.6"
 val graphqlVersion = "19.2"
 val kafkaClientsVersion = "3.3.1"
 val springSecurityWebVersion = "5.7.5"
