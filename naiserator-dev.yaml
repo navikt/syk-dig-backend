@@ -20,6 +20,9 @@ spec:
         diskType: SSD
         insights:
           enabled: true
+        flags:
+          - name: cloudsql.logical_decoding
+            value: "on"
   replicas:
     min: 1
     max: 1
