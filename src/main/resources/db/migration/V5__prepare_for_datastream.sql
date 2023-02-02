@@ -13,12 +13,12 @@ DO
 $$
     BEGIN
         IF EXISTS
-            (SELECT 1 from pg_roles where rolname = 'syk-dig-datastream-user')
+            (SELECT 1 from pg_roles where rolname = 'datastream-syk-dig-user')
         THEN
-            alter user "syk-dig-datastream-user" with replication;
-            GRANT SELECT ON ALL TABLES IN SCHEMA public TO "syk-dig-datastream-user";
-            GRANT USAGE ON SCHEMA public TO "syk-dig-datastream-user";
-            ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO "syk-dig-datastream-user";
+            alter user "datastream-syk-dig-user" with replication;
+            GRANT SELECT ON ALL TABLES IN SCHEMA public TO "datastream-syk-dig-user";
+            GRANT USAGE ON SCHEMA public TO "datastream-syk-dig-user";
+            ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO "datastream-syk-dig-user";
         END IF;
     END
 $$;
