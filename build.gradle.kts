@@ -5,8 +5,8 @@ import org.jlleitschuh.gradle.ktlint.KtlintExtension
 plugins {
     id("org.springframework.boot") version "2.7.6"
     id("io.spring.dependency-management") version "1.1.0"
-    kotlin("jvm") version "1.8.0"
-    kotlin("plugin.spring") version "1.8.0"
+    kotlin("jvm") version "1.8.10"
+    kotlin("plugin.spring") version "1.8.10"
     id("com.netflix.dgs.codegen") version "5.1.17"
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
@@ -31,7 +31,7 @@ repositories {
 
 val postgresVersion = "42.5.1"
 val snakeYamlVersion = "1.33"
-val smCommonVersion = "1.d6548c5"
+val smCommonVersion = "1.fbf33a9"
 val tokenSupportVersion = "2.1.7"
 val testContainersVersion = "1.17.4"
 val logstashLogbackEncoderVersion = "7.2"
