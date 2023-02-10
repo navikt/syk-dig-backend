@@ -1,8 +1,10 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
+import no.nav.syfo.model.AktivitetIkkeMulig
 import no.nav.syfo.model.AvsenderSystem
 import no.nav.syfo.model.Diagnose
 import no.nav.syfo.model.KontaktMedPasient
+import no.nav.syfo.model.Periode
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.syfo.model.SporsmalSvar
 import no.nav.sykdig.FellesTestOppsett
@@ -69,6 +71,44 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val dokumentInfoId = "111"
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt("9898")).thenAnswer { false }
 
+        val perioder = listOf(
+            Periode(
+                fom = LocalDate.now().minusMonths(1),
+                tom = LocalDate.now().minusWeeks(2),
+                aktivitetIkkeMulig =
+                AktivitetIkkeMulig(medisinskArsak = null, arbeidsrelatertArsak = null),
+                avventendeInnspillTilArbeidsgiver = null,
+                behandlingsdager = null,
+                gradert = null,
+                reisetilskudd = false
+            )
+        )
+
+        val validatedValues = FerdistilltRegisterOppgaveValues(
+            fnrPasient = "12345678910",
+            behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
+            skrevetLand = "SWE",
+            perioder = listOf(
+                PeriodeInput(
+                    PeriodeType.AKTIVITET_IKKE_MULIG,
+                    LocalDate.now().minusMonths(1),
+                    LocalDate.now().minusWeeks(2)
+                )
+            ),
+            hovedDiagnose = DiagnoseInput("A070", "ICD10"),
+            biDiagnoser = emptyList(),
+            harAndreRelevanteOpplysninger = null
+        )
+
+        val sykmeldt = Person(
+            fnr = "12345678910",
+            navn = Navn("Fornavn", null, "Etternavn"),
+            aktorId = "aktorid",
+            bostedsadresse = null,
+            oppholdsadresse = null,
+            fodselsdato = LocalDate.of(1970, 1, 1)
+        )
+
         ferdigstillingService.ferdigstill(
             navnSykmelder = "Fornavn Etternavn",
             enhet = "2990",
@@ -79,29 +119,8 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 journalpostId = journalpostId,
                 dokumentInfoId = dokumentInfoId
             ),
-            sykmeldt = Person(
-                fnr = "12345678910",
-                navn = Navn("Fornavn", null, "Etternavn"),
-                aktorId = "aktorid",
-                bostedsadresse = null,
-                oppholdsadresse = null,
-                fodselsdato = LocalDate.of(1970, 1, 1)
-            ),
-            validatedValues = FerdistilltRegisterOppgaveValues(
-                fnrPasient = "12345678910",
-                behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
-                skrevetLand = "SWE",
-                perioder = listOf(
-                    PeriodeInput(
-                        PeriodeType.AKTIVITET_IKKE_MULIG,
-                        LocalDate.now().minusMonths(1),
-                        LocalDate.now().minusWeeks(2)
-                    )
-                ),
-                hovedDiagnose = DiagnoseInput("A070", "ICD10"),
-                biDiagnoser = emptyList(),
-                harAndreRelevanteOpplysninger = null
-            ),
+            sykmeldt = sykmeldt,
+            validatedValues = validatedValues,
         )
 
         verify(dokarkivClient).oppdaterOgFerdigstillJournalpost(
@@ -111,7 +130,8 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             "2990",
             "111",
             "9898",
-            sykmeldingId.toString()
+            sykmeldingId.toString(),
+            perioder
         )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
     }
