@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
 
+import no.nav.syfo.model.Periode
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.logger
 import org.springframework.beans.factory.annotation.Value
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Component
 class DokarkivClient(
@@ -27,7 +30,8 @@ class DokarkivClient(
         enhet: String,
         dokumentinfoId: String,
         journalpostId: String,
-        sykmeldingId: String
+        sykmeldingId: String,
+        perioder: List<Periode>
     ) {
         oppdaterJournalpost(
             navnSykmelder = navnSykmelder,
@@ -35,7 +39,8 @@ class DokarkivClient(
             fnr = fnr,
             dokumentinfoId = dokumentinfoId,
             journalpostId = journalpostId,
-            sykmeldingId = sykmeldingId
+            sykmeldingId = sykmeldingId,
+            perioder = perioder
         )
         ferdigstillJournalpost(
             enhet = enhet,
@@ -51,7 +56,8 @@ class DokarkivClient(
         fnr: String,
         dokumentinfoId: String,
         journalpostId: String,
-        sykmeldingId: String
+        sykmeldingId: String,
+        perioder: List<Periode>
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -66,11 +72,11 @@ class DokarkivClient(
             bruker = Bruker(
                 id = fnr
             ),
-            tittel = "Utenlandsk papirsykmelding",
+            tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
             dokumenter = listOf(
                 DokumentInfo(
                     dokumentInfoId = dokumentinfoId,
-                    tittel = "Utenlandsk papirsykmelding"
+                    tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}"
                 )
             )
         )
@@ -100,6 +106,20 @@ class DokarkivClient(
             )
             throw e
         }
+    }
+
+    private fun getFomTomTekst(perioder: List<Periode>) =
+        "${formaterDato(perioder.sortedSykmeldingPeriodeFOMDate().first().fom)} -" +
+            " ${formaterDato(perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
+
+    fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> =
+        sortedBy { it.fom }
+    fun List<Periode>.sortedSykmeldingPeriodeTOMDate(): List<Periode> =
+        sortedBy { it.tom }
+
+    fun formaterDato(dato: LocalDate): String {
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+        return dato.format(formatter)
     }
 
     @Retryable
