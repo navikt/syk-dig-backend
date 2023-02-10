@@ -50,7 +50,8 @@ class FerdigstillingService(
                 enhet = enhet,
                 dokumentinfoId = oppgave.dokumentInfoId,
                 journalpostId = oppgave.journalpostId,
-                sykmeldingId = oppgave.sykmeldingId.toString()
+                sykmeldingId = oppgave.sykmeldingId.toString(),
+                receivedSykmelding = receivedSykmelding
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())

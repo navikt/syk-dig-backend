@@ -1,5 +1,9 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import no.nav.syfo.model.Periode
+import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.logger
 import org.springframework.beans.factory.annotation.Value
@@ -27,7 +31,8 @@ class DokarkivClient(
         enhet: String,
         dokumentinfoId: String,
         journalpostId: String,
-        sykmeldingId: String
+        sykmeldingId: String,
+        receivedSykmelding: ReceivedSykmelding
     ) {
         oppdaterJournalpost(
             navnSykmelder = navnSykmelder,
@@ -35,7 +40,8 @@ class DokarkivClient(
             fnr = fnr,
             dokumentinfoId = dokumentinfoId,
             journalpostId = journalpostId,
-            sykmeldingId = sykmeldingId
+            sykmeldingId = sykmeldingId,
+            receivedSykmelding = receivedSykmelding
         )
         ferdigstillJournalpost(
             enhet = enhet,
@@ -51,7 +57,8 @@ class DokarkivClient(
         fnr: String,
         dokumentinfoId: String,
         journalpostId: String,
-        sykmeldingId: String
+        sykmeldingId: String,
+        receivedSykmelding: ReceivedSykmelding
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -66,11 +73,11 @@ class DokarkivClient(
             bruker = Bruker(
                 id = fnr
             ),
-            tittel = "Utenlandsk papirsykmelding",
+            tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(receivedSykmelding)}",
             dokumenter = listOf(
                 DokumentInfo(
                     dokumentInfoId = dokumentinfoId,
-                    tittel = "Utenlandsk papirsykmelding"
+                    tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(receivedSykmelding)}"
                 )
             )
         )
@@ -100,6 +107,20 @@ class DokarkivClient(
             )
             throw e
         }
+    }
+
+    private fun getFomTomTekst(receivedSykmelding: ReceivedSykmelding) =
+        "${formaterDato(receivedSykmelding.sykmelding.perioder.sortedSykmeldingPeriodeFOMDate().first().fom)} -" +
+                " ${formaterDato(receivedSykmelding.sykmelding.perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
+
+    fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> =
+        sortedBy { it.fom }
+    fun List<Periode>.sortedSykmeldingPeriodeTOMDate(): List<Periode> =
+        sortedBy { it.tom }
+
+    fun formaterDato(dato: LocalDate): String {
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+        return dato.format(formatter)
     }
 
     @Retryable
