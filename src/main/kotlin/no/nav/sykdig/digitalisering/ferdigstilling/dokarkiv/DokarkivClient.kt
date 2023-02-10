@@ -1,7 +1,5 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import no.nav.syfo.model.Periode
 import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
@@ -16,6 +14,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Component
 class DokarkivClient(
@@ -111,7 +111,7 @@ class DokarkivClient(
 
     private fun getFomTomTekst(receivedSykmelding: ReceivedSykmelding) =
         "${formaterDato(receivedSykmelding.sykmelding.perioder.sortedSykmeldingPeriodeFOMDate().first().fom)} -" +
-                " ${formaterDato(receivedSykmelding.sykmelding.perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
+            " ${formaterDato(receivedSykmelding.sykmelding.perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
 
     fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> =
         sortedBy { it.fom }
