@@ -2,6 +2,7 @@ union DigitaliseringsoppgaveResult = Digitaliseringsoppgave | Digitaliseringsopp
 
 type Digitaliseringsoppgave {
     oppgaveId: String!
+    documents: [Document!]!
     person: Person!
     type: SykmeldingsType!
     values: OppgaveValues!
