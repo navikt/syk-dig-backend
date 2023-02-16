@@ -8,6 +8,7 @@ data class OppgaveDbModel(
     val fnr: String,
     val journalpostId: String,
     val dokumentInfoId: String?,
+    val dokumenter: List<DokumentDbModel>?,
     val opprettet: OffsetDateTime,
     val ferdigstilt: OffsetDateTime?,
     val tilbakeTilGosys: Boolean,
@@ -15,5 +16,10 @@ data class OppgaveDbModel(
     val type: String,
     val sykmelding: SykmeldingUnderArbeid?,
     val endretAv: String,
-    val timestamp: OffsetDateTime
+    val timestamp: OffsetDateTime,
+)
+
+data class DokumentDbModel(
+    val dokumentInfoId: String,
+    val tittel: String,
 )

@@ -17,6 +17,7 @@ import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
+import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
@@ -468,6 +469,7 @@ fun createDigitalseringsoppgaveDbModel(
     sykmeldingId: UUID = UUID.randomUUID(),
     type: String = "UTLAND",
     sykmelding: SykmeldingUnderArbeid? = null,
+    dokumenter: List<DokumentDbModel> = emptyList(),
     endretAv: String = "A123456",
     timestamp: OffsetDateTime = OffsetDateTime.now(),
 ) = OppgaveDbModel(
@@ -482,6 +484,7 @@ fun createDigitalseringsoppgaveDbModel(
     type = type,
     sykmelding = sykmelding,
     endretAv = endretAv,
+    dokumenter = dokumenter,
     timestamp = timestamp,
 )
 

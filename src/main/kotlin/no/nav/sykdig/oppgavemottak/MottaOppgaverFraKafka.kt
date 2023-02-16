@@ -3,6 +3,7 @@ package no.nav.sykdig.oppgavemottak
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.logger
 import no.nav.sykdig.metrics.MetricRegister
+import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
 import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
@@ -24,6 +25,12 @@ class MottaOppgaverFraKafka(
                 fnr = digitaliseringsoppgave.fnr,
                 journalpostId = digitaliseringsoppgave.journalpostId,
                 dokumentInfoId = digitaliseringsoppgave.dokumentInfoId,
+                dokumenter = digitaliseringsoppgave.dokumenter?.map {
+                    DokumentDbModel(
+                        dokumentInfoId = it.dokumentInfoId,
+                        tittel = it.tittel
+                    )
+                },
                 opprettet = opprettet,
                 ferdigstilt = null,
                 tilbakeTilGosys = false,
@@ -38,10 +45,16 @@ class MottaOppgaverFraKafka(
     }
 }
 
+data class DokumentKafka(
+    val tittel: String,
+    val dokumentInfoId: String
+)
+
 data class DigitaliseringsoppgaveKafka(
     val oppgaveId: String,
     val fnr: String,
     val journalpostId: String,
     val dokumentInfoId: String?,
+    val dokumenter: List<DokumentKafka>?,
     val type: String
 )
