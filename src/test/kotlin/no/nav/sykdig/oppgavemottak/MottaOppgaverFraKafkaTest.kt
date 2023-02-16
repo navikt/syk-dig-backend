@@ -19,7 +19,8 @@ class MottaOppgaverFraKafkaTest : FellesTestOppsett() {
             fnr = "12345678910",
             journalpostId = "11",
             dokumentInfoId = null,
-            type = "UTLAND"
+            type = "UTLAND",
+            dokumenter = emptyList(),
         )
 
         mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)
@@ -47,7 +48,8 @@ class MottaOppgaverFraKafkaTest : FellesTestOppsett() {
             fnr = "12345678910",
             journalpostId = "11",
             dokumentInfoId = null,
-            type = "UTLAND"
+            type = "UTLAND",
+            dokumenter = emptyList(),
         )
 
         mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)

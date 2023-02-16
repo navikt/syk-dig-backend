@@ -1,5 +1,6 @@
 package no.nav.sykdig.db
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.model.AktivitetIkkeMulig
 import no.nav.syfo.model.Diagnose
 import no.nav.syfo.model.Gradert
@@ -9,6 +10,7 @@ import no.nav.syfo.model.UtenlandskSykmelding
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
+import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.model.Sykmelding
 import no.nav.sykdig.model.SykmeldingUnderArbeid
@@ -38,6 +40,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 .addValue("fnr", digitaliseringsoppgave.fnr)
                 .addValue("journalpost_id", digitaliseringsoppgave.journalpostId)
                 .addValue("dokumentinfo_id", digitaliseringsoppgave.dokumentInfoId)
+                .addValue("dokumenter", digitaliseringsoppgave.dokumenter?.toPGObject())
                 .addValue("opprettet", Timestamp.from(digitaliseringsoppgave.opprettet.toInstant()))
                 .addValue(
                     "ferdigstilt",
@@ -66,6 +69,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                            fnr,
                            journalpost_id,
                            dokumentinfo_id,
+                           dokumenter,
                            opprettet,
                            ferdigstilt,
                            tilbake_til_gosys,
@@ -274,7 +278,7 @@ private fun RegisterOppgaveValues.mapToMedisinskVurdering() = MedisinskVurdering
     yrkesskadeDato = null,
 )
 
-fun SykmeldingUnderArbeid.toPGObject() = PGobject().also {
+fun <T> T.toPGObject() = PGobject().also {
     it.type = "json"
     it.value = objectMapper.writeValueAsString(this)
 }
@@ -291,6 +295,7 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
         sykmeldingId = UUID.fromString(getString("sykmelding_id")),
         type = getString("type"),
         sykmelding = getString("sykmelding")?.let { objectMapper.readValue(it, SykmeldingUnderArbeid::class.java) },
+        dokumenter = getString("dokumenter")?.let { objectMapper.readValue<List<DokumentDbModel>>(it) },
         endretAv = getString("endret_av"),
         timestamp = getTimestamp("timestamp").toInstant().atOffset(ZoneOffset.UTC)
     )
