@@ -1,0 +1,4 @@
+type Document {
+    tittel: String!
+    dokumentInfoId: String!
+}

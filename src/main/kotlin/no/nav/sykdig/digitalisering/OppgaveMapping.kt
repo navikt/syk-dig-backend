@@ -5,6 +5,7 @@ import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.generated.types.Bostedsadresse
 import no.nav.sykdig.generated.types.DiagnoseValue
 import no.nav.sykdig.generated.types.Digitaliseringsoppgave
+import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Matrikkeladresse
 import no.nav.sykdig.generated.types.OppgaveValues
 import no.nav.sykdig.generated.types.OppholdAnnetSted
@@ -28,7 +29,9 @@ fun mapToDigitaliseringsoppgave(
         oppholdsadresse = mapToOppholdsadresse(oppgave.person),
     ),
     type = if (oppgave.oppgaveDbModel.type == "UTLAND") SykmeldingsType.UTENLANDS else SykmeldingsType.INNENLANDS,
-    values = oppgave.oppgaveDbModel.sykmelding?.mapToOppgaveValues() ?: OppgaveValues(fnrPasient = oppgave.oppgaveDbModel.fnr)
+    values = oppgave.oppgaveDbModel.sykmelding?.mapToOppgaveValues()
+        ?: OppgaveValues(fnrPasient = oppgave.oppgaveDbModel.fnr),
+    documents = oppgave.oppgaveDbModel.dokumenter?.map { Document(it.tittel, it.dokumentInfoId) } ?: emptyList(),
 )
 
 private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues = OppgaveValues(
@@ -93,7 +96,7 @@ private fun mapToOppholdsadresse(person: no.nav.sykdig.digitalisering.pdl.Person
             )
 
             it.oppholdAnnetSted != null -> OppholdAnnetSted(
-                type = it.oppholdAnnetSted
+                type = it.oppholdAnnetSted,
             )
 
             else -> null
@@ -125,7 +128,7 @@ private fun mapToBostedsadresse(person: no.nav.sykdig.digitalisering.pdl.Person)
             )
 
             it.ukjentBosted != null -> UkjentBosted(
-                bostedskommune = it.ukjentBosted.bostedskommune
+                bostedskommune = it.ukjentBosted.bostedskommune,
             )
 
             else -> null
