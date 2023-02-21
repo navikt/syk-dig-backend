@@ -27,7 +27,7 @@ class DocumentController(
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
 
         if (oppgave != null) {
-            if (oppgave.dokumenter?.any { it.dokumentInfoId == dokumentInfoId } == false || oppgave.dokumentInfoId != dokumentInfoId) {
+            if (dokumentInfoId != "primary" || oppgave.dokumenter?.any { it.dokumentInfoId == dokumentInfoId } == false || oppgave.dokumentInfoId != dokumentInfoId) {
                 log.error("$dokumentInfoId er ikke en del av oppgave $oppgaveId")
                 throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "dokumentInfoId er ikke gyldig for oppgaven")
             }
