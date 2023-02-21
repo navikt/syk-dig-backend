@@ -27,14 +27,27 @@ class DocumentController(
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
 
         if (oppgave != null) {
-            if (dokumentInfoId != "primary" || oppgave.dokumenter?.any { it.dokumentInfoId == dokumentInfoId } == false || oppgave.dokumentInfoId != dokumentInfoId) {
+            if (dokumentInfoId == "primary") {
+                if (oppgave.dokumentInfoId == null) {
+                    log.error("$oppgaveId mangler dokumentInfoId")
+                    throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "$oppgaveId mangler dokumentInfoId")
+                }
+
+                return safClient.hentPdfFraSaf(
+                    dokumentInfoId = oppgave.dokumentInfoId,
+                    journalpostId = oppgave.journalpostId,
+                    sykmeldingId = oppgave.sykmeldingId.toString(),
+                )
+            }
+
+            if (oppgave.dokumenter?.any { it.dokumentInfoId == dokumentInfoId } == false || oppgave.dokumentInfoId != dokumentInfoId) {
                 log.error("$dokumentInfoId er ikke en del av oppgave $oppgaveId")
                 throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "dokumentInfoId er ikke gyldig for oppgaven")
             }
 
             try {
                 return safClient.hentPdfFraSaf(
-                    dokumentInfoId = if (dokumentInfoId == "primary") oppgave.dokumentInfoId else dokumentInfoId,
+                    dokumentInfoId = dokumentInfoId,
                     journalpostId = oppgave.journalpostId,
                     sykmeldingId = oppgave.sykmeldingId.toString(),
                 )
