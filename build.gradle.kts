@@ -38,7 +38,7 @@ val logstashLogbackEncoderVersion = "7.2"
 val javaJwtVersion = "4.2.1"
 val springBootResourceVersion = "2.7.6"
 val graphqlVersion = "19.2"
-val kafkaClientsVersion = "3.3.1"
+val kafkaClientsVersion = "3.4.0"
 val springSecurityWebVersion = "5.7.5"
 val okhttp3version = "4.10.0"
 val fellesformatVersion = "2019.07.30-12-26-5c924ef4f04022bbb850aaf299eb8e4464c1ca6a"
@@ -48,9 +48,10 @@ val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
+val graphqlDgsPlatformDependenciesVersion = "5.5.1"
 
 dependencies {
-    implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:5.5.1"))
+    implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
