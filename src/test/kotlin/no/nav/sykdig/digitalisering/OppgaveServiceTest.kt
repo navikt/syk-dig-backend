@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -24,9 +23,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureMetrics
+@AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 @Transactional
 class OppgaveServiceTest : FellesTestOppsett() {

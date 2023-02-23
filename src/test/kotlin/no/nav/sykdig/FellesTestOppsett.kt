@@ -4,7 +4,7 @@ import no.nav.sykdig.db.OppgaveRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -16,7 +16,7 @@ import kotlin.concurrent.thread
 private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureMetrics
+@AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 abstract class FellesTestOppsett {
 

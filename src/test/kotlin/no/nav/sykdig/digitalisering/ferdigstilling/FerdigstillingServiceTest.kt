@@ -31,7 +31,6 @@ import org.junit.jupiter.api.TestInstance
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.LocalDate
@@ -39,9 +38,10 @@ import java.time.Month
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureMetrics
+@AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 class FerdigstillingServiceTest : FellesTestOppsett() {
     @MockBean

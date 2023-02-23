@@ -31,13 +31,13 @@ import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 
 @SpringBootTest(
     classes = [
@@ -50,7 +50,7 @@ import java.util.UUID
         OppgaveSecurityService::class,
     ]
 )
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true)
 class OppgaveDataFetcherTest {
     @MockBean
     lateinit var poststedRepository: PoststedRepository

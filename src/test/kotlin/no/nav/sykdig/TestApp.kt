@@ -2,10 +2,10 @@ package no.nav.sykdig
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 
 @SpringBootApplication
-@AutoConfigureMetrics
+@AutoConfigureObservability
 class TestApp
 
 fun main(args: Array<String>) {
