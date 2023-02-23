@@ -49,8 +49,7 @@ val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
 val graphqlDgsPlatformDependenciesVersion = "5.5.1"
-// TODO update to version 10.1.6 when released
-val tomcatEmbedCoreVersion = "10.1.5"
+val tomcatEmbedCoreVersion = "10.1.6"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
