@@ -89,19 +89,19 @@ class DokarkivClient(
             )
             log.info("Oppdatert journalpost $journalpostId for sykmelding $sykmeldingId")
         } catch (e: HttpClientErrorException) {
-            if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å oppdatere journalpostId $journalpostId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else {
                 log.error(
-                    "HttpClientErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved oppdatering: ${e.message}",
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
                     e
                 )
             }
             throw e
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved oppdatering: ${e.message}",
+                "HttpServerErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
                 e
             )
             throw e
@@ -145,19 +145,19 @@ class DokarkivClient(
             )
             log.info("Ferdigstilt journalpost $journalpostId for sykmelding $sykmeldingId")
         } catch (e: HttpClientErrorException) {
-            if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å ferdigstille journalpostId $journalpostId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else {
                 log.error(
-                    "HttpClientErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved ferdigstilling: ${e.message}",
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}",
                     e
                 )
             }
             throw e
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved ferdigstilling: ${e.message}",
+                "HttpServerErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}",
                 e
             )
             throw e

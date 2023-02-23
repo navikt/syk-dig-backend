@@ -13,10 +13,10 @@ class SecurityConfiguration() {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain? {
-        return http.authorizeRequests { authorizeRequests ->
+        return http.authorizeHttpRequests { authorizeRequests ->
             authorizeRequests
-                .mvcMatchers(HttpMethod.GET, "/internal/**").permitAll()
-                .mvcMatchers(HttpMethod.GET, "/schema.json").permitAll()
+                .requestMatchers(HttpMethod.GET, "/internal/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/schema.json").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2ResourceServer()

@@ -45,15 +45,15 @@ class OppgaveClient(
             )
             return response.body ?: throw RuntimeException("Fant ikke oppgave med id $oppgaveId")
         } catch (e: HttpClientErrorException) {
-            if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
-                log.error("HttpClientErrorException med responskode ${e.rawStatusCode} fra Oppgave: ${e.message}", e)
+                log.error("HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
                 throw e
             }
         } catch (e: HttpServerErrorException) {
-            log.error("HttpServerErrorException med responskode ${e.rawStatusCode} fra Oppgave: ${e.message}", e)
+            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
             throw e
         }
     }
@@ -78,19 +78,19 @@ class OppgaveClient(
             )
             log.info("Ferdigstilt oppgave $oppgaveId for sykmelding $sykmeldingId")
         } catch (e: HttpClientErrorException) {
-            if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å ferdigstille oppgaveId $oppgaveId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
                 log.error(
-                    "HttpClientErrorException med responskode ${e.rawStatusCode} fra Oppgave ved ferdigstilling: ${e.message}",
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                     e
                 )
                 throw e
             }
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException med responskode ${e.rawStatusCode} fra Oppgave ved ferdigstilling: ${e.message}",
+                "HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                 e
             )
             throw e
@@ -127,19 +127,19 @@ class OppgaveClient(
             )
             log.info("OppdaterOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
         } catch (e: HttpClientErrorException) {
-            if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å oppdaterOppgave oppgaveId $oppgaveId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
                 log.error(
-                    "HttpClientErrorException med responskode ${e.rawStatusCode} fra Oppgave ved oppdaterOppgave: ${e.message}",
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave ved oppdaterOppgave: ${e.message}",
                     e
                 )
                 throw e
             }
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException med responskode ${e.rawStatusCode} fra Oppgave ved oppdaterOppgave: ${e.message}",
+                "HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave ved oppdaterOppgave: ${e.message}",
                 e
             )
             throw e

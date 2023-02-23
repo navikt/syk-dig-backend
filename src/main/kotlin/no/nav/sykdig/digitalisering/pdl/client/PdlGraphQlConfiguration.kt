@@ -28,7 +28,7 @@ class PdlGraphQlConfiguration {
             val response =
                 pdlRestTemplate.exchange(url, HttpMethod.POST, HttpEntity(body, httpHeaders), String::class.java)
 
-            HttpResponse(response.statusCodeValue, response.body)
+            HttpResponse(response.statusCode.value(), response.body)
         }
     }
 }

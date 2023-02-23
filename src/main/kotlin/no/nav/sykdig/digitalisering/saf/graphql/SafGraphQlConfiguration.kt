@@ -27,7 +27,7 @@ class SafGraphQlConfiguration {
             val response =
                 safRestTemplate.exchange("$url/graphql", HttpMethod.POST, HttpEntity(body, httpHeaders), String::class.java)
 
-            HttpResponse(response.statusCodeValue, response.body)
+            HttpResponse(response.statusCode.value(), response.body)
         }
     }
 }
