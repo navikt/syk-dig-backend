@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PdlClient(
-    private val pdlGraphQlClient: CustomGraphQLClient
+    private val pdlGraphQlClient: CustomGraphQLClient,
 ) {
     val log = logger()
 

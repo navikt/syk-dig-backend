@@ -16,7 +16,7 @@ class DigitaliseringsoppgaveService(
     private val sendTilGosysService: SendTilGosysService,
     private val personService: PersonService,
     private val metricRegister: MetricRegister,
-    private val regelvalideringService: RegelvalideringService
+    private val regelvalideringService: RegelvalideringService,
 ) {
 
     private val log = logger()
@@ -25,7 +25,7 @@ class DigitaliseringsoppgaveService(
         val oppgave = oppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
             fnr = oppgave.fnr,
-            sykmeldingId = oppgave.sykmeldingId.toString()
+            sykmeldingId = oppgave.sykmeldingId.toString(),
         )
         return SykDigOppgave(oppgave, sykmeldt)
     }
@@ -38,12 +38,12 @@ class DigitaliseringsoppgaveService(
         oppgaveId: String,
         ident: String,
         values: FerdistilltRegisterOppgaveValues,
-        enhetId: String
+        enhetId: String,
     ) {
         val oppgave = oppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
             fnr = oppgave.fnr,
-            sykmeldingId = oppgave.sykmeldingId.toString()
+            sykmeldingId = oppgave.sykmeldingId.toString(),
         )
         val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
         if (valideringsresultat.isNotEmpty()) {
@@ -61,7 +61,7 @@ class DigitaliseringsoppgaveService(
         val oppgave = oppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
             fnr = oppgave.fnr,
-            sykmeldingId = oppgave.sykmeldingId.toString()
+            sykmeldingId = oppgave.sykmeldingId.toString(),
         )
 
         sendTilGosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), ident)

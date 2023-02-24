@@ -14,5 +14,5 @@ data class SykmeldingUnderArbeid(
     val legekontorHerId: String?,
     val legekontorOrgName: String?,
     val mottattDato: LocalDateTime?,
-    var utenlandskSykmelding: UtenlandskSykmelding?
+    var utenlandskSykmelding: UtenlandskSykmelding?,
 )

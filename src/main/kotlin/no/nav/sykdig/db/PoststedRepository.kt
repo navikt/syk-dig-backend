@@ -11,7 +11,7 @@ import java.util.UUID
 @Transactional
 @Repository
 class PoststedRepository(
-    private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate
+    private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
     val log = logger()
 
@@ -22,7 +22,7 @@ class PoststedRepository(
                     FROM postinformasjon
                     where postnummer = :postnummer;
             """,
-            mapOf("postnummer" to postnummer)
+            mapOf("postnummer" to postnummer),
         ) { resultSet, _ ->
             resultSet.getString("poststed")
         }.firstOrNull()
@@ -47,7 +47,7 @@ class PoststedRepository(
             DELETE FROM postinformasjon
             where postnummer = :postnummer;
         """,
-                mapOf("postnummer" to it)
+                mapOf("postnummer" to it),
             )
         }
         oppdateresIDb.forEach {
@@ -59,8 +59,8 @@ class PoststedRepository(
         """,
                 mapOf(
                     "postnummer" to it.key,
-                    "poststed" to it.value.poststed
-                )
+                    "poststed" to it.value.poststed,
+                ),
             )
         }
     }
@@ -86,8 +86,8 @@ class PoststedRepository(
         """,
                 mapOf(
                     "postnummer" to it.postnummer,
-                    "poststed" to it.poststed
-                )
+                    "poststed" to it.poststed,
+                ),
             )
         }
     }
@@ -96,5 +96,5 @@ class PoststedRepository(
 private fun ResultSet.toPostInformasjon(): PostInformasjon =
     PostInformasjon(
         postnummer = getString("postnummer"),
-        poststed = getString("poststed")
+        poststed = getString("poststed"),
     )

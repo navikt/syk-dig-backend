@@ -31,13 +31,13 @@ import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 
 @SpringBootTest(
     classes = [
@@ -48,16 +48,19 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
         CustomDataFetchingExceptionHandler::class,
         TestGraphQLContextContributor::class,
         OppgaveSecurityService::class,
-    ]
+    ],
 )
 @EnableMethodSecurity(prePostEnabled = true)
 class OppgaveDataFetcherTest {
     @MockBean
     lateinit var poststedRepository: PoststedRepository
+
     @MockBean
     lateinit var oppgaveService: DigitaliseringsoppgaveService
+
     @MockBean
     lateinit var securityService: OppgaveSecurityService
+
     @Autowired
     lateinit var dgsQueryExecutor: DgsQueryExecutor
 
@@ -78,7 +81,7 @@ class OppgaveDataFetcherTest {
                 oppgaveDbModel = createDigitalseringsoppgaveDbModel(
                     sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
                 ),
-                person = createPerson()
+                person = createPerson(),
             )
         }
 
@@ -94,7 +97,7 @@ class OppgaveDataFetcherTest {
                 }
             }
             """.trimIndent(),
-            "data.oppgave.values.fnrPasient"
+            "data.oppgave.values.fnrPasient",
         )
 
         assertEquals("12345678910", oppgave)
@@ -108,7 +111,7 @@ class OppgaveDataFetcherTest {
                     sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
                     ferdigstilt = OffsetDateTime.now(),
                 ),
-                person = createPerson()
+                person = createPerson(),
             )
         }
 
@@ -122,7 +125,7 @@ class OppgaveDataFetcherTest {
                 }
             }
             """.trimIndent(),
-            "data.oppgave.status"
+            "data.oppgave.status",
         )
 
         assertEquals(status, "FERDIGSTILT")
@@ -137,7 +140,7 @@ class OppgaveDataFetcherTest {
                     ferdigstilt = OffsetDateTime.now(),
                     tilbakeTilGosys = true,
                 ),
-                person = createPerson()
+                person = createPerson(),
             )
         }
 
@@ -151,7 +154,7 @@ class OppgaveDataFetcherTest {
                 }
             }
             """.trimIndent(),
-            "data.oppgave.status"
+            "data.oppgave.status",
         )
 
         assertEquals(status, "IKKE_EN_SYKMELDING")
@@ -165,7 +168,7 @@ class OppgaveDataFetcherTest {
                 oppgaveDbModel = createDigitalseringsoppgaveDbModel(
                     sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
                 ),
-                person = createPerson()
+                person = createPerson(),
             )
         }
 
@@ -195,7 +198,7 @@ class OppgaveDataFetcherTest {
                 ),
                 person = createPerson(
                     vegadresse = Vegadresse("7", null, null, "Gateveien", null, "1111"),
-                )
+                ),
             )
         }
         Mockito.`when`(poststedRepository.getPoststed("1111")).thenAnswer {
@@ -234,8 +237,8 @@ class OppgaveDataFetcherTest {
                     sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
                 ),
                 person = createPerson(
-                    matrikkeladresse = Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222")
-                )
+                    matrikkeladresse = Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222"),
+                ),
             )
         }
 
@@ -262,7 +265,7 @@ class OppgaveDataFetcherTest {
                 }
             }
             """.trimIndent(),
-            "data.oppgave.person.bostedsadresse.poststed"
+            "data.oppgave.person.bostedsadresse.poststed",
         )
 
         assertEquals("Vestnes", poststed)
@@ -275,7 +278,7 @@ class OppgaveDataFetcherTest {
                 oppgaveDbModel = createDigitalseringsoppgaveDbModel(
                     sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
                 ),
-                person = createPerson()
+                person = createPerson(),
             )
         }
 
@@ -300,13 +303,14 @@ class OppgaveDataFetcherTest {
                     "hovedDiagnose" to null,
                     "biDiagnoser" to null,
                 ),
-                "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID
-            )
+                "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID,
+            ),
         )
 
         assertEquals(0, result.errors.size)
         verify(
-            oppgaveService, times(1)
+            oppgaveService,
+            times(1),
         ).updateOppgave(
             oppgaveId = "345",
             values = UferdigRegisterOppgaveValues(fnrPasient = "20086600138", null, null, null, null, null, null),
@@ -322,7 +326,7 @@ class OppgaveDataFetcherTest {
                 oppgaveDbModel = createDigitalseringsoppgaveDbModel(
                     sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
                 ),
-                person = createPerson()
+                person = createPerson(),
             )
         }
 
@@ -347,8 +351,8 @@ class OppgaveDataFetcherTest {
                     "hovedDiagnose" to null,
                     "biDiagnoser" to null,
                 ),
-                "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID
-            )
+                "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID,
+            ),
         )
         assertEquals(1, result.errors.size)
         assertEquals("Innlogget bruker har ikke tilgang", result.errors[0].message)
@@ -356,13 +360,12 @@ class OppgaveDataFetcherTest {
 
     @Test
     fun `lagre oppgave with FERDIGSTILT should ferdigstille oppgave`() {
-
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel = createDigitalseringsoppgaveDbModel(
                     sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
                 ),
-                person = createPerson()
+                person = createPerson(),
             )
         }
 
@@ -390,13 +393,14 @@ class OppgaveDataFetcherTest {
                     ),
                     "biDiagnoser" to emptyList<DiagnoseInput>(),
                 ),
-                "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT
-            )
+                "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT,
+            ),
         )
 
         assertEquals(0, result.errors.size)
         verify(
-            oppgaveService, times(1)
+            oppgaveService,
+            times(1),
         ).ferdigstillOppgave(
             oppgaveId = "345",
             ident = "fake-test-ident",
@@ -407,7 +411,7 @@ class OppgaveDataFetcherTest {
                 perioder = emptyList(),
                 hovedDiagnose = DiagnoseInput(kode = "Z09", system = "ICPC2"),
                 biDiagnoser = emptyList(),
-                harAndreRelevanteOpplysninger = null
+                harAndreRelevanteOpplysninger = null,
             ),
             enhetId = "1234",
         )
@@ -420,7 +424,7 @@ class OppgaveDataFetcherTest {
                 oppgaveDbModel = createDigitalseringsoppgaveDbModel(
                     sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
                 ),
-                person = createPerson()
+                person = createPerson(),
             )
         }
 
@@ -449,8 +453,8 @@ class OppgaveDataFetcherTest {
                     ),
                     "biDiagnoser" to emptyList<DiagnoseInput>(),
                 ),
-                "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT
-            )
+                "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT,
+            ),
         )
 
         assertEquals(1, result.errors.size)
@@ -503,5 +507,5 @@ private fun createPerson(
         null,
     ),
     null,
-    LocalDate.of(1970, 1, 1)
+    LocalDate.of(1970, 1, 1),
 )

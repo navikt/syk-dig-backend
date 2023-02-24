@@ -83,8 +83,8 @@ fun mapToFellesformat(
                                             s = "2.16.578.1.12.4.1.1.9051"
                                             v = "ENH"
                                         }
-                                    }
-                                )
+                                    },
+                                ),
                             )
                         }
                     }
@@ -118,7 +118,7 @@ fun mapToFellesformat(
                                         arbeidsgiver = tilArbeidsgiver()
                                         medisinskVurdering = tilMedisinskVurdering(
                                             validatedValues.hovedDiagnose,
-                                            validatedValues.biDiagnoser
+                                            validatedValues.biDiagnoser,
                                         )
                                         aktivitet = HelseOpplysningerArbeidsuforhet.Aktivitet().apply {
                                             periode.addAll(tilPeriodeListe(validatedValues.perioder))
@@ -140,13 +140,13 @@ fun mapToFellesformat(
                                                 journalpostId
                                         }
                                         strekkode = "123456789qwerty"
-                                    }
+                                    },
                                 )
                             }
                         }
-                    }
+                    },
                 )
-            }
+            },
         )
     }
 }
@@ -168,13 +168,12 @@ fun tilBehandler(): HelseOpplysningerArbeidsuforhet.Behandler =
                 teleAddress = URL().apply {
                     v = "tel:55553336"
                 }
-            }
+            },
         )
     }
 
 fun tilMedisinskVurdering(hovedDiagnoseInput: DiagnoseInput, biDiagnoserInput: List<DiagnoseInput>):
     HelseOpplysningerArbeidsuforhet.MedisinskVurdering {
-
     val biDiagnoseListe: List<CV> = biDiagnoserInput.map {
         toMedisinskVurderingDiagnose(it)
     }
@@ -223,9 +222,9 @@ fun getTextFromDiagnose(kode: String, diagnoseSystem: String): String {
 fun toDiagnoseKithSystem(diagnoseSystem: String): String {
     return if ("ICD10" == diagnoseSystem) {
         "2.16.578.1.12.4.1.1.7110"
-    } else if ("ICPC2" == diagnoseSystem)
+    } else if ("ICPC2" == diagnoseSystem) {
         "2.16.578.1.12.4.1.1.7170"
-    else {
+    } else {
         throw MappingException("Ukjent diagnose system")
     }
 }

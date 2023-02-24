@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class OppgaveService(
     private val oppgaveRepository: OppgaveRepository,
-    private val ferdigstillingService: FerdigstillingService
+    private val ferdigstillingService: FerdigstillingService,
 ) {
     private val log = logger()
 
@@ -37,7 +37,7 @@ class OppgaveService(
 
     fun ferdigstillOppgaveGosys(
         oppgave: OppgaveDbModel,
-        ident: String
+        ident: String,
     ) {
         val sykmelding = oppgaveRepository.getLastSykmelding(oppgave.oppgaveId)
         oppgaveRepository.ferdigstillOppgaveGosys(oppgave, ident, sykmelding)
@@ -49,7 +49,7 @@ class OppgaveService(
         ident: String,
         values: FerdistilltRegisterOppgaveValues,
         enhetId: String,
-        sykmeldt: Person
+        sykmeldt: Person,
     ) {
         val sykmelding = toSykmelding(oppgave, values)
 

@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate
 @Component
 class SafClient(
     @Value("\${saf.url}") private val url: String,
-    private val safRestTemplate: RestTemplate
+    private val safRestTemplate: RestTemplate,
 ) {
     val log = logger()
 
@@ -24,7 +24,7 @@ class SafClient(
     fun hentPdfFraSaf(
         journalpostId: String,
         dokumentInfoId: String,
-        sykmeldingId: String
+        sykmeldingId: String,
     ): ByteArray {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -37,7 +37,7 @@ class SafClient(
                 "$url/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV",
                 HttpMethod.GET,
                 HttpEntity<Any>(headers),
-                ByteArray::class.java
+                ByteArray::class.java,
             )
             return response.body ?: throw RuntimeException("Tomt svar fra SAF for journalpostId $journalpostId")
         } catch (e: HttpClientErrorException) {

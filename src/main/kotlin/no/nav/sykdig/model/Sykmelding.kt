@@ -27,5 +27,5 @@ data class Sykmelding(
     val kontaktMedPasient: KontaktMedPasient?,
     var behandletTidspunkt: OffsetDateTime?,
     val behandler: Behandler?,
-    val syketilfelleStartDato: LocalDate?
+    val syketilfelleStartDato: LocalDate?,
 )

@@ -24,8 +24,8 @@ class PoststedRepositoryTest : FellesTestOppsett() {
                 PostInformasjon("5341", "STRAUME"),
                 PostInformasjon("5365", "TURØY"),
                 PostInformasjon("5449", "BØMLO"),
-                PostInformasjon("9609", "NORDRE SEILAND")
-            )
+                PostInformasjon("9609", "NORDRE SEILAND"),
+            ),
         )
     }
 
@@ -62,9 +62,9 @@ class PoststedRepositoryTest : FellesTestOppsett() {
                 PostInformasjon("0484", "OSLO"),
                 PostInformasjon("5365", "TURØY"),
                 PostInformasjon("5449", "BØMLO"),
-                PostInformasjon("9609", "NORDRE SEILAND")
+                PostInformasjon("9609", "NORDRE SEILAND"),
             ),
-            UUID.randomUUID()
+            UUID.randomUUID(),
         )
 
         val allePoststeder = poststedRepository.getAllePoststeder()
@@ -81,9 +81,9 @@ class PoststedRepositoryTest : FellesTestOppsett() {
                 PostInformasjon("5341", "STRAUME"),
                 PostInformasjon("5365", "TURØY"),
                 PostInformasjon("5449", "BØMLO"),
-                PostInformasjon("9609", "NORDRE SEILAND")
+                PostInformasjon("9609", "NORDRE SEILAND"),
             ),
-            UUID.randomUUID()
+            UUID.randomUUID(),
         )
 
         val allePoststeder = poststedRepository.getAllePoststeder()
@@ -99,9 +99,9 @@ class PoststedRepositoryTest : FellesTestOppsett() {
                 PostInformasjon("0502", "OSLO"),
                 PostInformasjon("5341", "STRAUME"),
                 PostInformasjon("5365", "TURØY"),
-                PostInformasjon("9609", "SENJA")
+                PostInformasjon("9609", "SENJA"),
             ),
-            UUID.randomUUID()
+            UUID.randomUUID(),
         )
 
         val allePoststeder = poststedRepository.getAllePoststeder()
@@ -121,9 +121,9 @@ class PoststedRepositoryTest : FellesTestOppsett() {
                 PostInformasjon("5341", "STRAUME"),
                 PostInformasjon("5365", "TURØY"),
                 PostInformasjon("5449", "BØMLO"),
-                PostInformasjon("9609", "NORDRE SEILAND")
+                PostInformasjon("9609", "NORDRE SEILAND"),
             ),
-            UUID.randomUUID()
+            UUID.randomUUID(),
         )
 
         val allePoststederOppdatert = poststedRepository.getAllePoststeder()

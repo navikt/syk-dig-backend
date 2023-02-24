@@ -5,5 +5,5 @@ enum class Oppgavestatus {
     AAPNET,
     UNDER_BEHANDLING,
     FERDIGSTILT,
-    FEILREGISTRERT
+    FEILREGISTRERT,
 }

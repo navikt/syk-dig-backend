@@ -45,7 +45,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 .addValue(
                     "ferdigstilt",
                     digitaliseringsoppgave.ferdigstilt?.let { Timestamp.from(digitaliseringsoppgave.ferdigstilt.toInstant()) },
-                )
+                ),
         )
         namedParameterJdbcTemplate.update(
             """
@@ -59,7 +59,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 "sykmelding" to digitaliseringsoppgave.sykmelding?.toPGObject(),
                 "endret_av" to digitaliseringsoppgave.endretAv,
                 "timestamp" to Timestamp.from(digitaliseringsoppgave.timestamp.toInstant()),
-            )
+            ),
         )
     }
 
@@ -85,7 +85,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                                            WHERE oppgave_id = o.oppgave_id)
                     WHERE o.oppgave_id = :oppgave_id;
             """,
-            mapOf("oppgave_id" to oppgaveId)
+            mapOf("oppgave_id" to oppgaveId),
         ) { resultSet, _ ->
             resultSet.toDigitaliseringsoppgave()
         }.firstOrNull()
@@ -98,7 +98,6 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         ident: String,
         ferdigstilles: Boolean,
     ) {
-
         if (ferdigstilles) {
             namedParameterJdbcTemplate.update(
                 """
@@ -109,7 +108,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 mapOf(
                     "oppgave_id" to oppgave.oppgaveId,
                     "ferdigstilt" to Timestamp.from(Instant.now()),
-                )
+                ),
             )
         }
         namedParameterJdbcTemplate.update(
@@ -124,7 +123,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 "endret_av" to ident,
                 "timestamp" to Timestamp.from(Instant.now()),
                 "sykmelding" to sykmelding.toPGObject(),
-            )
+            ),
         )
     }
 
@@ -146,7 +145,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 "endret_av" to ident,
                 "timestamp" to Timestamp.from(Instant.now()),
                 "sykmelding" to sykmelding?.toPGObject(),
-            )
+            ),
         )
         namedParameterJdbcTemplate.update(
             """
@@ -159,7 +158,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 "oppgave_id" to oppgave.oppgaveId,
                 "ferdigstilt" to Timestamp.from(Instant.now()),
                 "tilbake_til_gosys" to true,
-            )
+            ),
         )
     }
 
@@ -176,7 +175,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                                            WHERE oppgave_id = o.oppgave_id)
                     WHERE s.oppgave_id = :oppgave_id;
             """,
-            mapOf("oppgave_id" to oppgaveId)
+            mapOf("oppgave_id" to oppgaveId),
         ) { resultSet, _ ->
             resultSet.toSykmeldingUnderArbeid()
         }.firstOrNull()
@@ -243,17 +242,25 @@ private fun List<PeriodeInput>?.mapToPerioder(): List<Periode>? = this?.map {
     Periode(
         fom = it.fom,
         tom = it.tom,
-        aktivitetIkkeMulig = if (it.type == PeriodeType.AKTIVITET_IKKE_MULIG) AktivitetIkkeMulig(
-            medisinskArsak = null,
-            arbeidsrelatertArsak = null,
-        ) else null,
+        aktivitetIkkeMulig = if (it.type == PeriodeType.AKTIVITET_IKKE_MULIG) {
+            AktivitetIkkeMulig(
+                medisinskArsak = null,
+                arbeidsrelatertArsak = null,
+            )
+        } else {
+            null
+        },
         behandlingsdager = null,
-        gradert = if (it.type == PeriodeType.GRADERT) Gradert(
-            grad = it.grad ?: throw IllegalStateException("Gradert periode must have grad"),
-            reisetilskudd = false,
-        ) else null,
+        gradert = if (it.type == PeriodeType.GRADERT) {
+            Gradert(
+                grad = it.grad ?: throw IllegalStateException("Gradert periode must have grad"),
+                reisetilskudd = false,
+            )
+        } else {
+            null
+        },
         reisetilskudd = false,
-        avventendeInnspillTilArbeidsgiver = null
+        avventendeInnspillTilArbeidsgiver = null,
     )
 }
 
@@ -297,7 +304,7 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
         sykmelding = getString("sykmelding")?.let { objectMapper.readValue(it, SykmeldingUnderArbeid::class.java) },
         dokumenter = getString("dokumenter")?.let { objectMapper.readValue<List<DokumentDbModel>>(it) },
         endretAv = getString("endret_av"),
-        timestamp = getTimestamp("timestamp").toInstant().atOffset(ZoneOffset.UTC)
+        timestamp = getTimestamp("timestamp").toInstant().atOffset(ZoneOffset.UTC),
     )
 
 private fun ResultSet.toSykmeldingUnderArbeid(): SykmeldingUnderArbeid? {

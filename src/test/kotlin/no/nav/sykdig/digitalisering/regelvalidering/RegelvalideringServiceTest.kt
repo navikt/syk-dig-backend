@@ -21,7 +21,7 @@ class RegelvalideringServiceTest {
         aktorId = "aktorid",
         bostedsadresse = null,
         oppholdsadresse = null,
-        fodselsdato = LocalDate.now().minusYears(40)
+        fodselsdato = LocalDate.now().minusYears(40),
     )
     private val happyCaseValues = FerdistilltRegisterOppgaveValues(
         fnrPasient = "12345678910",
@@ -31,12 +31,12 @@ class RegelvalideringServiceTest {
             PeriodeInput(
                 type = PeriodeType.AKTIVITET_IKKE_MULIG,
                 fom = LocalDate.now().minusWeeks(2),
-                tom = LocalDate.now().minusWeeks(1)
-            )
+                tom = LocalDate.now().minusWeeks(1),
+            ),
         ),
         hovedDiagnose = DiagnoseInput("A000", "ICD10"),
         biDiagnoser = emptyList(),
-        harAndreRelevanteOpplysninger = false
+        harAndreRelevanteOpplysninger = false,
     )
 
     @Test
@@ -50,7 +50,7 @@ class RegelvalideringServiceTest {
     fun sykmeldingManglerPeriode() {
         val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(
             sykmeldt,
-            happyCaseValues.copy(perioder = emptyList())
+            happyCaseValues.copy(perioder = emptyList()),
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -66,10 +66,10 @@ class RegelvalideringServiceTest {
                     PeriodeInput(
                         type = PeriodeType.AKTIVITET_IKKE_MULIG,
                         fom = LocalDate.now().minusWeeks(1),
-                        tom = LocalDate.now().minusWeeks(2)
-                    )
-                )
-            )
+                        tom = LocalDate.now().minusWeeks(2),
+                    ),
+                ),
+            ),
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -85,10 +85,10 @@ class RegelvalideringServiceTest {
                     PeriodeInput(
                         type = PeriodeType.AKTIVITET_IKKE_MULIG,
                         fom = LocalDate.now().minusYears(3).minusDays(5),
-                        tom = LocalDate.now().minusYears(3).plusDays(5)
-                    )
-                )
-            )
+                        tom = LocalDate.now().minusYears(3).plusDays(5),
+                    ),
+                ),
+            ),
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -99,7 +99,7 @@ class RegelvalideringServiceTest {
     fun sykmeldtErUnder13Ar() {
         val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(
             sykmeldt.copy(fodselsdato = LocalDate.now().minusYears(12)),
-            happyCaseValues
+            happyCaseValues,
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -110,7 +110,7 @@ class RegelvalideringServiceTest {
     fun sykmeldtErOver70Ar() {
         val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(
             sykmeldt.copy(fodselsdato = LocalDate.now().minusYears(71)),
-            happyCaseValues
+            happyCaseValues,
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -126,10 +126,10 @@ class RegelvalideringServiceTest {
                     PeriodeInput(
                         type = PeriodeType.AKTIVITET_IKKE_MULIG,
                         fom = LocalDate.now().plusDays(31),
-                        tom = LocalDate.now().plusDays(45)
-                    )
-                )
-            )
+                        tom = LocalDate.now().plusDays(45),
+                    ),
+                ),
+            ),
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -145,16 +145,16 @@ class RegelvalideringServiceTest {
                     PeriodeInput(
                         type = PeriodeType.AKTIVITET_IKKE_MULIG,
                         fom = LocalDate.now().minusMonths(6),
-                        tom = LocalDate.now()
+                        tom = LocalDate.now(),
                     ),
                     PeriodeInput(
                         type = PeriodeType.GRADERT,
                         fom = LocalDate.now().plusDays(1),
                         tom = LocalDate.now().plusMonths(8),
-                        grad = 50
-                    )
-                )
-            )
+                        grad = 50,
+                    ),
+                ),
+            ),
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -170,16 +170,16 @@ class RegelvalideringServiceTest {
                     PeriodeInput(
                         type = PeriodeType.AKTIVITET_IKKE_MULIG,
                         fom = LocalDate.now().minusMonths(1),
-                        tom = LocalDate.now()
+                        tom = LocalDate.now(),
                     ),
                     PeriodeInput(
                         type = PeriodeType.GRADERT,
                         fom = LocalDate.now(),
                         tom = LocalDate.now().plusDays(15),
-                        grad = 50
-                    )
-                )
-            )
+                        grad = 50,
+                    ),
+                ),
+            ),
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -195,16 +195,16 @@ class RegelvalideringServiceTest {
                     PeriodeInput(
                         type = PeriodeType.AKTIVITET_IKKE_MULIG,
                         fom = LocalDate.now().minusMonths(1),
-                        tom = LocalDate.now()
+                        tom = LocalDate.now(),
                     ),
                     PeriodeInput(
                         type = PeriodeType.GRADERT,
                         fom = LocalDate.now().plusDays(4),
                         tom = LocalDate.now().plusDays(15),
-                        grad = 50
-                    )
-                )
-            )
+                        grad = 50,
+                    ),
+                ),
+            ),
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -221,10 +221,10 @@ class RegelvalideringServiceTest {
                         type = PeriodeType.GRADERT,
                         fom = LocalDate.now().plusDays(4),
                         tom = LocalDate.now().plusDays(15),
-                        grad = 19
-                    )
-                )
-            )
+                        grad = 19,
+                    ),
+                ),
+            ),
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -241,16 +241,16 @@ class RegelvalideringServiceTest {
                         type = PeriodeType.GRADERT,
                         fom = LocalDate.now().plusDays(4),
                         tom = LocalDate.now().plusDays(15),
-                        grad = 100
-                    )
-                )
-            )
+                        grad = 100,
+                    ),
+                ),
+            ),
         )
 
         assertEquals(valideringsresultat.size, 1)
         assertEquals(
             valideringsresultat[0],
-            "Sykmeldingsgraden kan ikke være mer enn 99% når det er en gradert sykmelding."
+            "Sykmeldingsgraden kan ikke være mer enn 99% når det er en gradert sykmelding.",
         )
     }
 
@@ -258,7 +258,7 @@ class RegelvalideringServiceTest {
     fun hoveddiagnoseGirIkkeRettPaSykepenger() {
         val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(
             sykmeldt,
-            happyCaseValues.copy(hovedDiagnose = DiagnoseInput("Z09", "ICPC2"))
+            happyCaseValues.copy(hovedDiagnose = DiagnoseInput("Z09", "ICPC2")),
         )
 
         assertEquals(valideringsresultat.size, 1)
@@ -274,17 +274,17 @@ class RegelvalideringServiceTest {
                     PeriodeInput(
                         type = PeriodeType.AKTIVITET_IKKE_MULIG,
                         fom = LocalDate.now().minusMonths(1),
-                        tom = LocalDate.now()
+                        tom = LocalDate.now(),
                     ),
                     PeriodeInput(
                         type = PeriodeType.GRADERT,
                         fom = LocalDate.now(),
                         tom = LocalDate.now().plusDays(15),
-                        grad = 50
-                    )
+                        grad = 50,
+                    ),
                 ),
-                hovedDiagnose = DiagnoseInput("Z09", "ICPC2")
-            )
+                hovedDiagnose = DiagnoseInput("Z09", "ICPC2"),
+            ),
         )
 
         assertEquals(valideringsresultat.size, 2)

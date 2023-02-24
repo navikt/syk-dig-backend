@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate
 @Component
 class OppgaveClient(
     @Value("\${oppgave.url}") private val url: String,
-    private val oppgaveRestTemplate: RestTemplate
+    private val oppgaveRestTemplate: RestTemplate,
 ) {
     val log = logger()
 
@@ -41,7 +41,7 @@ class OppgaveClient(
                 "$url/$oppgaveId",
                 HttpMethod.GET,
                 HttpEntity<Any>(headers),
-                GetOppgaveResponse::class.java
+                GetOppgaveResponse::class.java,
             )
             return response.body ?: throw RuntimeException("Fant ikke oppgave med id $oppgaveId")
         } catch (e: HttpClientErrorException) {
@@ -67,14 +67,14 @@ class OppgaveClient(
         val body = PatchFerdigStillOppgaveRequest(
             versjon = oppgaveVersjon,
             status = Oppgavestatus.FERDIGSTILT,
-            id = oppgaveId.toInt()
+            id = oppgaveId.toInt(),
         )
         try {
             oppgaveRestTemplate.exchange(
                 "$url/$oppgaveId",
                 HttpMethod.PATCH,
                 HttpEntity(body, headers),
-                String::class.java
+                String::class.java,
             )
             log.info("Ferdigstilt oppgave $oppgaveId for sykmelding $sykmeldingId")
         } catch (e: HttpClientErrorException) {
@@ -84,14 +84,14 @@ class OppgaveClient(
             } else {
                 log.error(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
-                    e
+                    e,
                 )
                 throw e
             }
         } catch (e: HttpServerErrorException) {
             log.error(
                 "HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
-                e
+                e,
             )
             throw e
         }
@@ -115,7 +115,7 @@ class OppgaveClient(
             status = oppgaveStatus,
             id = oppgaveId.toInt(),
             behandlesAvApplikasjon = oppgaveBehandlesAvApplikasjon,
-            tilordnetRessurs = oppgaveTilordnetRessurs
+            tilordnetRessurs = oppgaveTilordnetRessurs,
         )
 
         try {
@@ -123,7 +123,7 @@ class OppgaveClient(
                 "$url/$oppgaveId",
                 HttpMethod.PATCH,
                 HttpEntity(body, headers),
-                String::class.java
+                String::class.java,
             )
             log.info("OppdaterOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
         } catch (e: HttpClientErrorException) {
@@ -133,14 +133,14 @@ class OppgaveClient(
             } else {
                 log.error(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave ved oppdaterOppgave: ${e.message}",
-                    e
+                    e,
                 )
                 throw e
             }
         } catch (e: HttpServerErrorException) {
             log.error(
                 "HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave ved oppdaterOppgave: ${e.message}",
-                e
+                e,
             )
             throw e
         }

@@ -21,7 +21,7 @@ data class FerdistilltRegisterOppgaveValues(
     override val perioder: List<PeriodeInput>,
     override val hovedDiagnose: DiagnoseInput,
     override val biDiagnoser: List<DiagnoseInput>,
-    override val harAndreRelevanteOpplysninger: Boolean?
+    override val harAndreRelevanteOpplysninger: Boolean?,
 ) : RegisterOppgaveValues
 
 data class UferdigRegisterOppgaveValues(

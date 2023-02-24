@@ -18,7 +18,7 @@ class SafGraphQlConfiguration {
     @Bean
     fun safGraphQlClient(
         @Value("\${saf.url}") safUrl: String,
-        safRestTemplate: RestTemplate
+        safRestTemplate: RestTemplate,
     ): CustomGraphQLClient {
         return GraphQLClient.createCustom(safUrl) { url, _, body ->
             val httpHeaders = HttpHeaders()
