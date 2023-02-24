@@ -31,7 +31,7 @@ import org.junit.jupiter.api.TestInstance
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.LocalDate
@@ -41,7 +41,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureMetrics
+@AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 class FerdigstillingServiceTest : FellesTestOppsett() {
     @MockBean
@@ -80,8 +80,8 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 avventendeInnspillTilArbeidsgiver = null,
                 behandlingsdager = null,
                 gradert = null,
-                reisetilskudd = false
-            )
+                reisetilskudd = false,
+            ),
         )
 
         val validatedValues = FerdistilltRegisterOppgaveValues(
@@ -92,12 +92,12 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 PeriodeInput(
                     PeriodeType.AKTIVITET_IKKE_MULIG,
                     LocalDate.now().minusMonths(1),
-                    LocalDate.now().minusWeeks(2)
-                )
+                    LocalDate.now().minusWeeks(2),
+                ),
             ),
             hovedDiagnose = DiagnoseInput("A070", "ICD10"),
             biDiagnoser = emptyList(),
-            harAndreRelevanteOpplysninger = null
+            harAndreRelevanteOpplysninger = null,
         )
 
         val sykmeldt = Person(
@@ -106,7 +106,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             aktorId = "aktorid",
             bostedsadresse = null,
             oppholdsadresse = null,
-            fodselsdato = LocalDate.of(1970, 1, 1)
+            fodselsdato = LocalDate.of(1970, 1, 1),
         )
 
         ferdigstillingService.ferdigstill(
@@ -117,7 +117,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 fnr = "12345678910",
                 sykmeldingId = sykmeldingId,
                 journalpostId = journalpostId,
-                dokumentInfoId = dokumentInfoId
+                dokumentInfoId = dokumentInfoId,
             ),
             sykmeldt = sykmeldt,
             validatedValues = validatedValues,
@@ -131,7 +131,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             "111",
             "9898",
             sykmeldingId.toString(),
-            perioder
+            perioder,
         )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
     }
@@ -145,7 +145,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val hoveddiagnose = Diagnose(
             system = "ICD10",
             kode = "A070",
-            tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
+            tekst = "Balantidiasis Dysenteri som skyldes Balantidium",
         )
 
         val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
@@ -160,8 +160,8 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                     type = PeriodeType.AKTIVITET_IKKE_MULIG,
                     fom = LocalDate.of(2019, Month.AUGUST, 15),
                     tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                    grad = null
-                )
+                    grad = null,
+                ),
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
@@ -180,7 +180,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 null,
             ),
             null,
-            LocalDate.of(1970, 1, 1)
+            LocalDate.of(1970, 1, 1),
         )
 
         val harAndreRelevanteOpplysninger = false
@@ -191,7 +191,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             harAndreRelevanteOpplysninger,
             sykmeldingId.toString(),
             journalPostId,
-            datoOpprettet.toLocalDateTime()
+            datoOpprettet.toLocalDateTime(),
         )
 
         assertEquals(fnrPasient, receivedSykmelding.personNrPasient)
@@ -206,9 +206,9 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             Diagnose(
                 system = "2.16.578.1.12.4.1.1.7110",
                 kode = "A070",
-                tekst = "Balantidiasis"
+                tekst = "Balantidiasis",
             ),
-            receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose
+            receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose,
         )
 
         assertEquals(false, receivedSykmelding.sykmelding.skjermesForPasient)
@@ -223,9 +223,9 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         assertEquals(
             KontaktMedPasient(
                 null,
-                null
+                null,
             ),
-            receivedSykmelding.sykmelding.kontaktMedPasient
+            receivedSykmelding.sykmelding.kontaktMedPasient,
         )
 
         assertEquals(behandletTidspunkt.toLocalDateTime(), receivedSykmelding.sykmelding.behandletTidspunkt)
@@ -243,7 +243,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val hoveddiagnose = Diagnose(
             system = "ICD10",
             kode = "A070",
-            tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
+            tekst = "Balantidiasis Dysenteri som skyldes Balantidium",
         )
 
         val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
@@ -258,8 +258,8 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                     type = PeriodeType.GRADERT,
                     fom = LocalDate.of(2019, Month.AUGUST, 15),
                     tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                    grad = 69
-                )
+                    grad = 69,
+                ),
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
@@ -278,7 +278,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 null,
             ),
             null,
-            LocalDate.of(1970, 1, 1)
+            LocalDate.of(1970, 1, 1),
         )
 
         val harAndreRelevanteOpplysninger = false
@@ -288,7 +288,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             harAndreRelevanteOpplysninger,
             sykmeldingId.toString(),
             journalPostId,
-            datoOpprettet.toLocalDateTime()
+            datoOpprettet.toLocalDateTime(),
         )
 
         assertEquals(1, receivedSykmelding.sykmelding.perioder.size)
@@ -303,7 +303,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val hoveddiagnose = Diagnose(
             system = "ICD10",
             kode = "A070",
-            tekst = "Balantidiasis Dysenteri som skyldes Balantidium"
+            tekst = "Balantidiasis Dysenteri som skyldes Balantidium",
         )
 
         val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
@@ -318,8 +318,8 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                     type = PeriodeType.GRADERT,
                     fom = LocalDate.of(2019, Month.AUGUST, 15),
                     tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                    grad = 120
-                )
+                    grad = 120,
+                ),
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
@@ -338,7 +338,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 null,
             ),
             null,
-            LocalDate.of(1970, 1, 1)
+            LocalDate.of(1970, 1, 1),
         )
 
         val harAndreRelevanteOpplysninger = false
@@ -349,7 +349,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 harAndreRelevanteOpplysninger,
                 sykmeldingId.toString(),
                 journalPostId,
-                datoOpprettet.toLocalDateTime()
+                datoOpprettet.toLocalDateTime(),
             )
         }
         assertEquals(exception.message, "Gradert sykmelding må ha grad")

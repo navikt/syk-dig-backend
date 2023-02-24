@@ -13,7 +13,7 @@ import java.net.InetAddress
 @Component
 class LeaderElection(
     private val plainTextUtf8RestTemplate: RestTemplate,
-    @Value("\${elector.path}") private val electorPath: String
+    @Value("\${elector.path}") private val electorPath: String,
 ) {
 
     val log = logger()
@@ -33,9 +33,10 @@ class LeaderElection(
             .toUriString()
         val result = plainTextUtf8RestTemplate
             .exchange(
-                uriString, HttpMethod.GET,
+                uriString,
+                HttpMethod.GET,
                 null,
-                String::class.java
+                String::class.java,
             )
         if (result.statusCode != HttpStatus.OK) {
             val message = "Kall mot elector feiler med HTTP-" + result.statusCode

@@ -16,7 +16,7 @@ import java.util.UUID
 @Component
 class KodeverkClient(
     @Value("\${kodeverk.url}") private val url: String,
-    private val kodeverkRestTemplate: RestTemplate
+    private val kodeverkRestTemplate: RestTemplate,
 ) {
     val log = logger()
 
@@ -32,7 +32,7 @@ class KodeverkClient(
                 "$url/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato=${LocalDate.now()}&spraak=nb",
                 HttpMethod.GET,
                 HttpEntity<Any>(headers),
-                GetKodeverkKoderBetydningerResponse::class.java
+                GetKodeverkKoderBetydningerResponse::class.java,
             )
             return response.body?.toPostInformasjonListe() ?: throw RuntimeException("Ingen respons fra kodeverk")
         } catch (e: Exception) {
@@ -43,22 +43,22 @@ class KodeverkClient(
 }
 
 data class GetKodeverkKoderBetydningerResponse(
-    val betydninger: Map<String, List<Betydning>>
+    val betydninger: Map<String, List<Betydning>>,
 ) {
     fun toPostInformasjonListe(): List<PostInformasjon> {
         return betydninger.map {
             PostInformasjon(
                 postnummer = it.key,
-                poststed = it.value.first().beskrivelser["nb"]?.term ?: throw RuntimeException("Kode ${it.key} mangler term")
+                poststed = it.value.first().beskrivelser["nb"]?.term ?: throw RuntimeException("Kode ${it.key} mangler term"),
             )
         }
     }
 }
 
 data class Betydning(
-    val beskrivelser: Map<String, Beskrivelse>
+    val beskrivelser: Map<String, Beskrivelse>,
 )
 
 data class Beskrivelse(
-    val term: String
+    val term: String,
 )

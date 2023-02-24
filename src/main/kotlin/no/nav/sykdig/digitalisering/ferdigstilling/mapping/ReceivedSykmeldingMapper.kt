@@ -12,22 +12,21 @@ fun mapToReceivedSykmelding(
     harAndreRelevanteOpplysninger: Boolean?,
     sykmeldingId: String,
     journalpostId: String,
-    opprettet: LocalDateTime
+    opprettet: LocalDateTime,
 ): ReceivedSykmelding {
-
     val fellesformat = mapToFellesformat(
         validatedValues = ferdigstillteRegisterOppgaveValues,
         person = sykmeldt,
         sykmeldingId = sykmeldingId,
         datoOpprettet = opprettet,
-        journalpostId = journalpostId
+        journalpostId = journalpostId,
     )
 
     val sykmelding = extractHelseOpplysningerArbeidsuforhet(fellesformat).toSykmelding(
         sykmeldingId = sykmeldingId,
         pasientAktoerId = sykmeldt.aktorId,
         msgId = sykmeldingId,
-        signaturDato = opprettet
+        signaturDato = opprettet,
     )
 
     return ReceivedSykmelding(
@@ -52,7 +51,7 @@ fun mapToReceivedSykmelding(
         vedlegg = null,
         utenlandskSykmelding = UtenlandskSykmelding(
             ferdigstillteRegisterOppgaveValues.skrevetLand,
-            harAndreRelevanteOpplysninger ?: false
-        )
+            harAndreRelevanteOpplysninger ?: false,
+        ),
     )
 }

@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component
 
 @Component
 class OppgaveListener(
-    val mottaOppgaverFraKafka: MottaOppgaverFraKafka
+    val mottaOppgaverFraKafka: MottaOppgaverFraKafka,
 ) {
 
     @KafkaListener(
         topics = [sykDigOppgaveTopic],
         properties = ["auto.offset.reset = earliest"],
-        containerFactory = "aivenKafkaListenerContainerFactory"
+        containerFactory = "aivenKafkaListenerContainerFactory",
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         mottaOppgaverFraKafka.lagre(cr.key(), objectMapper.readValue(cr.value()))

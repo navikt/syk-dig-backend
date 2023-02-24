@@ -70,7 +70,6 @@ class DigitaliseringsoppgaveDataFetcher(
         @InputArgument status: SykmeldingUnderArbeidStatus,
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveResult {
-
         val ident: String = dfe.graphQlContext.get("username")
         when (status) {
             SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
@@ -79,7 +78,7 @@ class DigitaliseringsoppgaveDataFetcher(
                     oppgaveId = oppgaveId,
                     ident = ident,
                     values = ferdistilltRegisterOppgaveValues,
-                    enhetId = enhetId
+                    enhetId = enhetId,
                 ).also { log.info("Ferdigstilt oppgave med id $oppgaveId") }
 
                 return DigitaliseringsoppgaveStatus(
@@ -93,7 +92,7 @@ class DigitaliseringsoppgaveDataFetcher(
                 digitaliseringsoppgaveService.updateOppgave(
                     oppgaveId = oppgaveId,
                     values = uferdigRegisterOppgaveValues,
-                    ident = ident
+                    ident = ident,
                 ).also { log.info("Lagret oppgave med id $oppgaveId") }
 
                 return mapToDigitaliseringsoppgave(digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId))
@@ -142,19 +141,17 @@ private fun validateRegisterOppgaveValues(
         perioder = values.perioder,
         hovedDiagnose = values.hovedDiagnose,
         biDiagnoser = values.biDiagnoser,
-        harAndreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger
+        harAndreRelevanteOpplysninger = values.harAndreRelevanteOpplysninger,
     )
 }
 
 private fun validateHovedDiagnose(hovedDiagnose: DiagnoseInput?) {
-
     if (hovedDiagnose != null) {
         validateDiagnose(hovedDiagnose)
     }
 }
 
 private fun validateBiDiagnoser(biDiagnoser: List<DiagnoseInput>?) {
-
     if (!biDiagnoser.isNullOrEmpty()) {
         biDiagnoser.forEach { biDiagnose ->
             validateDiagnose(biDiagnose)
@@ -170,7 +167,7 @@ private fun uferdigRegisterOppgaveValus(sykmeldingUnderArbeidValues: SykmeldingU
         perioder = sykmeldingUnderArbeidValues.perioder,
         hovedDiagnose = sykmeldingUnderArbeidValues.hovedDiagnose,
         biDiagnoser = sykmeldingUnderArbeidValues.biDiagnoser,
-        harAndreRelevanteOpplysninger = sykmeldingUnderArbeidValues.harAndreRelevanteOpplysninger
+        harAndreRelevanteOpplysninger = sykmeldingUnderArbeidValues.harAndreRelevanteOpplysninger,
     )
 }
 

@@ -16,7 +16,6 @@ private fun validateDiagnoseSystem(system: String) {
 }
 
 private fun validateDiagnoseKode(system: String, kode: String) {
-
     if (system == "ICD10" && Diagnosekoder.icd10[kode] == null) {
         throw ClientException("Diagnosekoden som er benyttet: $kode er ukjent")
     } else if (system == "ICPC2" && Diagnosekoder.icpc2[kode] == null) {

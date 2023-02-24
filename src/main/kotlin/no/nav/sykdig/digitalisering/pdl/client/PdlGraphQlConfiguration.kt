@@ -18,7 +18,7 @@ class PdlGraphQlConfiguration {
     @Bean
     fun pdlGraphQlClient(
         @Value("\${pdl.url}") pdlUrl: String,
-        pdlRestTemplate: RestTemplate
+        pdlRestTemplate: RestTemplate,
     ): CustomGraphQLClient {
         return GraphQLClient.createCustom(pdlUrl) { url, _, body ->
             val httpHeaders = HttpHeaders()
@@ -28,7 +28,7 @@ class PdlGraphQlConfiguration {
             val response =
                 pdlRestTemplate.exchange(url, HttpMethod.POST, HttpEntity(body, httpHeaders), String::class.java)
 
-            HttpResponse(response.statusCodeValue, response.body)
+            HttpResponse(response.statusCode.value(), response.body)
         }
     }
 }

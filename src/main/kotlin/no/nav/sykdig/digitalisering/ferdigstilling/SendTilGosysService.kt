@@ -10,13 +10,17 @@ class SendTilGosysService(
     fun sendOppgaveTilGosys(
         oppgaveId: String,
         sykmeldingId: String,
-        veilederIdent: String
+        veilederIdent: String,
     ) {
         val oppgave = oppgaveClient.getOppgave(oppgaveId, sykmeldingId)
 
         oppgaveClient.oppdaterOppgave(
-            oppgaveId, sykmeldingId, oppgave.versjon, oppgave.status,
-            "FS22", veilederIdent
+            oppgaveId,
+            sykmeldingId,
+            oppgave.versjon,
+            oppgave.status,
+            "FS22",
+            veilederIdent,
         )
     }
 }

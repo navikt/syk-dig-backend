@@ -18,7 +18,7 @@ class SafGraphQlConfiguration {
     @Bean
     fun safGraphQlClient(
         @Value("\${saf.url}") safUrl: String,
-        safRestTemplate: RestTemplate
+        safRestTemplate: RestTemplate,
     ): CustomGraphQLClient {
         return GraphQLClient.createCustom(safUrl) { url, _, body ->
             val httpHeaders = HttpHeaders()
@@ -27,7 +27,7 @@ class SafGraphQlConfiguration {
             val response =
                 safRestTemplate.exchange("$url/graphql", HttpMethod.POST, HttpEntity(body, httpHeaders), String::class.java)
 
-            HttpResponse(response.statusCodeValue, response.body)
+            HttpResponse(response.statusCode.value(), response.body)
         }
     }
 }

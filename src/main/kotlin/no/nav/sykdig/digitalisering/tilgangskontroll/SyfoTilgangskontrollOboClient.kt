@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate
 @Component
 class SyfoTilgangskontrollOboClient(
     @Value("\${syfotilgangskontroll.url}") private val url: String,
-    private val syfotilgangskontrollRestTemplate: RestTemplate
+    private val syfotilgangskontrollRestTemplate: RestTemplate,
 ) {
     companion object {
         const val ACCESS_TO_USER_WITH_AZURE_V2_PATH = "/syfo-tilgangskontroll/api/tilgang/navident/person"
@@ -34,11 +34,11 @@ class SyfoTilgangskontrollOboClient(
                 accessToUserV2Url(),
                 GET,
                 HttpEntity<Any>(headers),
-                String::class.java
+                String::class.java,
             )
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
-            return if (e.rawStatusCode == 403) {
+            return if (e.statusCode.value() == 403) {
                 false
             } else {
                 log.error("HttpClientErrorException mot tilgangskontroll", e)

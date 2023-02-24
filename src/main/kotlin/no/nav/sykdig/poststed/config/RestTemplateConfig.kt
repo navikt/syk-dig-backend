@@ -19,7 +19,7 @@ class RestTemplateConfig {
 
     @Bean
     fun kodeverkRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder
+        restTemplateBuilder: RestTemplateBuilder,
     ): RestTemplate =
         restTemplateBuilder
             .build()

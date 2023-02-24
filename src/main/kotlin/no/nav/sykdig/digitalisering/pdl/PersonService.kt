@@ -28,7 +28,7 @@ class PersonService(
             navn = Navn(
                 fornavn = navn.fornavn,
                 mellomnavn = navn.mellomnavn,
-                etternavn = navn.etternavn
+                etternavn = navn.etternavn,
             ),
             fodselsdato = pdlResponse.hentPerson.foedsel?.first()?.foedselsdato?.let { LocalDate.parse(it) },
             aktorId = pdlResponse.identer!!.identer.first { it.gruppe == "AKTORID" }.ident,
@@ -60,12 +60,12 @@ class PersonService(
                             postkode = utenlandskAdresse.postkode,
                             bySted = utenlandskAdresse.bySted,
                             regionDistriktOmraade = utenlandskAdresse.regionDistriktOmraade,
-                            landkode = utenlandskAdresse.landkode
+                            landkode = utenlandskAdresse.landkode,
                         )
                     },
                     ukjentBosted = it.ukjentBosted?.let { ukjentBosted ->
                         UkjentBosted(ukjentBosted.bostedskommune)
-                    }
+                    },
                 )
             },
             oppholdsadresse = oppholdsadresse?.let {
@@ -96,12 +96,12 @@ class PersonService(
                             postkode = utenlandskAdresse.postkode,
                             bySted = utenlandskAdresse.bySted,
                             regionDistriktOmraade = utenlandskAdresse.regionDistriktOmraade,
-                            landkode = utenlandskAdresse.landkode
+                            landkode = utenlandskAdresse.landkode,
                         )
                     },
-                    oppholdAnnetSted = it.oppholdAnnetSted
+                    oppholdAnnetSted = it.oppholdAnnetSted,
                 )
-            }
+            },
         )
     }
 }

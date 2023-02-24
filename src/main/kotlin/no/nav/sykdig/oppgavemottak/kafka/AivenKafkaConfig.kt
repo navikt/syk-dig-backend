@@ -28,7 +28,7 @@ class AivenKafkaConfig(
     @Value("\${KAFKA_TRUSTSTORE_PATH}") private val kafkaTruststorePath: String,
     @Value("\${KAFKA_CREDSTORE_PASSWORD}") private val kafkaCredstorePassword: String,
     @Value("\${KAFKA_KEYSTORE_PATH}") private val kafkaKeystorePath: String,
-    @Value("\${aiven-kafka.auto-offset-reset}") private val kafkaAutoOffsetReset: String
+    @Value("\${aiven-kafka.auto-offset-reset}") private val kafkaAutoOffsetReset: String,
 ) {
     private val JAVA_KEYSTORE = "JKS"
     private val PKCS12 = "PKCS12"
@@ -40,13 +40,13 @@ class AivenKafkaConfig(
             VALUE_SERIALIZER_CLASS_CONFIG to JacksonKafkaSerializer::class.java,
             ACKS_CONFIG to "all",
             RETRIES_CONFIG to 10,
-            RETRY_BACKOFF_MS_CONFIG to 100
+            RETRY_BACKOFF_MS_CONFIG to 100,
         ) + commonConfig()
         return KafkaProducer<String, ReceivedSykmelding>(configs)
     }
 
     fun commonConfig() = mapOf(
-        BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers
+        BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
     ) + securityConfig()
 
     private fun securityConfig() = mapOf(
@@ -63,7 +63,7 @@ class AivenKafkaConfig(
 
     @Bean
     fun aivenKafkaListenerContainerFactory(
-        aivenKafkaErrorHandler: AivenKafkaErrorHandler
+        aivenKafkaErrorHandler: AivenKafkaErrorHandler,
     ): ConcurrentKafkaListenerContainerFactory<String, String> {
         val config = mapOf(
             ConsumerConfig.GROUP_ID_CONFIG to "syk-dig-backend-consumer",

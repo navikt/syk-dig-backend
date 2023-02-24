@@ -13,7 +13,7 @@ import java.util.UUID
 @Component
 class MottaOppgaverFraKafka(
     private val oppgaveRepository: OppgaveRepository,
-    private val metricRegister: MetricRegister
+    private val metricRegister: MetricRegister,
 ) {
     val log = logger()
     fun lagre(sykmeldingId: String, digitaliseringsoppgave: DigitaliseringsoppgaveKafka) {
@@ -28,7 +28,7 @@ class MottaOppgaverFraKafka(
                 dokumenter = digitaliseringsoppgave.dokumenter?.map {
                     DokumentDbModel(
                         dokumentInfoId = it.dokumentInfoId,
-                        tittel = it.tittel
+                        tittel = it.tittel,
                     )
                 },
                 opprettet = opprettet,
@@ -38,8 +38,8 @@ class MottaOppgaverFraKafka(
                 type = digitaliseringsoppgave.type,
                 sykmelding = null,
                 endretAv = "syk-dig-backend",
-                timestamp = opprettet
-            )
+                timestamp = opprettet,
+            ),
         )
         metricRegister.MOTTATT_OPPGAVE.increment()
     }
@@ -47,7 +47,7 @@ class MottaOppgaverFraKafka(
 
 data class DokumentKafka(
     val tittel: String,
-    val dokumentInfoId: String
+    val dokumentInfoId: String,
 )
 
 data class DigitaliseringsoppgaveKafka(
@@ -56,5 +56,5 @@ data class DigitaliseringsoppgaveKafka(
     val journalpostId: String,
     val dokumentInfoId: String?,
     val dokumenter: List<DokumentKafka>?,
-    val type: String
+    val type: String,
 )

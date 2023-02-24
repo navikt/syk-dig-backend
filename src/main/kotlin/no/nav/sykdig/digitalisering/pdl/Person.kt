@@ -8,13 +8,13 @@ data class Person(
     val aktorId: String,
     val bostedsadresse: Bostedsadresse?,
     val oppholdsadresse: Oppholdsadresse?,
-    val fodselsdato: LocalDate?
+    val fodselsdato: LocalDate?,
 )
 
 data class Navn(
     val fornavn: String,
     val mellomnavn: String?,
-    val etternavn: String
+    val etternavn: String,
 )
 
 data class Bostedsadresse(
@@ -22,7 +22,7 @@ data class Bostedsadresse(
     val vegadresse: Vegadresse?,
     val matrikkeladresse: Matrikkeladresse?,
     val utenlandskAdresse: UtenlandskAdresse?,
-    val ukjentBosted: UkjentBosted?
+    val ukjentBosted: UkjentBosted?,
 )
 
 data class Oppholdsadresse(
@@ -30,7 +30,7 @@ data class Oppholdsadresse(
     val vegadresse: Vegadresse?,
     val matrikkeladresse: Matrikkeladresse?,
     val utenlandskAdresse: UtenlandskAdresse?,
-    val oppholdAnnetSted: String?
+    val oppholdAnnetSted: String?,
 )
 
 data class Vegadresse(
@@ -55,11 +55,11 @@ data class UtenlandskAdresse(
     val postkode: String? = null,
     val bySted: String? = null,
     val regionDistriktOmraade: String? = null,
-    val landkode: String
+    val landkode: String,
 )
 
 data class UkjentBosted(
-    val bostedskommune: String? = null
+    val bostedskommune: String? = null,
 )
 
 fun Navn.toFormattedNameString(): String {

@@ -23,7 +23,7 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
             createDigitalseringsoppgaveDbModel(
                 oppgaveId = "345",
                 fnr = "sykmeldt-fnr",
-            )
+            ),
         )
     }
 
@@ -56,7 +56,7 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
                             fom = LocalDate.parse("2021-01-01"),
                             tom = LocalDate.parse("2021-01-15"),
                             grad = 68,
-                        )
+                        ),
                     ),
                     hovedDiagnose = DiagnoseInput(kode = "Z00", system = "ICPC-2"),
                     biDiagnoser = listOf(
@@ -64,7 +64,7 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
                         DiagnoseInput(kode = "Z02", system = "ICPC-23"),
                     ),
                     harAndreRelevanteOpplysninger = true,
-                )
+                ),
             ),
             ident = "fake-test-ident",
             false,
@@ -94,7 +94,6 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
 
     @Test
     fun `should ferdigstill oppgave and update sykmelding`() {
-
         val saksbehandlerIdent = "Z212313"
 
         val preOppgave = oppgaveRepository.getOppgave("345")!!

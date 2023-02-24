@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -26,7 +26,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureMetrics
+@AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 @Transactional
 class OppgaveServiceTest : FellesTestOppsett() {
@@ -70,9 +70,9 @@ class OppgaveServiceTest : FellesTestOppsett() {
                 behandletTidspunkt = null,
                 perioder = null,
                 biDiagnoser = null,
-                harAndreRelevanteOpplysninger = null
+                harAndreRelevanteOpplysninger = null,
             ),
-            ident = "X987654"
+            ident = "X987654",
         )
 
         val oppdatertOppgave = oppgaveService.getOppgave("123")
@@ -95,7 +95,13 @@ class OppgaveServiceTest : FellesTestOppsett() {
                 fnrPasient = "12345678910",
                 behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
                 skrevetLand = "SWE",
-                perioder = listOf(PeriodeInput(PeriodeType.AKTIVITET_IKKE_MULIG, LocalDate.now().minusMonths(1), LocalDate.now().minusWeeks(2))),
+                perioder = listOf(
+                    PeriodeInput(
+                        PeriodeType.AKTIVITET_IKKE_MULIG,
+                        LocalDate.now().minusMonths(1),
+                        LocalDate.now().minusWeeks(2),
+                    ),
+                ),
                 hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
                 biDiagnoser = emptyList(),
                 harAndreRelevanteOpplysninger = null,
@@ -107,8 +113,8 @@ class OppgaveServiceTest : FellesTestOppsett() {
                 aktorId = "aktorid",
                 bostedsadresse = null,
                 oppholdsadresse = null,
-                fodselsdato = LocalDate.of(1980, 5, 5)
-            )
+                fodselsdato = LocalDate.of(1980, 5, 5),
+            ),
         )
 
         val oppdatertOppgave = oppgaveService.getOppgave("123")

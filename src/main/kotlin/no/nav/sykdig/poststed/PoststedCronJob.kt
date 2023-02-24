@@ -11,7 +11,7 @@ import java.util.UUID
 class PoststedCronJob(
     val leaderElection: LeaderElection,
     val kodeverkClient: KodeverkClient,
-    val poststedRepository: PoststedRepository
+    val poststedRepository: PoststedRepository,
 ) {
     val log = logger()
 

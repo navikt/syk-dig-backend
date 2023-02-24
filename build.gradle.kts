@@ -3,12 +3,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "2.7.8"
+    id("org.springframework.boot") version "3.0.2"
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm") version "1.8.10"
     kotlin("plugin.spring") version "1.8.10"
     id("com.netflix.dgs.codegen") version "5.1.17"
-    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
+    id("org.jlleitschuh.gradle.ktlint") version "11.2.0"
 }
 
 group = "no.nav.sykdig"
@@ -36,10 +36,10 @@ val tokenSupportVersion = "2.1.7"
 val testContainersVersion = "1.17.4"
 val logstashLogbackEncoderVersion = "7.2"
 val javaJwtVersion = "4.2.1"
-val springBootResourceVersion = "2.7.6"
+val springBootResourceVersion = "3.0.2"
 val graphqlVersion = "19.2"
 val kafkaClientsVersion = "3.4.0"
-val springSecurityWebVersion = "5.7.5"
+val springSecurityWebVersion = "6.0.2"
 val okhttp3version = "4.10.0"
 val fellesformatVersion = "2019.07.30-12-26-5c924ef4f04022bbb850aaf299eb8e4464c1ca6a"
 val sykmelding2013Version = "2019.07.30-12-26-5c924ef4f04022bbb850aaf299eb8e4464c1ca6a"
@@ -49,7 +49,6 @@ val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
 val graphqlDgsPlatformDependenciesVersion = "5.5.1"
-val tomcatEmbedCoreVersion = "9.0.71"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
@@ -57,7 +56,6 @@ dependencies {
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedCoreVersion") // overstyrer sårbar dependency
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

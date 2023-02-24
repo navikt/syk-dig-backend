@@ -77,14 +77,14 @@ const val PDL_QUERY = """
 
 data class PdlResponse(
     val hentPerson: PdlPerson?,
-    val identer: PdlIdenter?
+    val identer: PdlIdenter?,
 )
 data class PdlIdenter(
-    val identer: List<PdlIdent>
+    val identer: List<PdlIdent>,
 )
 data class PdlIdent(
     val ident: String,
-    val gruppe: String
+    val gruppe: String,
 )
 data class PdlPerson(
     val bostedsadresse: List<PdlBostedsadresse>,
@@ -94,7 +94,7 @@ data class PdlPerson(
 )
 
 data class Foedsel(
-    val foedselsdato: String?
+    val foedselsdato: String?,
 )
 
 data class PdlBostedsadresse(
@@ -134,7 +134,7 @@ data class PdlMatrikkeladresse(
 )
 
 data class PdlUkjentBosted(
-    val bostedskommune: String
+    val bostedskommune: String,
 )
 
 data class PdlUtenlandskAdresse(

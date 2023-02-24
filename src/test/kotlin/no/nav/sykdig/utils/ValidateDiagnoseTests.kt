@@ -11,7 +11,6 @@ class ValidateDiagnoseTests {
 
     @Test
     fun validateDiagnoseOKICPC2() {
-
         val validDiagnose = DiagnoseInput(kode = "Z09", system = "ICPC2")
 
         val result = assertDoesNotThrow("Should not throw an exception") {
@@ -20,9 +19,9 @@ class ValidateDiagnoseTests {
 
         assertEquals(Unit, result)
     }
+
     @Test
     fun validateDiagnoseOKICD10() {
-
         val validDiagnose = DiagnoseInput(kode = "T909", system = "ICD10")
 
         val result = assertDoesNotThrow("Should not throw an exception") {
@@ -34,7 +33,6 @@ class ValidateDiagnoseTests {
 
     @Test
     fun validateDiagnoseInvalidSystem() {
-
         val invalidDiagnose = DiagnoseInput(kode = "Z09", system = "ICPC-2")
 
         val exception = assertThrows<ClientException> {
@@ -42,13 +40,12 @@ class ValidateDiagnoseTests {
         }
         assertEquals(
             "Diagnosekode system som er benyttet: ${invalidDiagnose.system} er ukjent",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun validateDiagnoseInvalidKode() {
-
         val invalidDiagnose = DiagnoseInput(kode = "Z099", system = "ICPC2")
 
         val exception = assertThrows<ClientException> {
@@ -56,7 +53,7 @@ class ValidateDiagnoseTests {
         }
         assertEquals(
             "Diagnosekoden som er benyttet: ${invalidDiagnose.kode} er ukjent",
-            exception.message
+            exception.message,
         )
     }
 }

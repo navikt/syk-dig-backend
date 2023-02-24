@@ -11,6 +11,7 @@ class NaisRest {
     fun isAlive(): String {
         return "alive"
     }
+
     @Unprotected
     @GetMapping("/internal/is_ready")
     fun isReady(): String {

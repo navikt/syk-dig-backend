@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 @Component
 class DokarkivClient(
     @Value("\${dokarkiv.url}") private val url: String,
-    private val dokarkivRestTemplate: RestTemplate
+    private val dokarkivRestTemplate: RestTemplate,
 ) {
     val log = logger()
 
@@ -31,7 +31,7 @@ class DokarkivClient(
         dokumentinfoId: String,
         journalpostId: String,
         sykmeldingId: String,
-        perioder: List<Periode>
+        perioder: List<Periode>,
     ) {
         oppdaterJournalpost(
             navnSykmelder = navnSykmelder,
@@ -40,12 +40,12 @@ class DokarkivClient(
             dokumentinfoId = dokumentinfoId,
             journalpostId = journalpostId,
             sykmeldingId = sykmeldingId,
-            perioder = perioder
+            perioder = perioder,
         )
         ferdigstillJournalpost(
             enhet = enhet,
             journalpostId = journalpostId,
-            sykmeldingId = sykmeldingId
+            sykmeldingId = sykmeldingId,
         )
     }
 
@@ -57,7 +57,7 @@ class DokarkivClient(
         dokumentinfoId: String,
         journalpostId: String,
         sykmeldingId: String,
-        perioder: List<Periode>
+        perioder: List<Periode>,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -67,42 +67,42 @@ class DokarkivClient(
         val body = OppdaterJournalpostRequest(
             avsenderMottaker = AvsenderMottaker(
                 navn = navnSykmelder,
-                land = land
+                land = land,
             ),
             bruker = Bruker(
-                id = fnr
+                id = fnr,
             ),
             tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
             dokumenter = listOf(
                 DokumentInfo(
                     dokumentInfoId = dokumentinfoId,
-                    tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}"
-                )
-            )
+                    tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
+                ),
+            ),
         )
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
                 HttpMethod.PUT,
                 HttpEntity(body, headers),
-                String::class.java
+                String::class.java,
             )
             log.info("Oppdatert journalpost $journalpostId for sykmelding $sykmeldingId")
         } catch (e: HttpClientErrorException) {
-            if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å oppdatere journalpostId $journalpostId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else {
                 log.error(
-                    "HttpClientErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved oppdatering: ${e.message}",
-                    e
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
+                    e,
                 )
             }
             throw e
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved oppdatering: ${e.message}",
-                e
+                "HttpServerErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
+                e,
             )
             throw e
         }
@@ -126,7 +126,7 @@ class DokarkivClient(
     private fun ferdigstillJournalpost(
         enhet: String,
         journalpostId: String,
-        sykmeldingId: String
+        sykmeldingId: String,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -134,31 +134,31 @@ class DokarkivClient(
         headers["Nav-Callid"] = sykmeldingId
 
         val body = FerdigstillJournalpostRequest(
-            journalfoerendeEnhet = enhet
+            journalfoerendeEnhet = enhet,
         )
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId/ferdigstill",
                 HttpMethod.PATCH,
                 HttpEntity(body, headers),
-                String::class.java
+                String::class.java,
             )
             log.info("Ferdigstilt journalpost $journalpostId for sykmelding $sykmeldingId")
         } catch (e: HttpClientErrorException) {
-            if (e.rawStatusCode == 401 || e.rawStatusCode == 403) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å ferdigstille journalpostId $journalpostId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else {
                 log.error(
-                    "HttpClientErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved ferdigstilling: ${e.message}",
-                    e
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}",
+                    e,
                 )
             }
             throw e
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException med responskode ${e.rawStatusCode} fra Dokarkiv ved ferdigstilling: ${e.message}",
-                e
+                "HttpServerErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}",
+                e,
             )
             throw e
         }
