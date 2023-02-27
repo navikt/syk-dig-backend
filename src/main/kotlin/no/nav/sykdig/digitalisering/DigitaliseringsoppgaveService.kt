@@ -27,6 +27,9 @@ class DigitaliseringsoppgaveService(
             fnr = oppgave.fnr,
             sykmeldingId = oppgave.sykmeldingId.toString(),
         )
+
+        log.info("Hentet oppgave og sykmeldt for oppgave $oppgaveId, lager SykDigOppgave!")
+
         return SykDigOppgave(oppgave, sykmeldt)
     }
 

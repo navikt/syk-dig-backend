@@ -15,6 +15,8 @@ class PersonService(
     fun hentPerson(fnr: String, sykmeldingId: String): Person {
         val pdlResponse = pdlClient.hentPerson(fnr, sykmeldingId)
 
+        log.info("Hentet person med for oppgave med in id $sykmeldingId")
+
         return mapPdlResponseTilPerson(fnr, pdlResponse)
     }
 

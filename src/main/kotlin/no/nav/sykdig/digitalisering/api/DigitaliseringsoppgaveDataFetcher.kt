@@ -41,19 +41,32 @@ class DigitaliseringsoppgaveDataFetcher(
             val oppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId)
 
             if (oppgave.oppgaveDbModel.tilbakeTilGosys) {
+                log.info("Oppgave med $oppgaveId er markert som tilbake til Gosys, returnerer status IKKE_EN_SYKMELDING")
+
                 return DigitaliseringsoppgaveStatus(
                     oppgaveId = oppgaveId,
                     status = DigitaliseringsoppgaveStatusEnum.IKKE_EN_SYKMELDING,
                 )
             } else if (oppgave.oppgaveDbModel.ferdigstilt != null) {
+                log.info("Oppgave med $oppgaveId er markert som ferdigstilt, returnerer status FERDIGSTILT")
+
                 return DigitaliseringsoppgaveStatus(
                     oppgaveId = oppgaveId,
                     status = DigitaliseringsoppgaveStatusEnum.FERDIGSTILT,
                 )
             }
 
+            log.info("Oppgave med $oppgaveId er ikke ferdigstilt, returnerer oppgave")
             return mapToDigitaliseringsoppgave(oppgave)
         } catch (error: DgsEntityNotFoundException) {
+            log.info("Oppgave med $oppgaveId kastet DgsEntityNotFoundException, returnerer status FINNES_IKKE")
+            return DigitaliseringsoppgaveStatus(
+                oppgaveId = oppgaveId,
+                status = DigitaliseringsoppgaveStatusEnum.FINNES_IKKE,
+            )
+        } catch (error: RuntimeException) {
+            log.error("Oppgave med $oppgaveId kastet et ukjent feil! \uD83D\uDE2E", error)
+
             return DigitaliseringsoppgaveStatus(
                 oppgaveId = oppgaveId,
                 status = DigitaliseringsoppgaveStatusEnum.FINNES_IKKE,
