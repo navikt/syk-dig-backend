@@ -40,7 +40,9 @@ class DocumentController(
                 )
             }
 
-            if (oppgave.dokumenter?.any { it.dokumentInfoId == dokumentInfoId } == false || oppgave.dokumentInfoId != dokumentInfoId) {
+            val dokumentInfoIdInDokumenter = oppgave.dokumenter?.firstOrNull { it.dokumentInfoId == dokumentInfoId }
+
+            if (dokumentInfoIdInDokumenter == null && oppgave.dokumentInfoId != dokumentInfoId) {
                 log.error("$dokumentInfoId er ikke en del av oppgave $oppgaveId")
                 throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "dokumentInfoId er ikke gyldig for oppgaven")
             }
