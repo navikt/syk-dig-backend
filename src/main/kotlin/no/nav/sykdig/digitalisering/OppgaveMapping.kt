@@ -31,7 +31,9 @@ fun mapToDigitaliseringsoppgave(
     type = if (oppgave.oppgaveDbModel.type == "UTLAND") SykmeldingsType.UTENLANDS else SykmeldingsType.INNENLANDS,
     values = oppgave.oppgaveDbModel.sykmelding?.mapToOppgaveValues()
         ?: OppgaveValues(fnrPasient = oppgave.oppgaveDbModel.fnr),
-    documents = oppgave.oppgaveDbModel.dokumenter?.map { Document(it.tittel, it.dokumentInfoId) } ?: emptyList(),
+    documents = oppgave.oppgaveDbModel.dokumenter?.map { Document(it.tittel, it.dokumentInfoId) }
+        ?: oppgave.oppgaveDbModel.dokumentInfoId?.let { listOf(Document("Sykmelding", it)) }
+        ?: emptyList(),
 )
 
 private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues = OppgaveValues(

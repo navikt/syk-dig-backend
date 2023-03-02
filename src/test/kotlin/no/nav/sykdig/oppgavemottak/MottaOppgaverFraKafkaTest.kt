@@ -55,4 +55,30 @@ class MottaOppgaverFraKafkaTest : FellesTestOppsett() {
         mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)
         mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)
     }
+
+    @Test
+    fun testInsertWithMultipleDocuments() {
+        val sykmeldingId = UUID.randomUUID().toString()
+        val digitaliseringsoppgaveKafka = DigitaliseringsoppgaveKafka(
+            oppgaveId = "12345",
+            fnr = "12345678910",
+            journalpostId = "11",
+            dokumentInfoId = null,
+            type = "UTLAND",
+            dokumenter = listOf(
+                DokumentKafka(
+                    tittel = "tittel",
+                    dokumentInfoId = "id",
+                ),
+                DokumentKafka(
+                    tittel = "tittel-2",
+                    dokumentInfoId = "id-2",
+                ),
+            ),
+        )
+
+        mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)
+        val lagretOppdave = oppgaveRepository.getOppgave("12345")
+        assertEquals(2, lagretOppdave?.dokumenter?.size)
+    }
 }

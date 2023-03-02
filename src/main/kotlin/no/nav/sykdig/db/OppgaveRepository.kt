@@ -32,8 +32,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     fun lagreOppgave(digitaliseringsoppgave: OppgaveDbModel) {
         namedParameterJdbcTemplate.update(
             """
-            INSERT INTO oppgave(oppgave_id, fnr, journalpost_id, dokumentinfo_id, opprettet, ferdigstilt)
-            VALUES (:oppgave_id, :fnr, :journalpost_id, :dokumentinfo_id, :opprettet, :ferdigstilt) on conflict(oppgave_id) do nothing ;
+            INSERT INTO oppgave(oppgave_id, fnr, journalpost_id, dokumentinfo_id, opprettet, ferdigstilt, dokumenter)
+            VALUES (:oppgave_id, :fnr, :journalpost_id, :dokumentinfo_id, :opprettet, :ferdigstilt, :dokumenter) on conflict(oppgave_id) do nothing ;
         """,
             MapSqlParameterSource()
                 .addValue("oppgave_id", digitaliseringsoppgave.oppgaveId)
