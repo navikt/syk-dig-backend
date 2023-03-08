@@ -490,6 +490,7 @@ fun createDigitalseringsoppgaveDbModel(
     endretAv = endretAv,
     dokumenter = dokumenter,
     timestamp = timestamp,
+    source = "scanning",
 )
 
 private fun createPerson(

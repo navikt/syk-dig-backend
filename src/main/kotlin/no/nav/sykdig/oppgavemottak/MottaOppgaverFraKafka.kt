@@ -39,6 +39,7 @@ class MottaOppgaverFraKafka(
                 sykmelding = null,
                 endretAv = "syk-dig-backend",
                 timestamp = opprettet,
+                source = digitaliseringsoppgave.source,
             ),
         )
         metricRegister.MOTTATT_OPPGAVE.increment()
@@ -57,4 +58,5 @@ data class DigitaliseringsoppgaveKafka(
     val dokumentInfoId: String?,
     val dokumenter: List<DokumentKafka>?,
     val type: String,
+    val source: String = "scanning",
 )

@@ -77,7 +77,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                            type,
                            s.sykmelding,
                            endret_av,
-                           timestamp
+                           timestamp,
+                           source
                     FROM oppgave AS o
                              INNER JOIN sykmelding AS s ON o.oppgave_id = s.oppgave_id
                         AND s.timestamp = (SELECT MAX(timestamp)
@@ -305,6 +306,7 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
         dokumenter = getString("dokumenter")?.let { objectMapper.readValue<List<DokumentDbModel>>(it) },
         endretAv = getString("endret_av"),
         timestamp = getTimestamp("timestamp").toInstant().atOffset(ZoneOffset.UTC),
+        source = getString("source"),
     )
 
 private fun ResultSet.toSykmeldingUnderArbeid(): SykmeldingUnderArbeid? {

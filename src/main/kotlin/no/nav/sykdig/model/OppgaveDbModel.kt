@@ -17,6 +17,7 @@ data class OppgaveDbModel(
     val sykmelding: SykmeldingUnderArbeid?,
     val endretAv: String,
     val timestamp: OffsetDateTime,
+    val source: String,
 )
 
 data class DokumentDbModel(
