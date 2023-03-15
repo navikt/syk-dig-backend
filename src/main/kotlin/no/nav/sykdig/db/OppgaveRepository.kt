@@ -46,7 +46,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                     "ferdigstilt",
                     digitaliseringsoppgave.ferdigstilt?.let { Timestamp.from(digitaliseringsoppgave.ferdigstilt.toInstant()) },
                 )
-                .addValue("source", digitaliseringsoppgave.source)
+                .addValue("source", digitaliseringsoppgave.source),
         )
         namedParameterJdbcTemplate.update(
             """
