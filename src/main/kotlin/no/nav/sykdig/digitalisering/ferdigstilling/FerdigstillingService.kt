@@ -51,6 +51,7 @@ class FerdigstillingService(
                 journalpostId = oppgave.journalpostId,
                 sykmeldingId = oppgave.sykmeldingId.toString(),
                 perioder = receivedSykmelding.sykmelding.perioder,
+                source = oppgave.source,
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
