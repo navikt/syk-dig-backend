@@ -32,6 +32,7 @@ class DokarkivClient(
         journalpostId: String,
         sykmeldingId: String,
         perioder: List<Periode>,
+        source: String,
     ) {
         oppdaterJournalpost(
             navnSykmelder = navnSykmelder,
@@ -41,6 +42,7 @@ class DokarkivClient(
             journalpostId = journalpostId,
             sykmeldingId = sykmeldingId,
             perioder = perioder,
+            source = source,
         )
         ferdigstillJournalpost(
             enhet = enhet,
@@ -58,6 +60,7 @@ class DokarkivClient(
         journalpostId: String,
         sykmeldingId: String,
         perioder: List<Periode>,
+        source: String,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -72,11 +75,11 @@ class DokarkivClient(
             bruker = Bruker(
                 id = fnr,
             ),
-            tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
+            tittel = if(source == "rina") {"Søknad om kontantytelser ${getFomTomTekst(perioder)}"} else {"Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}"},
             dokumenter = listOf(
                 DokumentInfo(
                     dokumentInfoId = dokumentinfoId,
-                    tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
+                    tittel = if(source == "rina") {"Søknad om kontantytelser)${getFomTomTekst(perioder)}" } else {"Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}"},
                 ),
             ),
         )
