@@ -75,11 +75,11 @@ class DokarkivClient(
             bruker = Bruker(
                 id = fnr,
             ),
-            tittel = if(source == "rina") {"Søknad om kontantytelser ${getFomTomTekst(perioder)}"} else {"Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}"},
+            tittel = if (source == "rina") { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" },
             dokumenter = listOf(
                 DokumentInfo(
                     dokumentInfoId = dokumentinfoId,
-                    tittel = if(source == "rina") {"Søknad om kontantytelser)${getFomTomTekst(perioder)}" } else {"Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}"},
+                    tittel = if (source == "rina") { "Søknad om kontantytelser)${getFomTomTekst(perioder)}" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" },
                 ),
             ),
         )
