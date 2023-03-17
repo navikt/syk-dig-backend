@@ -83,14 +83,14 @@ class OppgaveClient(
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
                 log.error(
-                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
+                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                     e,
                 )
                 throw e
             }
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
+                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                 e,
             )
             throw e
@@ -128,18 +128,18 @@ class OppgaveClient(
             log.info("OppdaterOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("Veileder har ikke tilgang til å oppdaterOppgave oppgaveId $oppgaveId: ${e.message}")
+                log.warn("Veileder $oppgaveTilordnetRessurs har ikke tilgang til å oppdaterOppgave oppgaveId $oppgaveId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
                 log.error(
-                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave ved oppdaterOppgave: ${e.message}",
+                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} fra Oppgave ved oppdaterOppgave: ${e.message}",
                     e,
                 )
                 throw e
             }
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave ved oppdaterOppgave: ${e.message}",
+                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} fra Oppgave ved oppdaterOppgave: ${e.message}",
                 e,
             )
             throw e
