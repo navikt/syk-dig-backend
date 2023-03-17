@@ -29,31 +29,31 @@ class OppgaveService(
         return oppgave
     }
 
-    fun updateOppgave(oppgaveId: String, registerOppgaveValues: RegisterOppgaveValues, ident: String) {
+    fun updateOppgave(oppgaveId: String, registerOppgaveValues: RegisterOppgaveValues, navEpost: String) {
         val oppgave = getOppgave(oppgaveId)
         val sykmelding = toSykmelding(oppgave, registerOppgaveValues)
-        oppgaveRepository.updateOppgave(oppgave, sykmelding, ident, false)
+        oppgaveRepository.updateOppgave(oppgave, sykmelding, navEpost, false)
     }
 
     fun ferdigstillOppgaveGosys(
         oppgave: OppgaveDbModel,
-        ident: String,
+        navEpost: String,
     ) {
         val sykmelding = oppgaveRepository.getLastSykmelding(oppgave.oppgaveId)
-        oppgaveRepository.ferdigstillOppgaveGosys(oppgave, ident, sykmelding)
+        oppgaveRepository.ferdigstillOppgaveGosys(oppgave, navEpost, sykmelding)
     }
 
     @Transactional
     fun ferdigstillOppgave(
         oppgave: OppgaveDbModel,
-        ident: String,
+        navEpost: String,
         values: FerdistilltRegisterOppgaveValues,
         enhetId: String,
         sykmeldt: Person,
     ) {
         val sykmelding = toSykmelding(oppgave, values)
 
-        oppgaveRepository.updateOppgave(oppgave, sykmelding, ident, true)
+        oppgaveRepository.updateOppgave(oppgave, sykmelding, navEpost, true)
         ferdigstillingService.ferdigstill(
             navnSykmelder = values.skrevetLand, // TODO: finn ut hvor man skal få dette navnet fra
             enhet = enhetId,

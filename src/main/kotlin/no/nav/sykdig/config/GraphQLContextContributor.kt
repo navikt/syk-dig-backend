@@ -23,12 +23,14 @@ class GraphQLContextContributor : GraphQLContextContributor {
             val token: String = authHeader.first().replace("Bearer ", "")
             val decodedJWT = JWT.decode(token)
             val username = decodedJWT.claims["preferred_username"]?.asString()
+            val navIdent = decodedJWT.claims["NAVident"]?.asString()
 
             requireNotNull(username) { "preferred_username is missing in claims" }
 
-            log.info("Found ident in JWT: $username")
+            log.info("Found username and ident in JWT: $username, $navIdent")
 
             builder.put("username", username)
+            builder.put("nav_ident", navIdent)
         }
     }
 }

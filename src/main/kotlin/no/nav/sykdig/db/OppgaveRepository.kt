@@ -97,7 +97,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     fun updateOppgave(
         oppgave: OppgaveDbModel,
         sykmelding: SykmeldingUnderArbeid,
-        ident: String,
+        navEpost: String,
         ferdigstilles: Boolean,
     ) {
         if (ferdigstilles) {
@@ -122,7 +122,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
                 "oppgave_id" to oppgave.oppgaveId,
                 "type" to oppgave.type,
-                "endret_av" to ident,
+                "endret_av" to navEpost,
                 "timestamp" to Timestamp.from(Instant.now()),
                 "sykmelding" to sykmelding.toPGObject(),
             ),
@@ -132,7 +132,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     @Transactional
     fun ferdigstillOppgaveGosys(
         oppgave: OppgaveDbModel,
-        ident: String,
+        navEpost: String,
         sykmelding: SykmeldingUnderArbeid?,
     ) {
         namedParameterJdbcTemplate.update(
@@ -144,7 +144,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
                 "oppgave_id" to oppgave.oppgaveId,
                 "type" to oppgave.type,
-                "endret_av" to ident,
+                "endret_av" to navEpost,
                 "timestamp" to Timestamp.from(Instant.now()),
                 "sykmelding" to sykmelding?.toPGObject(),
             ),

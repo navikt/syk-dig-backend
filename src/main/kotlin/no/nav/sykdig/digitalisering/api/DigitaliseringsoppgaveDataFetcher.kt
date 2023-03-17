@@ -83,13 +83,13 @@ class DigitaliseringsoppgaveDataFetcher(
         @InputArgument status: SykmeldingUnderArbeidStatus,
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveResult {
-        val ident: String = dfe.graphQlContext.get("username")
+        val navEpost: String = dfe.graphQlContext.get("username")
         when (status) {
             SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
                 val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
                 digitaliseringsoppgaveService.ferdigstillOppgave(
                     oppgaveId = oppgaveId,
-                    ident = ident,
+                    navEpost = navEpost,
                     values = ferdistilltRegisterOppgaveValues,
                     enhetId = enhetId,
                 ).also { log.info("Ferdigstilt oppgave med id $oppgaveId") }
@@ -105,7 +105,7 @@ class DigitaliseringsoppgaveDataFetcher(
                 digitaliseringsoppgaveService.updateOppgave(
                     oppgaveId = oppgaveId,
                     values = uferdigRegisterOppgaveValues,
-                    ident = ident,
+                    navEpost = navEpost,
                 ).also { log.info("Lagret oppgave med id $oppgaveId") }
 
                 return mapToDigitaliseringsoppgave(digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId))
@@ -119,8 +119,13 @@ class DigitaliseringsoppgaveDataFetcher(
         @InputArgument oppgaveId: String,
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveStatus {
-        val ident: String = dfe.graphQlContext.get("username")
-        val updatedOppgave = digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(oppgaveId, ident)
+        val navEpost: String = dfe.graphQlContext.get("username")
+        val navIdent: String = dfe.graphQlContext.get("nav_ident")
+        val updatedOppgave = digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(
+            oppgaveId = oppgaveId,
+            navIdent = navIdent,
+            navEpost = navEpost,
+        )
 
         if (updatedOppgave.oppgaveDbModel.tilbakeTilGosys) {
             return DigitaliseringsoppgaveStatus(

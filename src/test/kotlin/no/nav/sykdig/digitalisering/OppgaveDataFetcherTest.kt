@@ -314,7 +314,7 @@ class OppgaveDataFetcherTest {
         ).updateOppgave(
             oppgaveId = "345",
             values = UferdigRegisterOppgaveValues(fnrPasient = "20086600138", null, null, null, null, null, null),
-            ident = "fake-test-ident",
+            navEpost = "fake-test-ident",
         )
     }
 
@@ -403,7 +403,7 @@ class OppgaveDataFetcherTest {
             times(1),
         ).ferdigstillOppgave(
             oppgaveId = "345",
-            ident = "fake-test-ident",
+            navEpost = "fake-test-ident",
             values = FerdistilltRegisterOppgaveValues(
                 fnrPasient = "20086600138",
                 behandletTidspunkt = LocalDate.parse("2022-10-26").toOffsetDateTimeAtNoon()!!,
