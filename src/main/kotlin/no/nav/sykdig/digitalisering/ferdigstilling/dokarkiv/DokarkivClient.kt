@@ -67,22 +67,7 @@ class DokarkivClient(
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = OppdaterJournalpostRequest(
-            avsenderMottaker = AvsenderMottaker(
-                navn = navnSykmelder,
-                land = land,
-            ),
-            bruker = Bruker(
-                id = fnr,
-            ),
-            tittel = if (source == "rina") { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" },
-            dokumenter = listOf(
-                DokumentInfo(
-                    dokumentInfoId = dokumentinfoId,
-                    tittel = if (source == "rina") { "Søknad om kontantytelser)${getFomTomTekst(perioder)}" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" },
-                ),
-            ),
-        )
+        val body = createOppdaterJournalpostRequest(navnSykmelder, land, fnr, dokumentinfoId, perioder, source)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -123,6 +108,51 @@ class DokarkivClient(
     fun formaterDato(dato: LocalDate): String {
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
         return dato.format(formatter)
+    }
+
+    private fun createOppdaterJournalpostRequest(
+        navnSykmelder: String?,
+        land: String,
+        fnr: String,
+        dokumentinfoId: String,
+        perioder: List<Periode>,
+        source: String,
+    ): OppdaterJournalpostRequest {
+        if (source == "rina") {
+            return OppdaterJournalpostRequest(
+                avsenderMottaker = AvsenderMottaker(
+                    navn = null,
+                    land = land,
+                ),
+                bruker = Bruker(
+                    id = fnr,
+                ),
+                tittel = "Søknad om kontantytelser ${getFomTomTekst(perioder)}",
+                dokumenter = listOf(
+                    DokumentInfo(
+                        dokumentInfoId = dokumentinfoId,
+                        tittel = "Søknad om kontantytelser)${getFomTomTekst(perioder)}",
+                    ),
+                ),
+            )
+        } else {
+            return OppdaterJournalpostRequest(
+                avsenderMottaker = AvsenderMottaker(
+                    navn = navnSykmelder,
+                    land = land,
+                ),
+                bruker = Bruker(
+                    id = fnr,
+                ),
+                tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
+                dokumenter = listOf(
+                    DokumentInfo(
+                        dokumentInfoId = dokumentinfoId,
+                        tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
+                    ),
+                ),
+            )
+        }
     }
 
     @Retryable
