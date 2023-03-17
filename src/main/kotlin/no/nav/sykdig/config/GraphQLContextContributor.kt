@@ -4,10 +4,13 @@ import com.auth0.jwt.JWT
 import com.netflix.graphql.dgs.context.GraphQLContextContributor
 import com.netflix.graphql.dgs.internal.DgsRequestData
 import graphql.GraphQLContext
+import no.nav.sykdig.logger
 import org.springframework.stereotype.Component
 
 @Component
 class GraphQLContextContributor : GraphQLContextContributor {
+    val log = logger()
+
     override fun contribute(
         builder: GraphQLContext.Builder,
         extensions: Map<String, Any>?,
@@ -22,6 +25,9 @@ class GraphQLContextContributor : GraphQLContextContributor {
             val username = decodedJWT.claims["preferred_username"]?.asString()
 
             requireNotNull(username) { "preferred_username is missing in claims" }
+
+            log.info("Found ident in JWT: $username")
+
             builder.put("username", username)
         }
     }
