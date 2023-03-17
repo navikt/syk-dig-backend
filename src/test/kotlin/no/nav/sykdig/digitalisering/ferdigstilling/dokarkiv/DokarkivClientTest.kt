@@ -12,6 +12,5 @@ import org.springframework.boot.test.context.SpringBootTest
 class DokarkivClientTest : FellesTestOppsett() {
     @Test
     fun oppdaterOgFerdigstillJournalpost() {
-
     }
 }

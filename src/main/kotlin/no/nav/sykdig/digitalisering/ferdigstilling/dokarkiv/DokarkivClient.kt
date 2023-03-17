@@ -1,8 +1,5 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
 
-import java.io.File
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import no.nav.syfo.model.Periode
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.logger
@@ -17,6 +14,9 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
+import java.io.File
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Component
 class DokarkivClient(
@@ -158,7 +158,7 @@ class DokarkivClient(
     }
     private fun findCountryName(landAlpha3: String): String {
         val countries: Countries = objectMapper.readValue(File("src/main/resources/country/countries-norwegian.json"), Countries::class.java)
-       return countries.countries.first { it.alpha3 == landAlpha3 }.name
+        return countries.countries.first { it.alpha3 == landAlpha3 }.name
     }
 
     @Retryable
@@ -204,12 +204,12 @@ class DokarkivClient(
     }
 }
 
-data class Countries (
-     val countries: List<Country>,
+data class Countries(
+    val countries: List<Country>,
 )
-data class Country (
-     val id: Int,
-     val alpha2: String,
-     val alpha3: String,
-     val name: String
+data class Country(
+    val id: Int,
+    val alpha2: String,
+    val alpha3: String,
+    val name: String,
 )
