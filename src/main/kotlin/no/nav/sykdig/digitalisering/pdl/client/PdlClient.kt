@@ -27,7 +27,13 @@ class PdlClient(
 
             val pdlResponse: PdlResponse = objectMapper.readValue(response.json)
 
-            if (pdlResponse.hentPerson == null || pdlResponse.hentPerson.navn.isEmpty()) {
+            if (pdlResponse.hentPerson == null) {
+                log.error("Fant ikke person i PDL $sykmeldingId")
+                securelog.info(("Fant ikke person i PDL $sykmeldingId, fnr: $fnr"))
+                throw RuntimeException("Fant ikke person i PDL")
+            }
+
+            if (pdlResponse.hentPerson.navn.isEmpty()) {
                 log.error("Fant ikke navn for person i PDL $sykmeldingId")
                 securelog.info(("Fant ikke navn for person i PDL $sykmeldingId, fnr: $fnr"))
                 throw RuntimeException("Fant ikke navn for person i PDL")
