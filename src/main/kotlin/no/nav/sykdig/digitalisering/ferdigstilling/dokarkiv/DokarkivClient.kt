@@ -69,6 +69,8 @@ class DokarkivClient(
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
+        log.info("land: $land for journalpostId $journalpostId")
+
         val body = createOppdaterJournalpostRequest(navnSykmelder, findCountryName(land), fnr, dokumentinfoId, perioder, source)
         try {
             dokarkivRestTemplate.exchange(
