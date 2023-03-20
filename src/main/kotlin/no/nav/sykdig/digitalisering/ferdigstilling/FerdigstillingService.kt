@@ -42,7 +42,7 @@ class FerdigstillingService(
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
-                land = validatedValues.skrevetLand,
+                landAlpha3 = validatedValues.skrevetLand,
                 fnr = sykmeldt.fnr,
                 enhet = enhet,
                 dokumentinfoId = oppgave.dokumentInfoId,

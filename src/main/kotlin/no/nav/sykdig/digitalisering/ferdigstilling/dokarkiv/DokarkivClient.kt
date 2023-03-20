@@ -27,7 +27,7 @@ class DokarkivClient(
     val log = logger()
 
     fun oppdaterOgFerdigstillJournalpost(
-        land: String,
+        landAlpha3: String,
         fnr: String,
         enhet: String,
         dokumentinfoId: String,
@@ -37,7 +37,7 @@ class DokarkivClient(
         source: String,
     ) {
         oppdaterJournalpost(
-            land = land,
+            landAlpha3 = landAlpha3,
             fnr = fnr,
             dokumentinfoId = dokumentinfoId,
             journalpostId = journalpostId,
@@ -54,7 +54,7 @@ class DokarkivClient(
 
     @Retryable
     private fun oppdaterJournalpost(
-        land: String,
+        landAlpha3: String,
         fnr: String,
         dokumentinfoId: String,
         journalpostId: String,
@@ -67,7 +67,7 @@ class DokarkivClient(
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(findCountryName(land), fnr, dokumentinfoId, perioder, source)
+        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -111,18 +111,17 @@ class DokarkivClient(
     }
 
     private fun createOppdaterJournalpostRequest(
-        land: String,
+        landAlpha3: String,
         fnr: String,
         dokumentinfoId: String,
         perioder: List<Periode>,
         source: String,
     ): OppdaterJournalpostRequest {
-        log.info("land: $land")
         if (source == "rina") {
             return OppdaterJournalpostRequest(
                 avsenderMottaker = AvsenderMottaker(
                     navn = null,
-                    land = land,
+                    land = mapFromAlpha3Toalpha2(landAlpha3),
                 ),
                 bruker = Bruker(
                     id = fnr,
@@ -138,8 +137,8 @@ class DokarkivClient(
         } else {
             return OppdaterJournalpostRequest(
                 avsenderMottaker = AvsenderMottaker(
-                    navn = land,
-                    land = land,
+                    navn = findCountryName(landAlpha3),
+                    land = mapFromAlpha3Toalpha2(landAlpha3),
                 ),
                 bruker = Bruker(
                     id = fnr,
@@ -158,6 +157,12 @@ class DokarkivClient(
         val countries: List<Country> =
             objectMapper.readValue<List<Country>>(DokarkivClient::class.java.getResourceAsStream("/country/countries-norwegian.json")!!)
         return countries.first { it.alpha3 == landAlpha3.lowercase(Locale.getDefault()) }.name
+    }
+
+    fun mapFromAlpha3Toalpha2(landAlpha3: String): String {
+        val countries: List<Country> =
+            objectMapper.readValue<List<Country>>(DokarkivClient::class.java.getResourceAsStream("/country/countries-norwegian.json")!!)
+        return countries.first { it.alpha3 == landAlpha3.lowercase(Locale.getDefault()) }.alpha2
     }
 
     @Retryable

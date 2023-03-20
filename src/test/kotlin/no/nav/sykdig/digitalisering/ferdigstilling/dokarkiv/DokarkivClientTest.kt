@@ -28,4 +28,15 @@ class DokarkivClientTest : FellesTestOppsett() {
 
         assertEquals("Bahamas", landName)
     }
+
+    @Test
+    fun `Should find bs as country alpha2`() {
+        val dokarkivClient = DokarkivClient(url = "localhost", dokarkivRestTemplate = dokarkivRestTemplate)
+
+        val landAlpha3 = "BHS"
+
+        val landAlpha2 = dokarkivClient.mapFromAlpha3Toalpha2(landAlpha3)
+
+        assertEquals("bs", landAlpha2)
+    }
 }
