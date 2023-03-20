@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -158,7 +157,8 @@ class DokarkivClient(
         }
     }
     fun findCountryName(landAlpha3: String): String {
-        val countries: List<Country> = objectMapper.readValue<List<Country>>(File("src/main/resources/country/countries-norwegian.json"))
+        val countries: List<Country> =
+            objectMapper.readValue<List<Country>>(DokarkivClient::class.java.getResourceAsStream("/country/countries-norwegian.json")!!)
         return countries.first { it.alpha3 == landAlpha3 }.name
     }
 
