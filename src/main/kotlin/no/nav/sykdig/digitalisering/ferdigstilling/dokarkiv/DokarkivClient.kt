@@ -17,6 +17,7 @@ import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Component
 class DokarkivClient(
@@ -68,8 +69,6 @@ class DokarkivClient(
         headers.contentType = MediaType.APPLICATION_JSON
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
-
-        log.info("land: $land for journalpostId $journalpostId")
 
         val body = createOppdaterJournalpostRequest(navnSykmelder, findCountryName(land), fnr, dokumentinfoId, perioder, source)
         try {
@@ -161,7 +160,7 @@ class DokarkivClient(
     fun findCountryName(landAlpha3: String): String {
         val countries: List<Country> =
             objectMapper.readValue<List<Country>>(DokarkivClient::class.java.getResourceAsStream("/country/countries-norwegian.json")!!)
-        return countries.first { it.alpha3 == landAlpha3 }.name
+        return countries.first { it.alpha3 == landAlpha3.lowercase(Locale.getDefault()) }.name
     }
 
     @Retryable
