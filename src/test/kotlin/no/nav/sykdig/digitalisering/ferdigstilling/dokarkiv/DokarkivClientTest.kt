@@ -20,14 +20,12 @@ class DokarkivClientTest : FellesTestOppsett() {
 
     @Test
     fun `Should find Bahamas as country name`() {
-
         val dokarkivClient = DokarkivClient(url = "localhost", dokarkivRestTemplate = dokarkivRestTemplate)
 
         val landAlpha3 = "bhs"
 
         val landName = dokarkivClient.findCountryName(landAlpha3)
 
-       assertEquals("Bahamas", landName)
-
+        assertEquals("Bahamas", landName)
     }
 }
