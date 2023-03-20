@@ -1,9 +1,11 @@
 package no.nav.sykdig.digitalisering.pdl.client
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PDL_QUERY
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlResponse
 import no.nav.sykdig.logger
+import no.nav.sykdig.objectMapper
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 
@@ -21,7 +23,7 @@ class PdlClient(
             val errors = response.errors
             errors.forEach { log.error("Feilmelding fra PDL: ${it.message} for $sykmeldingId") }
 
-            val pdlResponse = response.dataAsObject(PdlResponse::class.java)
+            val pdlResponse: PdlResponse = objectMapper.readValue(response.json)
 
             if (pdlResponse.hentPerson == null || pdlResponse.hentPerson.navn.isEmpty()) {
                 log.error("Fant ikke navn for person i PDL $sykmeldingId")
