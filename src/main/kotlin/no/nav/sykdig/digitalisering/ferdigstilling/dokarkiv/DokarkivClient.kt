@@ -1,8 +1,10 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.model.Periode
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.logger
+import no.nav.sykdig.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -15,6 +17,7 @@ import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Component
 class DokarkivClient(
@@ -24,8 +27,7 @@ class DokarkivClient(
     val log = logger()
 
     fun oppdaterOgFerdigstillJournalpost(
-        navnSykmelder: String?,
-        land: String,
+        landAlpha3: String,
         fnr: String,
         enhet: String,
         dokumentinfoId: String,
@@ -35,8 +37,7 @@ class DokarkivClient(
         source: String,
     ) {
         oppdaterJournalpost(
-            navnSykmelder = navnSykmelder,
-            land = land,
+            landAlpha3 = landAlpha3,
             fnr = fnr,
             dokumentinfoId = dokumentinfoId,
             journalpostId = journalpostId,
@@ -53,8 +54,7 @@ class DokarkivClient(
 
     @Retryable
     private fun oppdaterJournalpost(
-        navnSykmelder: String?,
-        land: String,
+        landAlpha3: String,
         fnr: String,
         dokumentinfoId: String,
         journalpostId: String,
@@ -67,22 +67,7 @@ class DokarkivClient(
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = OppdaterJournalpostRequest(
-            avsenderMottaker = AvsenderMottaker(
-                navn = navnSykmelder,
-                land = land,
-            ),
-            bruker = Bruker(
-                id = fnr,
-            ),
-            tittel = if (source == "rina") { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" },
-            dokumenter = listOf(
-                DokumentInfo(
-                    dokumentInfoId = dokumentinfoId,
-                    tittel = if (source == "rina") { "Søknad om kontantytelser)${getFomTomTekst(perioder)}" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" },
-                ),
-            ),
-        )
+        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -123,6 +108,61 @@ class DokarkivClient(
     fun formaterDato(dato: LocalDate): String {
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
         return dato.format(formatter)
+    }
+
+    private fun createOppdaterJournalpostRequest(
+        landAlpha3: String,
+        fnr: String,
+        dokumentinfoId: String,
+        perioder: List<Periode>,
+        source: String,
+    ): OppdaterJournalpostRequest {
+        if (source == "rina") {
+            return OppdaterJournalpostRequest(
+                avsenderMottaker = AvsenderMottaker(
+                    navn = null,
+                    land = mapFromAlpha3Toalpha2(landAlpha3),
+                ),
+                bruker = Bruker(
+                    id = fnr,
+                ),
+                tittel = "Søknad om kontantytelser ${getFomTomTekst(perioder)}",
+                dokumenter = listOf(
+                    DokumentInfo(
+                        dokumentInfoId = dokumentinfoId,
+                        tittel = "Søknad om kontantytelser)${getFomTomTekst(perioder)}",
+                    ),
+                ),
+            )
+        } else {
+            return OppdaterJournalpostRequest(
+                avsenderMottaker = AvsenderMottaker(
+                    navn = findCountryName(landAlpha3),
+                    land = mapFromAlpha3Toalpha2(landAlpha3),
+                ),
+                bruker = Bruker(
+                    id = fnr,
+                ),
+                tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
+                dokumenter = listOf(
+                    DokumentInfo(
+                        dokumentInfoId = dokumentinfoId,
+                        tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
+                    ),
+                ),
+            )
+        }
+    }
+    fun findCountryName(landAlpha3: String): String {
+        val countries: List<Country> =
+            objectMapper.readValue<List<Country>>(DokarkivClient::class.java.getResourceAsStream("/country/countries-norwegian.json")!!)
+        return countries.first { it.alpha3 == landAlpha3.lowercase(Locale.getDefault()) }.name
+    }
+
+    fun mapFromAlpha3Toalpha2(landAlpha3: String): String {
+        val countries: List<Country> =
+            objectMapper.readValue<List<Country>>(DokarkivClient::class.java.getResourceAsStream("/country/countries-norwegian.json")!!)
+        return countries.first { it.alpha3 == landAlpha3.lowercase(Locale.getDefault()) }.alpha2
     }
 
     @Retryable
@@ -167,3 +207,10 @@ class DokarkivClient(
         }
     }
 }
+
+data class Country(
+    val id: Int,
+    val alpha2: String,
+    val alpha3: String,
+    val name: String,
+)

@@ -24,7 +24,6 @@ class FerdigstillingService(
     val log = logger()
 
     fun ferdigstill(
-        navnSykmelder: String?,
         enhet: String,
         oppgave: OppgaveDbModel,
         sykmeldt: Person,
@@ -43,8 +42,7 @@ class FerdigstillingService(
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
-                navnSykmelder = navnSykmelder,
-                land = validatedValues.skrevetLand,
+                landAlpha3 = validatedValues.skrevetLand,
                 fnr = sykmeldt.fnr,
                 enhet = enhet,
                 dokumentinfoId = oppgave.dokumentInfoId,

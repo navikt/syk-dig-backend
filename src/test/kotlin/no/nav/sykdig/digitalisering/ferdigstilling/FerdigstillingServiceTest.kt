@@ -110,7 +110,6 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         )
 
         ferdigstillingService.ferdigstill(
-            navnSykmelder = "Fornavn Etternavn",
             enhet = "2990",
             oppgave = createDigitalseringsoppgaveDbModel(
                 oppgaveId = "123",
@@ -124,7 +123,6 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         )
 
         verify(dokarkivClient).oppdaterOgFerdigstillJournalpost(
-            "Fornavn Etternavn",
             "SWE",
             "12345678910",
             "2990",

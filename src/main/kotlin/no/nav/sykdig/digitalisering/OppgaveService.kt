@@ -55,7 +55,6 @@ class OppgaveService(
 
         oppgaveRepository.updateOppgave(oppgave, sykmelding, navEpost, true)
         ferdigstillingService.ferdigstill(
-            navnSykmelder = values.skrevetLand, // TODO: finn ut hvor man skal få dette navnet fra
             enhet = enhetId,
             oppgave = oppgave,
             sykmeldt = sykmeldt,
