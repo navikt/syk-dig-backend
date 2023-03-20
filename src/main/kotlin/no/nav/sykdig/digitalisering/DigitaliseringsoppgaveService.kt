@@ -33,13 +33,13 @@ class DigitaliseringsoppgaveService(
         return SykDigOppgave(oppgave, sykmeldt)
     }
 
-    fun updateOppgave(oppgaveId: String, values: RegisterOppgaveValues, ident: String) {
-        oppgaveService.updateOppgave(oppgaveId, values, ident)
+    fun updateOppgave(oppgaveId: String, values: RegisterOppgaveValues, navEpost: String) {
+        oppgaveService.updateOppgave(oppgaveId, values, navEpost)
     }
 
     fun ferdigstillOppgave(
         oppgaveId: String,
-        ident: String,
+        navEpost: String,
         values: FerdistilltRegisterOppgaveValues,
         enhetId: String,
     ) {
@@ -53,13 +53,14 @@ class DigitaliseringsoppgaveService(
             log.warn("Ferdigstilling av oppgave med id $oppgaveId feilet pga regelsjekk")
             throw ClientException(valideringsresultat.joinToString())
         }
-        oppgaveService.ferdigstillOppgave(oppgave, ident, values, enhetId, sykmeldt)
+        oppgaveService.ferdigstillOppgave(oppgave, navEpost, values, enhetId, sykmeldt)
         metricRegister.FERDIGSTILT_OPPGAVE.increment()
     }
 
     fun ferdigstillOppgaveSendTilGosys(
         oppgaveId: String,
-        ident: String,
+        navIdent: String,
+        navEpost: String,
     ): SykDigOppgave {
         val oppgave = oppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
@@ -67,8 +68,8 @@ class DigitaliseringsoppgaveService(
             sykmeldingId = oppgave.sykmeldingId.toString(),
         )
 
-        sendTilGosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), ident)
-        oppgaveService.ferdigstillOppgaveGosys(oppgave, ident)
+        sendTilGosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent)
+        oppgaveService.ferdigstillOppgaveGosys(oppgave, navEpost)
         val updatedOppgave = oppgaveService.getOppgave(oppgaveId)
 
         metricRegister.SENDT_TIL_GOSYS.increment()

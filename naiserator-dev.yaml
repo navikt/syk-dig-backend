@@ -58,6 +58,9 @@ spec:
     application:
       allowAllUsers: true
       enabled: true
+      claims:
+        extra:
+          - NAVident
   accessPolicy:
     inbound:
       rules:

@@ -66,7 +66,7 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
                     harAndreRelevanteOpplysninger = true,
                 ),
             ),
-            ident = "fake-test-ident",
+            navEpost = "fake-test-ident",
             false,
         )
         val oppgave = oppgaveRepository.getOppgave("345")

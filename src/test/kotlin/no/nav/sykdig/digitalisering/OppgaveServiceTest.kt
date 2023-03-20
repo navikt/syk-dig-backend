@@ -72,7 +72,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
                 biDiagnoser = null,
                 harAndreRelevanteOpplysninger = null,
             ),
-            ident = "X987654",
+            navEpost = "X987654",
         )
 
         val oppdatertOppgave = oppgaveService.getOppgave("123")
@@ -90,7 +90,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
     fun ferdigstillerOppgaveIDb() {
         oppgaveService.ferdigstillOppgave(
             oppgave = createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"),
-            ident = "X987654",
+            navEpost = "X987654",
             values = FerdistilltRegisterOppgaveValues(
                 fnrPasient = "12345678910",
                 behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),

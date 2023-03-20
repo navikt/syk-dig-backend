@@ -10,7 +10,7 @@ class SendTilGosysService(
     fun sendOppgaveTilGosys(
         oppgaveId: String,
         sykmeldingId: String,
-        veilederIdent: String,
+        veilederNavIdent: String,
     ) {
         val oppgave = oppgaveClient.getOppgave(oppgaveId, sykmeldingId)
 
@@ -20,7 +20,7 @@ class SendTilGosysService(
             oppgave.versjon,
             oppgave.status,
             "FS22",
-            veilederIdent,
+            veilederNavIdent,
         )
     }
 }
