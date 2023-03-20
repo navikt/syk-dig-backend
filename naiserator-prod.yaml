@@ -73,6 +73,8 @@ spec:
   ingresses:
     - "https://syk-dig-backend.intern.nav.no"
   leaderElection: true
+  secureLogs:
+    enabled: true
   env:
     - name: SYFOTILGANGSKONTROLL_URL
       value: https://syfo-tilgangskontroll.prod-fss-pub.nais.io
