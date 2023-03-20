@@ -27,7 +27,6 @@ class DokarkivClient(
     val log = logger()
 
     fun oppdaterOgFerdigstillJournalpost(
-        navnSykmelder: String?,
         land: String,
         fnr: String,
         enhet: String,
@@ -38,7 +37,6 @@ class DokarkivClient(
         source: String,
     ) {
         oppdaterJournalpost(
-            navnSykmelder = navnSykmelder,
             land = land,
             fnr = fnr,
             dokumentinfoId = dokumentinfoId,
@@ -56,7 +54,6 @@ class DokarkivClient(
 
     @Retryable
     private fun oppdaterJournalpost(
-        navnSykmelder: String?,
         land: String,
         fnr: String,
         dokumentinfoId: String,
@@ -70,7 +67,7 @@ class DokarkivClient(
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(navnSykmelder, findCountryName(land), fnr, dokumentinfoId, perioder, source)
+        val body = createOppdaterJournalpostRequest(findCountryName(land), fnr, dokumentinfoId, perioder, source)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -114,13 +111,13 @@ class DokarkivClient(
     }
 
     private fun createOppdaterJournalpostRequest(
-        navnSykmelder: String?,
         land: String,
         fnr: String,
         dokumentinfoId: String,
         perioder: List<Periode>,
         source: String,
     ): OppdaterJournalpostRequest {
+        log.info("land: $land")
         if (source == "rina") {
             return OppdaterJournalpostRequest(
                 avsenderMottaker = AvsenderMottaker(
@@ -141,7 +138,7 @@ class DokarkivClient(
         } else {
             return OppdaterJournalpostRequest(
                 avsenderMottaker = AvsenderMottaker(
-                    navn = navnSykmelder,
+                    navn = land,
                     land = land,
                 ),
                 bruker = Bruker(
