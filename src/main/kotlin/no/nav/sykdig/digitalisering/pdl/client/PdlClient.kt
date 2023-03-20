@@ -6,6 +6,7 @@ import no.nav.sykdig.digitalisering.pdl.client.graphql.PDL_QUERY
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlResponse
 import no.nav.sykdig.logger
 import no.nav.sykdig.objectMapper
+import no.nav.sykdig.securelog
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 
@@ -14,6 +15,7 @@ class PdlClient(
     private val pdlGraphQlClient: CustomGraphQLClient,
 ) {
     val log = logger()
+    val securelog = securelog()
 
     @Retryable
     fun hentPerson(fnr: String, sykmeldingId: String): PdlResponse {
@@ -27,10 +29,12 @@ class PdlClient(
 
             if (pdlResponse.hentPerson == null || pdlResponse.hentPerson.navn.isEmpty()) {
                 log.error("Fant ikke navn for person i PDL $sykmeldingId")
+                securelog.info(("Fant ikke navn for person i PDL $sykmeldingId, fnr: $fnr"))
                 throw RuntimeException("Fant ikke navn for person i PDL")
             }
             if (pdlResponse.identer == null || pdlResponse.identer.identer.firstOrNull { it.gruppe == "AKTORID" } == null) {
                 log.error("Fant ikke aktørid for person i PDL $sykmeldingId")
+                securelog.info(("Fant ikke aktørid for person i PDL $sykmeldingId, fnr: $fnr"))
                 throw RuntimeException("Fant ikke aktørid for person i PDL")
             }
 
