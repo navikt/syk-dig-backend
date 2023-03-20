@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.model.Periode
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.logger
@@ -156,9 +157,9 @@ class DokarkivClient(
             )
         }
     }
-    private fun findCountryName(landAlpha3: String): String {
-        val countries: Countries = objectMapper.readValue(File("src/main/resources/country/countries-norwegian.json"), Countries::class.java)
-        return countries.countries.first { it.alpha3 == landAlpha3 }.name
+    fun findCountryName(landAlpha3: String): String {
+        val countries: List<Country> = objectMapper.readValue<List<Country>>(File("src/main/resources/country/countries-norwegian.json"))
+        return countries.first { it.alpha3 == landAlpha3 }.name
     }
 
     @Retryable
@@ -204,9 +205,6 @@ class DokarkivClient(
     }
 }
 
-data class Countries(
-    val countries: List<Country>,
-)
 data class Country(
     val id: Int,
     val alpha2: String,
