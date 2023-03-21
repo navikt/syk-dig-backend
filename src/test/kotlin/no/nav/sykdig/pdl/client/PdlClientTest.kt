@@ -1,19 +1,20 @@
 package no.nav.sykdig.pdl.client
 
-import no.nav.sykdig.digitalisering.pdl.client.graphql.Data
-import no.nav.sykdig.objectMapper
-import org.junit.jupiter.api.Assertions
+import no.nav.sykdig.digitalisering.pdl.client.graphql.mapToPdlResponse
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class PdlClientTest {
 
     @Test
-    fun mapToPdlResponse() {
-        val pdlResponse = objectMapper.readValue(
-            PdlClientTest::class.java.getResourceAsStream("/pdl.json"),
-            Data::class.java,
-        ).data
+    fun shouldmapToPdlResponse() {
+        val json = String(Files.readAllBytes(Paths.get("src/test/resources/pdl.json")), StandardCharsets.UTF_8)
 
-        Assertions.assertEquals("UKONTROVERSIELL", pdlResponse?.hentPerson?.navn?.first()?.fornavn)
+        val pdlResponse = mapToPdlResponse(json)
+
+        assertEquals("UKONTROVERSIELL", pdlResponse.hentPerson?.navn?.first()?.fornavn)
     }
 }

@@ -1,5 +1,8 @@
 package no.nav.sykdig.digitalisering.pdl.client.graphql
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.sykdig.objectMapper
+
 const val PDL_QUERY = """
     query(${"$"}ident: ID!){
         identer: hentIdenter(ident: ${"$"}ident, historikk: false) {
@@ -157,3 +160,6 @@ data class PdlNavn(
     val mellomnavn: String?,
     val etternavn: String,
 )
+
+fun mapToPdlResponse(json: String): PdlResponse =
+    objectMapper.readValue<Data>(json).data!!
