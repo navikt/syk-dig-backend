@@ -53,6 +53,7 @@ const val PDL_QUERY = """
                     adressenavn
                     tilleggsnavn
                     postnummer
+                    bruksenhetsnummer
                 }
                 matrikkeladresse {
                     matrikkelId
@@ -74,6 +75,10 @@ const val PDL_QUERY = """
         }
     }
 """
+
+data class Data(
+    val data: PdlResponse?,
+)
 
 data class PdlResponse(
     val hentPerson: PdlPerson?,
