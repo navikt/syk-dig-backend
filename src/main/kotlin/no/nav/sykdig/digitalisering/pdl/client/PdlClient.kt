@@ -25,6 +25,8 @@ class PdlClient(
             val errors = response.errors
             errors.forEach { log.error("Feilmelding fra PDL: ${it.message} for $sykmeldingId") }
 
+            securelog.info("Repsone: ${response.json}")
+
             val pdlResponse: PdlResponse = objectMapper.readValue(response.json)
 
             if (pdlResponse.hentPerson == null) {
