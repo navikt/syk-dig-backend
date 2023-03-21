@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering.pdl.client
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
 import com.netflix.graphql.dgs.client.GraphQLResponse
+import no.nav.sykdig.digitalisering.pdl.client.graphql.Data
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PDL_QUERY
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlResponse
 import no.nav.sykdig.logger
@@ -56,5 +57,5 @@ class PdlClient(
     }
 
     fun mapToPdlResponse(graphQLResponse: GraphQLResponse): PdlResponse =
-        objectMapper.readValue(graphQLResponse.json)
+        objectMapper.readValue<Data>(graphQLResponse.json).data!!
 }
