@@ -1,0 +1,46 @@
+{
+  "data": {
+    "identer": {
+      "identer": [
+        {
+          "ident": "12896997449",
+          "gruppe": "FOLKEREGISTERIDENT"
+        },
+        {
+          "ident": "2097897438535",
+          "gruppe": "AKTORID"
+        }
+      ]
+    },
+    "hentPerson": {
+      "navn": [
+        {
+          "fornavn": "UKONTROVERSIELL",
+          "mellomnavn": null,
+          "etternavn": "DANS"
+        }
+      ],
+      "foedsel": [
+        {
+          "foedselsdato": "1969-09-12"
+        }
+      ],
+      "bostedsadresse": [
+        {
+          "coAdressenavn": null,
+          "vegadresse": {
+            "husnummer": "7",
+            "husbokstav": "B",
+            "adressenavn": "Søndre Jonsgate",
+            "tilleggsnavn": null,
+            "postnummer": "7030"
+          },
+          "matrikkeladresse": null,
+          "utenlandskAdresse": null,
+          "ukjentBosted": null
+        }
+      ],
+      "oppholdsadresse": []
+    }
+  }
+}

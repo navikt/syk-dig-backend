@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering.pdl.client
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
+import com.netflix.graphql.dgs.client.GraphQLResponse
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PDL_QUERY
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlResponse
 import no.nav.sykdig.logger
@@ -27,7 +28,7 @@ class PdlClient(
 
             securelog.info("Repsone: ${response.json}")
 
-            val pdlResponse: PdlResponse = objectMapper.readValue(response.json)
+            val pdlResponse: PdlResponse = mapToPdlResponse(response)
 
             if (pdlResponse.hentPerson == null) {
                 log.error("Fant ikke person i PDL $sykmeldingId")
@@ -53,4 +54,7 @@ class PdlClient(
             throw e
         }
     }
+
+    fun mapToPdlResponse(graphQLResponse: GraphQLResponse): PdlResponse =
+        objectMapper.readValue(graphQLResponse.json)
 }
