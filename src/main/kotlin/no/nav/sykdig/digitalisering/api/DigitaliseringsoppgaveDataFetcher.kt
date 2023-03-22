@@ -13,6 +13,7 @@ import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.generated.DgsConstants
+import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.DigitaliseringsoppgaveResult
 import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatus
@@ -121,20 +122,39 @@ class DigitaliseringsoppgaveDataFetcher(
     ): DigitaliseringsoppgaveStatus {
         val navEpost: String = dfe.graphQlContext.get("username")
         val navIdent: String = dfe.graphQlContext.get("nav_ident")
-        val updatedOppgave = digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(
+        digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(
             oppgaveId = oppgaveId,
             navIdent = navIdent,
             navEpost = navEpost,
         )
 
-        if (updatedOppgave.oppgaveDbModel.tilbakeTilGosys) {
-            return DigitaliseringsoppgaveStatus(
-                oppgaveId = oppgaveId,
-                status = DigitaliseringsoppgaveStatusEnum.IKKE_EN_SYKMELDING,
-            )
-        } else {
-            throw IllegalStateException("Oppgave med id $oppgaveId ble ikke sendt tilbake til Gosys")
-        }
+        return DigitaliseringsoppgaveStatus(
+            oppgaveId = oppgaveId,
+            status = DigitaliseringsoppgaveStatusEnum.IKKE_EN_SYKMELDING,
+        )
+    }
+
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @DgsMutation(field = DgsConstants.MUTATION.Avvis)
+    fun avvis(
+        @InputArgument oppgaveId: String,
+        @InputArgument avvisningsgrunn: Avvisingsgrunn,
+        dfe: DataFetchingEnvironment,
+    ): DigitaliseringsoppgaveStatus {
+        val navEpost: String = dfe.graphQlContext.get("username")
+        val navIdent: String = dfe.graphQlContext.get("nav_ident")
+
+        digitaliseringsoppgaveService.avvisOppgave(
+            oppgaveId = oppgaveId,
+            navIdent = navIdent,
+            navEpost = navEpost,
+            avvisningsgrunn = avvisningsgrunn,
+        )
+
+        return DigitaliseringsoppgaveStatus(
+            oppgaveId = oppgaveId,
+            status = DigitaliseringsoppgaveStatusEnum.AVVIST,
+        )
     }
 }
 

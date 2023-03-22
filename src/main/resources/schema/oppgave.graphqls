@@ -17,6 +17,7 @@ enum DigitaliseringsoppgaveStatusEnum {
     FERDIGSTILT
     IKKE_EN_SYKMELDING
     FINNES_IKKE
+    AVVIST
 }
 
 enum PeriodeType {
@@ -77,4 +78,12 @@ enum SykmeldingUnderArbeidStatus {
 enum SykmeldingsType {
     INNENLANDS
     UTENLANDS
+}
+
+enum Avvisingsgrunn {
+    MANGLENDE_DIAGNOSE
+    MANGLENDE_PERIODE_ELLER_SLUTTDATO
+    MANGLENDE_UNDERSKRIFT_ELLER_STEMPEL_FRA_SYKMELDER
+    MANGLENDE_ORGINAL_SYKMELDING
+    ANNET
 }

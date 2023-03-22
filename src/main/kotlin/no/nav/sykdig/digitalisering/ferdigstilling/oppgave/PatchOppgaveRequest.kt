@@ -14,4 +14,5 @@ data class PatchToGosysOppgaveRequest(
     val mappeId: Int? = null,
     val behandlesAvApplikasjon: String?,
     val tilordnetRessurs: String?,
+    val beskrivelse: String?,
 )

@@ -20,4 +20,8 @@ class MetricRegister(registry: MeterRegistry) {
     val SENDT_TIL_GOSYS = registry.counter(
         "${METRICS_NS}_sendt_til_gosys_counter",
     )
+
+    val AVVIST_SENDT_TIL_GOSYS = registry.counter(
+        "${METRICS_NS}_avvist_sendt_til_gosys_counter",
+    )
 }
