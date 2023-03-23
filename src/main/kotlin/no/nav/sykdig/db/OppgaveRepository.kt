@@ -175,8 +175,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     ) {
         namedParameterJdbcTemplate.update(
             """
-                INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp, avvisings_grunn)
-                VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp, :avvisings_grunn)
+                INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
+                VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
             """.trimIndent(),
             mapOf(
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
@@ -185,7 +185,6 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 "endret_av" to navEpost,
                 "timestamp" to Timestamp.from(Instant.now()),
                 "sykmelding" to sykmelding?.toPGObject(),
-                "avvisings_grunn" to avvisningsgrunn.name,
             ),
         )
         namedParameterJdbcTemplate.update(
@@ -198,7 +197,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             mapOf(
                 "oppgave_id" to oppgave.oppgaveId,
                 "ferdigstilt" to Timestamp.from(Instant.now()),
-                "avvisings_grunn" to oppgave.avvisingsgrunn,
+                "avvisings_grunn" to avvisningsgrunn.name,
             ),
         )
     }
