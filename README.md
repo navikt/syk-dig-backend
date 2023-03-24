@@ -6,6 +6,7 @@ This project contains the application code and infrastructure for syk-dig-backen
 * Kotlin
 * Spring boot
 * Gradle
+* Junit
 
 #### Requirements
 
