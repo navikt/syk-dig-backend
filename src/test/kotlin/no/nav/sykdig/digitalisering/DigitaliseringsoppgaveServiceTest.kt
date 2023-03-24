@@ -12,6 +12,7 @@ import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.metrics.MetricRegister
 import no.nav.sykdig.model.OppgaveDbModel
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -26,7 +27,6 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
-import org.junit.jupiter.api.Assertions.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
@@ -100,7 +100,7 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
                 fodselsdato = LocalDate.of(1980, 5, 5),
             )
         }
-       val avvistOppgave =  digitaliseringsoppgaveService.avvisOppgave(
+        val avvistOppgave = digitaliseringsoppgaveService.avvisOppgave(
             oppgave.oppgaveId,
             "Z123456",
             "Z123456@trygdeetaten.no",
