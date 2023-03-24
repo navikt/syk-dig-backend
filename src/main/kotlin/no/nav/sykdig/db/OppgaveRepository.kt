@@ -8,6 +8,7 @@ import no.nav.syfo.model.MedisinskVurdering
 import no.nav.syfo.model.Periode
 import no.nav.syfo.model.UtenlandskSykmelding
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
+import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.model.DokumentDbModel
@@ -73,6 +74,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                            dokumenter,
                            opprettet,
                            ferdigstilt,
+                           avvisings_grunn,
                            tilbake_til_gosys,
                            sykmelding_id,
                            type,
@@ -160,6 +162,42 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 "oppgave_id" to oppgave.oppgaveId,
                 "ferdigstilt" to Timestamp.from(Instant.now()),
                 "tilbake_til_gosys" to true,
+            ),
+        )
+    }
+
+    @Transactional
+    fun ferdigstillAvvistOppgave(
+        oppgave: OppgaveDbModel,
+        navEpost: String,
+        sykmelding: SykmeldingUnderArbeid?,
+        avvisningsgrunn: Avvisingsgrunn,
+    ) {
+        namedParameterJdbcTemplate.update(
+            """
+                INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
+                VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
+            """.trimIndent(),
+            mapOf(
+                "sykmelding_id" to oppgave.sykmeldingId.toString(),
+                "oppgave_id" to oppgave.oppgaveId,
+                "type" to oppgave.type,
+                "endret_av" to navEpost,
+                "timestamp" to Timestamp.from(Instant.now()),
+                "sykmelding" to sykmelding?.toPGObject(),
+            ),
+        )
+        namedParameterJdbcTemplate.update(
+            """
+                UPDATE oppgave
+                SET ferdigstilt = :ferdigstilt,
+                    avvisings_grunn = :avvisings_grunn
+                WHERE oppgave_id = :oppgave_id
+            """.trimIndent(),
+            mapOf(
+                "oppgave_id" to oppgave.oppgaveId,
+                "ferdigstilt" to Timestamp.from(Instant.now()),
+                "avvisings_grunn" to avvisningsgrunn.name,
             ),
         )
     }
@@ -301,6 +339,7 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
         opprettet = getTimestamp("opprettet").toInstant().atOffset(ZoneOffset.UTC),
         ferdigstilt = getTimestamp("ferdigstilt")?.toInstant()?.atOffset(ZoneOffset.UTC),
         tilbakeTilGosys = getBoolean("tilbake_til_gosys"),
+        avvisingsgrunn = getString("avvisings_grunn"),
         sykmeldingId = UUID.fromString(getString("sykmelding_id")),
         type = getString("type"),
         sykmelding = getString("sykmelding")?.let { objectMapper.readValue(it, SykmeldingUnderArbeid::class.java) },

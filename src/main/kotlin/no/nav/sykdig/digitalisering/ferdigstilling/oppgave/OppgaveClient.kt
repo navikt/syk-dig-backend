@@ -105,6 +105,7 @@ class OppgaveClient(
         oppgaveStatus: Oppgavestatus,
         oppgaveBehandlesAvApplikasjon: String,
         oppgaveTilordnetRessurs: String,
+        beskrivelse: String?,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -116,6 +117,7 @@ class OppgaveClient(
             id = oppgaveId.toInt(),
             behandlesAvApplikasjon = oppgaveBehandlesAvApplikasjon,
             tilordnetRessurs = oppgaveTilordnetRessurs,
+            beskrivelse = beskrivelse,
         )
 
         try {

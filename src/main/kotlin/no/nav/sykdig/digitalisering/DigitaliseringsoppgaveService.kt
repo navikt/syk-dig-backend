@@ -1,19 +1,23 @@
 package no.nav.sykdig.digitalisering
 
 import no.nav.sykdig.digitalisering.exceptions.ClientException
-import no.nav.sykdig.digitalisering.ferdigstilling.SendTilGosysService
+import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.regelvalidering.RegelvalideringService
+import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.logger
 import no.nav.sykdig.metrics.MetricRegister
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Service
 class DigitaliseringsoppgaveService(
-    private val oppgaveService: OppgaveService,
-    private val sendTilGosysService: SendTilGosysService,
+    private val sykDigOppgaveService: SykDigOppgaveService,
+    private val gosysService: GosysService,
     private val personService: PersonService,
     private val metricRegister: MetricRegister,
     private val regelvalideringService: RegelvalideringService,
@@ -22,7 +26,7 @@ class DigitaliseringsoppgaveService(
     private val log = logger()
 
     fun getDigitaiseringsoppgave(oppgaveId: String): SykDigOppgave {
-        val oppgave = oppgaveService.getOppgave(oppgaveId)
+        val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
             fnr = oppgave.fnr,
             sykmeldingId = oppgave.sykmeldingId.toString(),
@@ -34,7 +38,7 @@ class DigitaliseringsoppgaveService(
     }
 
     fun updateOppgave(oppgaveId: String, values: RegisterOppgaveValues, navEpost: String) {
-        oppgaveService.updateOppgave(oppgaveId, values, navEpost)
+        sykDigOppgaveService.updateOppgave(oppgaveId, values, navEpost)
     }
 
     fun ferdigstillOppgave(
@@ -43,7 +47,7 @@ class DigitaliseringsoppgaveService(
         values: FerdistilltRegisterOppgaveValues,
         enhetId: String,
     ) {
-        val oppgave = oppgaveService.getOppgave(oppgaveId)
+        val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
             fnr = oppgave.fnr,
             sykmeldingId = oppgave.sykmeldingId.toString(),
@@ -53,7 +57,7 @@ class DigitaliseringsoppgaveService(
             log.warn("Ferdigstilling av oppgave med id $oppgaveId feilet pga regelsjekk")
             throw ClientException(valideringsresultat.joinToString())
         }
-        oppgaveService.ferdigstillOppgave(oppgave, navEpost, values, enhetId, sykmeldt)
+        sykDigOppgaveService.ferdigstillOppgave(oppgave, navEpost, values, enhetId, sykmeldt)
         metricRegister.FERDIGSTILT_OPPGAVE.increment()
     }
 
@@ -62,17 +66,68 @@ class DigitaliseringsoppgaveService(
         navIdent: String,
         navEpost: String,
     ): SykDigOppgave {
-        val oppgave = oppgaveService.getOppgave(oppgaveId)
+        val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
             fnr = oppgave.fnr,
             sykmeldingId = oppgave.sykmeldingId.toString(),
         )
 
-        sendTilGosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent)
-        oppgaveService.ferdigstillOppgaveGosys(oppgave, navEpost)
-        val updatedOppgave = oppgaveService.getOppgave(oppgaveId)
+        gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent)
+        sykDigOppgaveService.ferdigstillOppgaveGosys(oppgave, navEpost)
+        val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
 
         metricRegister.SENDT_TIL_GOSYS.increment()
         return SykDigOppgave(updatedOppgave, sykmeldt)
+    }
+
+    @Transactional
+    fun avvisOppgave(
+        oppgaveId: String,
+        navIdent: String,
+        navEpost: String,
+        avvisningsgrunn: Avvisingsgrunn,
+    ): SykDigOppgave {
+        val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
+        val sykmeldt = personService.hentPerson(
+            fnr = oppgave.fnr,
+            sykmeldingId = oppgave.sykmeldingId.toString(),
+        )
+
+        val opprinneligBeskrivelse = gosysService.hentOppgave(oppgaveId, oppgave.sykmeldingId.toString()).beskrivelse
+
+        sykDigOppgaveService.ferdigstillAvvistOppgave(oppgave, navEpost, avvisningsgrunn)
+
+        val oppgaveBeskrivelse = lagOppgavebeskrivelse(
+            avvisningsgrunn = mapAvvisningsgrunn(avvisningsgrunn),
+            opprinneligBeskrivelse = opprinneligBeskrivelse,
+            navIdent = navIdent,
+        )
+
+        gosysService.avvisOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, oppgaveBeskrivelse)
+
+        val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
+        metricRegister.AVVIST_SENDT_TIL_GOSYS.increment()
+        return SykDigOppgave(updatedOppgave, sykmeldt)
+    }
+
+    fun mapAvvisningsgrunn(avvisningsgrunn: Avvisingsgrunn): String {
+        return when (avvisningsgrunn) {
+            Avvisingsgrunn.MANGLENDE_DIAGNOSE -> "Det mangler diagnose"
+            Avvisingsgrunn.MANGLENDE_PERIODE_ELLER_SLUTTDATO -> "Mangler periode eller sluttdato"
+            Avvisingsgrunn.MANGLENDE_UNDERSKRIFT_ELLER_STEMPEL_FRA_SYKMELDER -> "Mangler underskrift eller stempel fra sykmelder"
+            Avvisingsgrunn.MANGLENDE_ORGINAL_SYKMELDING -> "Mangler original sykmelding"
+        }
+    }
+
+    fun lagOppgavebeskrivelse(
+        avvisningsgrunn: String,
+        opprinneligBeskrivelse: String?,
+        navIdent: String,
+        timestamp: LocalDateTime? = null,
+    ): String {
+        val oppdatertBeskrivelse = "Avvist utenlandsk sykmelding med årsak: $avvisningsgrunn"
+        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+        val formattedTimestamp = (timestamp ?: LocalDateTime.now()).format(formatter)
+        return "--- $formattedTimestamp $navIdent ---\n$oppdatertBeskrivelse\n\n$opprinneligBeskrivelse"
     }
 }

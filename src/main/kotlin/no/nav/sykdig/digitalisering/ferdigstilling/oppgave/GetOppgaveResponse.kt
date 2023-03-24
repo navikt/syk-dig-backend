@@ -6,4 +6,5 @@ data class GetOppgaveResponse(
     val behandlesAvApplikasjon: String? = null,
     val tilordnetRessurs: String? = null,
     val mappeId: Int? = null,
+    val beskrivelse: String? = null,
 )

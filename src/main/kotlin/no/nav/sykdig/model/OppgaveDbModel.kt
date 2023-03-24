@@ -12,6 +12,7 @@ data class OppgaveDbModel(
     val opprettet: OffsetDateTime,
     val ferdigstilt: OffsetDateTime?,
     val tilbakeTilGosys: Boolean,
+    val avvisingsgrunn: String?,
     val sykmeldingId: UUID,
     val type: String,
     val sykmelding: SykmeldingUnderArbeid?,

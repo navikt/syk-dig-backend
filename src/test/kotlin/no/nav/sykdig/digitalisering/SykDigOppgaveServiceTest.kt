@@ -29,15 +29,15 @@ import java.time.ZoneOffset
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 @Transactional
-class OppgaveServiceTest : FellesTestOppsett() {
+class SykDigOppgaveServiceTest : FellesTestOppsett() {
     @MockBean
     lateinit var ferdigstillingService: FerdigstillingService
 
-    lateinit var oppgaveService: OppgaveService
+    lateinit var sykDigOppgaveService: SykDigOppgaveService
 
     @BeforeEach
     fun setup() {
-        oppgaveService = OppgaveService(oppgaveRepository, ferdigstillingService)
+        sykDigOppgaveService = SykDigOppgaveService(oppgaveRepository, ferdigstillingService)
         oppgaveRepository.lagreOppgave(createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"))
     }
 
@@ -49,7 +49,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
 
     @Test
     fun henterOppgaveFraDb() {
-        val oppgave = oppgaveService.getOppgave("123")
+        val oppgave = sykDigOppgaveService.getOppgave("123")
 
         assertEquals("12345678910", oppgave.fnr)
         assertEquals("12345678910", oppgave.fnr)
@@ -61,7 +61,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
 
     @Test
     fun oppdatererOppgaveIDb() {
-        oppgaveService.updateOppgave(
+        sykDigOppgaveService.updateOppgave(
             oppgaveId = "123",
             registerOppgaveValues = UferdigRegisterOppgaveValues(
                 fnrPasient = "12345678910",
@@ -75,7 +75,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
             navEpost = "X987654",
         )
 
-        val oppdatertOppgave = oppgaveService.getOppgave("123")
+        val oppdatertOppgave = sykDigOppgaveService.getOppgave("123")
 
         assertEquals("12345678910", oppdatertOppgave.fnr)
         assertEquals("X987654", oppdatertOppgave.endretAv)
@@ -88,7 +88,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
 
     @Test
     fun ferdigstillerOppgaveIDb() {
-        oppgaveService.ferdigstillOppgave(
+        sykDigOppgaveService.ferdigstillOppgave(
             oppgave = createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"),
             navEpost = "X987654",
             values = FerdistilltRegisterOppgaveValues(
@@ -117,7 +117,7 @@ class OppgaveServiceTest : FellesTestOppsett() {
             ),
         )
 
-        val oppdatertOppgave = oppgaveService.getOppgave("123")
+        val oppdatertOppgave = sykDigOppgaveService.getOppgave("123")
         assertEquals("12345678910", oppdatertOppgave.fnr)
         assertEquals("X987654", oppdatertOppgave.endretAv)
         assertEquals("UTLAND", oppdatertOppgave.type)

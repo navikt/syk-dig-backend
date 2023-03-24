@@ -17,4 +17,9 @@ type Mutation {
     oppgaveTilbakeTilGosys(
         oppgaveId: String!
     ): DigitaliseringsoppgaveStatus
+
+    avvis(
+        oppgaveId: String!
+        avvisningsgrunn: Avvisingsgrunn!
+    ): DigitaliseringsoppgaveStatus
 }
