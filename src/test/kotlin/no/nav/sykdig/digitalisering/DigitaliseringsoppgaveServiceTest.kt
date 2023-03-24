@@ -99,12 +99,6 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
                 fodselsdato = LocalDate.of(1980, 5, 5),
             )
         }
-        val avvistOppgave = digitaliseringsoppgaveService.avvisOppgave(
-            oppgave.oppgaveId,
-            "Z123456",
-            "Z123456@trygdeetaten.no",
-            excpetedAvvisingsgrunn,
-        )
         val lagretOppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
 
         assertNotNull(lagretOppgave.oppgaveDbModel.ferdigstilt)

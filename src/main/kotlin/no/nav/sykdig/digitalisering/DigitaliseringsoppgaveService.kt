@@ -116,7 +116,6 @@ class DigitaliseringsoppgaveService(
             Avvisingsgrunn.MANGLENDE_PERIODE_ELLER_SLUTTDATO -> "Mangler periode eller sluttdato"
             Avvisingsgrunn.MANGLENDE_UNDERSKRIFT_ELLER_STEMPEL_FRA_SYKMELDER -> "Mangler underskrift eller stempel fra sykmelder"
             Avvisingsgrunn.MANGLENDE_ORGINAL_SYKMELDING -> "Mangler original sykmelding"
-            Avvisingsgrunn.ANNET -> "Annen grunn"
         }
     }
 
