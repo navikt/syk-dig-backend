@@ -31,7 +31,7 @@ repositories {
 
 val postgresVersion = "42.5.1"
 val snakeYamlVersion = "1.33"
-val smCommonVersion = "1.fbf33a9"
+val smCommonVersion = "1.9df1108"
 val tokenSupportVersion = "2.1.7"
 val testContainersVersion = "1.17.4"
 val logstashLogbackEncoderVersion = "7.2"
@@ -100,6 +100,7 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
+        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
         testLogging {
             events("skipped", "failed")
             showStackTraces = true
