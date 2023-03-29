@@ -47,10 +47,17 @@ class SykDigOppgaveService(
     fun ferdigstillAvvistOppgave(
         oppgave: OppgaveDbModel,
         navEpost: String,
+        enhetId: String,
+        sykmeldt: Person,
         avvisningsgrunn: Avvisingsgrunn,
     ) {
         val sykmelding = oppgaveRepository.getLastSykmelding(oppgave.oppgaveId)
         oppgaveRepository.ferdigstillAvvistOppgave(oppgave, navEpost, sykmelding, avvisningsgrunn)
+        ferdigstillingService.ferdigstillAvvistJournalpost(
+            enhet = enhetId,
+            oppgave = oppgave,
+            sykmeldt = sykmeldt,
+        )
     }
 
     @Transactional

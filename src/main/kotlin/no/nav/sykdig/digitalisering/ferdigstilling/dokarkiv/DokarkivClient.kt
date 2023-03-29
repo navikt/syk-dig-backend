@@ -27,13 +27,13 @@ class DokarkivClient(
     val log = logger()
 
     fun oppdaterOgFerdigstillJournalpost(
-        landAlpha3: String,
+        landAlpha3: String?,
         fnr: String,
         enhet: String,
         dokumentinfoId: String,
         journalpostId: String,
         sykmeldingId: String,
-        perioder: List<Periode>,
+        perioder: List<Periode>?,
         source: String,
     ) {
         oppdaterJournalpost(
@@ -54,12 +54,12 @@ class DokarkivClient(
 
     @Retryable
     private fun oppdaterJournalpost(
-        landAlpha3: String,
+        landAlpha3: String?,
         fnr: String,
         dokumentinfoId: String,
         journalpostId: String,
         sykmeldingId: String,
-        perioder: List<Periode>,
+        perioder: List<Periode>?,
         source: String,
     ) {
         val headers = HttpHeaders()
@@ -111,43 +111,43 @@ class DokarkivClient(
     }
 
     private fun createOppdaterJournalpostRequest(
-        landAlpha3: String,
+        landAlpha3: String?,
         fnr: String,
         dokumentinfoId: String,
-        perioder: List<Periode>,
+        perioder: List<Periode>?,
         source: String,
     ): OppdaterJournalpostRequest {
         if (source == "rina") {
             return OppdaterJournalpostRequest(
                 avsenderMottaker = AvsenderMottaker(
                     navn = null,
-                    land = mapFromAlpha3Toalpha2(landAlpha3),
+                    land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                 ),
                 bruker = Bruker(
                     id = fnr,
                 ),
-                tittel = "Søknad om kontantytelser ${getFomTomTekst(perioder)}",
+                tittel = if (perioder.isNullOrEmpty()) { "Søknad om kontantytelser" } else { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" },
                 dokumenter = listOf(
                     DokumentInfo(
                         dokumentInfoId = dokumentinfoId,
-                        tittel = "Søknad om kontantytelser)${getFomTomTekst(perioder)}",
+                        tittel = if (perioder.isNullOrEmpty()) { "Søknad om kontantytelser" } else { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" },
                     ),
                 ),
             )
         } else {
             return OppdaterJournalpostRequest(
                 avsenderMottaker = AvsenderMottaker(
-                    navn = findCountryName(landAlpha3),
-                    land = mapFromAlpha3Toalpha2(landAlpha3),
+                    navn = if (landAlpha3 != null) { findCountryName(landAlpha3) } else { null },
+                    land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                 ),
                 bruker = Bruker(
                     id = fnr,
                 ),
-                tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
+                tittel = if (perioder.isNullOrEmpty()) { "Utenlandsk papirsykmelding" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" },
                 dokumenter = listOf(
                     DokumentInfo(
                         dokumentInfoId = dokumentinfoId,
-                        tittel = "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}",
+                        tittel = if (perioder.isNullOrEmpty()) { "Utenlandsk papirsykmelding" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" },
                     ),
                 ),
             )

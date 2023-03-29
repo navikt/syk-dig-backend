@@ -68,4 +68,27 @@ class FerdigstillingService(
             throw exception
         }
     }
+
+    fun ferdigstillAvvistJournalpost(
+        enhet: String,
+        oppgave: OppgaveDbModel,
+        sykmeldt: Person,
+
+    ) {
+        requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
+        if (safJournalpostGraphQlClient.erFerdigstilt(oppgave.journalpostId)) {
+            log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
+        } else {
+            dokarkivClient.oppdaterOgFerdigstillJournalpost(
+                landAlpha3 = null,
+                fnr = sykmeldt.fnr,
+                enhet = enhet,
+                dokumentinfoId = oppgave.dokumentInfoId,
+                journalpostId = oppgave.journalpostId,
+                sykmeldingId = oppgave.sykmeldingId.toString(),
+                perioder = null,
+                source = oppgave.source,
+            )
+        }
+    }
 }
