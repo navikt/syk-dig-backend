@@ -120,7 +120,7 @@ class DokarkivClient(
         if (source == "rina") {
             return OppdaterJournalpostRequest(
                 avsenderMottaker = AvsenderMottaker(
-                    navn = null,
+                    navn = source,
                     land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                 ),
                 bruker = Bruker(
@@ -137,7 +137,7 @@ class DokarkivClient(
         } else {
             return OppdaterJournalpostRequest(
                 avsenderMottaker = AvsenderMottaker(
-                    navn = if (landAlpha3 != null) { findCountryName(landAlpha3) } else { null },
+                    navn = if (landAlpha3 != null) { findCountryName(landAlpha3) } else { source },
                     land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                 ),
                 bruker = Bruker(
