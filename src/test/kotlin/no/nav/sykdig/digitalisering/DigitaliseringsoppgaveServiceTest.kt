@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.SykDigBackendApplication
+import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.GetOppgaveResponse
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.Oppgavestatus
@@ -46,6 +47,9 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
 
     @Autowired
     lateinit var digitaliseringsoppgaveService: DigitaliseringsoppgaveService
+
+    @MockBean
+    lateinit var ferdigstillingService: FerdigstillingService
 
     val sykmeldingId = UUID.randomUUID()
 
@@ -104,6 +108,7 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
             oppgave.oppgaveId,
             "Z123456",
             "Z123456@trygdeetaten.no",
+            "0393",
             excpetedAvvisingsgrunn,
         )
         val lagretOppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
@@ -140,6 +145,7 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
                 oppgaveMock.oppgaveId,
                 "Z123456",
                 "Z123456@trygdeetaten.no",
+                "0393",
                 excpetedAvvisingsgrunn,
             )
         }

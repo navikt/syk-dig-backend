@@ -77,7 +77,7 @@ docker run --rm -it -p 8080:8080 syk-dig-backend
 Find the newest version of gradle here: https://gradle.org/releases/ Then run this command:
 
 ``` bash
-./gradlew wrapper --gradle-version $gradleVersjon
+./gradlew wrapper --gradle-version $gradleVersion
 ```
 
 ### Contact

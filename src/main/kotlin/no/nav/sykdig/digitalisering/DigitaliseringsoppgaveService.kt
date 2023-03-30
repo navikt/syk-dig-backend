@@ -85,6 +85,7 @@ class DigitaliseringsoppgaveService(
         oppgaveId: String,
         navIdent: String,
         navEpost: String,
+        enhetId: String,
         avvisningsgrunn: Avvisingsgrunn,
     ): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
@@ -95,7 +96,7 @@ class DigitaliseringsoppgaveService(
 
         val opprinneligBeskrivelse = gosysService.hentOppgave(oppgaveId, oppgave.sykmeldingId.toString()).beskrivelse
 
-        sykDigOppgaveService.ferdigstillAvvistOppgave(oppgave, navEpost, avvisningsgrunn)
+        sykDigOppgaveService.ferdigstillAvvistOppgave(oppgave, navEpost, enhetId, sykmeldt, avvisningsgrunn)
 
         val oppgaveBeskrivelse = lagOppgavebeskrivelse(
             avvisningsgrunn = mapAvvisningsgrunn(avvisningsgrunn),

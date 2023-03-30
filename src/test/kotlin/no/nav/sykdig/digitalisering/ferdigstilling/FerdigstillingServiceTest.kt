@@ -131,6 +131,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             sykmeldingId.toString(),
             perioder,
             "scanning",
+            false,
         )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
     }

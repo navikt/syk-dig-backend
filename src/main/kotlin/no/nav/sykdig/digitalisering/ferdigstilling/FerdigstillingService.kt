@@ -50,6 +50,7 @@ class FerdigstillingService(
                 sykmeldingId = oppgave.sykmeldingId.toString(),
                 perioder = receivedSykmelding.sykmelding.perioder,
                 source = oppgave.source,
+                avvist = false,
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
@@ -66,6 +67,30 @@ class FerdigstillingService(
         } catch (exception: Exception) {
             log.error("failed to send sykmelding to kafka result for sykmelding {}", receivedSykmelding.sykmelding.id)
             throw exception
+        }
+    }
+
+    fun ferdigstillAvvistJournalpost(
+        enhet: String,
+        oppgave: OppgaveDbModel,
+        sykmeldt: Person,
+
+    ) {
+        requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
+        if (safJournalpostGraphQlClient.erFerdigstilt(oppgave.journalpostId)) {
+            log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
+        } else {
+            dokarkivClient.oppdaterOgFerdigstillJournalpost(
+                landAlpha3 = null,
+                fnr = sykmeldt.fnr,
+                enhet = enhet,
+                dokumentinfoId = oppgave.dokumentInfoId,
+                journalpostId = oppgave.journalpostId,
+                sykmeldingId = oppgave.sykmeldingId.toString(),
+                perioder = null,
+                source = oppgave.source,
+                avvist = true,
+            )
         }
     }
 }
