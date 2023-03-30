@@ -35,6 +35,7 @@ class DokarkivClient(
         sykmeldingId: String,
         perioder: List<Periode>?,
         source: String,
+        avvist: Boolean,
     ) {
         oppdaterJournalpost(
             landAlpha3 = landAlpha3,
@@ -44,6 +45,7 @@ class DokarkivClient(
             sykmeldingId = sykmeldingId,
             perioder = perioder,
             source = source,
+            avvist = avvist,
         )
         ferdigstillJournalpost(
             enhet = enhet,
@@ -61,13 +63,14 @@ class DokarkivClient(
         sykmeldingId: String,
         perioder: List<Periode>?,
         source: String,
+        avvist: Boolean,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source)
+        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvist)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -116,6 +119,7 @@ class DokarkivClient(
         dokumentinfoId: String,
         perioder: List<Periode>?,
         source: String,
+        avvist: Boolean,
     ): OppdaterJournalpostRequest {
         if (source == "rina") {
             return OppdaterJournalpostRequest(
@@ -126,11 +130,11 @@ class DokarkivClient(
                 bruker = Bruker(
                     id = fnr,
                 ),
-                tittel = if (perioder.isNullOrEmpty()) { "Søknad om kontantytelser" } else { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" },
+                tittel = createTittleRina(perioder, avvist),
                 dokumenter = listOf(
                     DokumentInfo(
                         dokumentInfoId = dokumentinfoId,
-                        tittel = if (perioder.isNullOrEmpty()) { "Søknad om kontantytelser" } else { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" },
+                        tittel = createTittleRina(perioder, avvist),
                     ),
                 ),
             )
@@ -143,16 +147,25 @@ class DokarkivClient(
                 bruker = Bruker(
                     id = fnr,
                 ),
-                tittel = if (perioder.isNullOrEmpty()) { "Utenlandsk papirsykmelding" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" },
+                tittel = createTittle(perioder, avvist),
                 dokumenter = listOf(
                     DokumentInfo(
                         dokumentInfoId = dokumentinfoId,
-                        tittel = if (perioder.isNullOrEmpty()) { "Utenlandsk papirsykmelding" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" },
+                        tittel = createTittle(perioder, avvist),
                     ),
                 ),
             )
         }
     }
+
+    fun createTittleRina(perioder: List<Periode>?, avvist: Boolean): String {
+        return if (avvist) { "Avvist Søknad om kontantytelser" } else if (perioder.isNullOrEmpty()) { "Søknad om kontantytelser" } else { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" }
+    }
+
+    fun createTittle(perioder: List<Periode>?, avvist: Boolean): String {
+        return if (avvist) { "Avvist Utenlandsk papirsykmelding" } else if (perioder.isNullOrEmpty()) { "Utenlandsk papirsykmelding" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" }
+    }
+
     fun findCountryName(landAlpha3: String): String {
         val countries: List<Country> =
             objectMapper.readValue<List<Country>>(DokarkivClient::class.java.getResourceAsStream("/country/countries-norwegian.json")!!)

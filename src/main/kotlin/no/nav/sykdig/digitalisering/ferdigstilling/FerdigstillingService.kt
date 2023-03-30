@@ -50,6 +50,7 @@ class FerdigstillingService(
                 sykmeldingId = oppgave.sykmeldingId.toString(),
                 perioder = receivedSykmelding.sykmelding.perioder,
                 source = oppgave.source,
+                avvist = false,
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
@@ -88,6 +89,7 @@ class FerdigstillingService(
                 sykmeldingId = oppgave.sykmeldingId.toString(),
                 perioder = null,
                 source = oppgave.source,
+                avvist = true,
             )
         }
     }
