@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.model.Periode
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.logger
+import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -218,6 +219,10 @@ class DokarkivClient(
             )
             throw e
         }
+    }
+
+    fun updateDocument(journalpostid: String, document: DokumentDbModel) {
+        TODO("Not yet implemented")
     }
 }
 

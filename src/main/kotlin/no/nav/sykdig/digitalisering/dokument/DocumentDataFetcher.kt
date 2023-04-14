@@ -1,4 +1,4 @@
-package no.nav.sykdig.digitalisering.api
+package no.nav.sykdig.digitalisering.dokument
 
 import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
