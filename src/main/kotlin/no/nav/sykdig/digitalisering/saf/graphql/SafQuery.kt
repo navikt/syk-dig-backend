@@ -4,6 +4,21 @@ const val SAF_QUERY = """
     query FindJournalpost(${"$"}id: String!) {
         journalpost(journalpostId: ${"$"}id) {
             journalstatus
+            dokumenter {
+                dokumentInfoId
+                tittel
+            }
+        }
+    }
+"""
+
+const val SAF_DOCUMENT_QUERY = """
+    query FindJournalpost(${"$"}id: String!) {
+        journalpost(journalpostId: ${"$"}id) {
+            dokumenter {
+                dokumentInfoId
+                tittel
+            }
         }
     }
 """
@@ -12,6 +27,13 @@ data class SafQuery(
     val journalpost: Journalpost?,
 )
 
+data class SafDocument(
+    val dokumentInfoId: String,
+    val tittel: String,
+)
+data class JournalpostDocumenter(
+    val dokumenter: List<SafDocument>,
+)
 data class Journalpost(
     val journalstatus: Journalstatus?,
 )

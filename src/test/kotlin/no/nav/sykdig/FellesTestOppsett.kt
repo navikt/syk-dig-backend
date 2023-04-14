@@ -27,7 +27,6 @@ abstract class FellesTestOppsett {
     lateinit var oppgaveRepository: OppgaveRepository
 
     companion object {
-
         init {
             val threads = mutableListOf<Thread>()
 

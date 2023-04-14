@@ -220,6 +220,20 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             resultSet.toSykmeldingUnderArbeid()
         }.firstOrNull()
     }
+
+    fun updateOppgaveDokumenter(oppgaveId: Any, dokumenter: List<DokumentDbModel>) {
+        namedParameterJdbcTemplate.update(
+            """
+                UPDATE oppgave
+                SET dokumenter = :dokumenter
+                WHERE oppgave_id = :oppgave_id
+            """.trimIndent(),
+            mapOf(
+                "oppgave_id" to oppgaveId,
+                "dokumenter" to dokumenter.toPGObject(),
+            ),
+        )
+    }
 }
 
 fun toSykmelding(
