@@ -26,34 +26,36 @@ class UpdateDocumentListener(
         groupId = "syk-dig-update-document-consumer",
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        val oppgave: DigitaliseringsoppgaveKafka = objectMapper.readValue(cr.value())
-        val oppgaveDokumenter = (oppgave.dokumenter ?: emptyList()).map {
-            DokumentDbModel(
-                dokumentInfoId = it.dokumentInfoId,
-                tittel = it.tittel,
-            )
-        }
-        val safDocuments = safDocumentClient.getDokumenter(oppgave.journalpostId).map {
-            DokumentDbModel(
-                dokumentInfoId = it.dokumentInfoId,
-                tittel = it.tittel,
-            )
-        }
+        try {
+            val oppgave: DigitaliseringsoppgaveKafka = objectMapper.readValue(cr.value())
+            val oppgaveDokumenter = (oppgave.dokumenter ?: emptyList()).map {
+                DokumentDbModel(
+                    dokumentInfoId = it.dokumentInfoId,
+                    tittel = it.tittel,
+                )
+            }
+            val safDocuments = safDocumentClient.getDokumenter(oppgave.journalpostId).map {
+                DokumentDbModel(
+                    dokumentInfoId = it.dokumentInfoId,
+                    tittel = it.tittel,
+                )
+            }
 
-        if (safDocuments.isEmpty()) {
-            log.info("Fant ikke journalpost for oppgave: ${oppgave.oppgaveId} - journalpost: ${oppgave.journalpostId}")
+            if (safDocuments.isEmpty()) {
+                log.info("Fant ikke journalpost for oppgave: ${oppgave.oppgaveId} - journalpost: ${oppgave.journalpostId}")
+                return
+            }
+
+            if (safDocuments.toSet() == oppgaveDokumenter.toSet()) {
+                log.info("Documents are equal, skipping oppgave ${oppgave.oppgaveId}")
+                return
+            }
+            log.info("Oppdaterer dokumenter for oppgave ${oppgave.oppgaveId} fra ${oppgave.source}, antall dokumenter ${safDocuments.size}")
+            oppgaveRepository.updateOppgaveDokumenter(oppgave.oppgaveId, safDocuments)
+        } catch (e: Exception) {
+            log.error("error prosessing record ${cr.key()}")
+        } finally {
             acknowledgment.acknowledge()
-            return
         }
-
-        if (safDocuments.toSet() == oppgaveDokumenter.toSet()) {
-            log.info("Documents are equal, skipping oppgave ${oppgave.oppgaveId}")
-            acknowledgment.acknowledge()
-            return
-        }
-
-        log.info("Oppdaterer dokumenter for oppgave ${oppgave.oppgaveId} fra ${oppgave.source}, antall dokumenter ${safDocuments.size}")
-        oppgaveRepository.updateOppgaveDokumenter(oppgave.oppgaveId, safDocuments)
-        acknowledgment.acknowledge()
     }
 }
