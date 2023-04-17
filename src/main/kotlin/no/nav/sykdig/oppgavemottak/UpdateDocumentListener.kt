@@ -2,7 +2,7 @@ package no.nav.sykdig.oppgavemottak
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sykdig.db.OppgaveRepository
-import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
+import no.nav.sykdig.digitalisering.saf.SafDocumentClient
 import no.nav.sykdig.logger
 import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.objectMapper
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class UpdateDocumentListener(
-    private val safDokarkivClient: SafJournalpostGraphQlClient,
+    private val safDocumentClient: SafDocumentClient,
     private val oppgaveRepository: OppgaveRepository,
 ) {
     private val log = logger()
@@ -33,11 +33,17 @@ class UpdateDocumentListener(
                 tittel = it.tittel,
             )
         }
-        val safDocuments = safDokarkivClient.getDokumenter(oppgave.journalpostId).map {
+        val safDocuments = safDocumentClient.getDokumenter(oppgave.journalpostId).map {
             DokumentDbModel(
                 dokumentInfoId = it.dokumentInfoId,
                 tittel = it.tittel,
             )
+        }
+
+        if (safDocuments.isEmpty()) {
+            log.info("Fant ikke journalpost for oppgave: ${oppgave.oppgaveId} - journalpost: ${oppgave.journalpostId}")
+            acknowledgment.acknowledge()
+            return
         }
 
         if (safDocuments.toSet() == oppgaveDokumenter.toSet()) {
@@ -48,5 +54,6 @@ class UpdateDocumentListener(
 
         log.info("Oppdaterer dokumenter for oppgave ${oppgave.oppgaveId} fra ${oppgave.source}, antall dokumenter ${safDocuments.size}")
         oppgaveRepository.updateOppgaveDokumenter(oppgave.oppgaveId, safDocuments)
+        acknowledgment.acknowledge()
     }
 }

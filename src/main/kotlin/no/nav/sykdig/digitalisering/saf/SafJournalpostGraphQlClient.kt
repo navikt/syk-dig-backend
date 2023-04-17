@@ -1,10 +1,8 @@
 package no.nav.sykdig.digitalisering.saf
 
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
-import no.nav.sykdig.digitalisering.saf.graphql.JournalpostDocumenter
 import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
 import no.nav.sykdig.digitalisering.saf.graphql.SAF_QUERY
-import no.nav.sykdig.digitalisering.saf.graphql.SafDocument
 import no.nav.sykdig.digitalisering.saf.graphql.SafQuery
 import no.nav.sykdig.logger
 import org.springframework.retry.annotation.Retryable
@@ -30,22 +28,6 @@ class SafJournalpostGraphQlClient(
             return journalstatus?.let {
                 it == Journalstatus.JOURNALFOERT || it == Journalstatus.FERDIGSTILT
             } ?: false
-        } catch (e: Exception) {
-            log.error("Noe gikk galt ved kall til SAF", e)
-            throw e
-        }
-    }
-
-    @Retryable
-    fun getDokumenter(journalpostId: String): List<SafDocument> {
-        try {
-            val response = safGraphQlClient.executeQuery(SAF_QUERY, mapOf("id" to journalpostId))
-
-            val errors = response.errors
-            errors.forEach { log.error("Feilmelding fra SAF: ${it.message} for $journalpostId") }
-
-            val safResponse = response.dataAsObject(JournalpostDocumenter::class.java)
-            return safResponse.dokumenter
         } catch (e: Exception) {
             log.error("Noe gikk galt ved kall til SAF", e)
             throw e
