@@ -23,11 +23,12 @@ class UpdateDocumentListener(
         topics = [sykDigOppgaveTopic],
         properties = ["auto.offset.reset = earliest"],
         containerFactory = "aivenKafkaListenerContainerFactory",
-        groupId = "syk-dig-update-document-consumer",
+        groupId = "syk-dig-update-document-consumer-2",
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         val oppgave: DigitaliseringsoppgaveKafka = objectMapper.readValue(cr.value())
-        val oppgaveDokumenter = (oppgave.dokumenter ?: emptyList()).map {
+        val oppgaveInDb = oppgaveRepository.getOppgave(oppgave.oppgaveId)
+        val oppgaveDokumenter = (oppgaveInDb?.dokumenter ?: emptyList()).map {
             DokumentDbModel(
                 dokumentInfoId = it.dokumentInfoId,
                 tittel = it.tittel,
