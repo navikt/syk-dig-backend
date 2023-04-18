@@ -100,7 +100,6 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
-        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
         testLogging {
             events("skipped", "failed")
             showStackTraces = true
