@@ -23,14 +23,6 @@ class SafGraphQlConfiguration {
         return graphQLClient(safUrl, safRestTemplate)
     }
 
-    @Bean
-    fun safDocumentGraphQlClient(
-        @Value("\${saf.url}") safUrl: String,
-        safDokumentTemplate: RestTemplate,
-    ): CustomGraphQLClient {
-        return graphQLClient(safUrl, safDokumentTemplate)
-    }
-
     private fun graphQLClient(
         safUrl: String,
         safDokumentTemplate: RestTemplate,
