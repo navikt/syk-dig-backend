@@ -54,14 +54,6 @@ no.nav.security.jwt:
             accepted_audience: ${AZURE_APP_CLIENT_ID}
     client:
         registration:
-            service-account-saf:
-                token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
-                scope: api://${SAF_CLIENT_ID}/.default
-                grant-type: client_credentials
-                authentication:
-                    client-id: ${AZURE_APP_CLIENT_ID}
-                    client-secret: ${AZURE_APP_CLIENT_SECRET}
-                    client-auth-method: client_secret_basic
             onbehalfof-syfotilgangskontroll:
                 token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
                 grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer

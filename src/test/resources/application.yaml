@@ -47,14 +47,6 @@ no.nav.security.jwt:
           client-id: client-id
           client-secret: secret
           client-auth-method: client_secret_basic
-      service-account-saf:
-        token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
-        grant-type: client_credentials
-        scope: saf-client
-        authentication:
-          client-id: client-id
-          client-secret: secretzz
-          client-auth-method: client_secret_basic
       onbehalfof-saf:
         token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
