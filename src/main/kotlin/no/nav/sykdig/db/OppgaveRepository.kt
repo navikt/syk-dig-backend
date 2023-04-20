@@ -41,7 +41,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 .addValue("fnr", digitaliseringsoppgave.fnr)
                 .addValue("journalpost_id", digitaliseringsoppgave.journalpostId)
                 .addValue("dokumentinfo_id", digitaliseringsoppgave.dokumentInfoId)
-                .addValue("dokumenter", digitaliseringsoppgave.dokumenter?.toPGObject())
+                .addValue("dokumenter", digitaliseringsoppgave.dokumenter.toPGObject())
                 .addValue("opprettet", Timestamp.from(digitaliseringsoppgave.opprettet.toInstant()))
                 .addValue(
                     "ferdigstilt",
@@ -221,7 +221,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         }.firstOrNull()
     }
 
-    fun updateOppgaveDokumenter(oppgaveId: Any, dokumenter: List<DokumentDbModel>) {
+    fun updateDocuments(oppgaveId: String, dokumenter: List<DokumentDbModel>) {
         namedParameterJdbcTemplate.update(
             """
                 UPDATE oppgave
@@ -357,7 +357,7 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
         sykmeldingId = UUID.fromString(getString("sykmelding_id")),
         type = getString("type"),
         sykmelding = getString("sykmelding")?.let { objectMapper.readValue(it, SykmeldingUnderArbeid::class.java) },
-        dokumenter = getString("dokumenter")?.let { objectMapper.readValue<List<DokumentDbModel>>(it) },
+        dokumenter = getString("dokumenter").let { objectMapper.readValue<List<DokumentDbModel>>(it) },
         endretAv = getString("endret_av"),
         timestamp = getTimestamp("timestamp").toInstant().atOffset(ZoneOffset.UTC),
         source = getString("source"),

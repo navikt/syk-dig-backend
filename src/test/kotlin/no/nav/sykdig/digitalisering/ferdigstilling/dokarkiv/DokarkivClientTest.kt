@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
 
 import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.SykDigBackendApplication
+import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
