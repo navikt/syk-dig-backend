@@ -93,7 +93,6 @@ class AadRestTemplateConfiguration {
             clientConfigurationProperties = clientConfigurationProperties,
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
-
     @Bean
     fun pdlRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,

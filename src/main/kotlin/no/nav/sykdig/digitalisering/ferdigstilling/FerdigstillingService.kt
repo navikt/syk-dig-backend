@@ -1,7 +1,7 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
 import no.nav.syfo.model.ReceivedSykmelding
-import no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues

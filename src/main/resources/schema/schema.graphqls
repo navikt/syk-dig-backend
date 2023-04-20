@@ -26,6 +26,7 @@ type Mutation {
 
     dokument(
         oppgaveId: String!
-        dokumentId: String!
+        dokumentInfoId: String!
+        tittel: String!
     ): Document
 }

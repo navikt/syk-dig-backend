@@ -7,6 +7,7 @@ import no.nav.sykdig.utils.toOppgaveDbModel
 import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import java.util.UUID
 
 @Component
 class MottaOppgaverFraKafka(
@@ -34,7 +35,7 @@ data class DigitaliseringsoppgaveKafka(
     val fnr: String,
     val journalpostId: String,
     val dokumentInfoId: String?,
-    val dokumenter: List<DokumentKafka>?,
+    val dokumenter: List<DokumentKafka>,
     val type: String,
     val source: String = "scanning",
 )
