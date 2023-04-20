@@ -69,19 +69,6 @@ class AadRestTemplateConfiguration {
     }
 
     @Bean
-    fun safDokumentTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
-        clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate =
-        downstreamRestTemplate(
-            registrationName = "service-account-saf",
-            restTemplateBuilder = restTemplateBuilder,
-            clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
-        )
-
-    @Bean
     fun safRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,
@@ -93,6 +80,7 @@ class AadRestTemplateConfiguration {
             clientConfigurationProperties = clientConfigurationProperties,
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
+
     @Bean
     fun pdlRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
