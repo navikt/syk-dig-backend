@@ -67,6 +67,9 @@ spec:
     inbound:
       rules:
         - application: syk-dig
+        - application: ida
+          namespace: traktor
+          cluster: prod-fss
     outbound:
       external:
         - host: kodeverk.dev-fss-pub.nais.io
