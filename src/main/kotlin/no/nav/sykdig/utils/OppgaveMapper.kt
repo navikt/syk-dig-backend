@@ -15,7 +15,7 @@ fun toOppgaveDbModel(
     fnr = digitaliseringsoppgave.fnr,
     journalpostId = digitaliseringsoppgave.journalpostId,
     dokumentInfoId = digitaliseringsoppgave.dokumentInfoId,
-    dokumenter = digitaliseringsoppgave.dokumenter?.map {
+    dokumenter = digitaliseringsoppgave.dokumenter.map {
         DokumentDbModel(
             dokumentInfoId = it.dokumentInfoId,
             tittel = it.tittel,

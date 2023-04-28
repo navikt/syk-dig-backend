@@ -24,7 +24,6 @@ class DigitaliseringsoppgaveService(
 ) {
 
     private val log = logger()
-
     fun getDigitaiseringsoppgave(oppgaveId: String): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(

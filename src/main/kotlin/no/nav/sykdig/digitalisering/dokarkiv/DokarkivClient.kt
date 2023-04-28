@@ -1,4 +1,4 @@
-package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
+package no.nav.sykdig.digitalisering.dokarkiv
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.model.Periode
@@ -25,6 +25,21 @@ class DokarkivClient(
     private val dokarkivRestTemplate: RestTemplate,
 ) {
     val log = logger()
+
+    fun updateDocument(journalpostid: String, documentId: String, tittel: String) {
+        val oppaterDokumentRequest = OppdaterDokumentRequest(
+            dokumenter = listOf(
+                DokumentInfo(
+                    dokumentInfoId = documentId,
+                    tittel = tittel,
+                ),
+            ),
+        )
+        dokarkivRestTemplate.put(
+            "$url/$journalpostid",
+            oppaterDokumentRequest,
+        )
+    }
 
     fun oppdaterOgFerdigstillJournalpost(
         landAlpha3: String?,

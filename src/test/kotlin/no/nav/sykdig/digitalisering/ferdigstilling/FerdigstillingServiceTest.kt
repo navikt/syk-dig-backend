@@ -10,7 +10,7 @@ import no.nav.syfo.model.SporsmalSvar
 import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
-import no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues

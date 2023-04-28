@@ -1,4 +1,4 @@
-package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
+package no.nav.sykdig.digitalisering.dokarkiv
 
 data class OppdaterJournalpostRequest(
     val tema: String = "SYM",
@@ -7,6 +7,10 @@ data class OppdaterJournalpostRequest(
     val sak: Sak = Sak(),
     val tittel: String,
     val dokumenter: List<DokumentInfo>?,
+)
+
+data class OppdaterDokumentRequest(
+    val dokumenter: List<DokumentInfo>,
 )
 
 data class AvsenderMottaker(
