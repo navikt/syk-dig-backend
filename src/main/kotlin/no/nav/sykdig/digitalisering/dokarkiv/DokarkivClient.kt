@@ -50,7 +50,7 @@ class DokarkivClient(
         sykmeldingId: String,
         perioder: List<Periode>?,
         source: String,
-        avvist: Boolean,
+        avvisningsGrunn: String?,
     ) {
         oppdaterJournalpost(
             landAlpha3 = landAlpha3,
@@ -60,7 +60,7 @@ class DokarkivClient(
             sykmeldingId = sykmeldingId,
             perioder = perioder,
             source = source,
-            avvist = avvist,
+            avvisningsGrunn = avvisningsGrunn,
         )
         ferdigstillJournalpost(
             enhet = enhet,
@@ -78,14 +78,14 @@ class DokarkivClient(
         sykmeldingId: String,
         perioder: List<Periode>?,
         source: String,
-        avvist: Boolean,
+        avvisningsGrunn: String?,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvist)
+        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -134,7 +134,7 @@ class DokarkivClient(
         dokumentinfoId: String,
         perioder: List<Periode>?,
         source: String,
-        avvist: Boolean,
+        avvisningsGrunn: String?,
     ): OppdaterJournalpostRequest {
         if (source == "rina") {
             return OppdaterJournalpostRequest(
@@ -145,11 +145,11 @@ class DokarkivClient(
                 bruker = Bruker(
                     id = fnr,
                 ),
-                tittel = createTittleRina(perioder, avvist),
+                tittel = createTittleRina(perioder, avvisningsGrunn),
                 dokumenter = listOf(
                     DokumentInfo(
                         dokumentInfoId = dokumentinfoId,
-                        tittel = createTittleRina(perioder, avvist),
+                        tittel = createTittleRina(perioder, avvisningsGrunn),
                     ),
                 ),
             )
@@ -162,23 +162,23 @@ class DokarkivClient(
                 bruker = Bruker(
                     id = fnr,
                 ),
-                tittel = createTittle(perioder, avvist),
+                tittel = createTittle(perioder, avvisningsGrunn),
                 dokumenter = listOf(
                     DokumentInfo(
                         dokumentInfoId = dokumentinfoId,
-                        tittel = createTittle(perioder, avvist),
+                        tittel = createTittle(perioder, avvisningsGrunn),
                     ),
                 ),
             )
         }
     }
 
-    fun createTittleRina(perioder: List<Periode>?, avvist: Boolean): String {
-        return if (avvist) { "Avvist Søknad om kontantytelser" } else if (perioder.isNullOrEmpty()) { "Søknad om kontantytelser" } else { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" }
+    fun createTittleRina(perioder: List<Periode>?, avvisningsGrunn: String?): String {
+        return if (!avvisningsGrunn.isNullOrEmpty()) { "Avvist Søknad om kontantytelser: $avvisningsGrunn" } else if (perioder.isNullOrEmpty()) { "Søknad om kontantytelser" } else { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" }
     }
 
-    fun createTittle(perioder: List<Periode>?, avvist: Boolean): String {
-        return if (avvist) { "Avvist Utenlandsk papirsykmelding" } else if (perioder.isNullOrEmpty()) { "Utenlandsk papirsykmelding" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" }
+    fun createTittle(perioder: List<Periode>?, avvisningsGrunn: String?): String {
+        return if (!avvisningsGrunn.isNullOrEmpty()) { "Avvist Utenlandsk papirsykmelding: $avvisningsGrunn" } else if (perioder.isNullOrEmpty()) { "Utenlandsk papirsykmelding" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" }
     }
 
     fun findCountryName(landAlpha3: String): String {

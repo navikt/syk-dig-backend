@@ -110,15 +110,6 @@ class DigitaliseringsoppgaveService(
         return SykDigOppgave(updatedOppgave, sykmeldt)
     }
 
-    fun mapAvvisningsgrunn(avvisningsgrunn: Avvisingsgrunn): String {
-        return when (avvisningsgrunn) {
-            Avvisingsgrunn.MANGLENDE_DIAGNOSE -> "Det mangler diagnose"
-            Avvisingsgrunn.MANGLENDE_PERIODE_ELLER_SLUTTDATO -> "Mangler periode eller sluttdato"
-            Avvisingsgrunn.MANGLENDE_UNDERSKRIFT_ELLER_STEMPEL_FRA_SYKMELDER -> "Mangler underskrift eller stempel fra sykmelder"
-            Avvisingsgrunn.MANGLENDE_ORGINAL_SYKMELDING -> "Mangler original sykmelding"
-        }
-    }
-
     fun lagOppgavebeskrivelse(
         avvisningsgrunn: String,
         opprinneligBeskrivelse: String?,
@@ -129,5 +120,14 @@ class DigitaliseringsoppgaveService(
         val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
         val formattedTimestamp = (timestamp ?: LocalDateTime.now()).format(formatter)
         return "--- $formattedTimestamp $navIdent ---\n$oppdatertBeskrivelse\n\n$opprinneligBeskrivelse"
+    }
+}
+
+fun mapAvvisningsgrunn(avvisningsgrunn: Avvisingsgrunn): String {
+    return when (avvisningsgrunn) {
+        Avvisingsgrunn.MANGLENDE_DIAGNOSE -> "Det mangler diagnose"
+        Avvisingsgrunn.MANGLENDE_PERIODE_ELLER_SLUTTDATO -> "Mangler periode eller sluttdato"
+        Avvisingsgrunn.MANGLENDE_UNDERSKRIFT_ELLER_STEMPEL_FRA_SYKMELDER -> "Mangler underskrift eller stempel fra sykmelder"
+        Avvisingsgrunn.MANGLENDE_ORGINAL_SYKMELDING -> "Mangler original sykmelding"
     }
 }
