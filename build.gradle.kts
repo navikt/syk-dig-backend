@@ -31,7 +31,7 @@ repositories {
 
 val postgresVersion = "42.5.1"
 val snakeYamlVersion = "1.33"
-val smCommonVersion = "1.9df1108"
+val smCommonVersion = "1.0.1"
 val tokenSupportVersion = "2.1.7"
 val testContainersVersion = "1.17.4"
 val logstashLogbackEncoderVersion = "7.2"
@@ -41,9 +41,7 @@ val graphqlVersion = "19.4"
 val kafkaClientsVersion = "3.4.0"
 val springSecurityWebVersion = "6.0.2"
 val okhttp3version = "4.10.0"
-val fellesformatVersion = "2019.07.30-12-26-5c924ef4f04022bbb850aaf299eb8e4464c1ca6a"
-val sykmelding2013Version = "2019.07.30-12-26-5c924ef4f04022bbb850aaf299eb8e4464c1ca6a"
-val kithHodemeldingVersion = "2019.07.30-12-26-5c924ef4f04022bbb850aaf299eb8e4464c1ca6a"
+val syfoXmlCodegen = "1.0.4"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
@@ -70,9 +68,9 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.yaml:snakeyaml:$snakeYamlVersion") // overstyrer sårbar dependency
     implementation("no.nav.helse:syfosm-common-models:$smCommonVersion")
-    implementation("no.nav.helse.xml:xmlfellesformat:$fellesformatVersion")
-    implementation("no.nav.helse.xml:sm2013:$sykmelding2013Version")
-    implementation("no.nav.helse.xml:kith-hodemelding:$kithHodemeldingVersion")
+    implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegen")
+    implementation("no.nav.helse.xml:sm2013:$syfoXmlCodegen")
+    implementation("no.nav.helse.xml:kith-hodemelding:$syfoXmlCodegen")
     implementation("no.nav.helse:syfosm-common-diagnosis-codes:$smCommonVersion")
     implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
     implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
