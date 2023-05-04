@@ -1,4 +1,4 @@
-package no.nav.syfo.util
+package no.nav.sykdig.utils
 
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
