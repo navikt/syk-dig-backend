@@ -50,7 +50,7 @@ class FerdigstillingService(
                 sykmeldingId = oppgave.sykmeldingId.toString(),
                 perioder = receivedSykmelding.sykmelding.perioder,
                 source = oppgave.source,
-                avvist = false,
+                avvisningsGrunn = null,
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
@@ -74,7 +74,7 @@ class FerdigstillingService(
         enhet: String,
         oppgave: OppgaveDbModel,
         sykmeldt: Person,
-
+        avvisningsGrunn: String,
     ) {
         requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
         if (safJournalpostGraphQlClient.erFerdigstilt(oppgave.journalpostId)) {
@@ -89,7 +89,7 @@ class FerdigstillingService(
                 sykmeldingId = oppgave.sykmeldingId.toString(),
                 perioder = null,
                 source = oppgave.source,
-                avvist = true,
+                avvisningsGrunn = avvisningsGrunn,
             )
         }
     }

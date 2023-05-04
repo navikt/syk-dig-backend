@@ -57,6 +57,7 @@ class SykDigOppgaveService(
             enhet = enhetId,
             oppgave = oppgave,
             sykmeldt = sykmeldt,
+            avvisningsGrunn = mapAvvisningsgrunn(avvisningsgrunn),
         )
     }
 
