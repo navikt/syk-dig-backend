@@ -32,7 +32,7 @@ repositories {
 val postgresVersion = "42.5.1"
 val snakeYamlVersion = "2.0"
 val smCommonVersion = "1.0.1"
-val tokenSupportVersion = "2.1.7"
+val tokenSupportVersion = "3.0.11"
 val testContainersVersion = "1.18.0"
 val logstashLogbackEncoderVersion = "7.3"
 val javaJwtVersion = "4.2.1"
