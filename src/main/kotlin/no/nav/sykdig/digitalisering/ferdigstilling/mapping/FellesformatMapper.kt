@@ -46,7 +46,7 @@ fun mapToFellesformat(
                         v = "SYKMELD"
                     }
                     miGversion = "v1.2 2006-05-24"
-                    genDate = datoOpprettet ?: LocalDateTime.of(validatedValues.perioder.first().fom, LocalTime.NOON)
+                    genDate = datoOpprettet?.toString() ?: LocalDateTime.of(validatedValues.perioder.first().fom, LocalTime.NOON).toString()
                     msgId = sykmeldingId
                     ack = XMLCS().apply {
                         dn = "Ja"

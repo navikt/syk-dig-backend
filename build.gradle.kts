@@ -30,14 +30,14 @@ repositories {
 }
 
 val postgresVersion = "42.5.1"
-val snakeYamlVersion = "1.33"
+val snakeYamlVersion = "2.0"
 val smCommonVersion = "1.0.1"
 val tokenSupportVersion = "3.0.11"
 val testContainersVersion = "1.18.0"
 val logstashLogbackEncoderVersion = "7.3"
 val javaJwtVersion = "4.2.1"
 val springBootResourceVersion = "3.0.2"
-val graphqlVersion = "20.2"
+val graphqlVersion = "19.4"
 val kafkaClientsVersion = "3.4.0"
 val syfoXmlCodegen = "1.0.4"
 val springSecurityWebVersion = "6.0.3"
