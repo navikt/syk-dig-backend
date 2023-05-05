@@ -3,11 +3,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "3.0.6"
+    id("org.springframework.boot") version "3.0.5"
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm") version "1.8.21"
     kotlin("plugin.spring") version "1.8.21"
-    id("com.netflix.dgs.codegen") version "5.7.2"
+    id("com.netflix.dgs.codegen") version "5.1.17"
     id("org.jlleitschuh.gradle.ktlint") version "11.3.2"
 }
 
@@ -32,7 +32,7 @@ repositories {
 val postgresVersion = "42.5.1"
 val snakeYamlVersion = "2.0"
 val smCommonVersion = "1.0.1"
-val tokenSupportVersion = "3.0.11"
+val tokenSupportVersion = "2.1.7"
 val testContainersVersion = "1.18.0"
 val logstashLogbackEncoderVersion = "7.3"
 val javaJwtVersion = "4.2.1"
@@ -40,13 +40,13 @@ val springBootResourceVersion = "3.0.2"
 val graphqlVersion = "19.4"
 val kafkaClientsVersion = "3.4.0"
 val syfoXmlCodegen = "1.0.4"
-val springSecurityWebVersion = "6.0.3"
-val okhttp3version = "4.11.0"
+val springSecurityWebVersion = "6.0.2"
+val okhttp3version = "4.10.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
-val graphqlDgsPlatformDependenciesVersion = "6.0.5"
+val graphqlDgsPlatformDependenciesVersion = "6.0.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
