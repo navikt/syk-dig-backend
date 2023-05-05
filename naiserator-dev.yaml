@@ -28,7 +28,7 @@ spec:
         pointInTimeRecovery: true
   replicas:
     min: 1
-    max: 1
+    max: 2
     cpuThresholdPercentage: 90
   port: 8080
   liveness:
