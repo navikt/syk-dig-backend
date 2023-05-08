@@ -68,18 +68,24 @@ spec:
       rules:
         - application: syk-dig
     outbound:
+      rules:
+        - application: syfo-tilgangskontroll
+          namespace: teamsykefravr
+          cluster: prod-gcp
       external:
         - host: kodeverk.prod-fss-pub.nais.io
+        - host: saf.prod-fss-pub.nais.io
+        - host: pdl-api.prod-fss-pub.nais.io
+        - host: dokarkiv.prod-fss-pub.nais.io
+        - host: oppgave.prod-fss-pub.nais.io
   ingresses:
     - "https://syk-dig-backend.intern.nav.no"
   leaderElection: true
   secureLogs:
     enabled: true
   env:
-    - name: SYFOTILGANGSKONTROLL_URL
-      value: https://syfo-tilgangskontroll.prod-fss-pub.nais.io
     - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID
-      value: prod-fss.teamsykefravr.syfo-tilgangskontroll
+      value: prod-gcp.teamsykefravr.syfo-tilgangskontroll
     - name: SAF_URL
       value: https://saf.prod-fss-pub.nais.io
     - name: SAF_CLIENT_ID

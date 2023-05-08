@@ -71,18 +71,24 @@ spec:
           namespace: traktor
           cluster: prod-fss
     outbound:
+      rules:
+        - application: syfo-tilgangskontroll
+          namespace: teamsykefravr
+          cluster: dev-gcp
       external:
         - host: kodeverk.dev-fss-pub.nais.io
+        - host: oppgave-q1.dev-fss-pub.nais.io
+        - host: dokarkiv.dev-fss-pub.nais.io
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: saf.dev-fss-pub.nais.io
   ingresses:
     - "https://syk-dig-backend.dev.intern.nav.no"
   leaderElection: true
   secureLogs:
     enabled: true
   env:
-    - name: SYFOTILGANGSKONTROLL_URL
-      value: https://syfo-tilgangskontroll.dev-fss-pub.nais.io
     - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID
-      value: dev-fss.teamsykefravr.syfo-tilgangskontroll
+      value: dev-gcp.teamsykefravr.syfo-tilgangskontroll
     - name: SAF_URL
       value: https://saf.dev-fss-pub.nais.io
     - name: SAF_CLIENT_ID

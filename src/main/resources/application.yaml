@@ -40,7 +40,7 @@ management:
 aiven-kafka:
     auto-offset-reset: earliest
 
-syfo-tilgangskontroll.url: ${SYFOTILGANGSKONTROLL_URL}
+syfo-tilgangskontroll.url: "http://syfo-tilgangskontroll.teamsykefravr"
 saf.url: ${SAF_URL}
 pdl.url: ${PDL_URL}
 kodeverk.url: ${KODEVERK_URL}
