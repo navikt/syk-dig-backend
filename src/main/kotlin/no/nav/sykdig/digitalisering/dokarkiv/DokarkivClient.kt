@@ -155,6 +155,7 @@ class DokarkivClient(
             )
         } else if (source == "navno") {
             return OppdaterJournalpostRequest(
+                tema = "SYK",
                 avsenderMottaker = AvsenderMottaker(
                     navn = source,
                     land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
