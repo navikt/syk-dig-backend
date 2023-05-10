@@ -153,6 +153,23 @@ class DokarkivClient(
                     ),
                 ),
             )
+        } else if (source == "navno") {
+            return OppdaterJournalpostRequest(
+                avsenderMottaker = AvsenderMottaker(
+                    navn = source,
+                    land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                ),
+                bruker = Bruker(
+                    id = fnr,
+                ),
+                tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                dokumenter = listOf(
+                    DokumentInfo(
+                        dokumentInfoId = dokumentinfoId,
+                        tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                    ),
+                ),
+            )
         } else {
             return OppdaterJournalpostRequest(
                 avsenderMottaker = AvsenderMottaker(
@@ -179,6 +196,9 @@ class DokarkivClient(
 
     fun createTittle(perioder: List<Periode>?, avvisningsGrunn: String?): String {
         return if (!avvisningsGrunn.isNullOrEmpty()) { "Avvist Utenlandsk papirsykmelding: $avvisningsGrunn" } else if (perioder.isNullOrEmpty()) { "Utenlandsk papirsykmelding" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" }
+    }
+    fun createNavNoTittle(perioder: List<Periode>?, avvisningsGrunn: String?): String {
+        return if (!avvisningsGrunn.isNullOrEmpty()) { "Avvist Egenerklæring for utenlandske sykemeldinger: $avvisningsGrunn" } else if (perioder.isNullOrEmpty()) { "Egenerklæring for utenlandske sykemeldinger" } else { "Egenerklæring for utenlandske sykemeldinger ${getFomTomTekst(perioder)}" }
     }
 
     fun findCountryName(landAlpha3: String): String {
