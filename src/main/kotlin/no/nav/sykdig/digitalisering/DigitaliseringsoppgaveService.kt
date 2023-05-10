@@ -129,5 +129,8 @@ fun mapAvvisningsgrunn(avvisningsgrunn: Avvisingsgrunn): String {
         Avvisingsgrunn.MANGLENDE_PERIODE_ELLER_SLUTTDATO -> "Mangler periode eller sluttdato"
         Avvisingsgrunn.MANGLENDE_UNDERSKRIFT_ELLER_STEMPEL_FRA_SYKMELDER -> "Mangler underskrift eller stempel fra sykmelder"
         Avvisingsgrunn.MANGLENDE_ORGINAL_SYKMELDING -> "Mangler original sykmelding"
+        Avvisingsgrunn.TILBAKEDATERT_SYKMELDING -> "Sykmeldingen er tilbakedatert"
+        Avvisingsgrunn.RISIKOSAK -> "Risikosak"
+        Avvisingsgrunn.FOR_LANG_PERIODE -> "Sykmeldingen har for lang periode"
     }
 }
