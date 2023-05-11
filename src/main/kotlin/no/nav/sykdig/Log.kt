@@ -10,3 +10,7 @@ inline fun <reified T> T.logger(): Logger {
 inline fun <reified T> T.securelog(): Logger {
     return LoggerFactory.getLogger("securelog")
 }
+
+inline fun <reified T> T.auditlog(): Logger {
+    return LoggerFactory.getLogger("auditLogger")
+}

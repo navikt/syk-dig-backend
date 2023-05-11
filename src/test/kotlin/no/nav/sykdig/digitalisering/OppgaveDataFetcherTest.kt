@@ -24,6 +24,7 @@ import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.times
@@ -71,7 +72,7 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(securityContext.authentication).thenReturn(authentication)
         SecurityContextHolder.setContext(securityContext)
         Mockito.`when`(authentication.isAuthenticated).thenReturn(true)
-        Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { true }
+        Mockito.`when`(securityService.hasAccessToOppgave(anyString(), any())).thenAnswer { true }
     }
 
     @Test
@@ -162,7 +163,7 @@ class OppgaveDataFetcherTest {
 
     @Test
     fun `querying oppgave no access to oppgave`() {
-        Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { false }
+        Mockito.`when`(securityService.hasAccessToOppgave(anyString(), any())).thenAnswer { false }
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel = createDigitalseringsoppgaveDbModel(
@@ -320,7 +321,7 @@ class OppgaveDataFetcherTest {
 
     @Test
     fun `lager oppgave uten tilgang`() {
-        Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { false }
+        Mockito.`when`(securityService.hasAccessToOppgave(anyString(), any())).thenAnswer { false }
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel = createDigitalseringsoppgaveDbModel(

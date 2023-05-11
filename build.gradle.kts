@@ -47,6 +47,7 @@ val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
 val graphqlDgsPlatformDependenciesVersion = "6.0.5"
+val logbacksyslog4jVersion = "1.0.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
@@ -83,6 +84,7 @@ dependencies {
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springBootResourceVersion")
     implementation("com.squareup.okhttp3:okhttp:$okhttp3version")
+    implementation("com.papertrailapp:logback-syslog4j:$logbacksyslog4jVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
