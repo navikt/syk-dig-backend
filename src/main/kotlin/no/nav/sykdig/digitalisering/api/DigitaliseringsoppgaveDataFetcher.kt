@@ -35,9 +35,12 @@ class DigitaliseringsoppgaveDataFetcher(
         private val log = logger()
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe)")
     @DgsQuery(field = DgsConstants.QUERY.Oppgave)
-    fun getOppgave(@InputArgument oppgaveId: String): DigitaliseringsoppgaveResult {
+    fun getOppgave(
+        @InputArgument oppgaveId: String,
+        dfe: DataFetchingEnvironment,
+    ): DigitaliseringsoppgaveResult {
         try {
             val oppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId)
 
@@ -75,7 +78,7 @@ class DigitaliseringsoppgaveDataFetcher(
         }
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe)")
     @DgsMutation(field = DgsConstants.MUTATION.Lagre)
     fun lagreOppgave(
         @InputArgument oppgaveId: String,
@@ -84,13 +87,13 @@ class DigitaliseringsoppgaveDataFetcher(
         @InputArgument status: SykmeldingUnderArbeidStatus,
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveResult {
-        val navEpost: String = dfe.graphQlContext.get("username")
+        val navEmail: String = dfe.graphQlContext.get("username")
         when (status) {
             SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
                 val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
                 digitaliseringsoppgaveService.ferdigstillOppgave(
                     oppgaveId = oppgaveId,
-                    navEpost = navEpost,
+                    navEpost = navEmail,
                     values = ferdistilltRegisterOppgaveValues,
                     enhetId = enhetId,
                 ).also { log.info("Ferdigstilt oppgave med id $oppgaveId") }
@@ -106,7 +109,7 @@ class DigitaliseringsoppgaveDataFetcher(
                 digitaliseringsoppgaveService.updateOppgave(
                     oppgaveId = oppgaveId,
                     values = uferdigRegisterOppgaveValues,
-                    navEpost = navEpost,
+                    navEpost = navEmail,
                 ).also { log.info("Lagret oppgave med id $oppgaveId") }
 
                 return mapToDigitaliseringsoppgave(digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId))
@@ -114,7 +117,7 @@ class DigitaliseringsoppgaveDataFetcher(
         }
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe)")
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
     fun oppgaveTilbakeTilGosys(
         @InputArgument oppgaveId: String,
@@ -134,7 +137,7 @@ class DigitaliseringsoppgaveDataFetcher(
         )
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe)")
     @DgsMutation(field = DgsConstants.MUTATION.Avvis)
     fun avvis(
         @InputArgument oppgaveId: String,
