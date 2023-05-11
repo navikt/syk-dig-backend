@@ -24,7 +24,7 @@ import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.any
 import org.mockito.Mockito
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.times
