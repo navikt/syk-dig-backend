@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
+import graphql.schema.DataFetchingEnvironment
 import no.nav.sykdig.TestGraphQLContextContributor
 import no.nav.sykdig.config.CustomDataFetchingExceptionHandler
 import no.nav.sykdig.db.PoststedRepository
@@ -72,7 +73,7 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(securityContext.authentication).thenReturn(authentication)
         SecurityContextHolder.setContext(securityContext)
         Mockito.`when`(authentication.isAuthenticated).thenReturn(true)
-        Mockito.`when`(securityService.hasAccessToOppgave(anyString(), any())).thenAnswer { true }
+        Mockito.`when`(securityService.hasAccessToOppgave(anyString(), any(DataFetchingEnvironment.class)).thenAnswer { true }
     }
 
     @Test
