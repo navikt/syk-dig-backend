@@ -9,7 +9,6 @@ import java.time.LocalDateTime
 fun mapToReceivedSykmelding(
     ferdigstillteRegisterOppgaveValues: FerdistilltRegisterOppgaveValues,
     sykmeldt: Person,
-    harAndreRelevanteOpplysninger: Boolean?,
     sykmeldingId: String,
     journalpostId: String,
     opprettet: LocalDateTime,
@@ -51,7 +50,6 @@ fun mapToReceivedSykmelding(
         vedlegg = null,
         utenlandskSykmelding = UtenlandskSykmelding(
             ferdigstillteRegisterOppgaveValues.skrevetLand,
-            harAndreRelevanteOpplysninger ?: false,
         ),
     )
 }

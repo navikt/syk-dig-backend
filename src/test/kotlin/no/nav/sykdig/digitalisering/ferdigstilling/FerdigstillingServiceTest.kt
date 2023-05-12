@@ -97,7 +97,6 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             ),
             hovedDiagnose = DiagnoseInput("A070", "ICD10"),
             biDiagnoser = emptyList(),
-            harAndreRelevanteOpplysninger = null,
         )
 
         val sykmeldt = Person(
@@ -165,7 +164,6 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
-            harAndreRelevanteOpplysninger = null,
         )
 
         val person = Person(
@@ -183,12 +181,9 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             LocalDate.of(1970, 1, 1),
         )
 
-        val harAndreRelevanteOpplysninger = false
-
         val receivedSykmelding = mapToReceivedSykmelding(
             validatedValues,
             person,
-            harAndreRelevanteOpplysninger,
             sykmeldingId.toString(),
             journalPostId,
             datoOpprettet.toLocalDateTime(),
@@ -263,7 +258,6 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
-            harAndreRelevanteOpplysninger = null,
         )
 
         val person = Person(
@@ -281,11 +275,9 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             LocalDate.of(1970, 1, 1),
         )
 
-        val harAndreRelevanteOpplysninger = false
         val receivedSykmelding = mapToReceivedSykmelding(
             validatedValues,
             person,
-            harAndreRelevanteOpplysninger,
             sykmeldingId.toString(),
             journalPostId,
             datoOpprettet.toLocalDateTime(),
@@ -323,7 +315,6 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
-            harAndreRelevanteOpplysninger = null,
         )
 
         val person = Person(
@@ -341,12 +332,10 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             LocalDate.of(1970, 1, 1),
         )
 
-        val harAndreRelevanteOpplysninger = false
         val exception = assertThrows(IllegalStateException::class.java) {
             mapToReceivedSykmelding(
                 validatedValues,
                 person,
-                harAndreRelevanteOpplysninger,
                 sykmeldingId.toString(),
                 journalPostId,
                 datoOpprettet.toLocalDateTime(),

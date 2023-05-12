@@ -23,7 +23,6 @@ class OppgaveSecurityService(
     fun hasAccessToOppgave(oppgaveId: String): Boolean {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         if (!syfoTilgangskontrollOboClient.sjekkTilgangVeileder(oppgave.fnr)) {
-
             val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
             val navEmail = autentication.token.claims["preferred_username"].toString()
 

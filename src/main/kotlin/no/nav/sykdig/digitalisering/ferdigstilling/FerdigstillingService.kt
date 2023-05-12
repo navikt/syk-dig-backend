@@ -33,7 +33,6 @@ class FerdigstillingService(
         val receivedSykmelding = mapToReceivedSykmelding(
             ferdigstillteRegisterOppgaveValues = validatedValues,
             sykmeldt = sykmeldt,
-            harAndreRelevanteOpplysninger = validatedValues.harAndreRelevanteOpplysninger,
             sykmeldingId = oppgave.sykmeldingId.toString(),
             journalpostId = oppgave.journalpostId,
             opprettet = oppgave.opprettet.toLocalDateTime(),

@@ -63,7 +63,6 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
                         DiagnoseInput(kode = "Z01", system = "ICPC-22"),
                         DiagnoseInput(kode = "Z02", system = "ICPC-23"),
                     ),
-                    harAndreRelevanteOpplysninger = true,
                 ),
             ),
             navEpost = "fake-test-ident",
@@ -77,7 +76,6 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
         assertEquals("nytt-fnr-pasient", oppgave?.sykmelding?.fnrPasient)
         assertEquals(OffsetDateTime.parse("2020-01-01T12:00:00Z"), oppgave?.sykmelding?.sykmelding?.behandletTidspunkt)
         assertEquals("ZMB", oppgave?.sykmelding?.utenlandskSykmelding?.land)
-        assertEquals(true, oppgave?.sykmelding?.utenlandskSykmelding?.andreRelevanteOpplysninger)
         assertEquals("Z00", oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode)
         assertEquals("ICPC-2", oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.system)
         assertEquals("ICPC-2", oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.system)
