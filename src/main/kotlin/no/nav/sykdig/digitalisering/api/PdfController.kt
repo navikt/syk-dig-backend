@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.api
 
+import graphql.schema.DataFetchingEnvironment
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.logger
@@ -22,9 +23,9 @@ class PdfController(
 
     @Deprecated("Bruk /api/document/{oppgaveId}/{dokumentInfoId} i stedet")
     @GetMapping("/api/pdf", produces = [MediaType.APPLICATION_PDF_VALUE])
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe.graphQlContext.get(\"username\"))")
     @ResponseBody
-    fun getPdf(@RequestParam oppgaveId: String): ByteArray {
+    fun getPdf(@RequestParam oppgaveId: String, dfe: DataFetchingEnvironment): ByteArray {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
         if (oppgave != null) {
             try {

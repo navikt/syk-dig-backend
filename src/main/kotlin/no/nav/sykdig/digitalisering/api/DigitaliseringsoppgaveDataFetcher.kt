@@ -35,7 +35,7 @@ class DigitaliseringsoppgaveDataFetcher(
         private val log = logger()
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe.graphQlContext.get(\"username\"))")
     @DgsQuery(field = DgsConstants.QUERY.Oppgave)
     fun getOppgave(
         @InputArgument oppgaveId: String,
@@ -78,7 +78,7 @@ class DigitaliseringsoppgaveDataFetcher(
         }
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe.graphQlContext.get(\"username\"))")
     @DgsMutation(field = DgsConstants.MUTATION.Lagre)
     fun lagreOppgave(
         @InputArgument oppgaveId: String,
@@ -117,7 +117,7 @@ class DigitaliseringsoppgaveDataFetcher(
         }
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe.graphQlContext.get(\"username\"))")
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
     fun oppgaveTilbakeTilGosys(
         @InputArgument oppgaveId: String,
@@ -137,7 +137,7 @@ class DigitaliseringsoppgaveDataFetcher(
         )
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe.graphQlContext.get(\"username\"))")
     @DgsMutation(field = DgsConstants.MUTATION.Avvis)
     fun avvis(
         @InputArgument oppgaveId: String,

@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.api
 
+import graphql.schema.DataFetchingEnvironment
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.logger
@@ -21,9 +22,13 @@ class DocumentController(
     val log = logger()
 
     @GetMapping("/api/document/{oppgaveId}/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId, #dfe.graphQlContext.get(\"username\"))")
     @ResponseBody
-    fun getDocument(@PathVariable oppgaveId: String, @PathVariable dokumentInfoId: String): ByteArray {
+    fun getDocument(
+        @PathVariable oppgaveId: String,
+        @PathVariable dokumentInfoId: String,
+        dfe: DataFetchingEnvironment,
+    ): ByteArray {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
 
         if (oppgave != null) {

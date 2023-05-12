@@ -1,6 +1,5 @@
 package no.nav.sykdig.digitalisering.tilgangskontroll
 
-import graphql.schema.DataFetchingEnvironment
 import no.nav.sykdig.auditLogger.AuditLogger
 import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
@@ -14,9 +13,8 @@ class OppgaveSecurityService(val syfoTilgangskontrollOboClient: SyfoTilgangskont
         private val log = logger()
         private val auditlog = auditlog()
     }
-    fun hasAccessToOppgave(oppgaveId: String, dfe: DataFetchingEnvironment): Boolean {
+    fun hasAccessToOppgave(oppgaveId: String, navEmail: String): Boolean {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
-        val navEmail: String = dfe.graphQlContext.get("username")
         if (!syfoTilgangskontrollOboClient.sjekkTilgangVeileder(oppgave.fnr)) {
             log.warn("Innlogget bruker har ikke tilgang til oppgave med id $oppgaveId")
             auditlog.info(
