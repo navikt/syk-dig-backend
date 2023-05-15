@@ -30,6 +30,7 @@ class SyfoTilgangskontrollOboClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
         headers[NAV_PERSONIDENT_HEADER] = fnr
+        securelog.info("interceptors: ${syfotilgangskontrollRestTemplate.interceptors}")
 
         try {
             val response = syfotilgangskontrollRestTemplate.exchange(
@@ -37,7 +38,7 @@ class SyfoTilgangskontrollOboClient(
                 GET,
                 HttpEntity<Any>(headers),
                 String::class.java,
-            ).also { securelog.info("Headers: ${it.headers}") }
+            )
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
             return if (e.statusCode.value() == 403) {
