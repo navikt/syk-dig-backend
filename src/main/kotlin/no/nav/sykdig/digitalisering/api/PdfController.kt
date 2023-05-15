@@ -23,7 +23,7 @@ class PdfController(
 
     @Deprecated("Bruk /api/document/{oppgaveId}/{dokumentInfoId} i stedet")
     @GetMapping("/api/pdf", produces = [MediaType.APPLICATION_PDF_VALUE])
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId,#dfe.graphQlContext.get(\"username\"))")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @ResponseBody
     fun getPdf(@RequestParam oppgaveId: String, dfe: DataFetchingEnvironment): ByteArray {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)

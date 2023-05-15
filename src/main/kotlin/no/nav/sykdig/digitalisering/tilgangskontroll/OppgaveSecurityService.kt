@@ -1,7 +1,5 @@
 package no.nav.sykdig.digitalisering.tilgangskontroll
 
-import no.nav.sykdig.auditLogger.AuditLogger
-import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.logger
 import org.springframework.stereotype.Service
@@ -11,12 +9,12 @@ class OppgaveSecurityService(val syfoTilgangskontrollOboClient: SyfoTilgangskont
 
     companion object {
         private val log = logger()
-        private val auditlog = auditlog()
     }
-    fun hasAccessToOppgave(oppgaveId: String, navEmail: String): Boolean {
+    fun hasAccessToOppgave(oppgaveId: String): Boolean {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         if (!syfoTilgangskontrollOboClient.sjekkTilgangVeileder(oppgave.fnr)) {
             log.warn("Innlogget bruker har ikke tilgang til oppgave med id $oppgaveId")
+            /*
             auditlog.info(
                 AuditLogger().createcCefMessage(
                     fnr = oppgave.fnr,
@@ -26,9 +24,12 @@ class OppgaveSecurityService(val syfoTilgangskontrollOboClient: SyfoTilgangskont
                     permit = AuditLogger.Permit.DENY,
                 ),
             )
+
+             */
             return false
         }
         log.info("Innlogget bruker har tilgang til oppgave med id $oppgaveId")
+        /*
         auditlog.info(
             AuditLogger().createcCefMessage(
                 fnr = oppgave.fnr,
@@ -38,6 +39,7 @@ class OppgaveSecurityService(val syfoTilgangskontrollOboClient: SyfoTilgangskont
                 permit = AuditLogger.Permit.PERMIT,
             ),
         )
+         */
         return true
     }
 }

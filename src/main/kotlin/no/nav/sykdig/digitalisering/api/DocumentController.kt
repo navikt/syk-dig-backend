@@ -22,7 +22,7 @@ class DocumentController(
     val log = logger()
 
     @GetMapping("/api/document/{oppgaveId}/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId, #dfe.graphQlContext.get(\"username\"))")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @ResponseBody
     fun getDocument(
         @PathVariable oppgaveId: String,
