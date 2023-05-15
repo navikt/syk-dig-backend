@@ -37,7 +37,8 @@ class SyfoTilgangskontrollOboClient(
                 GET,
                 HttpEntity<Any>(headers),
                 String::class.java,
-            ).also { securelog.info("Headers: ${it.headers["Authorization"]}")}
+            ).also { securelog.info("Headers: ${it.headers}") }
+            syfotilgangskontrollRestTemplate.clientHttpRequestInitializers
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
             return if (e.statusCode.value() == 403) {
