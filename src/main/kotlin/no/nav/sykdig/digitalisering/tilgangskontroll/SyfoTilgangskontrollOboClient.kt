@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.tilgangskontroll
 
 import no.nav.sykdig.logger
+import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -22,6 +23,7 @@ class SyfoTilgangskontrollOboClient(
     }
 
     val log = logger()
+    val securelog = securelog()
 
     @Retryable
     fun sjekkTilgangVeileder(fnr: String): Boolean {
@@ -35,7 +37,7 @@ class SyfoTilgangskontrollOboClient(
                 GET,
                 HttpEntity<Any>(headers),
                 String::class.java,
-            )
+            ).also { securelog.info("Headers: ${it.headers["Authorization"]}")}
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
             return if (e.statusCode.value() == 403) {
