@@ -1,7 +1,6 @@
 package no.nav.sykdig.digitalisering.tilgangskontroll
 
 import no.nav.sykdig.logger
-import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -23,14 +22,12 @@ class SyfoTilgangskontrollOboClient(
     }
 
     val log = logger()
-    val securelog = securelog()
 
     @Retryable
     fun sjekkTilgangVeileder(fnr: String): Boolean {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
         headers[NAV_PERSONIDENT_HEADER] = fnr
-        securelog.info("interceptors: ${syfotilgangskontrollRestTemplate.interceptors}")
 
         try {
             val response = syfotilgangskontrollRestTemplate.exchange(
