@@ -1,20 +1,30 @@
 package no.nav.sykdig.digitalisering.tilgangskontroll
 
+import no.nav.sykdig.auditLogger.AuditLogger
+import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.logger
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
 
 @Service
-class OppgaveSecurityService(val syfoTilgangskontrollOboClient: SyfoTilgangskontrollOboClient, val sykDigOppgaveService: SykDigOppgaveService) {
+class OppgaveSecurityService(
+    val syfoTilgangskontrollOboClient: SyfoTilgangskontrollOboClient,
+    val sykDigOppgaveService: SykDigOppgaveService,
+) {
 
     companion object {
         private val log = logger()
+        private val auditlog = auditlog()
     }
     fun hasAccessToOppgave(oppgaveId: String): Boolean {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         if (!syfoTilgangskontrollOboClient.sjekkTilgangVeileder(oppgave.fnr)) {
             log.warn("Innlogget bruker har ikke tilgang til oppgave med id $oppgaveId")
-            /*
+            val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+            val navEmail = autentication.token.claims["preferred_username"].toString()
+
             auditlog.info(
                 AuditLogger().createcCefMessage(
                     fnr = oppgave.fnr,
@@ -25,11 +35,13 @@ class OppgaveSecurityService(val syfoTilgangskontrollOboClient: SyfoTilgangskont
                 ),
             )
 
-             */
             return false
         }
         log.info("Innlogget bruker har tilgang til oppgave med id $oppgaveId")
-        /*
+
+        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        val navEmail = autentication.token.claims["preferred_username"].toString()
+
         auditlog.info(
             AuditLogger().createcCefMessage(
                 fnr = oppgave.fnr,
@@ -39,7 +51,7 @@ class OppgaveSecurityService(val syfoTilgangskontrollOboClient: SyfoTilgangskont
                 permit = AuditLogger.Permit.PERMIT,
             ),
         )
-         */
+
         return true
     }
 }
