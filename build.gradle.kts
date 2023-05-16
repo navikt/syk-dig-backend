@@ -7,7 +7,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm") version "1.8.21"
     kotlin("plugin.spring") version "1.8.21"
-    id("com.netflix.dgs.codegen") version "5.8.0"
+    id("com.netflix.dgs.codegen") version "5.8.1"
     id("org.jlleitschuh.gradle.ktlint") version "11.3.2"
 }
 
@@ -40,13 +40,13 @@ val springBootResourceVersion = "3.0.2"
 val graphqlVersion = "19.4"
 val kafkaClientsVersion = "3.4.0"
 val syfoXmlCodegen = "1.0.4"
-val springSecurityWebVersion = "6.0.3"
+val springSecurityWebVersion = "6.1.0"
 val okhttp3version = "4.10.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
-val graphqlDgsPlatformDependenciesVersion = "6.0.5"
+val graphqlDgsPlatformDependenciesVersion = "7.0.0"
 val logbacksyslog4jVersion = "1.0.0"
 
 dependencies {
