@@ -32,7 +32,6 @@ type OppgaveValues {
     perioder: [PeriodeValue!]
     hoveddiagnose: DiagnoseValue
     biDiagnoser: [DiagnoseValue!]
-    harAndreRelevanteOpplysninger: Boolean
 }
 
 type PeriodeValue {
@@ -55,7 +54,6 @@ input SykmeldingUnderArbeidValues {
     perioder: [PeriodeInput!]
     hovedDiagnose: DiagnoseInput
     biDiagnoser: [DiagnoseInput!]
-    harAndreRelevanteOpplysninger: Boolean
 }
 
 input DiagnoseInput {

@@ -11,7 +11,6 @@ interface RegisterOppgaveValues {
     val perioder: List<PeriodeInput>?
     val hovedDiagnose: DiagnoseInput?
     val biDiagnoser: List<DiagnoseInput>?
-    val harAndreRelevanteOpplysninger: Boolean?
 }
 
 data class FerdistilltRegisterOppgaveValues(
@@ -21,7 +20,6 @@ data class FerdistilltRegisterOppgaveValues(
     override val perioder: List<PeriodeInput>,
     override val hovedDiagnose: DiagnoseInput,
     override val biDiagnoser: List<DiagnoseInput>,
-    override val harAndreRelevanteOpplysninger: Boolean?,
 ) : RegisterOppgaveValues
 
 data class UferdigRegisterOppgaveValues(
@@ -31,5 +29,4 @@ data class UferdigRegisterOppgaveValues(
     override val perioder: List<PeriodeInput>?,
     override val hovedDiagnose: DiagnoseInput?,
     override val biDiagnoser: List<DiagnoseInput>?,
-    override val harAndreRelevanteOpplysninger: Boolean?,
 ) : RegisterOppgaveValues

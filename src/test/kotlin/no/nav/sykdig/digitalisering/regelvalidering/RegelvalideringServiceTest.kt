@@ -36,7 +36,6 @@ class RegelvalideringServiceTest {
         ),
         hovedDiagnose = DiagnoseInput("A000", "ICD10"),
         biDiagnoser = emptyList(),
-        harAndreRelevanteOpplysninger = false,
     )
 
     @Test
