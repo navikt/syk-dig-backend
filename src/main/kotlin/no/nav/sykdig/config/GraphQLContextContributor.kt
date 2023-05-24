@@ -27,8 +27,6 @@ class GraphQLContextContributor : GraphQLContextContributor {
 
             requireNotNull(username) { "preferred_username is missing in claims" }
 
-            log.info("Found username and ident in JWT: $username, $navIdent")
-
             builder.put("username", username)
             builder.put("nav_ident", navIdent)
         }
