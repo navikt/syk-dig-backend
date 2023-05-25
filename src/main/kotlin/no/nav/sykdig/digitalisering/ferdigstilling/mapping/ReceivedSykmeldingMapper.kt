@@ -36,7 +36,7 @@ fun mapToReceivedSykmelding(
         navLogId = sykmeldingId,
         msgId = sykmeldingId,
         legekontorOrgNr = null,
-        legekontorOrgName = "", // TODO: hva skal dette være?
+        legekontorOrgName = "", // Denne skal være blank siden vi ikkje har noe org name på legekontoret, men feltet er påkrevd i formatet
         legekontorHerId = null,
         legekontorReshId = null,
         mottattDato = opprettet,
@@ -50,6 +50,7 @@ fun mapToReceivedSykmelding(
         vedlegg = null,
         utenlandskSykmelding = UtenlandskSykmelding(
             ferdigstillteRegisterOppgaveValues.skrevetLand,
+            ferdigstillteRegisterOppgaveValues.folkeRegistertAdresseErBrakkeEllerTilsvarende ?: false,
         ),
     )
 }

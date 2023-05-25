@@ -83,6 +83,7 @@ spec:
         - host: saf.dev-fss-pub.nais.io
   ingresses:
     - "https://syk-dig-backend.dev.intern.nav.no"
+    - "https://syk-dig-backend.ekstern.dev.nav.no"
   leaderElection: true
   secureLogs:
     enabled: true
