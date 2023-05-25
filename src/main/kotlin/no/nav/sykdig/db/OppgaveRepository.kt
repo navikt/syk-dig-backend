@@ -287,6 +287,7 @@ private fun toUtenlandskSykmelding(values: RegisterOppgaveValues): UtenlandskSyk
     return values.skrevetLand?.let { skrevetLand ->
         UtenlandskSykmelding(
             land = skrevetLand,
+            folkeRegistertAdresseErBrakkeEllerTilsvarende = values.folkeRegistertAdresseErBrakkeEllerTilsvarende ?: false,
         )
     }
 }

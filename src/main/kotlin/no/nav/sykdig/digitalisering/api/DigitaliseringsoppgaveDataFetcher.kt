@@ -184,6 +184,7 @@ private fun validateRegisterOppgaveValues(
         perioder = values.perioder,
         hovedDiagnose = values.hovedDiagnose,
         biDiagnoser = values.biDiagnoser,
+        folkeRegistertAdresseErBrakkeEllerTilsvarende = values.folkeRegistertAdresseErBrakkeEllerTilsvarende,
     )
 }
 
@@ -209,6 +210,7 @@ private fun uferdigRegisterOppgaveValus(sykmeldingUnderArbeidValues: SykmeldingU
         perioder = sykmeldingUnderArbeidValues.perioder,
         hovedDiagnose = sykmeldingUnderArbeidValues.hovedDiagnose,
         biDiagnoser = sykmeldingUnderArbeidValues.biDiagnoser,
+        folkeRegistertAdresseErBrakkeEllerTilsvarende = sykmeldingUnderArbeidValues.folkeRegistertAdresseErBrakkeEllerTilsvarende,
     )
 }
 

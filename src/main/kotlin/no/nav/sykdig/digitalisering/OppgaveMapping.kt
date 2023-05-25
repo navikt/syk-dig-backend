@@ -54,6 +54,7 @@ private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues = OppgaveV
         )
     },
     perioder = this.sykmelding.perioder?.map(Periode::mapToPeriodeValue),
+    folkeRegistertAdresseErBrakkeEllerTilsvarende = this.utenlandskSykmelding?.folkeRegistertAdresseErBrakkeEllerTilsvarende ?: false,
 )
 
 private fun Periode.mapToPeriodeValue(): PeriodeValue {

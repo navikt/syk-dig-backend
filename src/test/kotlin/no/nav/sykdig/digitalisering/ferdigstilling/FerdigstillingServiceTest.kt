@@ -97,6 +97,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             ),
             hovedDiagnose = DiagnoseInput("A070", "ICD10"),
             biDiagnoser = emptyList(),
+            folkeRegistertAdresseErBrakkeEllerTilsvarende = true,
         )
 
         val sykmeldt = Person(
@@ -164,6 +165,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
+            folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
         )
 
         val person = Person(
@@ -258,6 +260,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
+            folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
         )
 
         val person = Person(
@@ -315,6 +318,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             ),
             hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
             biDiagnoser = emptyList(),
+            folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
         )
 
         val person = Person(
