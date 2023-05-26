@@ -132,6 +132,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             perioder,
             "scanning",
             null,
+            "Fornavn Etternavn",
         )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
     }

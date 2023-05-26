@@ -51,6 +51,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
+        sykmeldtNavn: String?,
     ) {
         oppdaterJournalpost(
             landAlpha3 = landAlpha3,
@@ -61,6 +62,7 @@ class DokarkivClient(
             perioder = perioder,
             source = source,
             avvisningsGrunn = avvisningsGrunn,
+            sykmeldtNavn = sykmeldtNavn,
         )
         ferdigstillJournalpost(
             enhet = enhet,
@@ -79,13 +81,14 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
+        sykmeldtNavn: String?,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn)
+        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, sykmeldtNavn)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -135,6 +138,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
+        sykmeldtNavn: String?,
     ): OppdaterJournalpostRequest {
         if (source == "rina") {
             return OppdaterJournalpostRequest(
@@ -157,7 +161,7 @@ class DokarkivClient(
             return OppdaterJournalpostRequest(
                 tema = "SYK",
                 avsenderMottaker = AvsenderMottaker(
-                    navn = source,
+                    navn = sykmeldtNavn ?: source,
                     land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                 ),
                 bruker = Bruker(
@@ -174,7 +178,7 @@ class DokarkivClient(
         } else {
             return OppdaterJournalpostRequest(
                 avsenderMottaker = AvsenderMottaker(
-                    navn = if (landAlpha3 != null) { findCountryName(landAlpha3) } else { source },
+                    navn = if (landAlpha3 != null) { findCountryName(landAlpha3) } else { sykmeldtNavn },
                     land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                 ),
                 bruker = Bruker(

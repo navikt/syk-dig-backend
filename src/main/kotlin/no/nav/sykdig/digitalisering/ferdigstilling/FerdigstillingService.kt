@@ -6,6 +6,7 @@ import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmeldi
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.logger
 import no.nav.sykdig.model.OppgaveDbModel
@@ -50,6 +51,7 @@ class FerdigstillingService(
                 perioder = receivedSykmelding.sykmelding.perioder,
                 source = oppgave.source,
                 avvisningsGrunn = null,
+                sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
@@ -89,6 +91,7 @@ class FerdigstillingService(
                 perioder = null,
                 source = oppgave.source,
                 avvisningsGrunn = avvisningsGrunn,
+                sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
             )
         }
     }
