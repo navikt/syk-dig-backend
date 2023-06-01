@@ -50,6 +50,7 @@ class SykDigOppgaveService(
         enhetId: String,
         sykmeldt: Person,
         avvisningsgrunn: Avvisingsgrunn,
+        avvisningsgrunnAnnet: String?,
     ) {
         val sykmelding = oppgaveRepository.getLastSykmelding(oppgave.oppgaveId)
         oppgaveRepository.ferdigstillAvvistOppgave(oppgave, navEpost, sykmelding, avvisningsgrunn)
@@ -57,7 +58,7 @@ class SykDigOppgaveService(
             enhet = enhetId,
             oppgave = oppgave,
             sykmeldt = sykmeldt,
-            avvisningsGrunn = mapAvvisningsgrunn(avvisningsgrunn),
+            avvisningsGrunn = mapAvvisningsgrunn(avvisningsgrunn, avvisningsgrunnAnnet),
         )
     }
 
