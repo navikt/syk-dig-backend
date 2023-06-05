@@ -143,6 +143,7 @@ class DigitaliseringsoppgaveDataFetcher(
         @InputArgument oppgaveId: String,
         @InputArgument avvisningsgrunn: Avvisingsgrunn,
         @InputArgument enhetId: String,
+        @InputArgument avvisningsgrunnAnnet: String?,
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveStatus {
         val navEpost: String = dfe.graphQlContext.get("username")
@@ -154,6 +155,7 @@ class DigitaliseringsoppgaveDataFetcher(
             navEpost = navEpost,
             enhetId = enhetId,
             avvisningsgrunn = avvisningsgrunn,
+            avvisningsgrunnAnnet = avvisningsgrunnAnnet,
         )
 
         return DigitaliseringsoppgaveStatus(

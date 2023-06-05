@@ -86,6 +86,7 @@ class DigitaliseringsoppgaveService(
         navEpost: String,
         enhetId: String,
         avvisningsgrunn: Avvisingsgrunn,
+        avvisningsgrunnAnnet: String?,
     ): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
@@ -95,10 +96,10 @@ class DigitaliseringsoppgaveService(
 
         val opprinneligBeskrivelse = gosysService.hentOppgave(oppgaveId, oppgave.sykmeldingId.toString()).beskrivelse
 
-        sykDigOppgaveService.ferdigstillAvvistOppgave(oppgave, navEpost, enhetId, sykmeldt, avvisningsgrunn)
+        sykDigOppgaveService.ferdigstillAvvistOppgave(oppgave, navEpost, enhetId, sykmeldt, avvisningsgrunn, avvisningsgrunnAnnet)
 
         val oppgaveBeskrivelse = lagOppgavebeskrivelse(
-            avvisningsgrunn = mapAvvisningsgrunn(avvisningsgrunn),
+            avvisningsgrunn = mapAvvisningsgrunn(avvisningsgrunn, avvisningsgrunnAnnet),
             opprinneligBeskrivelse = opprinneligBeskrivelse,
             navIdent = navIdent,
         )
@@ -123,7 +124,7 @@ class DigitaliseringsoppgaveService(
     }
 }
 
-fun mapAvvisningsgrunn(avvisningsgrunn: Avvisingsgrunn): String {
+fun mapAvvisningsgrunn(avvisningsgrunn: Avvisingsgrunn, avvisningsgrunnAnnet: String?): String {
     return when (avvisningsgrunn) {
         Avvisingsgrunn.MANGLENDE_DIAGNOSE -> "Det mangler diagnose"
         Avvisingsgrunn.MANGLENDE_PERIODE_ELLER_SLUTTDATO -> "Mangler periode eller sluttdato"
@@ -132,5 +133,7 @@ fun mapAvvisningsgrunn(avvisningsgrunn: Avvisingsgrunn): String {
         Avvisingsgrunn.TILBAKEDATERT_SYKMELDING -> "Sykmeldingen er tilbakedatert"
         Avvisingsgrunn.RISIKOSAK -> "Risikosak"
         Avvisingsgrunn.FOR_LANG_PERIODE -> "Sykmeldingen har for lang periode"
+        Avvisingsgrunn.BASERT_PAA_TELEFONKONTAKT -> "Sykmelding basert på telefonkontakt"
+        Avvisingsgrunn.ANNET -> avvisningsgrunnAnnet ?: throw RuntimeException("Avvisningsgrunn Annet er null")
     }
 }

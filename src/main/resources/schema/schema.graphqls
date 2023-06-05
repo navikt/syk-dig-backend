@@ -22,6 +22,7 @@ type Mutation {
         oppgaveId: String!
         enhetId: String!
         avvisningsgrunn: Avvisingsgrunn!
+        avvisningsgrunnAnnet: String
     ): DigitaliseringsoppgaveStatus
 
     dokument(

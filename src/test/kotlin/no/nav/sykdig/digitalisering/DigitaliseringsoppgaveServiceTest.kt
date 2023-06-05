@@ -78,14 +78,14 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
         status = Oppgavestatus.OPPRETTET,
         behandlesAvApplikasjon = "SMM",
         tilordnetRessurs = "A123456",
-        beskrivelse = null,
+        beskrivelse = "Dette var ikkje bra",
     )
 
     val excpetedAvvisingsgrunn = Avvisingsgrunn.MANGLENDE_DIAGNOSE
 
     @Test
     fun testAvvisOk() {
-        val oppgave = oppgaveMock.copy(oppgaveId = "2", sykmeldingId = UUID.randomUUID())
+        val oppgave = oppgaveMock.copy(oppgaveId = "3", sykmeldingId = UUID.randomUUID())
         oppgaveRepository.lagreOppgave(oppgave)
         Mockito.`when`(gosysService.hentOppgave(oppgave.oppgaveId, oppgave.sykmeldingId.toString())).thenAnswer {
             oppgaveResponseMock
@@ -110,6 +110,7 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
             "Z123456@trygdeetaten.no",
             "0393",
             excpetedAvvisingsgrunn,
+            null,
         )
         val lagretOppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
 
@@ -147,6 +148,85 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
                 "Z123456@trygdeetaten.no",
                 "0393",
                 excpetedAvvisingsgrunn,
+                null,
+            )
+        }
+
+        val oppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
+
+        assertNull(oppgave.oppgaveDbModel.ferdigstilt)
+    }
+
+    @Test
+    fun testAvvisAnnet() {
+        val oppgave = oppgaveMock.copy(oppgaveId = "2", sykmeldingId = UUID.randomUUID())
+        oppgaveRepository.lagreOppgave(oppgave)
+        Mockito.`when`(gosysService.hentOppgave(oppgave.oppgaveId, oppgave.sykmeldingId.toString())).thenAnswer {
+            oppgaveResponseMock
+        }
+
+        val excpetedAvvisingsgrunnAnnet = Avvisingsgrunn.ANNET
+
+        Mockito.`when`(metricRegister.AVVIST_SENDT_TIL_GOSYS).thenAnswer {
+            SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
+        }
+        Mockito.`when`(personService.hentPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
+            Person(
+                fnr = "20086600138",
+                navn = Navn("Fornavn", null, "Etternavn"),
+                aktorId = "aktorid",
+                bostedsadresse = null,
+                oppholdsadresse = null,
+                fodselsdato = LocalDate.of(1980, 5, 5),
+            )
+        }
+        val avvistOppgave = digitaliseringsoppgaveService.avvisOppgave(
+            oppgave.oppgaveId,
+            "Z123456",
+            "Z123456@trygdeetaten.no",
+            "0393",
+            excpetedAvvisingsgrunnAnnet,
+            "Feil dato",
+        )
+        val lagretOppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
+
+        assertNotNull(lagretOppgave.oppgaveDbModel.ferdigstilt)
+        assertEquals(avvistOppgave.oppgaveDbModel.ferdigstilt, lagretOppgave.oppgaveDbModel.ferdigstilt)
+    }
+
+    @Test
+    fun testAvvisAnnetRollbackVedFeil() {
+        oppgaveRepository.lagreOppgave(oppgaveMock)
+
+        val excpetedAvvisingsgrunnAnnet = Avvisingsgrunn.ANNET
+
+        Mockito.`when`(gosysService.hentOppgave(oppgaveId, sykmeldingId.toString())).thenAnswer {
+            oppgaveResponseMock
+        }
+        Mockito.`when`(gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString())).thenThrow(RuntimeException("Real bad error"))
+
+        Mockito.`when`(metricRegister.AVVIST_SENDT_TIL_GOSYS).thenAnswer {
+            SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
+        }
+        Mockito.`when`(personService.hentPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
+            Person(
+                fnr = "20086600138",
+                navn = Navn("Fornavn", null, "Etternavn"),
+                aktorId = "aktorid",
+                bostedsadresse = null,
+                oppholdsadresse = null,
+                fodselsdato = LocalDate.of(1980, 5, 5),
+            )
+        }
+
+        assertThrows<RuntimeException> {
+            digitaliseringsoppgaveService.avvisOppgave(
+                oppgaveMock.oppgaveId,
+                "Z123456",
+                "Z123456@trygdeetaten.no",
+                "0393",
+                excpetedAvvisingsgrunnAnnet,
+                null,
             )
         }
 
