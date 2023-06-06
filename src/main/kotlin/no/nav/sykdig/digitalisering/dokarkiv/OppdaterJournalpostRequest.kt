@@ -2,7 +2,6 @@ package no.nav.sykdig.digitalisering.dokarkiv
 
 data class OppdaterJournalpostRequest(
     val tema: String = "SYM",
-    val avsenderMottaker: AvsenderMottaker,
     val bruker: Bruker,
     val sak: Sak = Sak(),
     val tittel: String,
@@ -12,12 +11,6 @@ data class OppdaterJournalpostRequest(
 data class OppdaterDokumentRequest(
     val dokumenter: List<DokumentInfo>,
 )
-
-data class AvsenderMottaker(
-    val navn: String?,
-    val land: String?,
-)
-
 data class Bruker(
     val id: String,
     val idType: String = "FNR",
