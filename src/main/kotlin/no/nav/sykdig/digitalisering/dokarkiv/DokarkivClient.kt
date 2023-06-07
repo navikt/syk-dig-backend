@@ -7,7 +7,6 @@ import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
 import no.nav.sykdig.logger
 import no.nav.sykdig.objectMapper
-import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -28,7 +27,6 @@ class DokarkivClient(
     private val dokarkivRestTemplate: RestTemplate,
 ) {
     val log = logger()
-    val securelog = securelog()
 
     fun updateDocument(
         journalpostid: String,
@@ -100,7 +98,6 @@ class DokarkivClient(
         headers["Nav-Callid"] = sykmeldingId
 
         val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, orginalAvsenderMottaker, sykmeldtNavn)
-        securelog.info("dokakriv body: ${objectMapper.writeValueAsString(body)}")
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
