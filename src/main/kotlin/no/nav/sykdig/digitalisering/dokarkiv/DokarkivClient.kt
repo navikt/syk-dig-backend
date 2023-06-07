@@ -156,7 +156,7 @@ class DokarkivClient(
         when (source) {
             "rina" -> {
                 return OppdaterJournalpostRequest(
-                    avsenderMottakerRequest = createAvsenderMottaker(
+                    avsenderMottaker = createAvsenderMottaker(
                         orginalAvsenderMottaker = orginalAvsenderMottaker,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                         source = source,
@@ -178,7 +178,7 @@ class DokarkivClient(
             "navno" -> {
                 return OppdaterJournalpostRequest(
                     tema = "SYK",
-                    avsenderMottakerRequest = createAvsenderMottaker(
+                    avsenderMottaker = createAvsenderMottaker(
                         orginalAvsenderMottaker = orginalAvsenderMottaker,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                         source = source,
@@ -199,7 +199,7 @@ class DokarkivClient(
             }
             else -> {
                 return OppdaterJournalpostRequest(
-                    avsenderMottakerRequest = createAvsenderMottaker(
+                    avsenderMottaker = createAvsenderMottaker(
                         orginalAvsenderMottaker = orginalAvsenderMottaker,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                         source = source,
