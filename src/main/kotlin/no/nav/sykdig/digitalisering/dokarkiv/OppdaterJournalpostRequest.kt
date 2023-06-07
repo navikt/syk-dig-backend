@@ -2,7 +2,7 @@ package no.nav.sykdig.digitalisering.dokarkiv
 
 data class OppdaterJournalpostRequest(
     val tema: String = "SYM",
-    val avsenderMottakerRequest: AvsenderMottakerRequest,
+    val avsenderMottaker: AvsenderMottakerRequest,
     val bruker: Bruker,
     val sak: Sak = Sak(),
     val tittel: String,
