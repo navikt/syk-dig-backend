@@ -214,11 +214,23 @@ class DokarkivClient(
         source: String,
     ): AvsenderMottakerRequest {
         return AvsenderMottakerRequest(
-            navn = orginalAvsenderMottaker.navn ?: source,
+            navn = mapNavn(orginalAvsenderMottaker, land, source),
             id = orginalAvsenderMottaker.id,
             idType = mapidType(orginalAvsenderMottaker.type),
             land = land,
         )
+    }
+
+    fun mapNavn(orginalAvsenderMottaker: AvsenderMottaker,
+                land: String?,
+                source: String): String? {
+        return if(orginalAvsenderMottaker.navn.isNullOrBlank()) {
+            source
+        } else if(orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR  ) {
+            null
+        } else {
+            orginalAvsenderMottaker.navn
+        }
     }
 
     fun mapidType(orginalAvsenderMottakerIdType: AvsenderMottakerIdType?): IdType? {

@@ -5,9 +5,9 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
         journalpost(journalpostId: ${"$"}id) {
             journalstatus
             avsenderMottaker {
-                id, 
-                type, 
-                navn, 
+                id 
+                type 
+                navn 
                 land
             }
         }
