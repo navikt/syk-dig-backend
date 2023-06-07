@@ -158,6 +158,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             "scanning",
             null,
             journalpost.journalpost?.avsenderMottaker!!,
+            "Fornavn Etternavn",
         )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
     }

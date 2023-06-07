@@ -58,6 +58,7 @@ class DokarkivClient(
         source: String,
         avvisningsGrunn: String?,
         orginalAvsenderMottaker: AvsenderMottaker,
+        sykmeldtNavn: String?,
     ) {
         oppdaterJournalpost(
             landAlpha3 = landAlpha3,
@@ -69,6 +70,7 @@ class DokarkivClient(
             source = source,
             avvisningsGrunn = avvisningsGrunn,
             orginalAvsenderMottaker = orginalAvsenderMottaker,
+            sykmeldtNavn = sykmeldtNavn,
         )
         ferdigstillJournalpost(
             enhet = enhet,
@@ -88,13 +90,14 @@ class DokarkivClient(
         source: String,
         avvisningsGrunn: String?,
         orginalAvsenderMottaker: AvsenderMottaker,
+        sykmeldtNavn: String?,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, orginalAvsenderMottaker)
+        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, orginalAvsenderMottaker, sykmeldtNavn)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -145,6 +148,7 @@ class DokarkivClient(
         source: String,
         avvisningsGrunn: String?,
         orginalAvsenderMottaker: AvsenderMottaker,
+        sykmeldtNavn: String?,
     ): OppdaterJournalpostRequest {
         when (source) {
             "rina" -> {
@@ -153,6 +157,7 @@ class DokarkivClient(
                         orginalAvsenderMottaker = orginalAvsenderMottaker,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                         source = source,
+                        sykmeldtNavn = sykmeldtNavn,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -173,6 +178,7 @@ class DokarkivClient(
                         orginalAvsenderMottaker = orginalAvsenderMottaker,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                         source = source,
+                        sykmeldtNavn = sykmeldtNavn,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -192,6 +198,7 @@ class DokarkivClient(
                         orginalAvsenderMottaker = orginalAvsenderMottaker,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                         source = source,
+                        sykmeldtNavn = sykmeldtNavn,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -212,22 +219,26 @@ class DokarkivClient(
         orginalAvsenderMottaker: AvsenderMottaker,
         land: String?,
         source: String,
+        sykmeldtNavn: String?,
     ): AvsenderMottakerRequest {
         return AvsenderMottakerRequest(
-            navn = mapNavn(orginalAvsenderMottaker, land, source),
+            navn = mapNavn(orginalAvsenderMottaker, land, source, sykmeldtNavn),
             id = orginalAvsenderMottaker.id,
             idType = mapidType(orginalAvsenderMottaker.type),
             land = land,
         )
     }
 
-    fun mapNavn(orginalAvsenderMottaker: AvsenderMottaker,
-                land: String?,
-                source: String): String? {
-        return if(orginalAvsenderMottaker.navn.isNullOrBlank()) {
+    fun mapNavn(
+        orginalAvsenderMottaker: AvsenderMottaker,
+        land: String?,
+        source: String,
+        sykmeldtNavn: String?,
+    ): String? {
+        return if (orginalAvsenderMottaker.navn.isNullOrBlank()) {
             source
-        } else if(orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR  ) {
-            null
+        } else if (orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR) {
+            sykmeldtNavn
         } else {
             orginalAvsenderMottaker.navn
         }
