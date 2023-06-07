@@ -20,7 +20,6 @@ import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import no.nav.sykdig.securelog
 
 @Component
 class DokarkivClient(
@@ -99,7 +98,6 @@ class DokarkivClient(
         headers["Nav-Callid"] = sykmeldingId
 
         val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, orginalAvsenderMottaker, sykmeldtNavn)
-        securelog().info("dokakriv body: ${objectMapper.writeValueAsString(body)}")
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -160,6 +158,7 @@ class DokarkivClient(
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                         source = source,
                         sykmeldtNavn = sykmeldtNavn,
+                        sykmeldtFnr = fnr,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -181,6 +180,7 @@ class DokarkivClient(
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                         source = source,
                         sykmeldtNavn = sykmeldtNavn,
+                        sykmeldtFnr = fnr,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -201,6 +201,7 @@ class DokarkivClient(
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                         source = source,
                         sykmeldtNavn = sykmeldtNavn,
+                        sykmeldtFnr = fnr,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -222,13 +223,25 @@ class DokarkivClient(
         land: String?,
         source: String,
         sykmeldtNavn: String?,
+        sykmeldtFnr: String,
     ): AvsenderMottakerRequest {
         return AvsenderMottakerRequest(
             navn = mapNavn(orginalAvsenderMottaker, land, source, sykmeldtNavn),
-            id = orginalAvsenderMottaker.id,
+            id = mapId(orginalAvsenderMottaker, sykmeldtFnr),
             idType = mapidType(orginalAvsenderMottaker.type),
             land = land,
         )
+    }
+
+    fun mapId(
+        orginalAvsenderMottaker: AvsenderMottaker,
+        sykmeldtFnr: String,
+    ): String? {
+        return if (mapidType(orginalAvsenderMottaker.type) == IdType.FNR) {
+            sykmeldtFnr
+        } else {
+            orginalAvsenderMottaker.id
+        }
     }
 
     fun mapNavn(
@@ -246,13 +259,13 @@ class DokarkivClient(
         }
     }
 
-    fun mapidType(orginalAvsenderMottakerIdType: AvsenderMottakerIdType?): IdType? {
+    fun mapidType(orginalAvsenderMottakerIdType: AvsenderMottakerIdType?): IdType {
         return when (orginalAvsenderMottakerIdType) {
             AvsenderMottakerIdType.FNR -> IdType.FNR
             AvsenderMottakerIdType.HPRNR -> IdType.HPRNR
             AvsenderMottakerIdType.ORGNR -> IdType.ORGNR
             AvsenderMottakerIdType.UTL_ORG -> IdType.UTL_ORG
-            else -> null
+            else -> IdType.FNR
         }
     }
 
