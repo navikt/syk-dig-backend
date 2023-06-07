@@ -20,6 +20,7 @@ import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import no.nav.sykdig.securelog
 
 @Component
 class DokarkivClient(
@@ -98,6 +99,7 @@ class DokarkivClient(
         headers["Nav-Callid"] = sykmeldingId
 
         val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, orginalAvsenderMottaker, sykmeldtNavn)
+        securelog().info("dokakriv body: ${objectMapper.writeValueAsString(body)}")
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -235,12 +237,12 @@ class DokarkivClient(
         source: String,
         sykmeldtNavn: String?,
     ): String? {
-        return if (orginalAvsenderMottaker.navn.isNullOrBlank()) {
-            source
-        } else if (orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR) {
+        return if (!orginalAvsenderMottaker.navn.isNullOrBlank()) {
+            orginalAvsenderMottaker.navn
+        } else if (orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR && sykmeldtNavn != null) {
             sykmeldtNavn
         } else {
-            orginalAvsenderMottaker.navn
+            source
         }
     }
 
