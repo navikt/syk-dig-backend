@@ -19,6 +19,9 @@ import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
+import no.nav.sykdig.digitalisering.saf.graphql.Journalpost
+import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
+import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
@@ -70,8 +73,15 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val sykmeldingId = UUID.randomUUID()
         val journalpostId = "9898"
         val dokumentInfoId = "111"
-        Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpostId)).thenAnswer { false }
-        Mockito.`when`(safJournalpostGraphQlClient.hentAvvsenderMottar(journalpostId)).thenAnswer { AvsenderMottaker(navn = "Fornavn Etternavn") }
+        val journalpost = SafQueryJournalpost(
+            journalpost = Journalpost(
+                journalstatus = Journalstatus.JOURNALFOERT,
+                avsenderMottaker = AvsenderMottaker(navn = "Fornavn Etternavn"),
+            ),
+        )
+        Mockito.`when`(safJournalpostGraphQlClient.hentJournalpost(journalpostId)).thenAnswer { journalpost }
+        Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpost)).thenAnswer { false }
+        Mockito.`when`(safJournalpostGraphQlClient.hentAvvsenderMottar(journalpost)).thenAnswer { AvsenderMottaker(navn = "Fornavn Etternavn") }
 
         val perioder = listOf(
             Periode(

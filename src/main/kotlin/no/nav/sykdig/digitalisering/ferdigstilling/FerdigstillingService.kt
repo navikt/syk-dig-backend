@@ -37,10 +37,11 @@ class FerdigstillingService(
             journalpostId = oppgave.journalpostId,
             opprettet = oppgave.opprettet.toLocalDateTime(),
         )
-        if (safJournalpostGraphQlClient.erFerdigstilt(oppgave.journalpostId)) {
+        val journalpost = safJournalpostGraphQlClient.hentJournalpost(oppgave.journalpostId)
+        if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
-            val hentAvvsenderMottar = safJournalpostGraphQlClient.hentAvvsenderMottar(oppgave.journalpostId)
+            val hentAvvsenderMottar = safJournalpostGraphQlClient.hentAvvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
                 landAlpha3 = validatedValues.skrevetLand,
                 fnr = sykmeldt.fnr,
@@ -78,10 +79,11 @@ class FerdigstillingService(
         avvisningsGrunn: String,
     ) {
         requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
-        if (safJournalpostGraphQlClient.erFerdigstilt(oppgave.journalpostId)) {
+        val journalpost = safJournalpostGraphQlClient.hentJournalpost(oppgave.journalpostId)
+        if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
-            val hentAvvsenderMottar = safJournalpostGraphQlClient.hentAvvsenderMottar(oppgave.journalpostId)
+            val hentAvvsenderMottar = safJournalpostGraphQlClient.hentAvvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
                 landAlpha3 = null,
                 fnr = sykmeldt.fnr,

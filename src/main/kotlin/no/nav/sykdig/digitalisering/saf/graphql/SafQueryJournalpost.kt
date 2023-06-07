@@ -1,38 +1,24 @@
 package no.nav.sykdig.digitalisering.saf.graphql
 
-const val SAF_QUERY_JOURNAL_STATUS = """
+const val SAF_QUERY_FIND_JOURNALPOST = """
     query FindJournalpost(${"$"}id: String!) {
         journalpost(journalpostId: ${"$"}id) {
             journalstatus
-        }
-    }
-"""
-
-const val SAF_QUERY_AVSENDER_MOTTAKER = """
-    query FindJournalpost(${"$"}id: String!) {
-        journalpost(journalpostId: ${"$"}id) {
             avsenderMottaker
         }
     }
 """
 
-data class SafQueryJournalAvsenderMottaker(
-    val journalpost: JournalpostAvsenderMottaker?,
+data class SafQueryJournalpost(
+    val journalpost: Journalpost?,
 )
-
-data class JournalpostAvsenderMottaker(
+data class Journalpost(
+    val journalstatus: Journalstatus?,
     val avsenderMottaker: AvsenderMottaker?,
 )
 
-data class SafQueryJournalStatus(
-    val journalpost: JournalpostStatus?,
-)
-data class JournalpostStatus(
-    val journalstatus: Journalstatus?,
-)
-
 data class AvsenderMottaker(
-    val navn: String,
+    val navn: String?,
 )
 
 enum class Journalstatus {

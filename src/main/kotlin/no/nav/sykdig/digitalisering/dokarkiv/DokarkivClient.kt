@@ -55,7 +55,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        avsenderNavn: String,
+        avsenderNavn: String?,
     ) {
         oppdaterJournalpost(
             landAlpha3 = landAlpha3,
@@ -85,7 +85,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        avsenderNavn: String,
+        avsenderNavn: String?,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -142,13 +142,13 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        avsenderNavn: String,
+        avsenderNavn: String?,
     ): OppdaterJournalpostRequest {
         when (source) {
             "rina" -> {
                 return OppdaterJournalpostRequest(
                     avsenderMottaker = AvsenderMottaker(
-                        navn = avsenderNavn,
+                        navn = avsenderNavn ?: source,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                     ),
                     bruker = Bruker(
@@ -167,7 +167,7 @@ class DokarkivClient(
                 return OppdaterJournalpostRequest(
                     tema = "SYK",
                     avsenderMottaker = AvsenderMottaker(
-                        navn = avsenderNavn,
+                        navn = avsenderNavn ?: source,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                     ),
                     bruker = Bruker(
@@ -185,7 +185,7 @@ class DokarkivClient(
             else -> {
                 return OppdaterJournalpostRequest(
                     avsenderMottaker = AvsenderMottaker(
-                        navn = avsenderNavn,
+                        navn = avsenderNavn ?: source,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                     ),
                     bruker = Bruker(
