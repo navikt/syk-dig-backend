@@ -19,6 +19,7 @@ import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
+import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
 import no.nav.sykdig.digitalisering.saf.graphql.Journalpost
 import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
@@ -76,12 +77,24 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val journalpost = SafQueryJournalpost(
             journalpost = Journalpost(
                 journalstatus = Journalstatus.JOURNALFOERT,
-                avsenderMottaker = AvsenderMottaker(navn = "Fornavn Etternavn"),
+                avsenderMottaker = AvsenderMottaker(
+                    id = "12345678910",
+                    navn = "Fornavn Etternavn",
+                    type = AvsenderMottakerIdType.FNR,
+                    land = null,
+                ),
             ),
         )
         Mockito.`when`(safJournalpostGraphQlClient.hentJournalpost(journalpostId)).thenAnswer { journalpost }
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpost)).thenAnswer { false }
-        Mockito.`when`(safJournalpostGraphQlClient.hentAvvsenderMottar(journalpost)).thenAnswer { AvsenderMottaker(navn = "Fornavn Etternavn") }
+        Mockito.`when`(safJournalpostGraphQlClient.hentAvvsenderMottar(journalpost)).thenAnswer {
+            AvsenderMottaker(
+                id = "12345678910",
+                navn = "Fornavn Etternavn",
+                type = AvsenderMottakerIdType.FNR,
+                land = null,
+            )
+        }
 
         val perioder = listOf(
             Periode(
@@ -144,7 +157,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             perioder,
             "scanning",
             null,
-            "Fornavn Etternavn",
+            journalpost.journalpost?.avsenderMottaker!!,
         )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
     }

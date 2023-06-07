@@ -52,7 +52,7 @@ class FerdigstillingService(
                 perioder = receivedSykmelding.sykmelding.perioder,
                 source = oppgave.source,
                 avvisningsGrunn = null,
-                avsenderNavn = hentAvvsenderMottar.navn,
+                orginalAvsenderMottaker = hentAvvsenderMottar,
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
@@ -94,7 +94,7 @@ class FerdigstillingService(
                 perioder = null,
                 source = oppgave.source,
                 avvisningsGrunn = avvisningsGrunn,
-                avsenderNavn = hentAvvsenderMottar.navn,
+                orginalAvsenderMottaker = hentAvvsenderMottar,
             )
         }
     }

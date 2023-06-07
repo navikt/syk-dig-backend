@@ -3,6 +3,8 @@ package no.nav.sykdig.digitalisering.dokarkiv
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.model.Periode
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
+import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
+import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
 import no.nav.sykdig.logger
 import no.nav.sykdig.objectMapper
 import org.springframework.beans.factory.annotation.Value
@@ -55,7 +57,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        avsenderNavn: String?,
+        orginalAvsenderMottaker: AvsenderMottaker,
     ) {
         oppdaterJournalpost(
             landAlpha3 = landAlpha3,
@@ -66,7 +68,7 @@ class DokarkivClient(
             perioder = perioder,
             source = source,
             avvisningsGrunn = avvisningsGrunn,
-            avsenderNavn = avsenderNavn,
+            orginalAvsenderMottaker = orginalAvsenderMottaker,
         )
         ferdigstillJournalpost(
             enhet = enhet,
@@ -85,14 +87,14 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        avsenderNavn: String?,
+        orginalAvsenderMottaker: AvsenderMottaker,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, avsenderNavn)
+        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, orginalAvsenderMottaker)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -142,14 +144,15 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        avsenderNavn: String?,
+        orginalAvsenderMottaker: AvsenderMottaker,
     ): OppdaterJournalpostRequest {
         when (source) {
             "rina" -> {
                 return OppdaterJournalpostRequest(
-                    avsenderMottaker = AvsenderMottaker(
-                        navn = avsenderNavn ?: source,
+                    avsenderMottakerRequest = createAvsenderMottaker(
+                        orginalAvsenderMottaker = orginalAvsenderMottaker,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                        source = source,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -166,9 +169,10 @@ class DokarkivClient(
             "navno" -> {
                 return OppdaterJournalpostRequest(
                     tema = "SYK",
-                    avsenderMottaker = AvsenderMottaker(
-                        navn = avsenderNavn ?: source,
+                    avsenderMottakerRequest = createAvsenderMottaker(
+                        orginalAvsenderMottaker = orginalAvsenderMottaker,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                        source = source,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -184,9 +188,10 @@ class DokarkivClient(
             }
             else -> {
                 return OppdaterJournalpostRequest(
-                    avsenderMottaker = AvsenderMottaker(
-                        navn = avsenderNavn ?: source,
+                    avsenderMottakerRequest = createAvsenderMottaker(
+                        orginalAvsenderMottaker = orginalAvsenderMottaker,
                         land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                        source = source,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -200,6 +205,29 @@ class DokarkivClient(
                     ),
                 )
             }
+        }
+    }
+
+    fun createAvsenderMottaker(
+        orginalAvsenderMottaker: AvsenderMottaker,
+        land: String?,
+        source: String,
+    ): AvsenderMottakerRequest {
+        return AvsenderMottakerRequest(
+            navn = orginalAvsenderMottaker.navn ?: source,
+            id = orginalAvsenderMottaker.id,
+            idType = mapidType(orginalAvsenderMottaker.type),
+            land = land,
+        )
+    }
+
+    fun mapidType(orginalAvsenderMottakerIdType: AvsenderMottakerIdType?): IdType? {
+        return when (orginalAvsenderMottakerIdType) {
+            AvsenderMottakerIdType.FNR -> IdType.FNR
+            AvsenderMottakerIdType.HPRNR -> IdType.HPRNR
+            AvsenderMottakerIdType.ORGNR -> IdType.ORGNR
+            AvsenderMottakerIdType.UTL_ORG -> IdType.UTL_ORG
+            else -> null
         }
     }
 
