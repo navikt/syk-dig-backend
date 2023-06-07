@@ -252,11 +252,13 @@ class DokarkivClient(
         land: String?,
         source: String,
         sykmeldtNavn: String?,
-    ): String {
+    ): String? {
         return if (!orginalAvsenderMottaker.navn.isNullOrBlank()) {
             orginalAvsenderMottaker.navn
         } else if (orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR && !sykmeldtNavn.isNullOrBlank()) {
             sykmeldtNavn
+        } else if (orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR && sykmeldtNavn.isNullOrBlank()) {
+            null
         } else {
             source
         }
