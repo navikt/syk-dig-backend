@@ -18,6 +18,7 @@ import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
+import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
@@ -69,7 +70,8 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val sykmeldingId = UUID.randomUUID()
         val journalpostId = "9898"
         val dokumentInfoId = "111"
-        Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt("9898")).thenAnswer { false }
+        Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpostId)).thenAnswer { false }
+        Mockito.`when`(safJournalpostGraphQlClient.hentAvvsenderMottar(journalpostId)).thenAnswer { AvsenderMottaker(navn = "Fornavn Etternavn") }
 
         val perioder = listOf(
             Periode(
@@ -127,7 +129,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             "12345678910",
             "2990",
             "111",
-            "9898",
+            journalpostId,
             sykmeldingId.toString(),
             perioder,
             "scanning",

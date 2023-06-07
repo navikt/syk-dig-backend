@@ -26,7 +26,11 @@ class DokarkivClient(
 ) {
     val log = logger()
 
-    fun updateDocument(journalpostid: String, documentId: String, tittel: String) {
+    fun updateDocument(
+        journalpostid: String,
+        documentId: String,
+        tittel: String,
+    ) {
         val oppaterDokumentRequest = OppdaterDokumentRequest(
             dokumenter = listOf(
                 DokumentInfo(
@@ -51,7 +55,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        sykmeldtNavn: String?,
+        avsenderNavn: String,
     ) {
         oppdaterJournalpost(
             landAlpha3 = landAlpha3,
@@ -62,7 +66,7 @@ class DokarkivClient(
             perioder = perioder,
             source = source,
             avvisningsGrunn = avvisningsGrunn,
-            sykmeldtNavn = sykmeldtNavn,
+            avsenderNavn = avsenderNavn,
         )
         ferdigstillJournalpost(
             enhet = enhet,
@@ -81,14 +85,14 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        sykmeldtNavn: String?,
+        avsenderNavn: String,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, sykmeldtNavn)
+        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, avsenderNavn)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -138,60 +142,64 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        sykmeldtNavn: String?,
+        avsenderNavn: String,
     ): OppdaterJournalpostRequest {
-        if (source == "rina") {
-            return OppdaterJournalpostRequest(
-                avsenderMottaker = AvsenderMottaker(
-                    navn = source,
-                    land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
-                ),
-                bruker = Bruker(
-                    id = fnr,
-                ),
-                tittel = createTittleRina(perioder, avvisningsGrunn),
-                dokumenter = listOf(
-                    DokumentInfo(
-                        dokumentInfoId = dokumentinfoId,
-                        tittel = createTittleRina(perioder, avvisningsGrunn),
+        when (source) {
+            "rina" -> {
+                return OppdaterJournalpostRequest(
+                    avsenderMottaker = AvsenderMottaker(
+                        navn = avsenderNavn,
+                        land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
                     ),
-                ),
-            )
-        } else if (source == "navno") {
-            return OppdaterJournalpostRequest(
-                tema = "SYK",
-                avsenderMottaker = AvsenderMottaker(
-                    navn = sykmeldtNavn ?: source,
-                    land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
-                ),
-                bruker = Bruker(
-                    id = fnr,
-                ),
-                tittel = createNavNoTittle(perioder, avvisningsGrunn),
-                dokumenter = listOf(
-                    DokumentInfo(
-                        dokumentInfoId = dokumentinfoId,
-                        tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                    bruker = Bruker(
+                        id = fnr,
                     ),
-                ),
-            )
-        } else {
-            return OppdaterJournalpostRequest(
-                avsenderMottaker = AvsenderMottaker(
-                    navn = if (landAlpha3 != null) { findCountryName(landAlpha3) } else { sykmeldtNavn },
-                    land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
-                ),
-                bruker = Bruker(
-                    id = fnr,
-                ),
-                tittel = createTittle(perioder, avvisningsGrunn),
-                dokumenter = listOf(
-                    DokumentInfo(
-                        dokumentInfoId = dokumentinfoId,
-                        tittel = createTittle(perioder, avvisningsGrunn),
+                    tittel = createTittleRina(perioder, avvisningsGrunn),
+                    dokumenter = listOf(
+                        DokumentInfo(
+                            dokumentInfoId = dokumentinfoId,
+                            tittel = createTittleRina(perioder, avvisningsGrunn),
+                        ),
                     ),
-                ),
-            )
+                )
+            }
+            "navno" -> {
+                return OppdaterJournalpostRequest(
+                    tema = "SYK",
+                    avsenderMottaker = AvsenderMottaker(
+                        navn = avsenderNavn,
+                        land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                    ),
+                    bruker = Bruker(
+                        id = fnr,
+                    ),
+                    tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                    dokumenter = listOf(
+                        DokumentInfo(
+                            dokumentInfoId = dokumentinfoId,
+                            tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                        ),
+                    ),
+                )
+            }
+            else -> {
+                return OppdaterJournalpostRequest(
+                    avsenderMottaker = AvsenderMottaker(
+                        navn = avsenderNavn,
+                        land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                    ),
+                    bruker = Bruker(
+                        id = fnr,
+                    ),
+                    tittel = createTittle(perioder, avvisningsGrunn),
+                    dokumenter = listOf(
+                        DokumentInfo(
+                            dokumentInfoId = dokumentinfoId,
+                            tittel = createTittle(perioder, avvisningsGrunn),
+                        ),
+                    ),
+                )
+            }
         }
     }
 
