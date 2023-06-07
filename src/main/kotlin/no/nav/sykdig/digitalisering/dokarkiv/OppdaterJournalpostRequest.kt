@@ -16,7 +16,7 @@ data class OppdaterDokumentRequest(
 data class AvsenderMottakerRequest(
     val id: String?,
     val idType: IdType?,
-    val navn: String?,
+    val navn: String,
     val land: String?,
 )
 
