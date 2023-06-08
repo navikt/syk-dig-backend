@@ -3,6 +3,8 @@ package no.nav.sykdig.digitalisering.dokarkiv
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.model.Periode
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
+import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
+import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
 import no.nav.sykdig.logger
 import no.nav.sykdig.objectMapper
 import org.springframework.beans.factory.annotation.Value
@@ -26,7 +28,11 @@ class DokarkivClient(
 ) {
     val log = logger()
 
-    fun updateDocument(journalpostid: String, documentId: String, tittel: String) {
+    fun updateDocument(
+        journalpostid: String,
+        documentId: String,
+        tittel: String,
+    ) {
         val oppaterDokumentRequest = OppdaterDokumentRequest(
             dokumenter = listOf(
                 DokumentInfo(
@@ -51,6 +57,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
+        orginalAvsenderMottaker: AvsenderMottaker,
         sykmeldtNavn: String?,
     ) {
         oppdaterJournalpost(
@@ -62,6 +69,7 @@ class DokarkivClient(
             perioder = perioder,
             source = source,
             avvisningsGrunn = avvisningsGrunn,
+            orginalAvsenderMottaker = orginalAvsenderMottaker,
             sykmeldtNavn = sykmeldtNavn,
         )
         ferdigstillJournalpost(
@@ -81,6 +89,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
+        orginalAvsenderMottaker: AvsenderMottaker,
         sykmeldtNavn: String?,
     ) {
         val headers = HttpHeaders()
@@ -88,7 +97,7 @@ class DokarkivClient(
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, sykmeldtNavn)
+        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, orginalAvsenderMottaker, sykmeldtNavn)
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
@@ -138,60 +147,127 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
+        orginalAvsenderMottaker: AvsenderMottaker,
         sykmeldtNavn: String?,
     ): OppdaterJournalpostRequest {
-        if (source == "rina") {
-            return OppdaterJournalpostRequest(
-                avsenderMottaker = AvsenderMottaker(
-                    navn = source,
-                    land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
-                ),
-                bruker = Bruker(
-                    id = fnr,
-                ),
-                tittel = createTittleRina(perioder, avvisningsGrunn),
-                dokumenter = listOf(
-                    DokumentInfo(
-                        dokumentInfoId = dokumentinfoId,
-                        tittel = createTittleRina(perioder, avvisningsGrunn),
+        when (source) {
+            "rina" -> {
+                return OppdaterJournalpostRequest(
+                    avsenderMottaker = createAvsenderMottaker(
+                        orginalAvsenderMottaker = orginalAvsenderMottaker,
+                        land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                        source = source,
+                        sykmeldtNavn = sykmeldtNavn,
+                        sykmeldtFnr = fnr,
                     ),
-                ),
-            )
-        } else if (source == "navno") {
-            return OppdaterJournalpostRequest(
-                tema = "SYK",
-                avsenderMottaker = AvsenderMottaker(
-                    navn = sykmeldtNavn ?: source,
-                    land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
-                ),
-                bruker = Bruker(
-                    id = fnr,
-                ),
-                tittel = createNavNoTittle(perioder, avvisningsGrunn),
-                dokumenter = listOf(
-                    DokumentInfo(
-                        dokumentInfoId = dokumentinfoId,
-                        tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                    bruker = Bruker(
+                        id = fnr,
                     ),
-                ),
-            )
+                    tittel = createTittleRina(perioder, avvisningsGrunn),
+                    dokumenter = listOf(
+                        DokumentInfo(
+                            dokumentInfoId = dokumentinfoId,
+                            tittel = createTittleRina(perioder, avvisningsGrunn),
+                        ),
+                    ),
+                )
+            }
+            "navno" -> {
+                return OppdaterJournalpostRequest(
+                    tema = "SYK",
+                    avsenderMottaker = createAvsenderMottaker(
+                        orginalAvsenderMottaker = orginalAvsenderMottaker,
+                        land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                        source = source,
+                        sykmeldtNavn = sykmeldtNavn,
+                        sykmeldtFnr = fnr,
+                    ),
+                    bruker = Bruker(
+                        id = fnr,
+                    ),
+                    tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                    dokumenter = listOf(
+                        DokumentInfo(
+                            dokumentInfoId = dokumentinfoId,
+                            tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                        ),
+                    ),
+                )
+            }
+            else -> {
+                return OppdaterJournalpostRequest(
+                    avsenderMottaker = createAvsenderMottaker(
+                        orginalAvsenderMottaker = orginalAvsenderMottaker,
+                        land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                        source = source,
+                        sykmeldtNavn = sykmeldtNavn,
+                        sykmeldtFnr = fnr,
+                    ),
+                    bruker = Bruker(
+                        id = fnr,
+                    ),
+                    tittel = createTittle(perioder, avvisningsGrunn),
+                    dokumenter = listOf(
+                        DokumentInfo(
+                            dokumentInfoId = dokumentinfoId,
+                            tittel = createTittle(perioder, avvisningsGrunn),
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+
+    fun createAvsenderMottaker(
+        orginalAvsenderMottaker: AvsenderMottaker,
+        land: String?,
+        source: String,
+        sykmeldtNavn: String?,
+        sykmeldtFnr: String,
+    ): AvsenderMottakerRequest {
+        return AvsenderMottakerRequest(
+            navn = mapNavn(orginalAvsenderMottaker, land, source, sykmeldtNavn),
+            id = mapId(orginalAvsenderMottaker, sykmeldtFnr),
+            idType = mapidType(orginalAvsenderMottaker.type),
+            land = land,
+        )
+    }
+
+    fun mapId(
+        orginalAvsenderMottaker: AvsenderMottaker,
+        sykmeldtFnr: String,
+    ): String? {
+        return if (mapidType(orginalAvsenderMottaker.type) == IdType.FNR) {
+            sykmeldtFnr
         } else {
-            return OppdaterJournalpostRequest(
-                avsenderMottaker = AvsenderMottaker(
-                    navn = if (landAlpha3 != null) { findCountryName(landAlpha3) } else { sykmeldtNavn },
-                    land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
-                ),
-                bruker = Bruker(
-                    id = fnr,
-                ),
-                tittel = createTittle(perioder, avvisningsGrunn),
-                dokumenter = listOf(
-                    DokumentInfo(
-                        dokumentInfoId = dokumentinfoId,
-                        tittel = createTittle(perioder, avvisningsGrunn),
-                    ),
-                ),
-            )
+            orginalAvsenderMottaker.id
+        }
+    }
+
+    fun mapNavn(
+        orginalAvsenderMottaker: AvsenderMottaker,
+        land: String?,
+        source: String,
+        sykmeldtNavn: String?,
+    ): String? {
+        return if (!orginalAvsenderMottaker.navn.isNullOrBlank()) {
+            orginalAvsenderMottaker.navn
+        } else if (orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR && !sykmeldtNavn.isNullOrBlank()) {
+            sykmeldtNavn
+        } else if (orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR && sykmeldtNavn.isNullOrBlank()) {
+            null
+        } else {
+            source
+        }
+    }
+
+    fun mapidType(orginalAvsenderMottakerIdType: AvsenderMottakerIdType?): IdType {
+        return when (orginalAvsenderMottakerIdType) {
+            AvsenderMottakerIdType.FNR -> IdType.FNR
+            AvsenderMottakerIdType.HPRNR -> IdType.HPRNR
+            AvsenderMottakerIdType.ORGNR -> IdType.ORGNR
+            AvsenderMottakerIdType.UTL_ORG -> IdType.UTL_ORG
+            else -> IdType.FNR
         }
     }
 

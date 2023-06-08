@@ -18,6 +18,11 @@ import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
+import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
+import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
+import no.nav.sykdig.digitalisering.saf.graphql.Journalpost
+import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
+import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
@@ -69,7 +74,27 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val sykmeldingId = UUID.randomUUID()
         val journalpostId = "9898"
         val dokumentInfoId = "111"
-        Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt("9898")).thenAnswer { false }
+        val journalpost = SafQueryJournalpost(
+            journalpost = Journalpost(
+                journalstatus = Journalstatus.JOURNALFOERT,
+                avsenderMottaker = AvsenderMottaker(
+                    id = "12345678910",
+                    navn = "Fornavn Etternavn",
+                    type = AvsenderMottakerIdType.FNR,
+                    land = null,
+                ),
+            ),
+        )
+        Mockito.`when`(safJournalpostGraphQlClient.hentJournalpost(journalpostId)).thenAnswer { journalpost }
+        Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpost)).thenAnswer { false }
+        Mockito.`when`(safJournalpostGraphQlClient.hentAvvsenderMottar(journalpost)).thenAnswer {
+            AvsenderMottaker(
+                id = "12345678910",
+                navn = "Fornavn Etternavn",
+                type = AvsenderMottakerIdType.FNR,
+                land = null,
+            )
+        }
 
         val perioder = listOf(
             Periode(
@@ -127,11 +152,12 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             "12345678910",
             "2990",
             "111",
-            "9898",
+            journalpostId,
             sykmeldingId.toString(),
             perioder,
             "scanning",
             null,
+            journalpost.journalpost?.avsenderMottaker!!,
             "Fornavn Etternavn",
         )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())

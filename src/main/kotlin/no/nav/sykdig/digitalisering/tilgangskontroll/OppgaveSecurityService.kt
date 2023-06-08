@@ -3,7 +3,6 @@ package no.nav.sykdig.digitalisering.tilgangskontroll
 import no.nav.sykdig.auditLogger.AuditLogger
 import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
-import no.nav.sykdig.logger
 import no.nav.sykdig.securelog
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -16,7 +15,6 @@ class OppgaveSecurityService(
 ) {
 
     companion object {
-        private val log = logger()
         private val securelog = securelog()
         private val auditlog = auditlog()
     }
