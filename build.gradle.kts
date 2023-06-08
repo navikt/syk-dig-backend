@@ -8,7 +8,7 @@ plugins {
     kotlin("jvm") version "1.8.21"
     kotlin("plugin.spring") version "1.8.21"
     id("com.netflix.dgs.codegen") version "5.10.0"
-    id("org.jlleitschuh.gradle.ktlint") version "11.3.2"
+    id("org.jlleitschuh.gradle.ktlint") version "11.4.0"
 }
 
 group = "no.nav.sykdig"
