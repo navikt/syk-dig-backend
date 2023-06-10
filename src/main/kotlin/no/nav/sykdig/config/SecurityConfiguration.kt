@@ -18,12 +18,15 @@ class SecurityConfiguration() {
                 .requestMatchers(HttpMethod.GET, "/internal/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/schema.json").permitAll()
                 .anyRequest().authenticated()
-                .and()
-                .oauth2ResourceServer()
-                .jwt()
         }
-            .headers().frameOptions().sameOrigin().and()
-            .csrf().disable()
+            .oauth2ResourceServer { it.jwt {} }
+            .headers { headersConfigurer ->
+                headersConfigurer.frameOptions { frameOptionsCustomizer ->
+                    frameOptionsCustomizer.sameOrigin()
+                }
+            }.csrf { csrfCustomizer ->
+                csrfCustomizer.disable()
+            }
             .build()
     }
 }
