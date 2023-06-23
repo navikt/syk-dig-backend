@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "3.1.0"
+    id("org.springframework.boot") version "3.1.1"
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm") version "1.8.22"
     kotlin("plugin.spring") version "1.8.22"
