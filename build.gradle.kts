@@ -8,7 +8,7 @@ plugins {
     kotlin("jvm") version "1.8.22"
     kotlin("plugin.spring") version "1.8.22"
     id("com.netflix.dgs.codegen") version "5.12.2"
-    id("org.jlleitschuh.gradle.ktlint") version "11.4.0"
+    id("org.jlleitschuh.gradle.ktlint") version "11.4.2"
     id("org.cyclonedx.bom") version "1.7.4"
 }
 
