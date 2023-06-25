@@ -1,5 +1,6 @@
 # syk-dig-backend
 [![Deploy to dev and prod](https://github.com/navikt/syk-dig-backend/actions/workflows/deploy.yml/badge.svg)](https://github.com/navikt/syk-dig-backend/actions/workflows/deploy.yml)
+
 This project contains the application code and infrastructure for syk-dig-backend
 
 ## Technologies used
