@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 class SafClient(
-    @Value("\${saf.url}") private val url: String,
+    @Value("\${saf.url}") private val safUrl: String,
     private val safRestTemplate: RestTemplate,
 ) {
     val log = logger()
@@ -33,13 +33,17 @@ class SafClient(
         headers["Nav-Consumer-Id"] = "syk-dig-backend"
 
         try {
-            val response = safRestTemplate.exchange(
-                "$url/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV",
-                HttpMethod.GET,
-                HttpEntity<Any>(headers),
-                ByteArray::class.java,
-            )
-            return response.body ?: throw RuntimeException("Tomt svar fra SAF for journalpostId $journalpostId")
+            if (validJournalpostIdOrDokumentInfoIdFormat(journalpostId, dokumentInfoId)) {
+                val response = safRestTemplate.exchange(
+                    "$safUrl/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV",
+                    HttpMethod.GET,
+                    HttpEntity<Any>(headers),
+                    ByteArray::class.java,
+                )
+                return response.body ?: throw RuntimeException("Tomt svar fra SAF for journalpostId $journalpostId")
+            } else {
+                throw RuntimeException("Ugyldig journalpostId: $journalpostId eller dokumentInfoId: $dokumentInfoId er på ugyldigformat")
+            }
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til journalpostId $journalpostId: ${e.message}")
@@ -51,6 +55,17 @@ class SafClient(
         } catch (e: HttpServerErrorException) {
             log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra SAF: ${e.message}", e)
             throw RuntimeException("HttpServerErrorException fra SAF")
+        }
+    }
+
+    fun validJournalpostIdOrDokumentInfoIdFormat(journalpostId: String, dokumentInfoId: String): Boolean {
+        return try {
+            journalpostId.toLongOrNull()
+            dokumentInfoId.toLongOrNull()
+            true
+        } catch (exception: Exception) {
+            log.error("Ugyldig journalpostId eller dokumentInfoId", exception)
+            false
         }
     }
 }
