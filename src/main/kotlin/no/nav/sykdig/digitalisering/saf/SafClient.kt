@@ -33,7 +33,7 @@ class SafClient(
         headers["Nav-Consumer-Id"] = "syk-dig-backend"
 
         try {
-            if (validJournalpostIdOrDokumentInfoIdFormat(journalpostId, dokumentInfoId)) {
+            if (journalpostId.toLongOrNull() != null && dokumentInfoId.toLongOrNull() != null) {
                 val response = safRestTemplate.exchange(
                     "$safUrl/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV",
                     HttpMethod.GET,
@@ -55,17 +55,6 @@ class SafClient(
         } catch (e: HttpServerErrorException) {
             log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra SAF: ${e.message}", e)
             throw RuntimeException("HttpServerErrorException fra SAF")
-        }
-    }
-
-    fun validJournalpostIdOrDokumentInfoIdFormat(journalpostId: String, dokumentInfoId: String): Boolean {
-        return try {
-            journalpostId.toLongOrNull()
-            dokumentInfoId.toLongOrNull()
-            true
-        } catch (exception: Exception) {
-            log.error("Ugyldig journalpostId eller dokumentInfoId", exception)
-            false
         }
     }
 }
