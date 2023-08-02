@@ -33,9 +33,23 @@ class SafClient(
         headers["Nav-Consumer-Id"] = "syk-dig-backend"
 
         try {
+            val validJournalpostId = try {
+                journalpostId.toLong()
+            }
+            catch (exception: Exception) {
+                throw RuntimeException("Ugyldig journalpostId: $journalpostId er på ugyldigformat")
+            }
+
+            val validDokumentInfoId = try {
+                journalpostId.toLong()
+            }
+            catch (exception: Exception) {
+                throw RuntimeException("Ugyldig dokumentInfoId: $dokumentInfoId er på ugyldigformat")
+            }
+
             if (journalpostId.toLongOrNull() != null && dokumentInfoId.toLongOrNull() != null) {
                 val response = safRestTemplate.exchange(
-                    "$safUrl/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV",
+                    "$safUrl/rest/hentdokument/$validJournalpostId/$validDokumentInfoId/ARKIV",
                     HttpMethod.GET,
                     HttpEntity<Any>(headers),
                     ByteArray::class.java,
