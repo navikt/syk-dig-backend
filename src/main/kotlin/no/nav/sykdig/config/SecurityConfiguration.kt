@@ -24,6 +24,8 @@ class SecurityConfiguration() {
                 headersConfigurer.frameOptions { frameOptionsCustomizer ->
                     frameOptionsCustomizer.sameOrigin()
                 }
+            }.csrf { csrfCustomizer ->
+                csrfCustomizer.disable()
             }
             .build()
     }
