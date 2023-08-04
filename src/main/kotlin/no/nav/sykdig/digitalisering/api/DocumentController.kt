@@ -59,7 +59,7 @@ class DocumentController(
                     sykmeldingId = oppgave.sykmeldingId.toString(),
                 )
             } catch (e: Exception) {
-                log.error("Noe gikk galt ved henting av pdf for oppgave med id $oppgaveId")
+                log.error("Noe gikk galt ved henting av pdf for oppgave med id $oppgaveId", e)
                 throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Noe gikk galt ved henting av pdf")
             }
         } else {
