@@ -78,8 +78,6 @@ spec:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: oppgave.prod-fss-pub.nais.io
-  ingresses:
-    - "https://syk-dig-backend.intern.nav.no"
   leaderElection: true
   secureLogs:
     enabled: true
