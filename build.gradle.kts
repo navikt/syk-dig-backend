@@ -4,7 +4,7 @@ import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
     id("org.springframework.boot") version "3.1.2"
-    id("io.spring.dependency-management") version "1.1.2"
+    id("io.spring.dependency-management") version "1.1.3"
     kotlin("jvm") version "1.9.0"
     kotlin("plugin.spring") version "1.9.0"
     id("com.netflix.dgs.codegen") version "5.12.4"
@@ -32,8 +32,8 @@ repositories {
 
 val postgresVersion = "42.6.0"
 val snakeYamlVersion = "2.1"
-val smCommonVersion = "1.0.6"
-val tokenSupportVersion = "3.1.0"
+val smCommonVersion = "1.0.14"
+val tokenSupportVersion = "3.1.2"
 val testContainersVersion = "1.18.3"
 val logstashLogbackEncoderVersion = "7.4"
 val javaJwtVersion = "4.4.0"
@@ -47,7 +47,7 @@ val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
-val graphqlDgsPlatformDependenciesVersion = "7.3.2"
+val graphqlDgsPlatformDependenciesVersion = "7.3.6"
 val logbacksyslog4jVersion = "1.0.0"
 
 dependencies {
