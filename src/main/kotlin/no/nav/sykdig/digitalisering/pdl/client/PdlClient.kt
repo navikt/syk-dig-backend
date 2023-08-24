@@ -43,7 +43,7 @@ class PdlClient(
                 throw RuntimeException("Fant ikke aktørid for person i PDL")
             }
 
-            log.info("Hentet person for $sykmeldingId")
+            log.info("Hentet person for sykmeldingId: $sykmeldingId")
             return pdlResponse
         } catch (e: Exception) {
             log.error("Noe gikk galt ved kall til PDL", e)
