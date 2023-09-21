@@ -7,6 +7,9 @@ updates:
     open-pull-requests-limit: 10
     ignore:
       - dependency-name: "org.glassfish.jaxb:jaxb-runtime"
+      - dependency-name: "com.netflix.graphql.dgs:graphql-dgs-platform-dependencies"
+      - dependency-name: "com.graphql-java:graphql-java"
+      - dependency-name: "com.netflix.dgs.codegen"      
     groups:
       dependencies:
         patterns:
