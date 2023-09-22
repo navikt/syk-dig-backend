@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "3.1.3"
+    id("org.springframework.boot") version "3.1.4"
     id("io.spring.dependency-management") version "1.1.3"
     kotlin("jvm") version "1.9.10"
     kotlin("plugin.spring") version "1.9.10"
@@ -37,7 +37,7 @@ val tokenSupportVersion = "3.1.5"
 val testContainersVersion = "1.19.0"
 val logstashLogbackEncoderVersion = "7.4"
 val javaJwtVersion = "4.4.0"
-val springBootResourceVersion = "3.1.3"
+val springBootResourceVersion = "3.1.4"
 val graphqlVersion = "20.2"
 val kafkaClientsVersion = "3.5.1"
 val syfoXmlCodegen = "1.0.4"
