@@ -3,12 +3,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "3.1.2"
+    id("org.springframework.boot") version "3.1.3"
     id("io.spring.dependency-management") version "1.1.3"
-    kotlin("jvm") version "1.9.0"
-    kotlin("plugin.spring") version "1.9.0"
+    kotlin("jvm") version "1.9.10"
+    kotlin("plugin.spring") version "1.9.10"
     id("com.netflix.dgs.codegen") version "5.12.4"
-    id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
+    id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
     id("org.cyclonedx.bom") version "1.7.4"
 }
 
@@ -31,18 +31,18 @@ repositories {
 }
 
 val postgresVersion = "42.6.0"
-val snakeYamlVersion = "2.1"
+val snakeYamlVersion = "2.2"
 val smCommonVersion = "1.0.14"
-val tokenSupportVersion = "3.1.2"
-val testContainersVersion = "1.18.3"
+val tokenSupportVersion = "3.1.5"
+val testContainersVersion = "1.19.0"
 val logstashLogbackEncoderVersion = "7.4"
 val javaJwtVersion = "4.4.0"
-val springBootResourceVersion = "3.1.2"
+val springBootResourceVersion = "3.1.3"
 val graphqlVersion = "20.2"
 val kafkaClientsVersion = "3.5.1"
 val syfoXmlCodegen = "1.0.4"
-val springSecurityWebVersion = "6.1.2"
-val okhttp3version = "4.10.0"
+val springSecurityWebVersion = "6.1.4"
+val okhttp3version = "4.11.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
