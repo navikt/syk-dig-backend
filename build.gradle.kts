@@ -1,5 +1,4 @@
 import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {

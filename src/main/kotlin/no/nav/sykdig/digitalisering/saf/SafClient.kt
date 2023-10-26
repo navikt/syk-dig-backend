@@ -35,15 +35,13 @@ class SafClient(
         try {
             val validJournalpostId = try {
                 journalpostId.toLong()
-            }
-            catch (exception: Exception) {
+            } catch (exception: Exception) {
                 throw RuntimeException("Ugyldig journalpostId: $journalpostId er på ugyldigformat")
             }
 
             val validDokumentInfoId = try {
                 dokumentInfoId.toLong()
-            }
-            catch (exception: Exception) {
+            } catch (exception: Exception) {
                 throw RuntimeException("Ugyldig dokumentInfoId: $dokumentInfoId er på ugyldigformat")
             }
 
