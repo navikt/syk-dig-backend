@@ -4,6 +4,7 @@ scalar UUID
 
 type Query {
     oppgave(oppgaveId: String!): DigitaliseringsoppgaveResult
+    journalpost(id: String!): Journalpost!
 }
 
 type Mutation {

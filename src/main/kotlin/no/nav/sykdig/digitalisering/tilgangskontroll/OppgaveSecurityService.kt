@@ -18,6 +18,7 @@ class OppgaveSecurityService(
         private val securelog = securelog()
         private val auditlog = auditlog()
     }
+
     fun hasAccessToOppgave(oppgaveId: String): Boolean {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         if (!syfoTilgangskontrollOboClient.sjekkTilgangVeileder(oppgave.fnr)) {
