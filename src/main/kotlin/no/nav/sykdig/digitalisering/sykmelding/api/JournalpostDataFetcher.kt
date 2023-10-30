@@ -17,12 +17,12 @@ class JournalpostDataFetcher(
     // @PreAuthorize("@journalpostOppgaveService.hasAccessToJournalpost(#journalpostId)")
     @DgsQuery(field = DgsConstants.QUERY.Journalpost)
     fun getJournalpostById(
-        @InputArgument journalpostId: String,
+        @InputArgument id: String,
         dfe: DataFetchingEnvironment,
     ): Journalpost {
-        val journalpost = safGraphQlClient.getJournalpost(journalpostId)
+        val journalpost = safGraphQlClient.getJournalpost(id)
         return Journalpost(
-            journalpostId,
+            id,
             journalpost.journalpost?.journalstatus?.name ?: "MANGLER_STATUS",
         )
     }

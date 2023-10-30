@@ -1,4 +1,4 @@
-type Journalpost{
+type Journalpost {
     journalpostId: String!
     journalstatus: String!
 }
