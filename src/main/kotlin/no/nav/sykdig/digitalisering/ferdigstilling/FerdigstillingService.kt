@@ -38,7 +38,7 @@ class FerdigstillingService(
             journalpostId = oppgave.journalpostId,
             opprettet = oppgave.opprettet.toLocalDateTime(),
         )
-        val journalpost = safJournalpostGraphQlClient.hentJournalpost(oppgave.journalpostId)
+        val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
@@ -81,7 +81,7 @@ class FerdigstillingService(
         avvisningsGrunn: String,
     ) {
         requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
-        val journalpost = safJournalpostGraphQlClient.hentJournalpost(oppgave.journalpostId)
+        val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {

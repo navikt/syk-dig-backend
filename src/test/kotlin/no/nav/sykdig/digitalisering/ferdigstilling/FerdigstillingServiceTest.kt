@@ -85,7 +85,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 ),
             ),
         )
-        Mockito.`when`(safJournalpostGraphQlClient.hentJournalpost(journalpostId)).thenAnswer { journalpost }
+        Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpost)).thenAnswer { false }
         Mockito.`when`(safJournalpostGraphQlClient.hentAvvsenderMottar(journalpost)).thenAnswer {
             AvsenderMottaker(

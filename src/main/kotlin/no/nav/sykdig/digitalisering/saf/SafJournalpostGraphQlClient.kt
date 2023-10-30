@@ -16,7 +16,7 @@ class SafJournalpostGraphQlClient(
     val log = logger()
 
     @Retryable
-    fun hentJournalpost(journalpostId: String): SafQueryJournalpost {
+    fun getJournalpost(journalpostId: String): SafQueryJournalpost {
         try {
             val response = safGraphQlClient.executeQuery(SAF_QUERY_FIND_JOURNALPOST, mapOf("id" to journalpostId))
 
