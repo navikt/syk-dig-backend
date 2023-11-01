@@ -1,5 +1,7 @@
 package no.nav.sykdig.digitalisering.saf.graphql
 
+import no.nav.sykdig.digitalisering.dokarkiv.DokumentInfo
+
 const val SAF_QUERY_FIND_JOURNALPOST = """
     query FindJournalpost(${"$"}id: String!) {
         journalpost(journalpostId: ${"$"}id) {
@@ -9,6 +11,14 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
                 type
                 navn 
                 land
+            }
+            dokumenter {
+                dokumentInfoId
+                tittel
+                brevkode
+                dokumentvarianter {
+                    variantformat
+                }
             }
         }
     }
@@ -20,6 +30,7 @@ data class SafQueryJournalpost(
 data class Journalpost(
     val journalstatus: Journalstatus?,
     val avsenderMottaker: AvsenderMottaker?,
+    val dokumenter: List<DokumentInfo>?,
 )
 enum class AvsenderMottakerIdType {
     FNR,

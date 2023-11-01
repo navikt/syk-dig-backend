@@ -1,4 +1,10 @@
 type Journalpost {
     journalpostId: String!
     journalstatus: String!
+    dokumenter: [Document]
+}
+
+type Document {
+    tittel: String!
+    dokumentInfoId: String!
 }
