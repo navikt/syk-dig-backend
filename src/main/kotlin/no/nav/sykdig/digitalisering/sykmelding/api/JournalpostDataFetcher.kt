@@ -7,14 +7,14 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.Journalpost
+import org.springframework.security.access.prepost.PreAuthorize
 
 @DgsComponent
 class JournalpostDataFetcher(
     private val safGraphQlClient: SafJournalpostGraphQlClient,
 ) {
 
-    // TODO Access control
-    // @PreAuthorize("@journalpostOppgaveService.hasAccessToJournalpost(#journalpostId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(#journalpostId)")
     @DgsQuery(field = DgsConstants.QUERY.Journalpost)
     fun getJournalpostById(
         @InputArgument id: String,

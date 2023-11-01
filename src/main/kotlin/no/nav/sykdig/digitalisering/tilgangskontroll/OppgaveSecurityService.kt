@@ -3,6 +3,8 @@ package no.nav.sykdig.digitalisering.tilgangskontroll
 import no.nav.sykdig.auditLogger.AuditLogger
 import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
+import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
+import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType.FNR
 import no.nav.sykdig.securelog
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -10,8 +12,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class OppgaveSecurityService(
-    val syfoTilgangskontrollOboClient: SyfoTilgangskontrollOboClient,
-    val sykDigOppgaveService: SykDigOppgaveService,
+    private val syfoTilgangskontrollOboClient: SyfoTilgangskontrollOboClient,
+    private val sykDigOppgaveService: SykDigOppgaveService,
+    private val safGraphQlClient: SafJournalpostGraphQlClient,
 ) {
 
     companion object {
@@ -21,37 +24,45 @@ class OppgaveSecurityService(
 
     fun hasAccessToOppgave(oppgaveId: String): Boolean {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
-        if (!syfoTilgangskontrollOboClient.sjekkTilgangVeileder(oppgave.fnr)) {
-            val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
-            val navEmail = autentication.token.claims["preferred_username"].toString()
+        val navEmail = getNavEmail()
+        val tilgang = hasAccess(oppgave.fnr, navEmail)
+        securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
+        return tilgang
+    }
 
-            securelog.warn("Innlogget bruker: $navEmail har ikke tilgang til oppgave med id $oppgaveId")
-            auditlog.info(
-                AuditLogger().createcCefMessage(
-                    fnr = oppgave.fnr,
-                    navEmail = navEmail,
-                    operation = AuditLogger.Operation.WRITE,
-                    requestPath = "/api/graphql",
-                    permit = AuditLogger.Permit.DENY,
-                ),
-            )
+    fun hasAccessToJournalpost(journalpostId: String): Boolean {
+        val journalpost = safGraphQlClient.getJournalpost(journalpostId)
+        val fnr = when (journalpost.journalpost?.avsenderMottaker?.type) {
+            FNR -> journalpost.journalpost.avsenderMottaker.id
+            else -> null
+        } ?: return false
+        val navEmail = getNavEmail()
+        val tilgang = hasAccess(fnr, journalpostId)
+        securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} til journalpost med id $journalpostId")
+        return tilgang
+    }
 
-            return false
-        }
-
-        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
-        val navEmail = autentication.token.claims["preferred_username"].toString()
-        securelog.info("Innlogget bruker: $navEmail har tilgang til oppgave med id $oppgaveId")
+    private fun hasAccess(fnr: String, navEmail: String): Boolean {
+        val tilgang = syfoTilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
         auditlog.info(
             AuditLogger().createcCefMessage(
-                fnr = oppgave.fnr,
+                fnr = fnr,
                 navEmail = navEmail,
-                operation = AuditLogger.Operation.WRITE,
+                operation = AuditLogger.Operation.READ,
                 requestPath = "/api/graphql",
-                permit = AuditLogger.Permit.PERMIT,
+                permit = when (tilgang) {
+                    true -> AuditLogger.Permit.PERMIT
+                    false -> AuditLogger.Permit.DENY
+                },
             ),
         )
 
-        return true
+        return tilgang
+    }
+
+    private fun getNavEmail(): String {
+        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        val navEmail = autentication.token.claims["preferred_username"].toString()
+        return navEmail
     }
 }
