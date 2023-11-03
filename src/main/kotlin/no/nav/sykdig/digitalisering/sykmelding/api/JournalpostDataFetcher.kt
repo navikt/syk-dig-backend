@@ -14,7 +14,7 @@ class JournalpostDataFetcher(
     private val safGraphQlClient: SafJournalpostGraphQlClient,
 ) {
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(#journalpostId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(#id)")
     @DgsQuery(field = DgsConstants.QUERY.Journalpost)
     fun getJournalpostById(
         @InputArgument id: String,

@@ -83,6 +83,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                     type = AvsenderMottakerIdType.FNR,
                     land = null,
                 ),
+                dokumenter = emptyList(),
             ),
         )
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }
