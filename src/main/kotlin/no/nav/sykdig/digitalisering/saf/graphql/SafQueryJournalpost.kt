@@ -15,9 +15,6 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
             dokumenter {
                 dokumentInfoId
                 tittel
-                dokumentvarianter {
-                    variantformat
-                }
             }
         }
     }
