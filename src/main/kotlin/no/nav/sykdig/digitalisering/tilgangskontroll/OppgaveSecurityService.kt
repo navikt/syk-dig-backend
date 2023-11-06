@@ -5,6 +5,7 @@ import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType.FNR
+import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -32,7 +33,7 @@ class OppgaveSecurityService(
 
     fun hasAccessToJournalpost(journalpostId: String): Boolean {
         val journalpost = safGraphQlClient.getJournalpost(journalpostId)
-        securelog.info("journalpost hentet: ${journalpostId}")
+        securelog.info("journalpost hentet: ${objectMapper.writeValueAsString(journalpost)}")
         val fnr = when (journalpost.journalpost?.avsenderMottaker?.type) {
             FNR -> journalpost.journalpost.avsenderMottaker.id
             else -> null
