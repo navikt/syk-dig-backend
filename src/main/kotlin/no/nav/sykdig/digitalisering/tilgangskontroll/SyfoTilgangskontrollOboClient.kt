@@ -39,6 +39,7 @@ class SyfoTilgangskontrollOboClient(
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
             return if (e.statusCode.value() == 403) {
+                log.error("Syfo tilgangskontroll returnerte 403", e)
                 false
             } else {
                 log.error("HttpClientErrorException mot tilgangskontroll", e)
