@@ -32,10 +32,12 @@ class OppgaveSecurityService(
 
     fun hasAccessToJournalpost(journalpostId: String): Boolean {
         val journalpost = safGraphQlClient.getJournalpost(journalpostId)
+        securelog.info("journalpost hentet: ${journalpostId}")
         val fnr = when (journalpost.journalpost?.avsenderMottaker?.type) {
             FNR -> journalpost.journalpost.avsenderMottaker.id
             else -> null
         } ?: return false
+        securelog.info("Fødselsnummer: $fnr")
         val navEmail = getNavEmail()
         val tilgang = hasAccess(fnr, journalpostId)
         securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} til journalpost med id $journalpostId")
