@@ -9,7 +9,7 @@ plugins {
     kotlin("plugin.spring") version "1.9.10"
     id("com.netflix.dgs.codegen") version "5.12.4"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
-    id("org.cyclonedx.bom") version "1.8.0"
+    id("org.cyclonedx.bom") version "1.8.1"
 }
 
 group = "no.nav.sykdig"
