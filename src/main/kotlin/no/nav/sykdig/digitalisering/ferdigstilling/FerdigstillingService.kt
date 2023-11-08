@@ -42,7 +42,7 @@ class FerdigstillingService(
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
-            val hentAvvsenderMottar = safJournalpostGraphQlClient.hentAvvsenderMottar(journalpost)
+            val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
                 landAlpha3 = validatedValues.skrevetLand,
                 fnr = sykmeldt.fnr,
@@ -85,7 +85,7 @@ class FerdigstillingService(
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
-            val hentAvvsenderMottar = safJournalpostGraphQlClient.hentAvvsenderMottar(journalpost)
+            val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
                 landAlpha3 = null,
                 fnr = sykmeldt.fnr,

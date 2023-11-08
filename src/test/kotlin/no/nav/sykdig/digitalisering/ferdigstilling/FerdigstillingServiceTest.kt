@@ -84,11 +84,12 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                     land = null,
                 ),
                 dokumenter = emptyList(),
+                bruker = null,
             ),
         )
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpost)).thenAnswer { false }
-        Mockito.`when`(safJournalpostGraphQlClient.hentAvvsenderMottar(journalpost)).thenAnswer {
+        Mockito.`when`(safJournalpostGraphQlClient.getAvvsenderMottar(journalpost)).thenAnswer {
             AvsenderMottaker(
                 id = "12345678910",
                 navn = "Fornavn Etternavn",

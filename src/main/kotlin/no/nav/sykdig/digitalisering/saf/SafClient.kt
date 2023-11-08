@@ -21,15 +21,15 @@ class SafClient(
     val log = logger()
 
     @Retryable
-    fun hentPdfFraSaf(
+    fun getPdfFraSaf(
         journalpostId: String,
         dokumentInfoId: String,
-        sykmeldingId: String,
+        callId: String,
     ): ByteArray {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
         headers.accept = listOf(MediaType.APPLICATION_PDF)
-        headers["Nav-Callid"] = sykmeldingId
+        headers["Nav-Callid"] = callId
         headers["Nav-Consumer-Id"] = "syk-dig-backend"
 
         try {

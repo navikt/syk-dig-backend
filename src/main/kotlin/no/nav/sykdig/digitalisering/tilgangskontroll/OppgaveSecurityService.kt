@@ -3,8 +3,9 @@ package no.nav.sykdig.digitalisering.tilgangskontroll
 import no.nav.sykdig.auditLogger.AuditLogger
 import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
+import no.nav.sykdig.digitalisering.dokarkiv.BrukerIdType
+import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
-import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType.FNR
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.security.core.context.SecurityContextHolder
@@ -16,6 +17,7 @@ class OppgaveSecurityService(
     private val syfoTilgangskontrollOboClient: SyfoTilgangskontrollOboClient,
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val safGraphQlClient: SafJournalpostGraphQlClient,
+    private val personService: PersonService,
 ) {
 
     companion object {
@@ -34,10 +36,18 @@ class OppgaveSecurityService(
     fun hasAccessToJournalpost(journalpostId: String): Boolean {
         val journalpost = safGraphQlClient.getJournalpost(journalpostId)
         securelog.info("journalpost hentet: ${objectMapper.writeValueAsString(journalpost)}")
-        val fnr = when (journalpost.journalpost?.avsenderMottaker?.type) {
-            FNR -> journalpost.journalpost.avsenderMottaker.id
-            else -> null
-        } ?: return false
+        val id = when (journalpost.journalpost?.bruker?.type) {
+            BrukerIdType.ORGNR -> null
+            else -> journalpost.journalpost?.bruker?.id
+        }
+
+        if (id == null) {
+            securelog.info("Fant ikke id i journalpost: $journalpostId")
+            return false
+        }
+
+        val fnr = personService.hentPerson(id, journalpostId).fnr
+
         securelog.info("Fødselsnummer: $fnr")
         val navEmail = getNavEmail()
         val tilgang = hasAccess(fnr, journalpostId)

@@ -1,6 +1,5 @@
 package no.nav.sykdig.digitalisering.api
 
-import graphql.schema.DataFetchingEnvironment
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.logger
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
+import java.util.UUID
 
 @RestController
 class DocumentController(
@@ -21,13 +21,22 @@ class DocumentController(
 ) {
     val log = logger()
 
+    @GetMapping("/api/document/{journalpostId}/{dokumentInfoId}")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(#journalpostId)")
+    @ResponseBody
+    fun getJournalpostDocument(
+        @PathVariable journalpostId: String,
+        @PathVariable dokumentInfoId: String,
+    ): ByteArray {
+        return safClient.getPdfFraSaf(journalpostId, dokumentInfoId, UUID.randomUUID().toString())
+    }
+
     @GetMapping("/api/document/{oppgaveId}/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @ResponseBody
-    fun getDocument(
+    fun getOppgaveDocument(
         @PathVariable oppgaveId: String,
         @PathVariable dokumentInfoId: String,
-        dfe: DataFetchingEnvironment,
     ): ByteArray {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
 
@@ -38,10 +47,10 @@ class DocumentController(
                     throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "$oppgaveId mangler dokumentInfoId")
                 }
 
-                return safClient.hentPdfFraSaf(
+                return safClient.getPdfFraSaf(
                     dokumentInfoId = oppgave.dokumentInfoId,
                     journalpostId = oppgave.journalpostId,
-                    sykmeldingId = oppgave.sykmeldingId.toString(),
+                    callId = oppgave.sykmeldingId.toString(),
                 )
             }
 
@@ -53,10 +62,10 @@ class DocumentController(
             }
 
             try {
-                return safClient.hentPdfFraSaf(
+                return safClient.getPdfFraSaf(
                     dokumentInfoId = dokumentInfoId,
                     journalpostId = oppgave.journalpostId,
-                    sykmeldingId = oppgave.sykmeldingId.toString(),
+                    callId = oppgave.sykmeldingId.toString(),
                 )
             } catch (e: Exception) {
                 log.error("Noe gikk galt ved henting av pdf for oppgave med id $oppgaveId")

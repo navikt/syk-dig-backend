@@ -29,10 +29,10 @@ class PdfController(
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
         if (oppgave != null) {
             try {
-                return safClient.hentPdfFraSaf(
+                return safClient.getPdfFraSaf(
                     journalpostId = oppgave.journalpostId,
                     dokumentInfoId = oppgave.dokumentInfoId ?: "",
-                    sykmeldingId = oppgave.sykmeldingId.toString(),
+                    callId = oppgave.sykmeldingId.toString(),
                 )
             } catch (e: Exception) {
                 log.error("Noe gikk galt ved henting av pdf for oppgave med id $oppgaveId")

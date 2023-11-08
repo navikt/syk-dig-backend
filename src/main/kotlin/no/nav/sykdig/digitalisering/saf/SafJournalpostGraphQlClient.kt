@@ -43,7 +43,7 @@ class SafJournalpostGraphQlClient(
         }
     }
 
-    fun hentAvvsenderMottar(safQueryJournalpost: SafQueryJournalpost): AvsenderMottaker {
+    fun getAvvsenderMottar(safQueryJournalpost: SafQueryJournalpost): AvsenderMottaker {
         try {
             val avsenderMottaker = safQueryJournalpost.journalpost?.avsenderMottaker
             return avsenderMottaker!!
