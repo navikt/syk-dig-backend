@@ -21,7 +21,7 @@ class DocumentController(
 ) {
     val log = logger()
 
-    @GetMapping("/api/document/{journalpostId}/{dokumentInfoId}")
+    @GetMapping("/api/document/journalpost/{journalpostId}/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
     @PreAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(#journalpostId)")
     @ResponseBody
     fun getJournalpostDocument(
