@@ -27,7 +27,7 @@ class JournalpostDataFetcher(
             journalpost.journalpost?.journalstatus?.name ?: "MANGLER_STATUS",
             dokumenter = journalpost.journalpost?.dokumenter?.map {
                 Document(it.tittel ?: "Mangler Tittel", it.dokumentInfoId)
-            },
+            } ?: emptyList(),
         )
     }
 }
