@@ -1,5 +1,19 @@
+union JournalpostResult = Journalpost | JournalpostStatus
+
 type Journalpost {
     journalpostId: String!
     journalstatus: String!
     dokumenter: [Document!]!
+    fnr: String!
+}
+
+type JournalpostStatus {
+    journalpostId: String!
+    status: JournalpostStatusEnum!
+}
+
+enum JournalpostStatusEnum {
+    MANGLER_FNR
+    FEIL_TEMA
+    OPPRETTET
 }
