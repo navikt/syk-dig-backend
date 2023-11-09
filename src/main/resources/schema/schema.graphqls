@@ -31,4 +31,8 @@ type Mutation {
         dokumentInfoId: String!
         tittel: String!
     ): Document
+
+    sykmeldingFraJournalpost(
+        journalpostId: String!
+    ): Journalpost!
 }
