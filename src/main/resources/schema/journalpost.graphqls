@@ -1,0 +1,5 @@
+type Journalpost {
+    journalpostId: String!
+    journalstatus: String!
+    dokumenter: [Document!]!
+}

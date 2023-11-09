@@ -21,29 +21,27 @@ class SafClient(
     val log = logger()
 
     @Retryable
-    fun hentPdfFraSaf(
+    fun getPdfFraSaf(
         journalpostId: String,
         dokumentInfoId: String,
-        sykmeldingId: String,
+        callId: String,
     ): ByteArray {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
         headers.accept = listOf(MediaType.APPLICATION_PDF)
-        headers["Nav-Callid"] = sykmeldingId
+        headers["Nav-Callid"] = callId
         headers["Nav-Consumer-Id"] = "syk-dig-backend"
 
         try {
             val validJournalpostId = try {
                 journalpostId.toLong()
-            }
-            catch (exception: Exception) {
+            } catch (exception: Exception) {
                 throw RuntimeException("Ugyldig journalpostId: $journalpostId er på ugyldigformat")
             }
 
             val validDokumentInfoId = try {
                 dokumentInfoId.toLong()
-            }
-            catch (exception: Exception) {
+            } catch (exception: Exception) {
                 throw RuntimeException("Ugyldig dokumentInfoId: $dokumentInfoId er på ugyldigformat")
             }
 

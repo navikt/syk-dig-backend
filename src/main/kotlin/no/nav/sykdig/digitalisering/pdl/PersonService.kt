@@ -12,19 +12,20 @@ class PersonService(
 ) {
     val log = logger()
 
-    fun hentPerson(fnr: String, sykmeldingId: String): Person {
-        val pdlResponse = pdlClient.hentPerson(fnr, sykmeldingId)
+    fun hentPerson(id: String, callId: String): Person {
+        val pdlResponse = pdlClient.hentPerson(id, callId)
 
-        log.info("Hentet person for sykmeldingId $sykmeldingId")
+        log.info("Hentet person for callId: $callId")
 
-        return mapPdlResponseTilPerson(fnr, pdlResponse)
+        return mapPdlResponseTilPerson(id, pdlResponse)
     }
 
-    fun mapPdlResponseTilPerson(fnr: String, pdlResponse: PdlResponse): Person {
+    fun mapPdlResponseTilPerson(ident: String, pdlResponse: PdlResponse): Person {
         val navn = pdlResponse.hentPerson!!.navn.first()
         val bostedsadresse = pdlResponse.hentPerson.bostedsadresse.firstOrNull()
         val oppholdsadresse = pdlResponse.hentPerson.oppholdsadresse.firstOrNull()
-
+        val fnr = pdlResponse.identer?.identer?.first { it.gruppe == "FOLKEREGISTERIDENT" }?.ident
+            ?: throw RuntimeException("Fant ikke fnr for person i PDL")
         return Person(
             fnr = fnr,
             navn = Navn(
@@ -33,7 +34,7 @@ class PersonService(
                 etternavn = navn.etternavn,
             ),
             fodselsdato = pdlResponse.hentPerson.foedsel?.first()?.foedselsdato?.let { LocalDate.parse(it) },
-            aktorId = pdlResponse.identer!!.identer.first { it.gruppe == "AKTORID" }.ident,
+            aktorId = pdlResponse.identer.identer.first { it.gruppe == "AKTORID" }.ident,
             bostedsadresse = bostedsadresse?.let {
                 Bostedsadresse(
                     coAdressenavn = it.coAdressenavn,

@@ -27,8 +27,8 @@ class DigitaliseringsoppgaveService(
     fun getDigitaiseringsoppgave(oppgaveId: String): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
-            fnr = oppgave.fnr,
-            sykmeldingId = oppgave.sykmeldingId.toString(),
+            id = oppgave.fnr,
+            callId = oppgave.sykmeldingId.toString(),
         )
 
         log.info("Hentet oppgave og sykmeldt for oppgave $oppgaveId, lager SykDigOppgave!")
@@ -48,8 +48,8 @@ class DigitaliseringsoppgaveService(
     ) {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
-            fnr = oppgave.fnr,
-            sykmeldingId = oppgave.sykmeldingId.toString(),
+            id = oppgave.fnr,
+            callId = oppgave.sykmeldingId.toString(),
         )
         val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
         if (valideringsresultat.isNotEmpty()) {
@@ -67,8 +67,8 @@ class DigitaliseringsoppgaveService(
     ): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
-            fnr = oppgave.fnr,
-            sykmeldingId = oppgave.sykmeldingId.toString(),
+            id = oppgave.fnr,
+            callId = oppgave.sykmeldingId.toString(),
         )
 
         gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent)
@@ -90,8 +90,8 @@ class DigitaliseringsoppgaveService(
     ): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt = personService.hentPerson(
-            fnr = oppgave.fnr,
-            sykmeldingId = oppgave.sykmeldingId.toString(),
+            id = oppgave.fnr,
+            callId = oppgave.sykmeldingId.toString(),
         )
 
         val opprinneligBeskrivelse = gosysService.hentOppgave(oppgaveId, oppgave.sykmeldingId.toString()).beskrivelse
