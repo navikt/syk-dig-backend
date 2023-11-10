@@ -10,7 +10,9 @@ import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.logger
 import no.nav.sykdig.model.OppgaveDbModel
+import no.nav.sykdig.objectMapper
 import no.nav.sykdig.oppgavemottak.kafka.okSykmeldingTopic
+import no.nav.sykdig.securelog
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Component
@@ -23,6 +25,7 @@ class FerdigstillingService(
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
 ) {
     val log = logger()
+    val securelog = securelog()
 
     fun ferdigstill(
         enhet: String,
@@ -39,6 +42,7 @@ class FerdigstillingService(
             opprettet = oppgave.opprettet.toLocalDateTime(),
         )
         val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
+        securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
@@ -82,6 +86,8 @@ class FerdigstillingService(
     ) {
         requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
         val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
+        securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
+
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {

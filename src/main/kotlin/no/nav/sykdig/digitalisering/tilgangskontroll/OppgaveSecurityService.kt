@@ -35,7 +35,8 @@ class OppgaveSecurityService(
 
     fun hasAccessToJournalpost(journalpostId: String): Boolean {
         val journalpost = safGraphQlClient.getJournalpost(journalpostId)
-        securelog.info("journalpost hentet: ${objectMapper.writeValueAsString(journalpost)}")
+        securelog.info("journalpostid $journalpostId ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
+
         val id = when (journalpost.journalpost?.bruker?.type) {
             BrukerIdType.ORGNR -> null
             else -> journalpost.journalpost?.bruker?.id
