@@ -20,9 +20,11 @@ import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
+import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_IM
 import no.nav.sykdig.digitalisering.saf.graphql.Journalpost
 import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
+import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
@@ -85,6 +87,8 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 ),
                 dokumenter = emptyList(),
                 bruker = null,
+                tema = TEMA_SYKMELDING,
+                kanal = CHANNEL_SCAN_IM,
             ),
         )
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }

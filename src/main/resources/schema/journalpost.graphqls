@@ -15,5 +15,6 @@ type JournalpostStatus {
 enum JournalpostStatusEnum {
     MANGLER_FNR
     FEIL_TEMA
-    OPPRETTET
+    OPPRETTET,
+    FEIL_KANAL
 }
