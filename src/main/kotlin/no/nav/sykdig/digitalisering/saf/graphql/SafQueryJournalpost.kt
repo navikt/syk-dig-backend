@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering.saf.graphql
 
 import no.nav.sykdig.digitalisering.dokarkiv.Bruker
 import no.nav.sykdig.digitalisering.dokarkiv.DokumentInfo
+import no.nav.sykdig.digitalisering.dokarkiv.Sak
 
 const val SAF_QUERY_FIND_JOURNALPOST = """
     query FindJournalpost(${"$"}id: String!) {
@@ -17,6 +18,9 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
                 dokumentInfoId
                 tittel
             }
+            sak {
+                sakstype
+            }
         }
     }
 """
@@ -31,6 +35,7 @@ data class Journalpost(
     val dokumenter: List<DokumentInfo>?,
     val tema: String?,
     val kanal: String?,
+    val sak: no.nav.sykdig.digitalisering.saf.graphql.Sak?,
 )
 
 const val TEMA_SYKMELDING = "SYM"
@@ -65,4 +70,13 @@ enum class Journalstatus {
     RESERVERT,
     OPPLASTING_DOKUMENT,
     UKJENT,
+}
+
+data class Sak(
+    val sakstype: SaksType?,
+)
+
+enum class SaksType {
+    FAGSAK,
+    GENERELL,
 }
