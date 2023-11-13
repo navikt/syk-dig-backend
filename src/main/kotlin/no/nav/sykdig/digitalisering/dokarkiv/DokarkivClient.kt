@@ -57,7 +57,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        orginalAvsenderMottaker: AvsenderMottaker,
+        orginalAvsenderMottaker: AvsenderMottaker?,
         sykmeldtNavn: String?,
     ) {
         oppdaterJournalpost(
@@ -89,7 +89,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        orginalAvsenderMottaker: AvsenderMottaker,
+        orginalAvsenderMottaker: AvsenderMottaker?,
         sykmeldtNavn: String?,
     ) {
         val headers = HttpHeaders()
@@ -97,15 +97,65 @@ class DokarkivClient(
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(landAlpha3, fnr, dokumentinfoId, perioder, source, avvisningsGrunn, orginalAvsenderMottaker, sykmeldtNavn)
-        try {
-            dokarkivRestTemplate.exchange(
-                "$url/$journalpostId",
-                HttpMethod.PUT,
-                HttpEntity(body, headers),
-                String::class.java,
+        val bodyUtenOrginalAvsender =
+            if (orginalAvsenderMottaker == null) {
+                OppdaterJournalpostRequestUtenOrginalAvsender(
+                    avsenderMottaker = createAvsenderMottakerRequestUtenID(
+                        land = if (landAlpha3 != null) {
+                            mapFromAlpha3Toalpha2(landAlpha3)
+                        } else {
+                            null
+                        },
+                        source = source,
+                    ),
+                    bruker = Bruker(
+                        id = fnr,
+                    ),
+                    tittel = createTittleRina(perioder, avvisningsGrunn),
+                    dokumenter = listOf(
+                        DokumentInfo(
+                            dokumentInfoId = dokumentinfoId,
+                            tittel = createTittleRina(perioder, avvisningsGrunn),
+                        ),
+                    ),
+                )
+            } else {
+                null
+            }
+
+        val bodyMedOrginalAvsender = if (bodyUtenOrginalAvsender == null && orginalAvsenderMottaker != null) {
+            createOppdaterJournalpostRequest(
+                landAlpha3,
+                fnr,
+                dokumentinfoId,
+                perioder,
+                source,
+                avvisningsGrunn,
+                orginalAvsenderMottaker,
+                sykmeldtNavn,
             )
-            log.info("Oppdatert journalpost $journalpostId for sykmelding $sykmeldingId")
+        } else {
+            null
+        }
+
+        try {
+            if (bodyUtenOrginalAvsender != null) {
+                dokarkivRestTemplate.exchange(
+                    "$url/$journalpostId",
+                    HttpMethod.PUT,
+                    HttpEntity(bodyUtenOrginalAvsender, headers),
+                    String::class.java,
+                )
+                log.info("Oppdatert journalpost $journalpostId for sykmelding $sykmeldingId")
+            } else {
+                dokarkivRestTemplate.exchange(
+                    "$url/$journalpostId",
+                    HttpMethod.PUT,
+                    HttpEntity(bodyMedOrginalAvsender, headers),
+                    String::class.java,
+                )
+                log.info("Oppdatert journalpost $journalpostId for sykmelding $sykmeldingId")
+            }
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å oppdatere journalpostId $journalpostId: ${e.message}")
@@ -132,6 +182,7 @@ class DokarkivClient(
 
     fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> =
         sortedBy { it.fom }
+
     fun List<Periode>.sortedSykmeldingPeriodeTOMDate(): List<Periode> =
         sortedBy { it.tom }
 
@@ -155,7 +206,11 @@ class DokarkivClient(
                 return OppdaterJournalpostRequest(
                     avsenderMottaker = createAvsenderMottaker(
                         orginalAvsenderMottaker = orginalAvsenderMottaker,
-                        land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                        land = if (landAlpha3 != null) {
+                            mapFromAlpha3Toalpha2(landAlpha3)
+                        } else {
+                            null
+                        },
                         source = source,
                         sykmeldtNavn = sykmeldtNavn,
                         sykmeldtFnr = fnr,
@@ -172,12 +227,17 @@ class DokarkivClient(
                     ),
                 )
             }
+
             "navno" -> {
                 return OppdaterJournalpostRequest(
                     tema = "SYK",
                     avsenderMottaker = createAvsenderMottaker(
                         orginalAvsenderMottaker = orginalAvsenderMottaker,
-                        land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                        land = if (landAlpha3 != null) {
+                            mapFromAlpha3Toalpha2(landAlpha3)
+                        } else {
+                            null
+                        },
                         source = source,
                         sykmeldtNavn = sykmeldtNavn,
                         sykmeldtFnr = fnr,
@@ -194,11 +254,16 @@ class DokarkivClient(
                     ),
                 )
             }
+
             else -> {
                 return OppdaterJournalpostRequest(
                     avsenderMottaker = createAvsenderMottaker(
                         orginalAvsenderMottaker = orginalAvsenderMottaker,
-                        land = if (landAlpha3 != null) { mapFromAlpha3Toalpha2(landAlpha3) } else { null },
+                        land = if (landAlpha3 != null) {
+                            mapFromAlpha3Toalpha2(landAlpha3)
+                        } else {
+                            null
+                        },
                         source = source,
                         sykmeldtNavn = sykmeldtNavn,
                         sykmeldtFnr = fnr,
@@ -216,6 +281,16 @@ class DokarkivClient(
                 )
             }
         }
+    }
+
+    fun createAvsenderMottakerRequestUtenID(
+        land: String?,
+        source: String,
+    ): AvsenderMottakerRequestUtenOrginalAvsender {
+        return AvsenderMottakerRequestUtenOrginalAvsender(
+            navn = source,
+            land = land,
+        )
     }
 
     fun createAvsenderMottaker(
@@ -245,12 +320,14 @@ class DokarkivClient(
     }
 
     fun mapNavn(
-        orginalAvsenderMottaker: AvsenderMottaker,
+        orginalAvsenderMottaker: AvsenderMottaker?,
         land: String?,
         source: String,
         sykmeldtNavn: String?,
     ): String? {
-        return if (!orginalAvsenderMottaker.navn.isNullOrBlank()) {
+        return if (orginalAvsenderMottaker == null) {
+            source
+        } else if (!orginalAvsenderMottaker.navn.isNullOrBlank()) {
             orginalAvsenderMottaker.navn
         } else if (orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR && !sykmeldtNavn.isNullOrBlank()) {
             sykmeldtNavn
@@ -272,14 +349,33 @@ class DokarkivClient(
     }
 
     fun createTittleRina(perioder: List<Periode>?, avvisningsGrunn: String?): String {
-        return if (!avvisningsGrunn.isNullOrEmpty()) { "Avvist Søknad om kontantytelser: $avvisningsGrunn" } else if (perioder.isNullOrEmpty()) { "Søknad om kontantytelser" } else { "Søknad om kontantytelser ${getFomTomTekst(perioder)}" }
+        return if (!avvisningsGrunn.isNullOrEmpty()) {
+            "Avvist Søknad om kontantytelser: $avvisningsGrunn"
+        } else if (perioder.isNullOrEmpty()) {
+            "Søknad om kontantytelser"
+        } else {
+            "Søknad om kontantytelser ${getFomTomTekst(perioder)}"
+        }
     }
 
     fun createTittle(perioder: List<Periode>?, avvisningsGrunn: String?): String {
-        return if (!avvisningsGrunn.isNullOrEmpty()) { "Avvist Utenlandsk papirsykmelding: $avvisningsGrunn" } else if (perioder.isNullOrEmpty()) { "Utenlandsk papirsykmelding" } else { "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}" }
+        return if (!avvisningsGrunn.isNullOrEmpty()) {
+            "Avvist Utenlandsk papirsykmelding: $avvisningsGrunn"
+        } else if (perioder.isNullOrEmpty()) {
+            "Utenlandsk papirsykmelding"
+        } else {
+            "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}"
+        }
     }
+
     fun createNavNoTittle(perioder: List<Periode>?, avvisningsGrunn: String?): String {
-        return if (!avvisningsGrunn.isNullOrEmpty()) { "Avvist Egenerklæring for utenlandske sykemeldinger: $avvisningsGrunn" } else if (perioder.isNullOrEmpty()) { "Egenerklæring for utenlandske sykemeldinger" } else { "Egenerklæring for utenlandske sykemeldinger ${getFomTomTekst(perioder)}" }
+        return if (!avvisningsGrunn.isNullOrEmpty()) {
+            "Avvist Egenerklæring for utenlandske sykemeldinger: $avvisningsGrunn"
+        } else if (perioder.isNullOrEmpty()) {
+            "Egenerklæring for utenlandske sykemeldinger"
+        } else {
+            "Egenerklæring for utenlandske sykemeldinger ${getFomTomTekst(perioder)}"
+        }
     }
 
     fun findCountryName(landAlpha3: String): String {
