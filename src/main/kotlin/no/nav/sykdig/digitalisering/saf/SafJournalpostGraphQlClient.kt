@@ -43,10 +43,9 @@ class SafJournalpostGraphQlClient(
         }
     }
 
-    fun getAvvsenderMottar(safQueryJournalpost: SafQueryJournalpost): AvsenderMottaker {
+    fun getAvvsenderMottar(safQueryJournalpost: SafQueryJournalpost): AvsenderMottaker? {
         try {
-            val avsenderMottaker = safQueryJournalpost.journalpost?.avsenderMottaker
-            return avsenderMottaker!!
+            return safQueryJournalpost.journalpost?.avsenderMottaker
         } catch (exception: Exception) {
             log.error("Noe gikk galt ved kall til SAF", exception)
             throw exception
