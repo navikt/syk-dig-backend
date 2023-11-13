@@ -59,6 +59,7 @@ class FerdigstillingService(
                 avvisningsGrunn = null,
                 sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
                 orginalAvsenderMottaker = hentAvvsenderMottar,
+                sak = journalpost.journalpost?.sak,
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
@@ -104,6 +105,7 @@ class FerdigstillingService(
                 avvisningsGrunn = avvisningsGrunn,
                 sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
                 orginalAvsenderMottaker = hentAvvsenderMottar,
+                sak = journalpost.journalpost?.sak,
             )
         }
     }
