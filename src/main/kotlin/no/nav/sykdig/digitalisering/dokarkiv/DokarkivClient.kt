@@ -271,8 +271,8 @@ class DokarkivClient(
         } else {
             AvsenderMottakerRequest(
                 navn = mapNavn(orginalAvsenderMottaker, land, source, sykmeldtNavn),
-                id = mapId(orginalAvsenderMottaker!!, sykmeldtFnr),
-                idType = mapidType(orginalAvsenderMottaker.type),
+                id = mapId(orginalAvsenderMottaker, sykmeldtFnr),
+                idType = mapidType(orginalAvsenderMottaker?.type),
                 land = land,
             )
         }
