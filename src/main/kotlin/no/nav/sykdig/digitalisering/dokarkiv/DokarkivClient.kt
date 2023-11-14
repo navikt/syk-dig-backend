@@ -9,6 +9,7 @@ import no.nav.sykdig.digitalisering.saf.graphql.Sak
 import no.nav.sykdig.digitalisering.saf.graphql.SaksType
 import no.nav.sykdig.logger
 import no.nav.sykdig.objectMapper
+import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -29,7 +30,7 @@ class DokarkivClient(
     private val dokarkivRestTemplate: RestTemplate,
 ) {
     val log = logger()
-
+    val securelog = securelog()
     fun updateDocument(
         journalpostid: String,
         documentId: String,
@@ -115,6 +116,7 @@ class DokarkivClient(
         )
 
         try {
+            securelog.info("createOppdaterJournalpostRequest: ${objectMapper.writeValueAsString(body)}")
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
                 HttpMethod.PUT,
