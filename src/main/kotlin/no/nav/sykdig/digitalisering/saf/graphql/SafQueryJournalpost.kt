@@ -78,5 +78,5 @@ data class Sak(
 
 enum class SaksType {
     FAGSAK,
-    GENERELL,
+    GENERELL_SAK,
 }
