@@ -89,7 +89,6 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 bruker = null,
                 tema = TEMA_SYKMELDING,
                 kanal = CHANNEL_SCAN_IM,
-                sak = null,
             ),
         )
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }
@@ -166,7 +165,6 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             null,
             journalpost.journalpost?.avsenderMottaker!!,
             "Fornavn Etternavn",
-            null,
         )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
     }

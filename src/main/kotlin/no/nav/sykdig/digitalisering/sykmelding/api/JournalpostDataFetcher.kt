@@ -31,8 +31,8 @@ class JournalpostDataFetcher(
         @InputArgument id: String,
     ): JournalpostResult {
         val journalpost = safGraphQlClient.getJournalpost(id)
-        val fnrEllerAktorId = when (journalpost.journalpost?.bruker?.type) {
-            BrukerIdType.ORGNR -> null
+        val fnrEllerAktorId = when (journalpost.journalpost?.bruker?.idType) {
+            BrukerIdType.ORGNR.toString() -> null
             else -> journalpost.journalpost?.bruker?.id
         }
 
