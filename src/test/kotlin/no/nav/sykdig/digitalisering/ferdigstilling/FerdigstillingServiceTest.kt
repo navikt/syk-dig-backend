@@ -90,6 +90,8 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 tema = TEMA_SYKMELDING,
                 kanal = CHANNEL_SCAN_IM,
                 sak = null,
+                tema = TEMA_SYKMELDING,
+                kanal = CHANNEL_SCAN_IM,
             ),
         )
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }
