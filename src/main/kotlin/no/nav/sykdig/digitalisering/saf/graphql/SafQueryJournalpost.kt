@@ -7,6 +7,8 @@ import no.nav.sykdig.digitalisering.dokarkiv.Sak
 const val SAF_QUERY_FIND_JOURNALPOST = """
     query FindJournalpost(${"$"}id: String!) {
         journalpost(journalpostId: ${"$"}id) {
+            kanal
+            tema
             journalstatus
             bruker {
                 id 
@@ -31,8 +33,15 @@ data class Journalpost(
     val avsenderMottaker: AvsenderMottaker?,
     val bruker: Bruker?,
     val dokumenter: List<DokumentInfo>?,
+    val tema: String?,
+    val kanal: String?,
     val sak: no.nav.sykdig.digitalisering.saf.graphql.Sak?,
 )
+
+const val TEMA_SYKMELDING = "SYM"
+const val CHANNEL_SCAN_IM = "SKAN_IM"
+const val CHANNEL_SCAN_NETS = "SKAN_NETS"
+
 enum class AvsenderMottakerIdType {
     FNR,
     HPRNR,

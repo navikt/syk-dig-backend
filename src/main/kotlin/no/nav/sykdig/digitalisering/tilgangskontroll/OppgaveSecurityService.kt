@@ -6,6 +6,9 @@ import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.dokarkiv.BrukerIdType
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
+import no.nav.sykdig.generated.types.Journalpost
+import no.nav.sykdig.generated.types.JournalpostResult
+import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.security.core.context.SecurityContextHolder
@@ -32,8 +35,14 @@ class OppgaveSecurityService(
         securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
         return tilgang
     }
-
-    fun hasAccessToJournalpost(journalpostId: String): Boolean {
+    fun hasAccessToJournalpost(journalpostResult: JournalpostResult): Boolean {
+        return when (journalpostResult) {
+            is Journalpost -> return hasAccess(journalpostResult.fnr, getNavEmail())
+            is JournalpostStatus -> return true
+            else -> false
+        }
+    }
+    fun hasAccessToJournalpostId(journalpostId: String): Boolean {
         val journalpost = safGraphQlClient.getJournalpost(journalpostId)
         securelog.info("journalpostid $journalpostId ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
 
