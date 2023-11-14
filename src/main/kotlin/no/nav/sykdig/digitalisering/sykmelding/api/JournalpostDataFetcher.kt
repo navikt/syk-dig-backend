@@ -10,6 +10,7 @@ import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_IM
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_NETS
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
+import no.nav.sykdig.digitalisering.sykmelding.service.SykmeldingService
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Journalpost
@@ -23,6 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 class JournalpostDataFetcher(
     private val safGraphQlClient: SafJournalpostGraphQlClient,
     private val personService: PersonService,
+    private val sykmeldingService: SykmeldingService
 ) {
 
     @PostAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(returnObject)")
@@ -88,7 +90,8 @@ class JournalpostDataFetcher(
                 status = JournalpostStatusEnum.FEIL_KANAL,
             )
         }
-        // TODO: Valider og opprett sykmelding på Kafka
+
+        sykmeldingService.createSykmelding(journalpostId, journalpost.journalpost.tema)
 
         return JournalpostStatus(
             journalpostId = journalpostId,

@@ -11,7 +11,7 @@ import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.logger
 import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.objectMapper
-import no.nav.sykdig.oppgavemottak.kafka.okSykmeldingTopic
+import no.nav.sykdig.config.kafka.okSykmeldingTopic
 import no.nav.sykdig.securelog
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord

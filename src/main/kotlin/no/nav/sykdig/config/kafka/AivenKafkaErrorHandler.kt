@@ -1,4 +1,4 @@
-package no.nav.sykdig.oppgavemottak.kafka
+package no.nav.sykdig.config.kafka
 
 import no.nav.sykdig.logger
 import org.apache.kafka.clients.consumer.Consumer

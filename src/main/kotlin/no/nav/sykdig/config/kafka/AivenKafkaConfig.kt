@@ -1,6 +1,7 @@
-package no.nav.sykdig.oppgavemottak.kafka
+package no.nav.sykdig.config.kafka
 
 import no.nav.syfo.model.ReceivedSykmelding
+import no.nav.sykdig.digitalisering.sykmelding.CreateSykmeldingKafkaMessage
 import no.nav.sykdig.utils.JacksonKafkaSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
@@ -14,9 +15,11 @@ import org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_C
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ContainerProperties
@@ -81,6 +84,21 @@ class AivenKafkaConfig(
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         return factory
     }
+
+    @Bean
+    fun createSykmeldingKafkaProducer(): KafkaProducer<String, CreateSykmeldingKafkaMessage> {
+        val configs = mapOf(
+            KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+            VALUE_SERIALIZER_CLASS_CONFIG to JacksonKafkaSerializer::class.java,
+            ACKS_CONFIG to "all",
+            RETRIES_CONFIG to 10,
+            RETRY_BACKOFF_MS_CONFIG to 100,
+        ) + commonConfig()
+        return KafkaProducer<String, CreateSykmeldingKafkaMessage>(configs)
+    }
+    
+    @Bean
+    fun getCreateSykmeldingTopic(): String = "teamsykmelding.create-sykmelding"
 }
 
 const val sykDigOppgaveTopic = "teamsykmelding.syk-dig-oppgave"
