@@ -261,10 +261,10 @@ class DokarkivClient(
         sykmeldtFnr: String,
         sak: Sak?,
     ): AvsenderMottakerRequest {
-        return if (orginalAvsenderMottaker == null && (sak == null || sak?.sakstype == SaksType.GENERELL_SAK)) {
+        return if (orginalAvsenderMottaker == null && (sak == null || sak.sakstype == SaksType.GENERELL_SAK)) {
             AvsenderMottakerRequest(
-                navn = mapNavn(orginalAvsenderMottaker, land, source, sykmeldtNavn),
-                id = mapId(orginalAvsenderMottaker, sykmeldtFnr),
+                navn = sykmeldtNavn,
+                id = sykmeldtFnr,
                 idType = IdType.FNR,
                 land = land,
             )
