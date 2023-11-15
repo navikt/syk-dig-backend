@@ -15,11 +15,9 @@ import org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_C
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ContainerProperties
@@ -96,7 +94,7 @@ class AivenKafkaConfig(
         ) + commonConfig()
         return KafkaProducer<String, CreateSykmeldingKafkaMessage>(configs)
     }
-    
+
     @Bean
     fun getCreateSykmeldingTopic(): String = "teamsykmelding.create-sykmelding"
 }

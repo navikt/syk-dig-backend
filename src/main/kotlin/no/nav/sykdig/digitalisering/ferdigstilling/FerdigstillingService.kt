@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
 import no.nav.syfo.model.ReceivedSykmelding
+import no.nav.sykdig.config.kafka.okSykmeldingTopic
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
@@ -11,7 +12,6 @@ import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.logger
 import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.objectMapper
-import no.nav.sykdig.config.kafka.okSykmeldingTopic
 import no.nav.sykdig.securelog
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord

@@ -23,24 +23,24 @@ class SykmeldingService(
             val createSykmeldingKafkaMessage = CreateSykmeldingKafkaMessage(
                 metadata = Metadata(),
                 data = JournalpostMetadata(
-                    journalpostId, tema
-                )
+                    journalpostId,
+                    tema,
+                ),
             )
 
             sykmeldingKafkaProducer.send(
                 ProducerRecord(
                     createSykmeldingTopic,
                     journalpostId,
-                    createSykmeldingKafkaMessage
-                )
+                    createSykmeldingKafkaMessage,
+                ),
             ).get()
             log.info(
-                "Sykmelding sendt to kafka topic $createSykmeldingTopic journalpost id $journalpostId"
+                "Sykmelding sendt to kafka topic $createSykmeldingTopic journalpost id $journalpostId",
             )
-        } catch (exception : Exception) {
+        } catch (exception: Exception) {
             log.error("Failed to produce create sykmelding to topic", exception)
             throw exception
         }
     }
 }
-

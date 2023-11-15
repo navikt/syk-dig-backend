@@ -1,7 +1,7 @@
 package no.nav.sykdig.digitalisering.sykmelding
-data class Metadata (
+data class Metadata(
     val type: String = "journalpost",
-    val source: String = "syk-dig"
+    val source: String = "syk-dig",
 )
 data class JournalpostMetadata(
     val journalpostId: String,
@@ -10,5 +10,5 @@ data class JournalpostMetadata(
 
 data class CreateSykmeldingKafkaMessage(
     val metadata: Metadata,
-    val data: JournalpostMetadata
+    val data: JournalpostMetadata,
 )

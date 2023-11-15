@@ -24,7 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 class JournalpostDataFetcher(
     private val safGraphQlClient: SafJournalpostGraphQlClient,
     private val personService: PersonService,
-    private val sykmeldingService: SykmeldingService
+    private val sykmeldingService: SykmeldingService,
 ) {
 
     @PostAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(returnObject)")
