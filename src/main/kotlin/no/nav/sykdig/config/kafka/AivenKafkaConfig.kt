@@ -96,7 +96,7 @@ class AivenKafkaConfig(
     }
 
     @Bean
-    fun getCreateSykmeldingTopic(): String = "teamsykmelding.create-sykmelding"
+    fun getCreateSykmeldingTopic(): String = "teamsykmelding.opprett-sykmelding"
 }
 
 const val sykDigOppgaveTopic = "teamsykmelding.syk-dig-oppgave"
