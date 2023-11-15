@@ -6,12 +6,13 @@ import no.nav.sykdig.digitalisering.sykmelding.Metadata
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 
 @Service
 class SykmeldingService(
     private val sykmeldingKafkaProducer: KafkaProducer<String, CreateSykmeldingKafkaMessage>,
-    private val createSykmeldingTopic: String,
+    @Qualifier("sykmeldingTopic") private val sykmeldingTopic: String,
 ) {
 
     companion object {
@@ -30,13 +31,13 @@ class SykmeldingService(
 
             sykmeldingKafkaProducer.send(
                 ProducerRecord(
-                    createSykmeldingTopic,
+                    sykmeldingTopic,
                     journalpostId,
                     createSykmeldingKafkaMessage,
                 ),
             ).get()
             log.info(
-                "Sykmelding sendt to kafka topic $createSykmeldingTopic journalpost id $journalpostId",
+                "Sykmelding sendt to kafka topic $sykmeldingTopic journalpost id $journalpostId",
             )
         } catch (exception: Exception) {
             log.error("Failed to produce create sykmelding to topic", exception)

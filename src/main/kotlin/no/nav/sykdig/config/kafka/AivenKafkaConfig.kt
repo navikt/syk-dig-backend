@@ -95,7 +95,7 @@ class AivenKafkaConfig(
         return KafkaProducer<String, CreateSykmeldingKafkaMessage>(configs)
     }
 
-    @Bean
+    @Bean("sykmeldingTopic")
     fun getCreateSykmeldingTopic(): String = "teamsykmelding.opprett-sykmelding"
 }
 
