@@ -5,10 +5,9 @@ import no.nav.syfo.model.Periode
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
-import no.nav.sykdig.digitalisering.saf.graphql.Sak
-import no.nav.sykdig.digitalisering.saf.graphql.SaksType
 import no.nav.sykdig.logger
 import no.nav.sykdig.objectMapper
+import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -29,7 +28,7 @@ class DokarkivClient(
     private val dokarkivRestTemplate: RestTemplate,
 ) {
     val log = logger()
-
+    val securelog = securelog()
     fun updateDocument(
         journalpostid: String,
         documentId: String,
@@ -61,7 +60,6 @@ class DokarkivClient(
         avvisningsGrunn: String?,
         orginalAvsenderMottaker: AvsenderMottaker?,
         sykmeldtNavn: String?,
-        sak: Sak?,
     ) {
         oppdaterJournalpost(
             landAlpha3 = landAlpha3,
@@ -74,7 +72,6 @@ class DokarkivClient(
             avvisningsGrunn = avvisningsGrunn,
             orginalAvsenderMottaker = orginalAvsenderMottaker,
             sykmeldtNavn = sykmeldtNavn,
-            sak = sak,
         )
         ferdigstillJournalpost(
             enhet = enhet,
@@ -95,7 +92,6 @@ class DokarkivClient(
         avvisningsGrunn: String?,
         orginalAvsenderMottaker: AvsenderMottaker?,
         sykmeldtNavn: String?,
-        sak: Sak?,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -111,10 +107,10 @@ class DokarkivClient(
             avvisningsGrunn,
             orginalAvsenderMottaker,
             sykmeldtNavn,
-            sak,
         )
 
         try {
+            securelog.info("createOppdaterJournalpostRequest: ${objectMapper.writeValueAsString(body)}")
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
                 HttpMethod.PUT,
@@ -166,7 +162,6 @@ class DokarkivClient(
         avvisningsGrunn: String?,
         orginalAvsenderMottaker: AvsenderMottaker?,
         sykmeldtNavn: String?,
-        sak: Sak?,
     ): OppdaterJournalpostRequest {
         when (source) {
             "rina" -> {
@@ -181,7 +176,6 @@ class DokarkivClient(
                         source = source,
                         sykmeldtNavn = sykmeldtNavn,
                         sykmeldtFnr = fnr,
-                        sak = sak,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -209,7 +203,6 @@ class DokarkivClient(
                         source = source,
                         sykmeldtNavn = sykmeldtNavn,
                         sykmeldtFnr = fnr,
-                        sak = sak,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -236,7 +229,6 @@ class DokarkivClient(
                         source = source,
                         sykmeldtNavn = sykmeldtNavn,
                         sykmeldtFnr = fnr,
-                        sak = sak,
                     ),
                     bruker = Bruker(
                         id = fnr,
@@ -259,23 +251,13 @@ class DokarkivClient(
         source: String,
         sykmeldtNavn: String?,
         sykmeldtFnr: String,
-        sak: Sak?,
     ): AvsenderMottakerRequest {
-        return if (orginalAvsenderMottaker == null && sak?.sakstype == SaksType.GENERELL_SAK) {
-            AvsenderMottakerRequest(
-                navn = mapNavn(orginalAvsenderMottaker, land, source, sykmeldtNavn),
-                id = mapId(orginalAvsenderMottaker, sykmeldtFnr),
-                idType = IdType.FNR,
-                land = land,
-            )
-        } else {
-            AvsenderMottakerRequest(
-                navn = mapNavn(orginalAvsenderMottaker, land, source, sykmeldtNavn),
-                id = mapId(orginalAvsenderMottaker, sykmeldtFnr),
-                idType = mapidType(orginalAvsenderMottaker?.type),
-                land = land,
-            )
-        }
+        return AvsenderMottakerRequest(
+            navn = mapNavn(orginalAvsenderMottaker, land, source, sykmeldtNavn),
+            id = mapId(orginalAvsenderMottaker, sykmeldtFnr),
+            idType = mapidType(orginalAvsenderMottaker?.type),
+            land = land,
+        )
     }
 
     fun mapId(
@@ -297,13 +279,11 @@ class DokarkivClient(
         source: String,
         sykmeldtNavn: String?,
     ): String? {
-        return if (orginalAvsenderMottaker == null) {
-            source
-        } else if (!orginalAvsenderMottaker.navn.isNullOrBlank()) {
-            orginalAvsenderMottaker.navn
-        } else if (orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR && !sykmeldtNavn.isNullOrBlank()) {
+        return if (!orginalAvsenderMottaker?.navn.isNullOrBlank()) {
+            orginalAvsenderMottaker?.navn
+        } else if (orginalAvsenderMottaker?.type == AvsenderMottakerIdType.FNR && !sykmeldtNavn.isNullOrBlank()) {
             sykmeldtNavn
-        } else if (orginalAvsenderMottaker.type == AvsenderMottakerIdType.FNR && sykmeldtNavn.isNullOrBlank()) {
+        } else if (orginalAvsenderMottaker?.type == AvsenderMottakerIdType.FNR && sykmeldtNavn.isNullOrBlank()) {
             null
         } else {
             source

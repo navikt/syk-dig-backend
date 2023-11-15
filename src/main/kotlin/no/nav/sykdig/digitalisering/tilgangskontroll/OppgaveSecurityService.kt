@@ -46,8 +46,8 @@ class OppgaveSecurityService(
         val journalpost = safGraphQlClient.getJournalpost(journalpostId)
         securelog.info("journalpostid $journalpostId ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
 
-        val id = when (journalpost.journalpost?.bruker?.type) {
-            BrukerIdType.ORGNR -> null
+        val id = when (journalpost.journalpost?.bruker?.idType) {
+            BrukerIdType.ORGNR.toString() -> null
             else -> journalpost.journalpost?.bruker?.id
         }
 
@@ -85,7 +85,6 @@ class OppgaveSecurityService(
 
     private fun getNavEmail(): String {
         val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
-        val navEmail = autentication.token.claims["preferred_username"].toString()
-        return navEmail
+        return autentication.token.claims["preferred_username"].toString()
     }
 }

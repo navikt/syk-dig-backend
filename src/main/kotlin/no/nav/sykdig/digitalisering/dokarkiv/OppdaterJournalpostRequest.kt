@@ -29,7 +29,7 @@ enum class IdType {
 
 data class Bruker(
     val id: String,
-    val type: BrukerIdType = BrukerIdType.FNR,
+    val idType: String = "FNR",
 )
 
 enum class BrukerIdType {
