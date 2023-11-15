@@ -4,12 +4,12 @@ import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
-import no.nav.sykdig.digitalisering.dokarkiv.BrukerIdType
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_IM
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_NETS
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
+import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.digitalisering.sykmelding.service.SykmeldingService
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.Document
@@ -38,8 +38,9 @@ class JournalpostDataFetcher(
     ): JournalpostResult {
         val journalpost = safGraphQlClient.getJournalpost(id)
         securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
-        val fnrEllerAktorId = when (journalpost.journalpost?.bruker?.idType) {
-            BrukerIdType.ORGNR.toString() -> null
+        val fnrEllerAktorId = when (journalpost.journalpost?.bruker?.type) {
+            Type.ORGNR -> null
+            Type.AKTOERID -> null
             else -> journalpost.journalpost?.bruker?.id
         }
 
