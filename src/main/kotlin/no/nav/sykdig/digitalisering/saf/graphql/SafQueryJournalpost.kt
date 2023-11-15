@@ -1,7 +1,5 @@
 package no.nav.sykdig.digitalisering.saf.graphql
 
-import no.nav.sykdig.digitalisering.dokarkiv.DokumentInfo
-
 const val SAF_QUERY_FIND_JOURNALPOST = """
     query FindJournalpost(${"$"}id: String!) {
         journalpost(journalpostId: ${"$"}id) {
@@ -65,6 +63,11 @@ enum class Journalstatus {
     OPPLASTING_DOKUMENT,
     UKJENT,
 }
+
+data class DokumentInfo(
+    val dokumentInfoId: String,
+    val tittel: String?,
+)
 
 data class Bruker(
     val id: String,

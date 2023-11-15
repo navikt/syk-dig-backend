@@ -41,7 +41,9 @@ class DocumentController(
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
 
         if (oppgave != null) {
-            if (dokumentInfoId == "primary") {
+            if (
+                dokumentInfoId == "primary"
+            ) {
                 if (oppgave.dokumentInfoId == null) {
                     log.error("$oppgaveId mangler dokumentInfoId")
                     throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "$oppgaveId mangler dokumentInfoId")
