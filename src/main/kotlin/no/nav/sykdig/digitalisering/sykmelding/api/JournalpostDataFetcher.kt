@@ -17,6 +17,8 @@ import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.generated.types.JournalpostStatusEnum
+import no.nav.sykdig.objectMapper
+import no.nav.sykdig.securelog
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -27,12 +29,15 @@ class JournalpostDataFetcher(
     private val sykmeldingService: SykmeldingService,
 ) {
 
+    val securelog = securelog()
+
     @PostAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(returnObject)")
     @DgsQuery(field = DgsConstants.QUERY.Journalpost)
     fun getJournalpostById(
         @InputArgument id: String,
     ): JournalpostResult {
         val journalpost = safGraphQlClient.getJournalpost(id)
+        securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
         val fnrEllerAktorId = when (journalpost.journalpost?.bruker?.idType) {
             BrukerIdType.ORGNR.toString() -> null
             else -> journalpost.journalpost?.bruker?.id
