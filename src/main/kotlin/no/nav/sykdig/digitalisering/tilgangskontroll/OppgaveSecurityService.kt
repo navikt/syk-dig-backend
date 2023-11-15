@@ -48,7 +48,6 @@ class OppgaveSecurityService(
 
         val id = when (journalpost.journalpost?.bruker?.type) {
             Type.ORGNR -> null
-            Type.AKTOERID -> null
             else -> journalpost.journalpost?.bruker?.id
         }
 

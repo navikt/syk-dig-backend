@@ -40,7 +40,6 @@ class JournalpostDataFetcher(
         securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
         val fnrEllerAktorId = when (journalpost.journalpost?.bruker?.type) {
             Type.ORGNR -> null
-            Type.AKTOERID -> null
             else -> journalpost.journalpost?.bruker?.id
         }
 
