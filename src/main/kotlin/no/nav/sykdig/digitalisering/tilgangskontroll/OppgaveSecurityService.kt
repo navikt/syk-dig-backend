@@ -46,7 +46,7 @@ class OppgaveSecurityService(
         val journalpost = safGraphQlClient.getJournalpost(journalpostId)
         securelog.info("journalpostid $journalpostId ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
 
-        val id = when (journalpost.journalpost?.bruker?.idType) {
+        val id = when (journalpost.journalpost?.bruker?.type) {
             BrukerIdType.ORGNR.toString() -> null
             else -> journalpost.journalpost?.bruker?.id
         }
