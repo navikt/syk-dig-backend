@@ -78,4 +78,5 @@ enum class Type {
     FNR,
     AKTOERID,
     ORGNR,
-}
+
+

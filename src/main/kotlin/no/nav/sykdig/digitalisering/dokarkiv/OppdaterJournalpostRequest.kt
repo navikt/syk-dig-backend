@@ -3,7 +3,7 @@ package no.nav.sykdig.digitalisering.dokarkiv
 data class OppdaterJournalpostRequest(
     val tema: String = "SYM",
     val avsenderMottaker: AvsenderMottakerRequest,
-    val bruker: Bruker,
+    val bruker: DokBruker,
     val sak: Sak = Sak(),
     val tittel: String,
     val dokumenter: List<DokumentInfo>?,
@@ -27,7 +27,7 @@ enum class IdType {
     UTL_ORG,
 }
 
-data class Bruker(
+data class DokBruker(
     val id: String,
     val idType: String = "FNR",
 )
