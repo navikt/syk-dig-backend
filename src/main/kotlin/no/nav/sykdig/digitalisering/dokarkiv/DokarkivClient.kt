@@ -177,7 +177,7 @@ class DokarkivClient(
                         sykmeldtNavn = sykmeldtNavn,
                         sykmeldtFnr = fnr,
                     ),
-                    bruker = Bruker(
+                    bruker = DokBruker(
                         id = fnr,
                     ),
                     tittel = createTitleRina(perioder, avvisningsGrunn),
@@ -204,7 +204,7 @@ class DokarkivClient(
                         sykmeldtNavn = sykmeldtNavn,
                         sykmeldtFnr = fnr,
                     ),
-                    bruker = Bruker(
+                    bruker = DokBruker(
                         id = fnr,
                     ),
                     tittel = createNavNoTittle(perioder, avvisningsGrunn),
@@ -230,7 +230,7 @@ class DokarkivClient(
                         sykmeldtNavn = sykmeldtNavn,
                         sykmeldtFnr = fnr,
                     ),
-                    bruker = Bruker(
+                    bruker = DokBruker(
                         id = fnr,
                     ),
                     tittel = createTittle(perioder, avvisningsGrunn),

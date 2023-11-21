@@ -1,8 +1,5 @@
 package no.nav.sykdig.digitalisering.saf.graphql
 
-import no.nav.sykdig.digitalisering.dokarkiv.Bruker
-import no.nav.sykdig.digitalisering.dokarkiv.DokumentInfo
-
 const val SAF_QUERY_FIND_JOURNALPOST = """
     query FindJournalpost(${"$"}id: String!) {
         journalpost(journalpostId: ${"$"}id) {
@@ -71,3 +68,13 @@ enum class SaksType {
     FAGSAK,
     GENERELL_SAK,
 }
+
+data class Bruker(
+    val id: String,
+    val type: String = "FNR",
+)
+
+data class DokumentInfo(
+    val dokumentInfoId: String,
+    val tittel: String?,
+)
