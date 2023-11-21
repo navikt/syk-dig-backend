@@ -4,18 +4,21 @@ import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
-import no.nav.sykdig.digitalisering.dokarkiv.BrukerIdType
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_IM
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_NETS
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
+import no.nav.sykdig.digitalisering.saf.graphql.Type
+import no.nav.sykdig.digitalisering.sykmelding.service.SykmeldingService
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.generated.types.JournalpostStatusEnum
+import no.nav.sykdig.objectMapper
+import no.nav.sykdig.securelog
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -23,7 +26,10 @@ import org.springframework.security.access.prepost.PreAuthorize
 class JournalpostDataFetcher(
     private val safGraphQlClient: SafJournalpostGraphQlClient,
     private val personService: PersonService,
+    private val sykmeldingService: SykmeldingService,
 ) {
+
+    val securelog = securelog()
 
     @PostAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(returnObject)")
     @DgsQuery(field = DgsConstants.QUERY.Journalpost)
@@ -31,8 +37,9 @@ class JournalpostDataFetcher(
         @InputArgument id: String,
     ): JournalpostResult {
         val journalpost = safGraphQlClient.getJournalpost(id)
+        securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
         val fnrEllerAktorId = when (journalpost.journalpost?.bruker?.type) {
-            BrukerIdType.ORGNR.toString() -> null
+            Type.ORGNR -> null
             else -> journalpost.journalpost?.bruker?.id
         }
 
@@ -88,7 +95,8 @@ class JournalpostDataFetcher(
                 status = JournalpostStatusEnum.FEIL_KANAL,
             )
         }
-        // TODO: Valider og opprett sykmelding på Kafka
+
+        sykmeldingService.createSykmelding(journalpostId, journalpost.journalpost.tema)
 
         return JournalpostStatus(
             journalpostId = journalpostId,

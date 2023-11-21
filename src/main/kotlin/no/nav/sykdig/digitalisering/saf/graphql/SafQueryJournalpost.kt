@@ -64,17 +64,19 @@ enum class Journalstatus {
     UKJENT,
 }
 
-enum class SaksType {
-    FAGSAK,
-    GENERELL_SAK,
-}
-
-data class Bruker(
-    val id: String,
-    val type: String = "FNR",
-)
-
 data class DokumentInfo(
     val dokumentInfoId: String,
     val tittel: String?,
 )
+
+data class Bruker(
+    val id: String,
+    val type: Type,
+)
+
+enum class Type {
+    FNR,
+    AKTOERID,
+    ORGNR,
+
+

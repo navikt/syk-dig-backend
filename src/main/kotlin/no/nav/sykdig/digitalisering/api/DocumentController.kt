@@ -22,7 +22,7 @@ class DocumentController(
     val log = logger()
 
     @GetMapping("/api/document/journalpost/{journalpostId}/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(#journalpostId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToJournalpostId(#journalpostId)")
     @ResponseBody
     fun getJournalpostDocument(
         @PathVariable journalpostId: String,
@@ -41,7 +41,9 @@ class DocumentController(
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
 
         if (oppgave != null) {
-            if (dokumentInfoId == "primary") {
+            if (
+                dokumentInfoId == "primary"
+            ) {
                 if (oppgave.dokumentInfoId == null) {
                     log.error("$oppgaveId mangler dokumentInfoId")
                     throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "$oppgaveId mangler dokumentInfoId")

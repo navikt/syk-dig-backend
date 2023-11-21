@@ -3,9 +3,9 @@ package no.nav.sykdig.digitalisering.tilgangskontroll
 import no.nav.sykdig.auditLogger.AuditLogger
 import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
-import no.nav.sykdig.digitalisering.dokarkiv.BrukerIdType
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
+import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
@@ -47,7 +47,7 @@ class OppgaveSecurityService(
         securelog.info("journalpostid $journalpostId ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
 
         val id = when (journalpost.journalpost?.bruker?.type) {
-            BrukerIdType.ORGNR.toString() -> null
+            Type.ORGNR -> null
             else -> journalpost.journalpost?.bruker?.id
         }
 

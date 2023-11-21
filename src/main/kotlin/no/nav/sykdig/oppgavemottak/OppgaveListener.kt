@@ -1,8 +1,8 @@
 package no.nav.sykdig.oppgavemottak
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.sykdig.config.kafka.sykDigOppgaveTopic
 import no.nav.sykdig.objectMapper
-import no.nav.sykdig.oppgavemottak.kafka.sykDigOppgaveTopic
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
