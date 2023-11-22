@@ -54,5 +54,6 @@ abstract class FellesTestOppsett {
     @AfterAll
     fun opprydning() {
         namedParameterJdbcTemplate.update("DELETE FROM sykmelding", MapSqlParameterSource())
+        namedParameterJdbcTemplate.update("DELETE FROM journalpost_sykmelding", MapSqlParameterSource())
     }
 }

@@ -101,9 +101,12 @@ tasks {
     getByName<Jar>("jar") {
         enabled = false
     }
+    "compileKotlin" {
+        dependsOn("ktlintFormat")
+    }
 
     "check" {
-        dependsOn("ktlintFormat")
+        dependsOn("ktlintCheck")
     }
 }
 configure<KtlintExtension> {
