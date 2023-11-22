@@ -1,0 +1,1 @@
+alter table sykmelidng_from_journalpost rename to journalpost_sykmelding;

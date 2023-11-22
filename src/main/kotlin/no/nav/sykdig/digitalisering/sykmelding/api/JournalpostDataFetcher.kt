@@ -17,6 +17,7 @@ import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.generated.types.JournalpostStatusEnum
+import no.nav.sykdig.logger
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.security.access.prepost.PostAuthorize
@@ -28,8 +29,10 @@ class JournalpostDataFetcher(
     private val personService: PersonService,
     private val sykmeldingService: SykmeldingService,
 ) {
-
-    val securelog = securelog()
+    companion object {
+        private val securelog = securelog()
+        private val log = logger()
+    }
 
     @PostAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(returnObject)")
     @DgsQuery(field = DgsConstants.QUERY.Journalpost)
@@ -38,6 +41,14 @@ class JournalpostDataFetcher(
     ): JournalpostResult {
         val journalpost = safGraphQlClient.getJournalpost(id)
         securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
+
+        if (sykmeldingService.isSykmeldingCreated(id)) {
+            log.info("Sykmelding already created for journalpost id $id")
+            return JournalpostStatus(
+                journalpostId = id,
+                status = JournalpostStatusEnum.OPPRETTET,
+            )
+        }
         val fnrEllerAktorId = when (journalpost.journalpost?.bruker?.type) {
             Type.ORGNR -> null
             else -> journalpost.journalpost?.bruker?.id
@@ -65,6 +76,7 @@ class JournalpostDataFetcher(
         }
 
         val fnr = personService.hentPerson(fnrEllerAktorId, id).fnr
+
         return Journalpost(
             id,
             journalpost.journalpost.journalstatus?.name ?: "MANGLER_STATUS",
