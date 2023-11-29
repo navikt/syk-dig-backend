@@ -6,6 +6,7 @@ import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.GetOppgaveResponse
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveType
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.Oppgavestatus
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
@@ -79,6 +80,8 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
         behandlesAvApplikasjon = "SMM",
         tilordnetRessurs = "A123456",
         beskrivelse = "Dette var ikkje bra",
+        oppgaveType = OppgaveType.BEH_SED,
+        tildeltEnhetsnr = "0393",
     )
 
     val excpetedAvvisingsgrunn = Avvisingsgrunn.MANGLENDE_DIAGNOSE

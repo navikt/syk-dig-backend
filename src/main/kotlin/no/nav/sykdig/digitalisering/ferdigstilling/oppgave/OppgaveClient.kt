@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
+import java.time.LocalDate
+import java.util.UUID
 
 @Component
 class OppgaveClient(
@@ -49,7 +51,10 @@ class OppgaveClient(
                 log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
-                log.error("HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
+                log.error(
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
+                    e,
+                )
                 throw e
             }
         } catch (e: HttpServerErrorException) {
@@ -142,6 +147,81 @@ class OppgaveClient(
         } catch (e: HttpServerErrorException) {
             log.error(
                 "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} fra Oppgave ved oppdaterOppgave: ${e.message}",
+                e,
+            )
+            throw e
+        }
+    }
+
+    fun opprettOppgave(
+        id: Int,
+        tildeltEnhetsnr: String,
+        versjon: Int,
+        tema: String,
+        oppgavetype: OppgaveType,
+        status: Oppgavestatus,
+        prioritet: String,
+        aktivDato: LocalDate,
+    ) {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-Correlation-ID"] = UUID.randomUUID().toString()
+        try {
+            oppgaveRestTemplate.exchange(
+                "$url",
+                HttpMethod.POST,
+                HttpEntity(
+                    CreateOppgaveRequest(
+                        id = id,
+                        tildeltEnhetsnr = tildeltEnhetsnr,
+                        versjon = versjon,
+                        tema = tema,
+                        oppgavetype = oppgavetype,
+                        status = status,
+                        prioritet = prioritet,
+                        aktivDato = aktivDato,
+                    ),
+                    headers,
+                ),
+                String::class.java,
+            )
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+                log.warn("Veileder har ikke tilgang til å opprette oppgaveId $id: ${e.message}")
+                throw IkkeTilgangException("Veileder har ikke tilgang til å opprette oppgave")
+            } else {
+                log.error(
+                    "HttpClientErrorException for oppgaveId $id med responskode ${e.statusCode.value()} fra Oppgave ved createOppgave: ${e.message}",
+                    e,
+                )
+                throw e
+            }
+        } catch (e: HttpServerErrorException) {
+            log.error(
+                "HttpServerErrorException for oppgaveId $id med responskode ${e.statusCode.value()} fra Oppgave ved createOppgave: ${e.message}",
+                e,
+            )
+            throw e
+        }
+    }
+
+    @Retryable
+    fun getOppgaveByJournalpostId(journalpostId: String): GetOppgaveResponse {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-Correlation-ID"] = UUID.fromString(journalpostId).toString()
+
+        try {
+            val response = oppgaveRestTemplate.exchange(
+                "$url?journalpostId",
+                HttpMethod.GET,
+                HttpEntity<Any>(listOf(journalpostId), headers),
+                GetOppgaveResponse::class.java,
+            )
+            return response.body ?: throw RuntimeException("Fant ikke oppgave med journalpostId $journalpostId")
+        } catch (e: HttpServerErrorException) {
+            log.error(
+                "HttpServerErrorException for journalpostId $journalpostId med responskode ${e.statusCode.value()} fra Oppgave ved getOppgaveByJournalpostId: ${e.message}",
                 e,
             )
             throw e

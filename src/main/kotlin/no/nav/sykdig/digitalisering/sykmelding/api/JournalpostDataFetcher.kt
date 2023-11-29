@@ -4,6 +4,7 @@ import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_IM
@@ -28,6 +29,7 @@ class JournalpostDataFetcher(
     private val safGraphQlClient: SafJournalpostGraphQlClient,
     private val personService: PersonService,
     private val sykmeldingService: SykmeldingService,
+    private val oppgaveClient: OppgaveClient,
 ) {
     companion object {
         private val securelog = securelog()
@@ -91,6 +93,7 @@ class JournalpostDataFetcher(
     @DgsMutation(field = DgsConstants.MUTATION.SykmeldingFraJournalpost)
     fun createSykmelding(
         @InputArgument journalpostId: String,
+        norsk: Boolean,
     ): JournalpostResult {
         val journalpost = safGraphQlClient.getJournalpost(journalpostId)
 
@@ -101,10 +104,26 @@ class JournalpostDataFetcher(
             )
         }
 
-        if (!listOf(CHANNEL_SCAN_IM, CHANNEL_SCAN_NETS).contains(journalpost.journalpost.kanal)) {
-            return JournalpostStatus(
-                journalpostId = journalpostId,
-                status = JournalpostStatusEnum.FEIL_KANAL,
+        if (norsk) {
+            if (!listOf(CHANNEL_SCAN_IM, CHANNEL_SCAN_NETS).contains(journalpost.journalpost.kanal)) {
+                return JournalpostStatus(
+                    journalpostId = journalpostId,
+                    status = JournalpostStatusEnum.FEIL_KANAL,
+                )
+            }
+        } else {
+            // Utenlandsk sykmelding
+            // TODO FInn original oppgave for journapostId - hent ut oppgaveType, Status, prioritet, aktivDato, tildeltEnhetsnr -> For å bruke i oppgaveClient.opprettOppgave
+            val oppgaveByJournalpostId = oppgaveClient.getOppgaveByJournalpostId(journalpostId)
+            oppgaveClient.opprettOppgave(
+                id = journalpostId.toInt(),
+                tildeltEnhetsnr = "9999",
+                versjon = 1,
+                tema = journalpost.journalpost.tema, // SYK / SYM
+                oppgavetype = oppgaveByJournalpostId.oppgaveType, // BEH_SED / VURD_HENV
+                status = oppgaveByJournalpostId.status,
+                prioritet = "NORM",
+                aktivDato = java.time.LocalDate.now(),
             )
         }
 
