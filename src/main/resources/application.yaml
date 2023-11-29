@@ -40,7 +40,7 @@ management:
 aiven-kafka:
     auto-offset-reset: earliest
 
-syfo-tilgangskontroll.url: "http://syfo-tilgangskontroll.teamsykefravr"
+istilgangskontroll.url: "http://istilgangskontroll.teamsykefravr"
 saf.url: ${SAF_URL}
 pdl.url: ${PDL_URL}
 kodeverk.url: ${KODEVERK_URL}
@@ -54,10 +54,10 @@ no.nav.security.jwt:
             accepted_audience: ${AZURE_APP_CLIENT_ID}
     client:
         registration:
-            onbehalfof-syfotilgangskontroll:
+            onbehalfof-istilgangskontroll:
                 token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
                 grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-                scope: api://${SYFOTILGANGSKONTROLL_AAD_CLIENT_ID}/.default
+                scope: api://${ISTILGANGSKONTROLL_AAD_CLIENT_ID}/.default
                 authentication:
                     client-id: ${AZURE_APP_CLIENT_ID}
                     client-secret: ${AZURE_APP_CLIENT_SECRET}

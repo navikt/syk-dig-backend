@@ -25,7 +25,7 @@ KAFKA_KEYSTORE_PATH: ""
 aiven-kafka:
   auto-offset-reset: latest
 
-syfotilgangskontroll.url: http://syfotilgangskontroll
+istilgangskontroll.url: http://istilgangskontroll
 saf.url: http://saf
 pdl.url: http://pdl
 kodeverk.url: http://kodeverk
@@ -39,10 +39,10 @@ no.nav.security.jwt:
       accepted_audience: syk-dig-backend-client-id
   client:
     registration:
-      onbehalfof-syfotilgangskontroll:
+      onbehalfof-istilgangskontroll:
         token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: syfotilgangskontroll-client
+        scope: istilgangskontroll-client
         authentication:
           client-id: client-id
           client-secret: secret
