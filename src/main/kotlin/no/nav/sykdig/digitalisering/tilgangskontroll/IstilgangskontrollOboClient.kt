@@ -12,12 +12,12 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 @Component
-class SyfoTilgangskontrollOboClient(
-    @Value("\${syfotilgangskontroll.url}") private val url: String,
-    private val syfotilgangskontrollRestTemplate: RestTemplate,
+class IstilgangskontrollOboClient(
+    @Value("\${istilgangskontroll.url}") private val url: String,
+    private val istilgangskontrollRestTemplate: RestTemplate,
 ) {
     companion object {
-        const val ACCESS_TO_USER_WITH_AZURE_V2_PATH = "/syfo-tilgangskontroll/api/tilgang/navident/person"
+        const val ACCESS_TO_USER_WITH_AZURE_V2_PATH = "/api/tilgang/navident/person"
         const val NAV_PERSONIDENT_HEADER = "nav-personident"
     }
 
@@ -30,7 +30,7 @@ class SyfoTilgangskontrollOboClient(
         headers[NAV_PERSONIDENT_HEADER] = fnr
 
         try {
-            val response = syfotilgangskontrollRestTemplate.exchange(
+            val response = istilgangskontrollRestTemplate.exchange(
                 accessToUserV2Url(),
                 GET,
                 HttpEntity<Any>(headers),
@@ -39,7 +39,7 @@ class SyfoTilgangskontrollOboClient(
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
             return if (e.statusCode.value() == 403) {
-                log.error("Syfo tilgangskontroll returnerte 403", e)
+                log.error("istilgangskontroll returnerte 403", e)
                 false
             } else {
                 log.error("HttpClientErrorException mot tilgangskontroll", e)

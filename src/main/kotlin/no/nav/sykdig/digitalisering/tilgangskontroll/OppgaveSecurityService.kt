@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class OppgaveSecurityService(
-    private val syfoTilgangskontrollOboClient: SyfoTilgangskontrollOboClient,
+    private val istilgangskontrollOboClient: IstilgangskontrollOboClient,
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val safGraphQlClient: SafJournalpostGraphQlClient,
     private val personService: PersonService,
@@ -66,7 +66,7 @@ class OppgaveSecurityService(
     }
 
     private fun hasAccess(fnr: String, navEmail: String): Boolean {
-        val tilgang = syfoTilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
+        val tilgang = istilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
         auditlog.info(
             AuditLogger().createcCefMessage(
                 fnr = fnr,
