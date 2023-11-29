@@ -4,6 +4,7 @@ import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
+import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
@@ -19,10 +20,15 @@ import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.generated.types.JournalpostStatusEnum
 import no.nav.sykdig.logger
+import no.nav.sykdig.model.DokumentDbModel
+import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
+import no.nav.sykdig.utils.toOppgaveDbModel
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
+import java.time.LocalDate
+import java.util.*
 
 @DgsComponent
 class JournalpostDataFetcher(
@@ -30,6 +36,7 @@ class JournalpostDataFetcher(
     private val personService: PersonService,
     private val sykmeldingService: SykmeldingService,
     private val oppgaveClient: OppgaveClient,
+    private val oppgaveRepository: OppgaveRepository
 ) {
     companion object {
         private val securelog = securelog()
@@ -89,6 +96,7 @@ class JournalpostDataFetcher(
         )
     }
 
+
     @PreAuthorize("@oppgaveSecurityService.hasAccessToJournalpostId(#journalpostId)")
     @DgsMutation(field = DgsConstants.MUTATION.SykmeldingFraJournalpost)
     fun createSykmelding(
@@ -113,25 +121,47 @@ class JournalpostDataFetcher(
             }
         } else {
             // Utenlandsk sykmelding
-            // TODO FInn original oppgave for journapostId - hent ut oppgaveType, Status, prioritet, aktivDato, tildeltEnhetsnr -> For å bruke i oppgaveClient.opprettOppgave
-            val oppgaveByJournalpostId = oppgaveClient.getOppgaveByJournalpostId(journalpostId)
-            oppgaveClient.opprettOppgave(
-                id = journalpostId.toInt(),
-                tildeltEnhetsnr = "9999",
-                versjon = 1,
-                tema = journalpost.journalpost.tema, // SYK / SYM
-                oppgavetype = oppgaveByJournalpostId.oppgaveType, // BEH_SED / VURD_HENV
-                status = oppgaveByJournalpostId.status,
-                prioritet = "NORM",
-                aktivDato = java.time.LocalDate.now(),
-            )
-        }
+            // TODO FInn original oppgave for journapostId - trenger oppgaveTYpe
 
+
+            val response = oppgaveClient.opprettOppgave(
+                journalpostId = journalpostId,
+                tema = journalpost.journalpost.tema, // SYK / SYM
+                oppgavetype = "BEH_SED", // BEH_SED / VURD_HENV
+                prioritet = "NORM",
+                aktivDato = LocalDate.now(),
+                behandlesAvApplikasjon = "FS22",
+            )
+            /*val oppgave = OppgaveDbModel(oppgaveId = response.id.toString(),
+                fnr = "journalpost.journalpost.bruker.id",
+                journalpostId = journalpostId,
+                dokumentInfoId = UUID.randomUUID().toString(),
+                dokumenter = listOf(DokumentDbModel("dokumentInfoId", "tittel")), //List<DokumentDbModel>
+                opprettet = ,
+                ferdigstilt = ,
+                tilbakeTilGosys = ,
+                avvisingsgrunn = ,
+                sykmeldingId = UUID.randomUUID() ,
+                type = ,
+                sykmelding = null,
+                endretAv = ,
+                timestamp = ,
+                source =
+            )*/
+            //oppgaveRepository.lagreOppgave(oppgave)
+
+            // lagre oppgave og sykmelding dersom
+            handleUtenlandsk()
+        }
         sykmeldingService.createSykmelding(journalpostId, journalpost.journalpost.tema)
+
 
         return JournalpostStatus(
             journalpostId = journalpostId,
             status = JournalpostStatusEnum.OPPRETTET,
         )
+    }
+    private fun handleUtenlandsk() {
+
     }
 }

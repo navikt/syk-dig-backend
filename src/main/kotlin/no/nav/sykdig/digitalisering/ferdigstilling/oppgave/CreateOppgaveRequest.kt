@@ -3,12 +3,10 @@ package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 import java.time.LocalDate
 
 data class CreateOppgaveRequest(
-    val id: Int,
-    val tildeltEnhetsnr: String,
-    val versjon: Int,
+    val journalpostId: String,
     val tema: String,
-    val oppgavetype: OppgaveType,
-    val status: Oppgavestatus,
+    val oppgavetype: String,
     val prioritet: String,
     val aktivDato: LocalDate,
+    val behandlesAvApplikasjon: String,
 )
