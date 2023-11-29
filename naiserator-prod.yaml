@@ -69,7 +69,7 @@ spec:
         - application: syk-dig
     outbound:
       rules:
-        - application: syfo-tilgangskontroll
+        - application: istilgangskontroll
           namespace: teamsykefravr
           cluster: prod-gcp
       external:
@@ -82,8 +82,8 @@ spec:
   secureLogs:
     enabled: true
   env:
-    - name: SYFOTILGANGSKONTROLL_AAD_CLIENT_ID
-      value: prod-gcp.teamsykefravr.syfo-tilgangskontroll
+    - name: ISTILGANGSKONTROLL_AAD_CLIENT_ID
+      value: prod-gcp.teamsykefravr.istilgangskontroll
     - name: SAF_URL
       value: https://saf.prod-fss-pub.nais.io
     - name: SAF_CLIENT_ID
