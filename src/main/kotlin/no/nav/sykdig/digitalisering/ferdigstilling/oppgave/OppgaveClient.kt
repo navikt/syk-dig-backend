@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 

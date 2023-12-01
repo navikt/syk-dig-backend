@@ -9,13 +9,11 @@ import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
-import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
-import java.time.OffsetDateTime
 import java.util.*
 
 @Service
@@ -90,7 +88,7 @@ class OppgaveSecurityService(
         val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         return autentication.token.claims["preferred_username"].toString()
     }
-    public fun getSaksbehandlerId(): String {
-        return getNavEmail();
+    fun getSaksbehandlerId(): String {
+        return getNavEmail()
     }
 }

@@ -1,6 +1,5 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
-import java.time.LocalDate
 import java.time.OffsetDateTime
 
 data class GetOppgaveResponse(
