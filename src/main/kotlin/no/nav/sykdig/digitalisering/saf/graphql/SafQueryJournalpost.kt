@@ -25,7 +25,7 @@ data class Journalpost(
     val journalstatus: Journalstatus?,
     val avsenderMottaker: AvsenderMottaker?,
     val bruker: Bruker?,
-    val dokumenter: List<DokumentInfo>?,
+    val dokumenter: List<DokumentInfo>,
     val tema: String?,
     val kanal: String?,
 )

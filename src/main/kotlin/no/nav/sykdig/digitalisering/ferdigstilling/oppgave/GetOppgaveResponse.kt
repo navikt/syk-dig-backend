@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
 import java.time.LocalDate
+import java.time.OffsetDateTime
 
 data class GetOppgaveResponse(
     val versjon: Int,
@@ -10,7 +11,7 @@ data class GetOppgaveResponse(
     val mappeId: Int? = null,
     val beskrivelse: String? = null,
     val oppgaveType: OppgaveType,
-    val aktivDato: LocalDate? = null,
+    val aktivDato: OffsetDateTime,
     val prioritet: String? = null,
     val id: Int? = null,
     val tema: String? = null,

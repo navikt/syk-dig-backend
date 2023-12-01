@@ -10,9 +10,11 @@ import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_IM
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_NETS
+import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.digitalisering.sykmelding.service.SykmeldingService
+import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Journalpost
@@ -28,6 +30,7 @@ import no.nav.sykdig.utils.toOppgaveDbModel
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.util.*
 
 @DgsComponent
@@ -36,7 +39,8 @@ class JournalpostDataFetcher(
     private val personService: PersonService,
     private val sykmeldingService: SykmeldingService,
     private val oppgaveClient: OppgaveClient,
-    private val oppgaveRepository: OppgaveRepository
+    private val oppgaveRepository: OppgaveRepository,
+    private val oppgaveSecurityService: OppgaveSecurityService,
 ) {
     companion object {
         private val securelog = securelog()
@@ -58,10 +62,7 @@ class JournalpostDataFetcher(
                 status = JournalpostStatusEnum.OPPRETTET,
             )
         }
-        val fnrEllerAktorId = when (journalpost.journalpost?.bruker?.type) {
-            Type.ORGNR -> null
-            else -> journalpost.journalpost?.bruker?.id
-        }
+        val fnrEllerAktorId = getFnrEllerAktorId(journalpost)
 
         if (fnrEllerAktorId == null) {
             return JournalpostStatus(
@@ -120,38 +121,45 @@ class JournalpostDataFetcher(
                 )
             }
         } else {
-            // Utenlandsk sykmelding
-            // TODO FInn original oppgave for journapostId - trenger oppgaveTYpe
-
-
             val response = oppgaveClient.opprettOppgave(
                 journalpostId = journalpostId,
-                tema = journalpost.journalpost.tema, // SYK / SYM
-                oppgavetype = "BEH_SED", // BEH_SED / VURD_HENV
+                tema = journalpost.journalpost.tema,
+                oppgavetype = "BEH_SED",
                 prioritet = "NORM",
-                aktivDato = LocalDate.now(),
+                aktivDato = OffsetDateTime.now(),
                 behandlesAvApplikasjon = "FS22",
             )
-            /*val oppgave = OppgaveDbModel(oppgaveId = response.id.toString(),
-                fnr = "journalpost.journalpost.bruker.id",
-                journalpostId = journalpostId,
-                dokumentInfoId = UUID.randomUUID().toString(),
-                dokumenter = listOf(DokumentDbModel("dokumentInfoId", "tittel")), //List<DokumentDbModel>
-                opprettet = ,
-                ferdigstilt = ,
-                tilbakeTilGosys = ,
-                avvisingsgrunn = ,
-                sykmeldingId = UUID.randomUUID() ,
-                type = ,
-                sykmelding = null,
-                endretAv = ,
-                timestamp = ,
-                source =
-            )*/
-            //oppgaveRepository.lagreOppgave(oppgave)
 
-            // lagre oppgave og sykmelding dersom
-            handleUtenlandsk()
+            val fnrEllerAktorId = getFnrEllerAktorId(journalpost)
+                ?: return JournalpostStatus(
+                    journalpostId = journalpostId,
+                    status = JournalpostStatusEnum.MANGLER_FNR,
+                )
+
+            val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
+
+            val dokumenter = journalpost.journalpost.dokumenter.map {
+                DokumentDbModel(it.dokumentInfoId, it.tittel ?: "Mangler Tittel")
+            }
+            val oppgave = OppgaveDbModel(
+                oppgaveId = response.id.toString(),
+                fnr = fnr,
+                journalpostId = journalpostId,
+                dokumentInfoId = journalpost.journalpost.dokumenter.first().dokumentInfoId,
+                dokumenter = dokumenter,
+                opprettet = response.aktivDato,
+                ferdigstilt = null,
+                tilbakeTilGosys = true,
+                avvisingsgrunn = null,
+                sykmeldingId = UUID.randomUUID() , // Må opprette sykmelding først for å ha denne.
+                type = "UTLAND",
+                sykmelding = null,
+                endretAv = oppgaveSecurityService.getSaksbehandlerId(),
+                timestamp = OffsetDateTime.now(),
+                source = "syk-dig"
+            )
+            oppgaveRepository.lagreOppgave(oppgave)
+
         }
         sykmeldingService.createSykmelding(journalpostId, journalpost.journalpost.tema)
 
@@ -161,7 +169,12 @@ class JournalpostDataFetcher(
             status = JournalpostStatusEnum.OPPRETTET,
         )
     }
-    private fun handleUtenlandsk() {
 
+    private fun getFnrEllerAktorId(journalpost: SafQueryJournalpost): String? {
+        return when (journalpost.journalpost?.bruker?.type) {
+            Type.ORGNR -> null
+            else -> journalpost.journalpost?.bruker?.id
+        }
     }
+
 }
