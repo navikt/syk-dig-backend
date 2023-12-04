@@ -2,13 +2,13 @@ import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "3.1.5"
-    id("io.spring.dependency-management") version "1.1.3"
-    kotlin("jvm") version "1.9.10"
-    kotlin("plugin.spring") version "1.9.10"
+    id("org.springframework.boot") version "3.2.0"
+    id("io.spring.dependency-management") version "1.1.4"
+    kotlin("jvm") version "1.9.21"
+    kotlin("plugin.spring") version "1.9.21"
     id("com.netflix.dgs.codegen") version "5.12.4"
-    id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
-    id("org.cyclonedx.bom") version "1.8.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.0.2"
+    id("org.cyclonedx.bom") version "1.8.1"
 }
 
 group = "no.nav.sykdig"
@@ -22,18 +22,18 @@ repositories {
     }
 }
 
-val postgresVersion = "42.6.0"
+val postgresVersion = "42.7.0"
 val snakeYamlVersion = "2.2"
-val smCommonVersion = "2.0.4"
-val tokenSupportVersion = "3.1.7"
-val testContainersVersion = "1.19.1"
+val smCommonVersion = "2.0.6"
+val tokenSupportVersion = "3.2.0"
+val testContainersVersion = "1.19.3"
 val logstashLogbackEncoderVersion = "7.4"
 val javaJwtVersion = "4.4.0"
-val springBootResourceVersion = "3.1.5"
+val springBootResourceVersion = "3.2.0"
 val graphqlVersion = "20.2"
 val kafkaClientsVersion = "3.6.0"
 val syfoXmlCodegen = "2.0.1"
-val springSecurityWebVersion = "6.1.5"
+val springSecurityWebVersion = "6.2.0"
 val okhttp3version = "4.12.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
