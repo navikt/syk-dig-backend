@@ -83,12 +83,9 @@ class OppgaveSecurityService(
 
         return tilgang
     }
+}
 
-    private fun getNavEmail(): String {
-        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
-        return autentication.token.claims["preferred_username"].toString()
-    }
-    fun getSaksbehandlerId(): String {
-        return getNavEmail()
-    }
+fun getNavEmail(): String {
+    val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+    return authentication.token.claims["preferred_username"].toString()
 }

@@ -16,5 +16,6 @@ enum JournalpostStatusEnum {
     MANGLER_FNR
     FEIL_TEMA
     OPPRETTET,
-    FEIL_KANAL
+    FEIL_KANAL,
+    MANGLENDE_JOURNALPOST,
 }

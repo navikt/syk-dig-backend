@@ -1,9 +1,10 @@
 package no.nav.sykdig.digitalisering.sykmelding.service
 
+import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_IM
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_NETS
-import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
+import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.generated.types.Document
@@ -17,10 +18,10 @@ import org.springframework.stereotype.Service
 class JournalpostService(
     private val sykmeldingService: SykmeldingService,
     private val personService: PersonService,
-    private val journalpostOppgaveService: JournalpostOppgaveService,
+    private val sykDigOppgaveService: SykDigOppgaveService,
 ) {
 
-    fun createSykmeldingFromJournalpost(journalpost: SafQueryJournalpost, journalpostId: String, norsk: Boolean): JournalpostResult {
+    fun createSykmeldingFromJournalpost(journalpost: SafJournalpost, journalpostId: String, isNorsk: Boolean): JournalpostResult {
         if (isWrongTema(journalpost)) {
             return JournalpostStatus(
                 journalpostId = journalpostId,
@@ -28,7 +29,7 @@ class JournalpostService(
             )
         }
 
-        if (norsk) {
+        if (isNorsk) {
             if (isWrongChannel(journalpost)) {
                 return JournalpostStatus(
                     journalpostId = journalpostId,
@@ -43,9 +44,10 @@ class JournalpostService(
                 )
 
             val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
-            journalpostOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
+
+            sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr) // TODO: FIX THIS
         }
-        sykmeldingService.createSykmelding(journalpostId, journalpost.journalpost?.tema!!)
+        sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
 
         return JournalpostStatus(
             journalpostId = journalpostId,
@@ -53,7 +55,7 @@ class JournalpostService(
         )
     }
 
-    fun getJournalpostResult(journalpost: SafQueryJournalpost, journalpostId: String): JournalpostResult {
+    fun getJournalpostResult(journalpost: SafJournalpost, journalpostId: String): JournalpostResult {
         val fnrEllerAktorId = getFnrEllerAktorId(journalpost)
             ?: return JournalpostStatus(
                 journalpostId = journalpostId,
@@ -75,26 +77,26 @@ class JournalpostService(
         }
         return Journalpost(
             journalpostId,
-            journalpost.journalpost?.journalstatus?.name ?: "MANGLER_STATUS",
-            dokumenter = journalpost.journalpost?.dokumenter?.map {
+            journalpost.journalstatus?.name ?: "MANGLER_STATUS",
+            dokumenter = journalpost.dokumenter.map {
                 Document(it.tittel ?: "Mangler Tittel", it.dokumentInfoId)
-            } ?: emptyList(),
+            },
             fnr = fnr,
         )
     }
 
-    private fun isWrongChannel(journalpost: SafQueryJournalpost): Boolean {
-        return !listOf(CHANNEL_SCAN_IM, CHANNEL_SCAN_NETS).contains(journalpost.journalpost?.kanal)
+    private fun isWrongChannel(journalpost: SafJournalpost): Boolean {
+        return !listOf(CHANNEL_SCAN_IM, CHANNEL_SCAN_NETS).contains(journalpost.kanal)
     }
 
-    private fun isWrongTema(journalpost: SafQueryJournalpost): Boolean {
-        return journalpost.journalpost?.tema != TEMA_SYKMELDING
+    private fun isWrongTema(journalpost: SafJournalpost): Boolean {
+        return journalpost.tema != TEMA_SYKMELDING
     }
 
-    private fun getFnrEllerAktorId(journalpost: SafQueryJournalpost): String? {
-        return when (journalpost.journalpost?.bruker?.type) {
+    private fun getFnrEllerAktorId(journalpost: SafJournalpost): String? {
+        return when (journalpost.bruker?.type) {
             Type.ORGNR -> null
-            else -> journalpost.journalpost?.bruker?.id
+            else -> journalpost.bruker?.id
         }
     }
 }

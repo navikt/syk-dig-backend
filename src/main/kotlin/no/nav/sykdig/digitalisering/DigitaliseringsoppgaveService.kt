@@ -11,6 +11,8 @@ import no.nav.sykdig.logger
 import no.nav.sykdig.metrics.MetricRegister
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -135,5 +137,13 @@ fun mapAvvisningsgrunn(avvisningsgrunn: Avvisingsgrunn, avvisningsgrunnAnnet: St
         Avvisingsgrunn.FOR_LANG_PERIODE -> "Sykmeldingen har for lang periode"
         Avvisingsgrunn.BASERT_PAA_TELEFONKONTAKT -> "Sykmelding basert på telefonkontakt"
         Avvisingsgrunn.ANNET -> avvisningsgrunnAnnet ?: throw RuntimeException("Avvisningsgrunn Annet er null")
+    }
+}
+
+fun getFristForFerdigstillingAvOppgave(today: LocalDate): LocalDate {
+    return when (today.dayOfWeek) {
+        DayOfWeek.FRIDAY -> today.plusDays(3)
+        DayOfWeek.SATURDAY -> today.plusDays(2)
+        else -> today.plusDays(1)
     }
 }

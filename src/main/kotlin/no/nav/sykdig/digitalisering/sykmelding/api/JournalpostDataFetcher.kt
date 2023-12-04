@@ -33,7 +33,11 @@ class JournalpostDataFetcher(
     fun getJournalpostById(
         @InputArgument id: String,
     ): JournalpostResult {
-        val journalpost = safGraphQlClient.getJournalpost(id)
+        val journalpost = safGraphQlClient.getJournalpost(id).journalpost ?: return JournalpostStatus(
+            journalpostId = id,
+            status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
+        )
+
         securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
 
         if (sykmeldingService.isSykmeldingCreated(id)) {
@@ -51,9 +55,13 @@ class JournalpostDataFetcher(
     @DgsMutation(field = DgsConstants.MUTATION.SykmeldingFraJournalpost)
     fun createSykmelding(
         @InputArgument journalpostId: String,
-        norsk: Boolean,
+        isNorsk: Boolean,
     ): JournalpostResult {
-        val journalpost = safGraphQlClient.getJournalpost(journalpostId)
-        return journalpostService.createSykmeldingFromJournalpost(journalpost, journalpostId, norsk)
+        val journalpost = safGraphQlClient.getJournalpost(journalpostId).journalpost
+            ?: return JournalpostStatus(
+                journalpostId = journalpostId,
+                status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
+            )
+        return journalpostService.createSykmeldingFromJournalpost(journalpost, journalpostId, isNorsk)
     }
 }

@@ -4,22 +4,57 @@ import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.db.toSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
+import no.nav.sykdig.digitalisering.tilgangskontroll.getNavEmail
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.logger
+import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.OffsetDateTime
+import java.util.UUID
 
 @Service
 class SykDigOppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val ferdigstillingService: FerdigstillingService,
+    private val oppgaveClient: OppgaveClient,
 ) {
     private val log = logger()
 
+    fun opprettOgLagreOppgave(journalpost: SafJournalpost, journalpostId: String, fnr: String) {
+        val response = oppgaveClient.opprettOppgave(
+            journalpostId = journalpostId,
+        )
+
+        val dokumenter = journalpost.dokumenter.map {
+            DokumentDbModel(it.dokumentInfoId, it.tittel ?: "Mangler Tittel")
+        }
+
+        val oppgave = OppgaveDbModel(
+            oppgaveId = response.id.toString(),
+            fnr = fnr,
+            journalpostId = journalpostId,
+            dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId,
+            dokumenter = dokumenter,
+            opprettet = response.aktivDato,
+            ferdigstilt = null,
+            tilbakeTilGosys = false,
+            avvisingsgrunn = null,
+            sykmeldingId = UUID.randomUUID(),
+            type = UTLAND,
+            sykmelding = null,
+            endretAv = getNavEmail(),
+            timestamp = OffsetDateTime.now(),
+            source = "syk-dig",
+        )
+        oppgaveRepository.lagreOppgave(oppgave)
+    }
     fun getOppgave(oppgaveId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
         if (oppgave == null) {
@@ -79,5 +114,9 @@ class SykDigOppgaveService(
             sykmeldt = sykmeldt,
             validatedValues = values,
         )
+    }
+
+    companion object {
+        private const val UTLAND = "UTLAND"
     }
 }

@@ -1,12 +1,15 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
-import java.time.OffsetDateTime
+import java.time.LocalDate
 
 data class CreateOppgaveRequest(
     val journalpostId: String,
+    val opprettetAvEnhetsnr: String? = null,
     val tema: String,
     val oppgavetype: String,
     val prioritet: String,
-    val aktivDato: OffsetDateTime,
+    val aktivDato: LocalDate,
     val behandlesAvApplikasjon: String,
+    val fristFerdigstillelse: LocalDate,
+    val tildeltEnhetsnr: String,
 )

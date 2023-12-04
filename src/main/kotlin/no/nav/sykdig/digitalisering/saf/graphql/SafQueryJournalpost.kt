@@ -19,9 +19,9 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
 """
 
 data class SafQueryJournalpost(
-    val journalpost: Journalpost?,
+    val journalpost: SafJournalpost?,
 )
-data class Journalpost(
+data class SafJournalpost(
     val journalstatus: Journalstatus?,
     val avsenderMottaker: AvsenderMottaker?,
     val bruker: Bruker?,

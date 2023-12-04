@@ -1,6 +1,8 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
+import no.nav.sykdig.digitalisering.getFristForFerdigstillingAvOppgave
+import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -12,8 +14,18 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.time.OffsetDateTime
+import java.time.LocalDate
 import java.util.UUID
+
+private const val OPPGAVETYPE = "JFR"
+
+private const val PRIORITET_NORM = "NORM"
+
+private const val BEHANDLES_AV_APPLIKASJON = "SMD"
+
+private const val TILDELT_ENHETSNR = "0393"
+
+private const val OPPRETTET_AV_ENHETSNR = "9999"
 
 @Component
 class OppgaveClient(
@@ -155,47 +167,51 @@ class OppgaveClient(
 
     fun opprettOppgave(
         journalpostId: String,
-        tema: String,
-        oppgavetype: String,
-        prioritet: String,
-        aktivDato: OffsetDateTime,
-        behandlesAvApplikasjon: String,
     ): GetOppgaveResponse {
         val headers = HttpHeaders()
+        val xCorrelationId = UUID.randomUUID().toString()
         headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = UUID.randomUUID().toString()
+        headers["X-Correlation-ID"] = xCorrelationId
         try {
-            val res = oppgaveRestTemplate.exchange(
-                "$url",
+            return oppgaveRestTemplate.exchange(
+                url,
                 HttpMethod.POST,
                 HttpEntity(
                     CreateOppgaveRequest(
                         journalpostId = journalpostId,
-                        tema = tema,
-                        oppgavetype = oppgavetype,
-                        prioritet = prioritet,
-                        aktivDato = aktivDato,
-                        behandlesAvApplikasjon = behandlesAvApplikasjon,
+                        tema = TEMA_SYKMELDING,
+                        oppgavetype = OPPGAVETYPE,
+                        prioritet = PRIORITET_NORM,
+                        opprettetAvEnhetsnr = OPPRETTET_AV_ENHETSNR,
+                        aktivDato = LocalDate.now(),
+                        behandlesAvApplikasjon = BEHANDLES_AV_APPLIKASJON,
+                        fristFerdigstillelse = getFristForFerdigstillingAvOppgave(LocalDate.now()),
+                        tildeltEnhetsnr = TILDELT_ENHETSNR,
                     ),
                     headers,
                 ),
                 GetOppgaveResponse::class.java,
-            )
-            return res.body ?: throw RuntimeException("Kunne ikke opprette oppgave med på journalpostId $journalpostId")
+            ).body!!
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("Veileder har ikke tilgang til å opprette oppgaveId $journalpostId: ${e.message}")
+                log.warn("Veileder har ikke tilgang til å opprette oppgaveId $journalpostId med correlation id $xCorrelationId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til å opprette oppgave")
             } else {
                 log.error(
-                    "HttpClientErrorException for oppgaveId $journalpostId med responskode ${e.statusCode.value()} fra Oppgave ved createOppgave: ${e.message}",
+                    "HttpClientErrorException for oppgaveId $journalpostId med responskode ${e.statusCode.value()} fra Oppgave ved createOppgave med correlation id $xCorrelationId: ${e.message}",
                     e,
                 )
                 throw e
             }
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException for oppgaveId $journalpostId med responskode ${e.statusCode.value()} fra Oppgave ved createOppgave: ${e.message}",
+                "HttpServerErrorException for oppgaveId $journalpostId med responskode ${e.statusCode.value()} fra Oppgave ved createOppgave med correlation id $xCorrelationId: ${e.message}",
+                e,
+            )
+            throw e
+        } catch (e: Exception) {
+            log.error(
+                "Kunne ikke opprette oppgave med på journalpostId $journalpostId ved createOppgave med correlation id $xCorrelationId: ${e.message}",
                 e,
             )
             throw e
