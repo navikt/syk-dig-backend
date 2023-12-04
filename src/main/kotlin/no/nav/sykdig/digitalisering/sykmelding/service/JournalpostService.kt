@@ -36,6 +36,7 @@ class JournalpostService(
                     status = JournalpostStatusEnum.FEIL_KANAL,
                 )
             }
+            sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
         } else {
             val fnrEllerAktorId = getFnrEllerAktorId(journalpost)
                 ?: return JournalpostStatus(
@@ -45,9 +46,8 @@ class JournalpostService(
 
             val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
 
-            sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr) // TODO: FIX THIS
+            sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
         }
-        sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
 
         return JournalpostStatus(
             journalpostId = journalpostId,

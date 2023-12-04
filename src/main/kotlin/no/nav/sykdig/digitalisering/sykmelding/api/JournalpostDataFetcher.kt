@@ -55,13 +55,13 @@ class JournalpostDataFetcher(
     @DgsMutation(field = DgsConstants.MUTATION.SykmeldingFraJournalpost)
     fun createSykmelding(
         @InputArgument journalpostId: String,
-        isNorsk: Boolean,
+        @InputArgument norsk: Boolean,
     ): JournalpostResult {
         val journalpost = safGraphQlClient.getJournalpost(journalpostId).journalpost
             ?: return JournalpostStatus(
                 journalpostId = journalpostId,
                 status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
             )
-        return journalpostService.createSykmeldingFromJournalpost(journalpost, journalpostId, isNorsk)
+        return journalpostService.createSykmeldingFromJournalpost(journalpost, journalpostId, isNorsk = norsk)
     }
 }
