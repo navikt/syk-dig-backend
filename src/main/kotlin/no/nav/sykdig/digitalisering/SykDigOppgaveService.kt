@@ -17,6 +17,7 @@ import no.nav.sykdig.model.OppgaveDbModel
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 @Service
@@ -42,7 +43,7 @@ class SykDigOppgaveService(
             journalpostId = journalpostId,
             dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId,
             dokumenter = dokumenter,
-            opprettet = response.aktivDato,
+            opprettet = OffsetDateTime.now(ZoneOffset.UTC),
             ferdigstilt = null,
             tilbakeTilGosys = false,
             avvisingsgrunn = null,
@@ -50,7 +51,7 @@ class SykDigOppgaveService(
             type = UTLAND,
             sykmelding = null,
             endretAv = getNavEmail(),
-            timestamp = OffsetDateTime.now(),
+            timestamp = OffsetDateTime.now(ZoneOffset.UTC),
             source = "syk-dig",
         )
         oppgaveRepository.lagreOppgave(oppgave)

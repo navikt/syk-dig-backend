@@ -40,7 +40,7 @@ class JournalpostDataFetcher(
 
         securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
 
-        if (sykmeldingService.isSykmeldingCreated(id)) {
+        if (journalpostService.isSykmeldingCreated(id)) {
             log.info("Sykmelding already created for journalpost id $id")
             return JournalpostStatus(
                 journalpostId = id,
@@ -57,6 +57,13 @@ class JournalpostDataFetcher(
         @InputArgument journalpostId: String,
         @InputArgument norsk: Boolean,
     ): JournalpostResult {
+        if (journalpostService.isSykmeldingCreated(journalpostId)) {
+            log.info("Sykmelding already created for journalpost id $journalpostId")
+            return JournalpostStatus(
+                journalpostId = journalpostId,
+                status = JournalpostStatusEnum.OPPRETTET,
+            )
+        }
         val journalpost = safGraphQlClient.getJournalpost(journalpostId).journalpost
             ?: return JournalpostStatus(
                 journalpostId = journalpostId,

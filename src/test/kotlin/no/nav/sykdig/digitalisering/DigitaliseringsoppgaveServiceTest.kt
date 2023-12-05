@@ -82,7 +82,7 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
         beskrivelse = "Dette var ikkje bra",
         oppgaveType = OppgaveType.BEH_SED,
         tildeltEnhetsnr = "0393",
-        aktivDato = OffsetDateTime.now(),
+        aktivDato = LocalDate.now(),
     )
 
     val excpetedAvvisingsgrunn = Avvisingsgrunn.MANGLENDE_DIAGNOSE

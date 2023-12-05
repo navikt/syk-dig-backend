@@ -7,6 +7,7 @@ import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_NETS
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.digitalisering.saf.graphql.Type
+import no.nav.sykdig.digitalisering.sykmelding.db.JournalpostSykmeldingRepository
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
@@ -19,6 +20,7 @@ class JournalpostService(
     private val sykmeldingService: SykmeldingService,
     private val personService: PersonService,
     private val sykDigOppgaveService: SykDigOppgaveService,
+    private val journalpostSykmeldingRepository: JournalpostSykmeldingRepository,
 ) {
 
     fun createSykmeldingFromJournalpost(journalpost: SafJournalpost, journalpostId: String, isNorsk: Boolean): JournalpostResult {
@@ -29,25 +31,30 @@ class JournalpostService(
             )
         }
 
-        if (isNorsk) {
-            if (isWrongChannel(journalpost)) {
-                return JournalpostStatus(
-                    journalpostId = journalpostId,
-                    status = JournalpostStatusEnum.FEIL_KANAL,
-                )
+        when (isNorsk) {
+            true -> {
+                if (isWrongChannel(journalpost)) {
+                    return JournalpostStatus(
+                        journalpostId = journalpostId,
+                        status = JournalpostStatusEnum.FEIL_KANAL,
+                    )
+                }
+                sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
             }
-            sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
-        } else {
-            val fnrEllerAktorId = getFnrEllerAktorId(journalpost)
-                ?: return JournalpostStatus(
-                    journalpostId = journalpostId,
-                    status = JournalpostStatusEnum.MANGLER_FNR,
-                )
+            false -> {
+                val fnrEllerAktorId = getFnrEllerAktorId(journalpost)
+                    ?: return JournalpostStatus(
+                        journalpostId = journalpostId,
+                        status = JournalpostStatusEnum.MANGLER_FNR,
+                    )
 
-            val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
+                val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
 
-            sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
+                sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
+            }
         }
+
+        journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
 
         return JournalpostStatus(
             journalpostId = journalpostId,
@@ -83,6 +90,10 @@ class JournalpostService(
             },
             fnr = fnr,
         )
+    }
+
+    fun isSykmeldingCreated(id: String): Boolean {
+        return journalpostSykmeldingRepository.getJournalpostSykmelding(id) != null
     }
 
     private fun isWrongChannel(journalpost: SafJournalpost): Boolean {
