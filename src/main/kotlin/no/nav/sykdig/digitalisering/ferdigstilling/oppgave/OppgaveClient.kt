@@ -27,6 +27,8 @@ private const val TILDELT_ENHETSNR = "0393"
 
 private const val OPPRETTET_AV_ENHETSNR = "9999"
 
+private const val BEHANDLINGS_TYPE_UTLAND = "ae0106"
+
 @Component
 class OppgaveClient(
     @Value("\${oppgave.url}") private val url: String,
@@ -185,6 +187,7 @@ class OppgaveClient(
                         opprettetAvEnhetsnr = OPPRETTET_AV_ENHETSNR,
                         aktivDato = LocalDate.now(),
                         behandlesAvApplikasjon = BEHANDLES_AV_APPLIKASJON,
+                        behandlingstype = BEHANDLINGS_TYPE_UTLAND,
                         fristFerdigstillelse = getFristForFerdigstillingAvOppgave(LocalDate.now()),
                         tildeltEnhetsnr = TILDELT_ENHETSNR,
                     ),

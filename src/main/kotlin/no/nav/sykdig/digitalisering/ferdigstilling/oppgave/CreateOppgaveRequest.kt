@@ -7,6 +7,7 @@ data class CreateOppgaveRequest(
     val opprettetAvEnhetsnr: String? = null,
     val tema: String,
     val oppgavetype: String,
+    val behandlingstype: String? = null,
     val prioritet: String,
     val aktivDato: LocalDate,
     val behandlesAvApplikasjon: String,
