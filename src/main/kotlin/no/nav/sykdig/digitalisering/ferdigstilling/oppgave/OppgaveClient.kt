@@ -4,6 +4,8 @@ import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.getFristForFerdigstillingAvOppgave
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.logger
+import no.nav.sykdig.objectMapper
+import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -35,7 +37,7 @@ class OppgaveClient(
     private val oppgaveRestTemplate: RestTemplate,
 ) {
     val log = logger()
-
+    val secureLog = securelog()
     fun ferdigstillOppgave(oppgaveId: String, sykmeldingId: String) {
         val oppgave = getOppgave(oppgaveId, sykmeldingId)
         if (oppgave.status == Oppgavestatus.FERDIGSTILT || oppgave.status == Oppgavestatus.FEILREGISTRERT) {
@@ -175,7 +177,7 @@ class OppgaveClient(
         headers.contentType = MediaType.APPLICATION_JSON
         headers["X-Correlation-ID"] = xCorrelationId
         try {
-            return oppgaveRestTemplate.exchange(
+            val result = oppgaveRestTemplate.exchange(
                 url,
                 HttpMethod.POST,
                 HttpEntity(
@@ -194,7 +196,12 @@ class OppgaveClient(
                     headers,
                 ),
                 GetOppgaveResponse::class.java,
-            ).body!!
+            )
+
+            secureLog.info("OpprettOppgave: $journalpostId: ${objectMapper.writeValueAsString(result.body)}")
+            val oppgave = result.body!!
+            log.info("OpprettOppgave fra journalpostId: $journalpostId  med oppgaveId: ${oppgave.id}")
+            return oppgave
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å opprette oppgaveId $journalpostId med correlation id $xCorrelationId: ${e.message}")

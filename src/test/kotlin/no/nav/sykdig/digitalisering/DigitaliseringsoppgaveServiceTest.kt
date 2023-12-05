@@ -83,6 +83,7 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
         oppgavetype = OppgaveType.BEH_SED,
         tildeltEnhetsnr = "0393",
         aktivDato = LocalDate.now(),
+        duplikat = false,
     )
 
     val excpetedAvvisingsgrunn = Avvisingsgrunn.MANGLENDE_DIAGNOSE

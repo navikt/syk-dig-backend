@@ -15,4 +15,5 @@ data class GetOppgaveResponse(
     val id: Int? = null,
     val tema: String? = null,
     val tildeltEnhetsnr: String,
+    val duplikat: Boolean?,
 )
