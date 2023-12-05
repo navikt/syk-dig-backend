@@ -34,5 +34,6 @@ type Mutation {
 
     sykmeldingFraJournalpost(
         journalpostId: String!
+        norsk: Boolean!
     ): JournalpostStatus!
 }

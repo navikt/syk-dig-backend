@@ -14,6 +14,7 @@ import no.nav.sykdig.securelog
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class OppgaveSecurityService(
@@ -82,9 +83,9 @@ class OppgaveSecurityService(
 
         return tilgang
     }
+}
 
-    private fun getNavEmail(): String {
-        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
-        return autentication.token.claims["preferred_username"].toString()
-    }
+fun getNavEmail(): String {
+    val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+    return authentication.token.claims["preferred_username"].toString()
 }

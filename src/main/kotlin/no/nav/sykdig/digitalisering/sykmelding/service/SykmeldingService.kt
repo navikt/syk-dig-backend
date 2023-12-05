@@ -44,7 +44,6 @@ class SykmeldingService(
                 log.info(
                     "Sykmelding sendt to kafka topic $sykmeldingTopic journalpost id $journalpostId",
                 )
-                journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
             } else {
                 log.info("Sykmelding already created for journalpost id $journalpostId")
             }
@@ -52,9 +51,5 @@ class SykmeldingService(
             log.error("Failed to produce create sykmelding to topic", exception)
             throw exception
         }
-    }
-
-    fun isSykmeldingCreated(id: String): Boolean {
-        return journalpostSykmeldingRepository.getJournalpostSykmelding(id) != null
     }
 }

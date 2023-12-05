@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering
 import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Navn
@@ -35,9 +36,12 @@ class SykDigOppgaveServiceTest : FellesTestOppsett() {
 
     lateinit var sykDigOppgaveService: SykDigOppgaveService
 
+    @MockBean
+    lateinit var oppgaveClient: OppgaveClient
+
     @BeforeEach
     fun setup() {
-        sykDigOppgaveService = SykDigOppgaveService(oppgaveRepository, ferdigstillingService)
+        sykDigOppgaveService = SykDigOppgaveService(oppgaveRepository, ferdigstillingService, oppgaveClient)
         oppgaveRepository.lagreOppgave(createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"))
     }
 

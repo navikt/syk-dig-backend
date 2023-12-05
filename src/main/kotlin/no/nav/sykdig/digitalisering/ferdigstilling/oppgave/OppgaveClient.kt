@@ -1,7 +1,11 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
+import no.nav.sykdig.digitalisering.getFristForFerdigstillingAvOppgave
+import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.logger
+import no.nav.sykdig.objectMapper
+import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -12,6 +16,20 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
+import java.time.LocalDate
+import java.util.UUID
+
+private const val OPPGAVETYPE = "JFR"
+
+private const val PRIORITET_NORM = "NORM"
+
+private const val BEHANDLES_AV_APPLIKASJON = "SMD"
+
+private const val TILDELT_ENHETSNR = "0393"
+
+private const val OPPRETTET_AV_ENHETSNR = "9999"
+
+private const val BEHANDLINGS_TYPE_UTLAND = "ae0106"
 
 @Component
 class OppgaveClient(
@@ -19,7 +37,7 @@ class OppgaveClient(
     private val oppgaveRestTemplate: RestTemplate,
 ) {
     val log = logger()
-
+    val secureLog = securelog()
     fun ferdigstillOppgave(oppgaveId: String, sykmeldingId: String) {
         val oppgave = getOppgave(oppgaveId, sykmeldingId)
         if (oppgave.status == Oppgavestatus.FERDIGSTILT || oppgave.status == Oppgavestatus.FEILREGISTRERT) {
@@ -49,7 +67,10 @@ class OppgaveClient(
                 log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
-                log.error("HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
+                log.error(
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
+                    e,
+                )
                 throw e
             }
         } catch (e: HttpServerErrorException) {
@@ -142,6 +163,65 @@ class OppgaveClient(
         } catch (e: HttpServerErrorException) {
             log.error(
                 "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} fra Oppgave ved oppdaterOppgave: ${e.message}",
+                e,
+            )
+            throw e
+        }
+    }
+
+    fun opprettOppgave(
+        journalpostId: String,
+    ): GetOppgaveResponse {
+        val headers = HttpHeaders()
+        val xCorrelationId = UUID.randomUUID().toString()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-Correlation-ID"] = xCorrelationId
+        try {
+            val result = oppgaveRestTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                HttpEntity(
+                    CreateOppgaveRequest(
+                        journalpostId = journalpostId,
+                        tema = TEMA_SYKMELDING,
+                        oppgavetype = OPPGAVETYPE,
+                        prioritet = PRIORITET_NORM,
+                        opprettetAvEnhetsnr = OPPRETTET_AV_ENHETSNR,
+                        aktivDato = LocalDate.now(),
+                        behandlesAvApplikasjon = BEHANDLES_AV_APPLIKASJON,
+                        behandlingstype = BEHANDLINGS_TYPE_UTLAND,
+                        fristFerdigstillelse = getFristForFerdigstillingAvOppgave(LocalDate.now()),
+                        tildeltEnhetsnr = TILDELT_ENHETSNR,
+                    ),
+                    headers,
+                ),
+                GetOppgaveResponse::class.java,
+            )
+
+            secureLog.info("OpprettOppgave: $journalpostId: ${objectMapper.writeValueAsString(result.body)}")
+            val oppgave = result.body!!
+            log.info("OpprettOppgave fra journalpostId: $journalpostId  med oppgaveId: ${oppgave.id}")
+            return oppgave
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+                log.warn("Veileder har ikke tilgang til å opprette oppgaveId $journalpostId med correlation id $xCorrelationId: ${e.message}")
+                throw IkkeTilgangException("Veileder har ikke tilgang til å opprette oppgave")
+            } else {
+                log.error(
+                    "HttpClientErrorException for oppgaveId $journalpostId med responskode ${e.statusCode.value()} fra Oppgave ved createOppgave med correlation id $xCorrelationId: ${e.message}",
+                    e,
+                )
+                throw e
+            }
+        } catch (e: HttpServerErrorException) {
+            log.error(
+                "HttpServerErrorException for oppgaveId $journalpostId med responskode ${e.statusCode.value()} fra Oppgave ved createOppgave med correlation id $xCorrelationId: ${e.message}",
+                e,
+            )
+            throw e
+        } catch (e: Exception) {
+            log.error(
+                "Kunne ikke opprette oppgave med på journalpostId $journalpostId ved createOppgave med correlation id $xCorrelationId: ${e.message}",
                 e,
             )
             throw e

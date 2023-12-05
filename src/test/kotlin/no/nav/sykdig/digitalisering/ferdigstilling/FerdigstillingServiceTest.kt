@@ -21,8 +21,8 @@ import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
 import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_IM
-import no.nav.sykdig.digitalisering.saf.graphql.Journalpost
 import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
+import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.generated.types.DiagnoseInput
@@ -77,7 +77,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val journalpostId = "9898"
         val dokumentInfoId = "111"
         val journalpost = SafQueryJournalpost(
-            journalpost = Journalpost(
+            journalpost = SafJournalpost(
                 journalstatus = Journalstatus.JOURNALFOERT,
                 avsenderMottaker = AvsenderMottaker(
                     id = "12345678910",
