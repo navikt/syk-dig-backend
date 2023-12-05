@@ -10,6 +10,7 @@ type Journalpost {
 type JournalpostStatus {
     journalpostId: String!
     status: JournalpostStatusEnum!
+    oppgaveId: String
 }
 
 enum JournalpostStatusEnum {

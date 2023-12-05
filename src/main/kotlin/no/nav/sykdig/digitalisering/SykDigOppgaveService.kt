@@ -28,7 +28,7 @@ class SykDigOppgaveService(
 ) {
     private val log = logger()
 
-    fun opprettOgLagreOppgave(journalpost: SafJournalpost, journalpostId: String, fnr: String) {
+    fun opprettOgLagreOppgave(journalpost: SafJournalpost, journalpostId: String, fnr: String): String {
         val response = oppgaveClient.opprettOppgave(
             journalpostId = journalpostId,
         )
@@ -37,8 +37,9 @@ class SykDigOppgaveService(
             DokumentDbModel(it.dokumentInfoId, it.tittel ?: "Mangler Tittel")
         }
 
+        val oppgaveId = response.id.toString()
         val oppgave = OppgaveDbModel(
-            oppgaveId = response.id.toString(),
+            oppgaveId = oppgaveId,
             fnr = fnr,
             journalpostId = journalpostId,
             dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId,
@@ -55,7 +56,9 @@ class SykDigOppgaveService(
             source = "syk-dig",
         )
         oppgaveRepository.lagreOppgave(oppgave)
+        return oppgaveId
     }
+
     fun getOppgave(oppgaveId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
         if (oppgave == null) {

@@ -40,6 +40,12 @@ class JournalpostService(
                     )
                 }
                 sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
+                journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
+
+                return JournalpostStatus(
+                    journalpostId = journalpostId,
+                    status = JournalpostStatusEnum.OPPRETTET,
+                )
             }
             false -> {
                 val fnrEllerAktorId = getFnrEllerAktorId(journalpost)
@@ -49,17 +55,17 @@ class JournalpostService(
                     )
 
                 val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
+                val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
 
-                sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
+                journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
+
+                return JournalpostStatus(
+                    journalpostId = journalpostId,
+                    status = JournalpostStatusEnum.OPPRETTET,
+                    oppgaveId = oppgaveId,
+                )
             }
         }
-
-        journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
-
-        return JournalpostStatus(
-            journalpostId = journalpostId,
-            status = JournalpostStatusEnum.OPPRETTET,
-        )
     }
 
     fun getJournalpostResult(journalpost: SafJournalpost, journalpostId: String): JournalpostResult {
@@ -82,6 +88,10 @@ class JournalpostService(
                 status = JournalpostStatusEnum.FEIL_TEMA,
             )
         }
+
+        // TODO: Kan vi returnere OPPRETTET med oppgaveId
+        // dersom det allerede er en opprettet utelandsk journalpost i databasen?
+
         return Journalpost(
             journalpostId,
             journalpost.journalstatus?.name ?: "MANGLER_STATUS",
