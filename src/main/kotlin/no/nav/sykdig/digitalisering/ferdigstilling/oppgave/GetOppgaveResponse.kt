@@ -9,7 +9,7 @@ data class GetOppgaveResponse(
     val tilordnetRessurs: String? = null,
     val mappeId: Int? = null,
     val beskrivelse: String? = null,
-    val oppgaveType: OppgaveType,
+    val oppgavetype: OppgaveType,
     val aktivDato: LocalDate? = null,
     val prioritet: String? = null,
     val id: Int? = null,

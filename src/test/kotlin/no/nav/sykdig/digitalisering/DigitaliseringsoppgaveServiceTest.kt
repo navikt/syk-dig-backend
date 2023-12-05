@@ -80,7 +80,7 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
         behandlesAvApplikasjon = "SMM",
         tilordnetRessurs = "A123456",
         beskrivelse = "Dette var ikkje bra",
-        oppgaveType = OppgaveType.BEH_SED,
+        oppgavetype = OppgaveType.BEH_SED,
         tildeltEnhetsnr = "0393",
         aktivDato = LocalDate.now(),
     )
