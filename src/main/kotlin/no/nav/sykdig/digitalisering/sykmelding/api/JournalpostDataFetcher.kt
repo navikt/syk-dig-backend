@@ -33,22 +33,24 @@ class JournalpostDataFetcher(
     fun getJournalpostById(
         @InputArgument id: String,
     ): JournalpostResult {
-        val journalpost = safGraphQlClient.getJournalpost(id).journalpost ?: return JournalpostStatus(
-            journalpostId = id,
+        val trimedJournalpostId = id.trim()
+
+        val journalpost = safGraphQlClient.getJournalpost(trimedJournalpostId).journalpost ?: return JournalpostStatus(
+            journalpostId = trimedJournalpostId,
             status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
         )
 
         securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
 
-        if (journalpostService.isSykmeldingCreated(id)) {
-            log.info("Sykmelding already created for journalpost id $id")
+        if (journalpostService.isSykmeldingCreated(trimedJournalpostId)) {
+            log.info("Sykmelding already created for journalpost id $trimedJournalpostId")
             return JournalpostStatus(
-                journalpostId = id,
+                journalpostId = trimedJournalpostId,
                 status = JournalpostStatusEnum.OPPRETTET,
             )
         }
 
-        return journalpostService.getJournalpostResult(journalpost, id)
+        return journalpostService.getJournalpostResult(journalpost, trimedJournalpostId)
     }
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToJournalpostId(#journalpostId)")
@@ -57,18 +59,19 @@ class JournalpostDataFetcher(
         @InputArgument journalpostId: String,
         @InputArgument norsk: Boolean,
     ): JournalpostResult {
-        if (journalpostService.isSykmeldingCreated(journalpostId)) {
-            log.info("Sykmelding already created for journalpost id $journalpostId")
+        val trimedJournalpostId = journalpostId.trim()
+        if (journalpostService.isSykmeldingCreated(trimedJournalpostId)) {
+            log.info("Sykmelding already created for journalpost id $trimedJournalpostId")
             return JournalpostStatus(
-                journalpostId = journalpostId,
+                journalpostId = trimedJournalpostId,
                 status = JournalpostStatusEnum.OPPRETTET,
             )
         }
-        val journalpost = safGraphQlClient.getJournalpost(journalpostId).journalpost
+        val journalpost = safGraphQlClient.getJournalpost(trimedJournalpostId).journalpost
             ?: return JournalpostStatus(
-                journalpostId = journalpostId,
+                journalpostId = trimedJournalpostId,
                 status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
             )
-        return journalpostService.createSykmeldingFromJournalpost(journalpost, journalpostId, isNorsk = norsk)
+        return journalpostService.createSykmeldingFromJournalpost(journalpost, trimedJournalpostId, isNorsk = norsk)
     }
 }
