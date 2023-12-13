@@ -57,114 +57,144 @@ fun HelseOpplysningerArbeidsuforhet.toSykmelding(
     navnFastlege = pasient?.navnFastlege,
 )
 
-fun HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.toPeriode() = Periode(
-    fom = periodeFOMDato,
-    tom = periodeTOMDato,
-    aktivitetIkkeMulig = aktivitetIkkeMulig?.toAktivitetIkkeMulig(),
-    avventendeInnspillTilArbeidsgiver = avventendeSykmelding?.innspillTilArbeidsgiver,
-    behandlingsdager = behandlingsdager?.antallBehandlingsdagerUke,
-    gradert = gradertSykmelding?.toGradert(),
-    reisetilskudd = isReisetilskudd == true,
-)
+fun HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.toPeriode() =
+    Periode(
+        fom = periodeFOMDato,
+        tom = periodeTOMDato,
+        aktivitetIkkeMulig = aktivitetIkkeMulig?.toAktivitetIkkeMulig(),
+        avventendeInnspillTilArbeidsgiver = avventendeSykmelding?.innspillTilArbeidsgiver,
+        behandlingsdager = behandlingsdager?.antallBehandlingsdagerUke,
+        gradert = gradertSykmelding?.toGradert(),
+        reisetilskudd = isReisetilskudd == true,
+    )
 
-fun HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.GradertSykmelding.toGradert() = Gradert(
-    reisetilskudd = isReisetilskudd == true,
-    grad = sykmeldingsgrad,
-)
+fun HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.GradertSykmelding.toGradert() =
+    Gradert(
+        reisetilskudd = isReisetilskudd == true,
+        grad = sykmeldingsgrad,
+    )
 
-fun HelseOpplysningerArbeidsuforhet.Arbeidsgiver.toArbeidsgiver() = Arbeidsgiver(
-    harArbeidsgiver = HarArbeidsgiver.values().first { it.codeValue == harArbeidsgiver.v },
-    navn = navnArbeidsgiver,
-    yrkesbetegnelse = yrkesbetegnelse,
-    stillingsprosent = stillingsprosent,
-)
+fun HelseOpplysningerArbeidsuforhet.Arbeidsgiver.toArbeidsgiver() =
+    Arbeidsgiver(
+        harArbeidsgiver = HarArbeidsgiver.values().first { it.codeValue == harArbeidsgiver.v },
+        navn = navnArbeidsgiver,
+        yrkesbetegnelse = yrkesbetegnelse,
+        stillingsprosent = stillingsprosent,
+    )
 
-fun HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.AktivitetIkkeMulig.toAktivitetIkkeMulig() = AktivitetIkkeMulig(
-    medisinskArsak = medisinskeArsaker?.toMedisinskArsak(),
-    arbeidsrelatertArsak = arbeidsplassen?.toArbeidsrelatertArsak(),
-)
+fun HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.AktivitetIkkeMulig.toAktivitetIkkeMulig() =
+    AktivitetIkkeMulig(
+        medisinskArsak = medisinskeArsaker?.toMedisinskArsak(),
+        arbeidsrelatertArsak = arbeidsplassen?.toArbeidsrelatertArsak(),
+    )
 
-fun HelseOpplysningerArbeidsuforhet.MedisinskVurdering.toMedisinskVurdering() = MedisinskVurdering(
-    hovedDiagnose = hovedDiagnose?.diagnosekode?.toDiagnose(),
-    biDiagnoser = biDiagnoser?.diagnosekode?.map(CV::toDiagnose) ?: listOf(),
-    svangerskap = isSvangerskap == true,
-    yrkesskade = isYrkesskade == true,
-    yrkesskadeDato = yrkesskadeDato,
-    annenFraversArsak = annenFraversArsak?.toAnnenFraversArsak(),
-)
+fun HelseOpplysningerArbeidsuforhet.MedisinskVurdering.toMedisinskVurdering() =
+    MedisinskVurdering(
+        hovedDiagnose = hovedDiagnose?.diagnosekode?.toDiagnose(),
+        biDiagnoser = biDiagnoser?.diagnosekode?.map(CV::toDiagnose) ?: listOf(),
+        svangerskap = isSvangerskap == true,
+        yrkesskade = isYrkesskade == true,
+        yrkesskadeDato = yrkesskadeDato,
+        annenFraversArsak = annenFraversArsak?.toAnnenFraversArsak(),
+    )
 
 fun CV.toDiagnose() = Diagnose(s, v, dn)
 
-fun ArsakType.toAnnenFraversArsak() = AnnenFraversArsak(
-    beskrivelse = beskriv,
-    grunn = arsakskode.mapNotNull { code ->
-        if (code.v == null || code.v == "0") {
-            null
-        } else {
-            AnnenFraverGrunn.values().first { it.codeValue == code.v.trim() }
-        }
-    },
-)
+fun ArsakType.toAnnenFraversArsak() =
+    AnnenFraversArsak(
+        beskrivelse = beskriv,
+        grunn =
+            arsakskode.mapNotNull { code ->
+                if (code.v == null || code.v == "0") {
+                    null
+                } else {
+                    AnnenFraverGrunn.values().first { it.codeValue == code.v.trim() }
+                }
+            },
+    )
 
-fun CS.toMedisinskArsakType() = if (v == null || v == "0") { null } else { MedisinskArsakType.values().first { it.codeValue == v.trim() } }
+fun CS.toMedisinskArsakType() =
+    if (v == null || v == "0") {
+        null
+    } else {
+        MedisinskArsakType.values().first { it.codeValue == v.trim() }
+    }
 
-fun CS.toArbeidsrelatertArsakType() = if (v == null || v == "0") { null } else { ArbeidsrelatertArsakType.values().first { it.codeValue == v } }
+fun CS.toArbeidsrelatertArsakType() =
+    if (v == null || v == "0") {
+        null
+    } else {
+        ArbeidsrelatertArsakType.values().first { it.codeValue == v }
+    }
 
 fun HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.toMap() =
     spmGruppe.associate { spmGruppe ->
-        spmGruppe.spmGruppeId to spmGruppe.spmSvar.associate { svar ->
-            svar.spmId to SporsmalSvar(
-                sporsmal = svar.spmTekst,
-                svar = svar.svarTekst,
-                restriksjoner = svar.restriksjon?.restriksjonskode?.mapNotNull(CS::toSvarRestriksjon) ?: listOf(),
-            )
-        }
+        spmGruppe.spmGruppeId to
+            spmGruppe.spmSvar.associate { svar ->
+                svar.spmId to
+                    SporsmalSvar(
+                        sporsmal = svar.spmTekst,
+                        svar = svar.svarTekst,
+                        restriksjoner = svar.restriksjon?.restriksjonskode?.mapNotNull(CS::toSvarRestriksjon) ?: listOf(),
+                    )
+            }
     }
 
 fun CS.toSvarRestriksjon() =
-    if (v.isNullOrBlank()) { null } else { SvarRestriksjon.values().first { it.codeValue == v } }
+    if (v.isNullOrBlank()) {
+        null
+    } else {
+        SvarRestriksjon.values().first { it.codeValue == v }
+    }
 
-fun Address.toAdresse() = Adresse(
-    gate = streetAdr,
-    postnummer = postalCode?.toIntOrNull(),
-    kommune = city,
-    postboks = postbox,
-    land = country?.v,
-)
+fun Address.toAdresse() =
+    Adresse(
+        gate = streetAdr,
+        postnummer = postalCode?.toIntOrNull(),
+        kommune = city,
+        postboks = postbox,
+        land = country?.v,
+    )
 
-fun ArsakType.toArbeidsrelatertArsak() = ArbeidsrelatertArsak(
-    beskrivelse = beskriv,
-    arsak = arsakskode.mapNotNull(CS::toArbeidsrelatertArsakType),
-)
+fun ArsakType.toArbeidsrelatertArsak() =
+    ArbeidsrelatertArsak(
+        beskrivelse = beskriv,
+        arsak = arsakskode.mapNotNull(CS::toArbeidsrelatertArsakType),
+    )
 
-fun ArsakType.toMedisinskArsak() = MedisinskArsak(
-    beskrivelse = beskriv,
-    arsak = arsakskode.mapNotNull(CS::toMedisinskArsakType),
-)
+fun ArsakType.toMedisinskArsak() =
+    MedisinskArsak(
+        beskrivelse = beskriv,
+        arsak = arsakskode.mapNotNull(CS::toMedisinskArsakType),
+    )
 
-fun HelseOpplysningerArbeidsuforhet.MeldingTilNav.toMeldingTilNAV() = MeldingTilNAV(
-    bistandUmiddelbart = isBistandNAVUmiddelbart,
-    beskrivBistand = beskrivBistandNAV,
-)
+fun HelseOpplysningerArbeidsuforhet.MeldingTilNav.toMeldingTilNAV() =
+    MeldingTilNAV(
+        bistandUmiddelbart = isBistandNAVUmiddelbart,
+        beskrivBistand = beskrivBistandNAV,
+    )
 
-fun HelseOpplysningerArbeidsuforhet.KontaktMedPasient.toKontaktMedPasient() = KontaktMedPasient(
-    kontaktDato = kontaktDato,
-    begrunnelseIkkeKontakt = begrunnIkkeKontakt,
-)
+fun HelseOpplysningerArbeidsuforhet.KontaktMedPasient.toKontaktMedPasient() =
+    KontaktMedPasient(
+        kontaktDato = kontaktDato,
+        begrunnelseIkkeKontakt = begrunnIkkeKontakt,
+    )
 
-fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler() = Behandler(
-    fornavn = navn.fornavn ?: "",
-    mellomnavn = navn.mellomnavn,
-    etternavn = navn.etternavn ?: "",
-    aktoerId = "",
-    fnr = id.find { it.typeId.v == "FNR" }?.id ?: id.find { it.typeId.v == "DNR" }?.id ?: "",
-    hpr = id.find { it.typeId.v == "HPR" }?.id,
-    her = id.find { it.typeId.v == "HER" }?.id,
-    adresse = adresse.toAdresse(),
-    tlf = kontaktInfo.firstOrNull()?.teleAddress?.v,
-)
+fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler() =
+    Behandler(
+        fornavn = navn.fornavn ?: "",
+        mellomnavn = navn.mellomnavn,
+        etternavn = navn.etternavn ?: "",
+        aktoerId = "",
+        fnr = id.find { it.typeId.v == "FNR" }?.id ?: id.find { it.typeId.v == "DNR" }?.id ?: "",
+        hpr = id.find { it.typeId.v == "HPR" }?.id,
+        her = id.find { it.typeId.v == "HER" }?.id,
+        adresse = adresse.toAdresse(),
+        tlf = kontaktInfo.firstOrNull()?.teleAddress?.v,
+    )
 
-fun HelseOpplysningerArbeidsuforhet.AvsenderSystem.toAvsenderSystem() = AvsenderSystem(
-    navn = systemNavn,
-    versjon = systemVersjon,
-)
+fun HelseOpplysningerArbeidsuforhet.AvsenderSystem.toAvsenderSystem() =
+    AvsenderSystem(
+        navn = systemNavn,
+        versjon = systemVersjon,
+    )

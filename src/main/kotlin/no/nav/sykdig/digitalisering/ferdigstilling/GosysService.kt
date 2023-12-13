@@ -46,5 +46,8 @@ class GosysService(
         )
     }
 
-    fun hentOppgave(oppgaveId: String, sykmeldingId: String) = oppgaveClient.getOppgave(oppgaveId, sykmeldingId)
+    fun hentOppgave(
+        oppgaveId: String,
+        sykmeldingId: String,
+    ) = oppgaveClient.getOppgave(oppgaveId, sykmeldingId)
 }

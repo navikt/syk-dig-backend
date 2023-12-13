@@ -1,9 +1,9 @@
 package no.nav.sykdig.digitalisering.api
 
 import graphql.schema.DataFetchingEnvironment
+import no.nav.sykdig.applog
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.saf.SafClient
-import no.nav.sykdig.logger
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -19,13 +19,16 @@ class PdfController(
     private val oppgaveRepository: OppgaveRepository,
     private val safClient: SafClient,
 ) {
-    val log = logger()
+    val log = applog()
 
     @Deprecated("Bruk /api/document/{oppgaveId}/{dokumentInfoId} i stedet")
     @GetMapping("/api/pdf", produces = [MediaType.APPLICATION_PDF_VALUE])
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @ResponseBody
-    fun getPdf(@RequestParam oppgaveId: String, dfe: DataFetchingEnvironment): ByteArray {
+    fun getPdf(
+        @RequestParam oppgaveId: String,
+        dfe: DataFetchingEnvironment,
+    ): ByteArray {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
         if (oppgave != null) {
             try {

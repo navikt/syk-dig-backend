@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering
 
+import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.ClientException
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
@@ -7,7 +8,6 @@ import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.regelvalidering.RegelvalideringService
 import no.nav.sykdig.generated.types.Avvisingsgrunn
-import no.nav.sykdig.logger
 import no.nav.sykdig.metrics.MetricRegister
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,21 +24,26 @@ class DigitaliseringsoppgaveService(
     private val metricRegister: MetricRegister,
     private val regelvalideringService: RegelvalideringService,
 ) {
+    private val log = applog()
 
-    private val log = logger()
     fun getDigitaiseringsoppgave(oppgaveId: String): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
-        val sykmeldt = personService.hentPerson(
-            id = oppgave.fnr,
-            callId = oppgave.sykmeldingId.toString(),
-        )
+        val sykmeldt =
+            personService.hentPerson(
+                id = oppgave.fnr,
+                callId = oppgave.sykmeldingId.toString(),
+            )
 
         log.info("Hentet oppgave og sykmeldt for oppgave $oppgaveId, lager SykDigOppgave!")
 
         return SykDigOppgave(oppgave, sykmeldt)
     }
 
-    fun updateOppgave(oppgaveId: String, values: RegisterOppgaveValues, navEpost: String) {
+    fun updateOppgave(
+        oppgaveId: String,
+        values: RegisterOppgaveValues,
+        navEpost: String,
+    ) {
         sykDigOppgaveService.updateOppgave(oppgaveId, values, navEpost)
     }
 
@@ -49,17 +54,18 @@ class DigitaliseringsoppgaveService(
         enhetId: String,
     ) {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
-        val sykmeldt = personService.hentPerson(
-            id = oppgave.fnr,
-            callId = oppgave.sykmeldingId.toString(),
-        )
+        val sykmeldt =
+            personService.hentPerson(
+                id = oppgave.fnr,
+                callId = oppgave.sykmeldingId.toString(),
+            )
         val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
         if (valideringsresultat.isNotEmpty()) {
             log.warn("Ferdigstilling av oppgave med id $oppgaveId feilet pga regelsjekk")
             throw ClientException(valideringsresultat.joinToString())
         }
         sykDigOppgaveService.ferdigstillOppgave(oppgave, navEpost, values, enhetId, sykmeldt)
-        metricRegister.FERDIGSTILT_OPPGAVE.increment()
+        metricRegister.ferdigstiltOppgave.increment()
     }
 
     fun ferdigstillOppgaveSendTilGosys(
@@ -68,16 +74,17 @@ class DigitaliseringsoppgaveService(
         navEpost: String,
     ): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
-        val sykmeldt = personService.hentPerson(
-            id = oppgave.fnr,
-            callId = oppgave.sykmeldingId.toString(),
-        )
+        val sykmeldt =
+            personService.hentPerson(
+                id = oppgave.fnr,
+                callId = oppgave.sykmeldingId.toString(),
+            )
 
         gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent)
         sykDigOppgaveService.ferdigstillOppgaveGosys(oppgave, navEpost)
         val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
 
-        metricRegister.SENDT_TIL_GOSYS.increment()
+        metricRegister.sendtTilGosys.increment()
         return SykDigOppgave(updatedOppgave, sykmeldt)
     }
 
@@ -91,25 +98,27 @@ class DigitaliseringsoppgaveService(
         avvisningsgrunnAnnet: String?,
     ): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
-        val sykmeldt = personService.hentPerson(
-            id = oppgave.fnr,
-            callId = oppgave.sykmeldingId.toString(),
-        )
+        val sykmeldt =
+            personService.hentPerson(
+                id = oppgave.fnr,
+                callId = oppgave.sykmeldingId.toString(),
+            )
 
         val opprinneligBeskrivelse = gosysService.hentOppgave(oppgaveId, oppgave.sykmeldingId.toString()).beskrivelse
 
         sykDigOppgaveService.ferdigstillAvvistOppgave(oppgave, navEpost, enhetId, sykmeldt, avvisningsgrunn, avvisningsgrunnAnnet)
 
-        val oppgaveBeskrivelse = lagOppgavebeskrivelse(
-            avvisningsgrunn = mapAvvisningsgrunn(avvisningsgrunn, avvisningsgrunnAnnet),
-            opprinneligBeskrivelse = opprinneligBeskrivelse,
-            navIdent = navIdent,
-        )
+        val oppgaveBeskrivelse =
+            lagOppgavebeskrivelse(
+                avvisningsgrunn = mapAvvisningsgrunn(avvisningsgrunn, avvisningsgrunnAnnet),
+                opprinneligBeskrivelse = opprinneligBeskrivelse,
+                navIdent = navIdent,
+            )
 
         gosysService.avvisOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, oppgaveBeskrivelse)
 
         val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
-        metricRegister.AVVIST_SENDT_TIL_GOSYS.increment()
+        metricRegister.avvistSendtTilGosys.increment()
         return SykDigOppgave(updatedOppgave, sykmeldt)
     }
 
@@ -126,7 +135,10 @@ class DigitaliseringsoppgaveService(
     }
 }
 
-fun mapAvvisningsgrunn(avvisningsgrunn: Avvisingsgrunn, avvisningsgrunnAnnet: String?): String {
+fun mapAvvisningsgrunn(
+    avvisningsgrunn: Avvisingsgrunn,
+    avvisningsgrunnAnnet: String?,
+): String {
     return when (avvisningsgrunn) {
         Avvisingsgrunn.MANGLENDE_DIAGNOSE -> "Det mangler diagnose"
         Avvisingsgrunn.MANGLENDE_PERIODE_ELLER_SLUTTDATO -> "Mangler periode eller sluttdato"

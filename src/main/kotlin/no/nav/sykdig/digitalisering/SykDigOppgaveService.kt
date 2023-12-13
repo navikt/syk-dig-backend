@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering
 
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
+import no.nav.sykdig.applog
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.db.toSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
@@ -11,7 +12,6 @@ import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.tilgangskontroll.getNavEmail
 import no.nav.sykdig.generated.types.Avvisingsgrunn
-import no.nav.sykdig.logger
 import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
 import org.springframework.stereotype.Service
@@ -26,35 +26,42 @@ class SykDigOppgaveService(
     private val ferdigstillingService: FerdigstillingService,
     private val oppgaveClient: OppgaveClient,
 ) {
-    private val log = logger()
+    private val log = applog()
 
-    fun opprettOgLagreOppgave(journalpost: SafJournalpost, journalpostId: String, fnr: String): String {
-        val response = oppgaveClient.opprettOppgave(
-            journalpostId = journalpostId,
-        )
+    fun opprettOgLagreOppgave(
+        journalpost: SafJournalpost,
+        journalpostId: String,
+        fnr: String,
+    ): String {
+        val response =
+            oppgaveClient.opprettOppgave(
+                journalpostId = journalpostId,
+            )
 
-        val dokumenter = journalpost.dokumenter.map {
-            DokumentDbModel(it.dokumentInfoId, it.tittel ?: "Mangler Tittel")
-        }
+        val dokumenter =
+            journalpost.dokumenter.map {
+                DokumentDbModel(it.dokumentInfoId, it.tittel ?: "Mangler Tittel")
+            }
 
         val oppgaveId = response.id.toString()
-        val oppgave = OppgaveDbModel(
-            oppgaveId = oppgaveId,
-            fnr = fnr,
-            journalpostId = journalpostId,
-            dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId,
-            dokumenter = dokumenter,
-            opprettet = OffsetDateTime.now(ZoneOffset.UTC),
-            ferdigstilt = null,
-            tilbakeTilGosys = false,
-            avvisingsgrunn = null,
-            sykmeldingId = UUID.randomUUID(),
-            type = UTLAND,
-            sykmelding = null,
-            endretAv = getNavEmail(),
-            timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-            source = "syk-dig",
-        )
+        val oppgave =
+            OppgaveDbModel(
+                oppgaveId = oppgaveId,
+                fnr = fnr,
+                journalpostId = journalpostId,
+                dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId,
+                dokumenter = dokumenter,
+                opprettet = OffsetDateTime.now(ZoneOffset.UTC),
+                ferdigstilt = null,
+                tilbakeTilGosys = false,
+                avvisingsgrunn = null,
+                sykmeldingId = UUID.randomUUID(),
+                type = UTLAND,
+                sykmelding = null,
+                endretAv = getNavEmail(),
+                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                source = "syk-dig",
+            )
         oppgaveRepository.lagreOppgave(oppgave)
         return oppgaveId
     }
@@ -69,7 +76,11 @@ class SykDigOppgaveService(
         return oppgave
     }
 
-    fun updateOppgave(oppgaveId: String, registerOppgaveValues: RegisterOppgaveValues, navEpost: String) {
+    fun updateOppgave(
+        oppgaveId: String,
+        registerOppgaveValues: RegisterOppgaveValues,
+        navEpost: String,
+    ) {
         val oppgave = getOppgave(oppgaveId)
         val sykmelding = toSykmelding(oppgave, registerOppgaveValues)
         oppgaveRepository.updateOppgave(oppgave, sykmelding, navEpost, false)

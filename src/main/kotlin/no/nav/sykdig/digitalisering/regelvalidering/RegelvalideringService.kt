@@ -12,8 +12,10 @@ import java.time.temporal.ChronoUnit
 
 @Service
 class RegelvalideringService {
-
-    fun validerUtenlandskSykmelding(sykmeldt: Person, values: FerdistilltRegisterOppgaveValues): List<String> {
+    fun validerUtenlandskSykmelding(
+        sykmeldt: Person,
+        values: FerdistilltRegisterOppgaveValues,
+    ): List<String> {
         val resultatListe = mutableListOf<String?>()
         val forsteFom = values.perioder.sortedFOMDate().firstOrNull()
         val sisteTom = values.perioder.sortedTOMDate().lastOrNull()
@@ -65,28 +67,40 @@ class RegelvalideringService {
             null
         }
 
-    private fun sykmeldtErOver13Ar(sisteTom: LocalDate, fodselsdato: LocalDate): String? =
+    private fun sykmeldtErOver13Ar(
+        sisteTom: LocalDate,
+        fodselsdato: LocalDate,
+    ): String? =
         if (sisteTom < fodselsdato.plusYears(13)) {
             "Pasienten er under 13 år. Sykmelding kan ikke benyttes."
         } else {
             null
         }
 
-    private fun sykmeldtErUnder70Ar(forsteFom: LocalDate, fodselsdato: LocalDate): String? =
+    private fun sykmeldtErUnder70Ar(
+        forsteFom: LocalDate,
+        fodselsdato: LocalDate,
+    ): String? =
         if (forsteFom > fodselsdato.plusYears(70)) {
             "Pasienten er over 70 år. Sykmelding kan ikke benyttes."
         } else {
             null
         }
 
-    private fun sykmeldingErIkkeFremdatertMerEnn30Dager(forsteFom: LocalDate, behandletTidspunkt: OffsetDateTime): String? =
+    private fun sykmeldingErIkkeFremdatertMerEnn30Dager(
+        forsteFom: LocalDate,
+        behandletTidspunkt: OffsetDateTime,
+    ): String? =
         if (forsteFom > behandletTidspunkt.plusDays(30).toLocalDate()) {
             "Sykmeldingen er fremdatert mer enn 30 dager."
         } else {
             null
         }
 
-    private fun totalVarighetErUnderEtAr(forsteFom: LocalDate, sisteTom: LocalDate): String? =
+    private fun totalVarighetErUnderEtAr(
+        forsteFom: LocalDate,
+        sisteTom: LocalDate,
+    ): String? =
         if ((forsteFom..sisteTom).daysBetween() > 365) {
             "Sykmeldingen kan ikke ha en varighet på over ett år."
         } else {
@@ -94,13 +108,14 @@ class RegelvalideringService {
         }
 
     private fun periodeneOverlapperIkke(perioder: List<PeriodeInput>): String? {
-        val overlapper = perioder.any { periodA ->
-            perioder
-                .filter { periodB -> periodB != periodA }
-                .any { periodB ->
-                    periodA.fom in periodB.range() || periodA.tom in periodB.range()
-                }
-        }
+        val overlapper =
+            perioder.any { periodA ->
+                perioder
+                    .filter { periodB -> periodB != periodA }
+                    .any { periodB ->
+                        periodA.fom in periodB.range() || periodA.tom in periodB.range()
+                    }
+            }
         return if (overlapper) {
             "Periodene må ikke overlappe hverandre."
         } else {
@@ -109,9 +124,10 @@ class RegelvalideringService {
     }
 
     private fun ikkeOppholdMellomPerioder(perioder: List<PeriodeInput>): String? {
-        val periodeRanges = perioder
-            .sortedBy { it.fom }
-            .map { it.fom to it.tom }
+        val periodeRanges =
+            perioder
+                .sortedBy { it.fom }
+                .map { it.fom to it.tom }
         var gapBetweenPeriods = false
         for (i in 1 until periodeRanges.size) {
             gapBetweenPeriods =
@@ -149,15 +165,17 @@ class RegelvalideringService {
         }
 }
 
-fun List<PeriodeInput>.sortedFOMDate(): List<LocalDate> =
-    map { it.fom }.sorted()
+fun List<PeriodeInput>.sortedFOMDate(): List<LocalDate> = map { it.fom }.sorted()
 
-fun List<PeriodeInput>.sortedTOMDate(): List<LocalDate> =
-    map { it.tom }.sorted()
+fun List<PeriodeInput>.sortedTOMDate(): List<LocalDate> = map { it.tom }.sorted()
 
 fun PeriodeInput.range(): ClosedRange<LocalDate> = fom.rangeTo(tom)
 
 fun ClosedRange<LocalDate>.daysBetween(): Long = ChronoUnit.DAYS.between(start, endInclusive)
 
-fun workdaysBetween(a: LocalDate, b: LocalDate): Int = (1 until ChronoUnit.DAYS.between(a, b))
-    .map { a.plusDays(it) }.count { it.dayOfWeek !in arrayOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }
+fun workdaysBetween(
+    a: LocalDate,
+    b: LocalDate,
+): Int =
+    (1 until ChronoUnit.DAYS.between(a, b))
+        .map { a.plusDays(it) }.count { it.dayOfWeek !in arrayOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }

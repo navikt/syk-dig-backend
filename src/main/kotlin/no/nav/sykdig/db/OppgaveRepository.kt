@@ -117,8 +117,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         }
         namedParameterJdbcTemplate.update(
             """
-                INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
-                VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
+            INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
+            VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
             """.trimIndent(),
             mapOf(
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
@@ -139,8 +139,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     ) {
         namedParameterJdbcTemplate.update(
             """
-                INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
-                VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
+            INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
+            VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
             """.trimIndent(),
             mapOf(
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
@@ -153,10 +153,10 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         )
         namedParameterJdbcTemplate.update(
             """
-                UPDATE oppgave
-                SET ferdigstilt = :ferdigstilt,
-                    tilbake_til_gosys = :tilbake_til_gosys
-                WHERE oppgave_id = :oppgave_id
+            UPDATE oppgave
+            SET ferdigstilt = :ferdigstilt,
+                tilbake_til_gosys = :tilbake_til_gosys
+            WHERE oppgave_id = :oppgave_id
             """.trimIndent(),
             mapOf(
                 "oppgave_id" to oppgave.oppgaveId,
@@ -175,8 +175,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     ) {
         namedParameterJdbcTemplate.update(
             """
-                INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
-                VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
+            INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
+            VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
             """.trimIndent(),
             mapOf(
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
@@ -189,10 +189,10 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         )
         namedParameterJdbcTemplate.update(
             """
-                UPDATE oppgave
-                SET ferdigstilt = :ferdigstilt,
-                    avvisings_grunn = :avvisings_grunn
-                WHERE oppgave_id = :oppgave_id
+            UPDATE oppgave
+            SET ferdigstilt = :ferdigstilt,
+                avvisings_grunn = :avvisings_grunn
+            WHERE oppgave_id = :oppgave_id
             """.trimIndent(),
             mapOf(
                 "oppgave_id" to oppgave.oppgaveId,
@@ -203,9 +203,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     }
 
     @Transactional
-    fun getLastSykmelding(
-        oppgaveId: String,
-    ): SykmeldingUnderArbeid? {
+    fun getLastSykmelding(oppgaveId: String): SykmeldingUnderArbeid? {
         return namedParameterJdbcTemplate.query(
             """SELECT s.sykmelding
                     FROM sykmelding AS s
@@ -221,12 +219,15 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
         }.firstOrNull()
     }
 
-    fun updateDocuments(oppgaveId: String, dokumenter: List<DokumentDbModel>) {
+    fun updateDocuments(
+        oppgaveId: String,
+        dokumenter: List<DokumentDbModel>,
+    ) {
         namedParameterJdbcTemplate.update(
             """
-                UPDATE oppgave
-                SET dokumenter = :dokumenter
-                WHERE oppgave_id = :oppgave_id
+            UPDATE oppgave
+            SET dokumenter = :dokumenter
+            WHERE oppgave_id = :oppgave_id
             """.trimIndent(),
             mapOf(
                 "oppgave_id" to oppgaveId,
@@ -243,24 +244,25 @@ fun toSykmelding(
     if (oppgave.sykmelding == null) {
         val msgId = UUID.randomUUID().toString()
         return SykmeldingUnderArbeid(
-            sykmelding = Sykmelding(
-                id = oppgave.sykmeldingId.toString(),
-                msgId = msgId,
-                medisinskVurdering = values.mapToMedisinskVurdering(),
-                arbeidsgiver = null,
-                perioder = values.perioder.mapToPerioder(),
-                prognose = null,
-                utdypendeOpplysninger = null,
-                tiltakArbeidsplassen = null,
-                tiltakNAV = null,
-                andreTiltak = null,
-                meldingTilNAV = null,
-                meldingTilArbeidsgiver = null,
-                kontaktMedPasient = null,
-                behandletTidspunkt = values.behandletTidspunkt,
-                behandler = null,
-                syketilfelleStartDato = null,
-            ),
+            sykmelding =
+                Sykmelding(
+                    id = oppgave.sykmeldingId.toString(),
+                    msgId = msgId,
+                    medisinskVurdering = values.mapToMedisinskVurdering(),
+                    arbeidsgiver = null,
+                    perioder = values.perioder.mapToPerioder(),
+                    prognose = null,
+                    utdypendeOpplysninger = null,
+                    tiltakArbeidsplassen = null,
+                    tiltakNAV = null,
+                    andreTiltak = null,
+                    meldingTilNAV = null,
+                    meldingTilArbeidsgiver = null,
+                    kontaktMedPasient = null,
+                    behandletTidspunkt = values.behandletTidspunkt,
+                    behandler = null,
+                    syketilfelleStartDato = null,
+                ),
             fnrPasient = values.fnrPasient,
             fnrLege = null,
             legeHprNr = null,
@@ -292,57 +294,66 @@ private fun toUtenlandskSykmelding(values: RegisterOppgaveValues): UtenlandskSyk
     }
 }
 
-private fun List<PeriodeInput>?.mapToPerioder(): List<Periode>? = this?.map {
-    Periode(
-        fom = it.fom,
-        tom = it.tom,
-        aktivitetIkkeMulig = if (it.type == PeriodeType.AKTIVITET_IKKE_MULIG) {
-            AktivitetIkkeMulig(
-                medisinskArsak = null,
-                arbeidsrelatertArsak = null,
-            )
-        } else {
-            null
-        },
-        behandlingsdager = null,
-        gradert = if (it.type == PeriodeType.GRADERT) {
-            Gradert(
-                grad = it.grad ?: throw IllegalStateException("Gradert periode must have grad"),
-                reisetilskudd = false,
-            )
-        } else {
-            null
-        },
-        reisetilskudd = false,
-        avventendeInnspillTilArbeidsgiver = null,
+private fun List<PeriodeInput>?.mapToPerioder(): List<Periode>? =
+    this?.map {
+        Periode(
+            fom = it.fom,
+            tom = it.tom,
+            aktivitetIkkeMulig =
+                if (it.type == PeriodeType.AKTIVITET_IKKE_MULIG) {
+                    AktivitetIkkeMulig(
+                        medisinskArsak = null,
+                        arbeidsrelatertArsak = null,
+                    )
+                } else {
+                    null
+                },
+            behandlingsdager = null,
+            gradert =
+                if (it.type == PeriodeType.GRADERT) {
+                    Gradert(
+                        grad = it.grad ?: throw IllegalStateException("Gradert periode must have grad"),
+                        reisetilskudd = false,
+                    )
+                } else {
+                    null
+                },
+            reisetilskudd = false,
+            avventendeInnspillTilArbeidsgiver = null,
+        )
+    }
+
+private fun RegisterOppgaveValues.mapToMedisinskVurdering() =
+    MedisinskVurdering(
+        hovedDiagnose =
+            hovedDiagnose?.let {
+                Diagnose(
+                    kode = it.kode,
+                    system = it.system,
+                    tekst = null,
+                    // TODO enhance
+                )
+            },
+        biDiagnoser =
+            biDiagnoser?.map {
+                Diagnose(
+                    kode = it.kode,
+                    system = it.system,
+                    tekst = null,
+                    // TODO enhance
+                )
+            } ?: emptyList(),
+        annenFraversArsak = null,
+        svangerskap = false,
+        yrkesskade = false,
+        yrkesskadeDato = null,
     )
-}
 
-private fun RegisterOppgaveValues.mapToMedisinskVurdering() = MedisinskVurdering(
-    hovedDiagnose = hovedDiagnose?.let {
-        Diagnose(
-            kode = it.kode,
-            system = it.system,
-            tekst = null, // TODO enhance
-        )
-    },
-    biDiagnoser = biDiagnoser?.map {
-        Diagnose(
-            kode = it.kode,
-            system = it.system,
-            tekst = null, // TODO enhance
-        )
-    } ?: emptyList(),
-    annenFraversArsak = null,
-    svangerskap = false,
-    yrkesskade = false,
-    yrkesskadeDato = null,
-)
-
-fun <T> T.toPGObject() = PGobject().also {
-    it.type = "json"
-    it.value = objectMapper.writeValueAsString(this)
-}
+fun <T> T.toPGObject() =
+    PGobject().also {
+        it.type = "json"
+        it.value = objectMapper.writeValueAsString(this)
+    }
 
 private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
     OppgaveDbModel(

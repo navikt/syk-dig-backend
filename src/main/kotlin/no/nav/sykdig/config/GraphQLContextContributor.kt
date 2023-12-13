@@ -4,12 +4,12 @@ import com.auth0.jwt.JWT
 import com.netflix.graphql.dgs.context.GraphQLContextContributor
 import com.netflix.graphql.dgs.internal.DgsRequestData
 import graphql.GraphQLContext
-import no.nav.sykdig.logger
+import no.nav.sykdig.applog
 import org.springframework.stereotype.Component
 
 @Component
 class GraphQLContextContributor : GraphQLContextContributor {
-    val log = logger()
+    val log = applog()
 
     override fun contribute(
         builder: GraphQLContext.Builder,

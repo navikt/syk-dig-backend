@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate
 
 @Configuration
 class PdlGraphQlConfiguration {
-
     @Bean
     fun pdlGraphQlClient(
         @Value("\${pdl.url}") pdlUrl: String,

@@ -67,15 +67,16 @@ class SykDigOppgaveServiceTest : FellesTestOppsett() {
     fun oppdatererOppgaveIDb() {
         sykDigOppgaveService.updateOppgave(
             oppgaveId = "123",
-            registerOppgaveValues = UferdigRegisterOppgaveValues(
-                fnrPasient = "12345678910",
-                skrevetLand = "SWE",
-                hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
-                behandletTidspunkt = null,
-                perioder = null,
-                biDiagnoser = null,
-                folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
-            ),
+            registerOppgaveValues =
+                UferdigRegisterOppgaveValues(
+                    fnrPasient = "12345678910",
+                    skrevetLand = "SWE",
+                    hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
+                    behandletTidspunkt = null,
+                    perioder = null,
+                    biDiagnoser = null,
+                    folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
+                ),
             navEpost = "X987654",
         )
 
@@ -95,30 +96,33 @@ class SykDigOppgaveServiceTest : FellesTestOppsett() {
         sykDigOppgaveService.ferdigstillOppgave(
             oppgave = createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"),
             navEpost = "X987654",
-            values = FerdistilltRegisterOppgaveValues(
-                fnrPasient = "12345678910",
-                behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
-                skrevetLand = "SWE",
-                perioder = listOf(
-                    PeriodeInput(
-                        PeriodeType.AKTIVITET_IKKE_MULIG,
-                        LocalDate.now().minusMonths(1),
-                        LocalDate.now().minusWeeks(2),
-                    ),
+            values =
+                FerdistilltRegisterOppgaveValues(
+                    fnrPasient = "12345678910",
+                    behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
+                    skrevetLand = "SWE",
+                    perioder =
+                        listOf(
+                            PeriodeInput(
+                                PeriodeType.AKTIVITET_IKKE_MULIG,
+                                LocalDate.now().minusMonths(1),
+                                LocalDate.now().minusWeeks(2),
+                            ),
+                        ),
+                    hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
+                    biDiagnoser = emptyList(),
+                    folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
                 ),
-                hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
-                biDiagnoser = emptyList(),
-                folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
-            ),
             enhetId = "2990",
-            sykmeldt = Person(
-                fnr = "12345678910",
-                navn = Navn("Fornavn", null, "Etternavn"),
-                aktorId = "aktorid",
-                bostedsadresse = null,
-                oppholdsadresse = null,
-                fodselsdato = LocalDate.of(1980, 5, 5),
-            ),
+            sykmeldt =
+                Person(
+                    fnr = "12345678910",
+                    navn = Navn("Fornavn", null, "Etternavn"),
+                    aktorId = "aktorid",
+                    bostedsadresse = null,
+                    oppholdsadresse = null,
+                    fodselsdato = LocalDate.of(1980, 5, 5),
+                ),
         )
 
         val oppdatertOppgave = sykDigOppgaveService.getOppgave("123")

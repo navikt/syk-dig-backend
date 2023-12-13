@@ -15,12 +15,13 @@ fun toOppgaveDbModel(
     fnr = digitaliseringsoppgave.fnr,
     journalpostId = digitaliseringsoppgave.journalpostId,
     dokumentInfoId = digitaliseringsoppgave.dokumentInfoId,
-    dokumenter = digitaliseringsoppgave.dokumenter.map {
-        DokumentDbModel(
-            dokumentInfoId = it.dokumentInfoId,
-            tittel = it.tittel,
-        )
-    },
+    dokumenter =
+        digitaliseringsoppgave.dokumenter.map {
+            DokumentDbModel(
+                dokumentInfoId = it.dokumentInfoId,
+                tittel = it.tittel,
+            )
+        },
     opprettet = opprettet,
     ferdigstilt = null,
     tilbakeTilGosys = false,

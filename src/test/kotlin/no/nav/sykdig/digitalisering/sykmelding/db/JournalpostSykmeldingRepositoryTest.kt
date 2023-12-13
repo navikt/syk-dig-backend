@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DuplicateKeyException
 
 class JournalpostSykmeldingRepositoryTest : FellesTestOppsett() {
-
     @Autowired
     lateinit var journalpostSykmeldingRepository: JournalpostSykmeldingRepository
 

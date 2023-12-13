@@ -8,7 +8,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 class PdlClientTest {
-
     @Test
     fun shouldmapToPdlResponse() {
         val json = String(Files.readAllBytes(Paths.get("src/test/resources/pdl.json")), StandardCharsets.UTF_8)

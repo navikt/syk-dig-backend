@@ -1,7 +1,7 @@
 package no.nav.sykdig.oppgavemottak
 
+import no.nav.sykdig.applog
 import no.nav.sykdig.db.OppgaveRepository
-import no.nav.sykdig.logger
 import no.nav.sykdig.metrics.MetricRegister
 import no.nav.sykdig.utils.toOppgaveDbModel
 import org.springframework.stereotype.Component
@@ -13,14 +13,18 @@ class MottaOppgaverFraKafka(
     private val oppgaveRepository: OppgaveRepository,
     private val metricRegister: MetricRegister,
 ) {
-    val log = logger()
-    fun lagre(sykmeldingId: String, digitaliseringsoppgave: DigitaliseringsoppgaveKafka) {
+    val log = applog()
+
+    fun lagre(
+        sykmeldingId: String,
+        digitaliseringsoppgave: DigitaliseringsoppgaveKafka,
+    ) {
         log.info("Mottatt oppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
         val opprettet = OffsetDateTime.now(ZoneOffset.UTC)
         oppgaveRepository.lagreOppgave(
             toOppgaveDbModel(digitaliseringsoppgave, opprettet, sykmeldingId),
         )
-        metricRegister.MOTTATT_OPPGAVE.increment()
+        metricRegister.mottatOppgave.increment()
     }
 }
 

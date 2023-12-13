@@ -4,6 +4,7 @@ import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
+import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
 import no.nav.sykdig.digitalisering.sykmelding.service.SykmeldingService
@@ -11,7 +12,6 @@ import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.generated.types.JournalpostStatusEnum
-import no.nav.sykdig.logger
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.security.access.prepost.PostAuthorize
@@ -25,7 +25,7 @@ class JournalpostDataFetcher(
 ) {
     companion object {
         private val securelog = securelog()
-        private val log = logger()
+        private val log = applog()
     }
 
     @PostAuthorize("@oppgaveSecurityService.hasAccessToJournalpost(returnObject)")
@@ -35,10 +35,11 @@ class JournalpostDataFetcher(
     ): JournalpostResult {
         val trimedJournalpostId = id.trim()
 
-        val journalpost = safGraphQlClient.getJournalpost(trimedJournalpostId).journalpost ?: return JournalpostStatus(
-            journalpostId = trimedJournalpostId,
-            status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
-        )
+        val journalpost =
+            safGraphQlClient.getJournalpost(trimedJournalpostId).journalpost ?: return JournalpostStatus(
+                journalpostId = trimedJournalpostId,
+                status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
+            )
 
         securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
 
@@ -67,11 +68,12 @@ class JournalpostDataFetcher(
                 status = JournalpostStatusEnum.OPPRETTET,
             )
         }
-        val journalpost = safGraphQlClient.getJournalpost(trimedJournalpostId).journalpost
-            ?: return JournalpostStatus(
-                journalpostId = trimedJournalpostId,
-                status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
-            )
+        val journalpost =
+            safGraphQlClient.getJournalpost(trimedJournalpostId).journalpost
+                ?: return JournalpostStatus(
+                    journalpostId = trimedJournalpostId,
+                    status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
+                )
         return journalpostService.createSykmeldingFromJournalpost(journalpost, trimedJournalpostId, isNorsk = norsk)
     }
 }

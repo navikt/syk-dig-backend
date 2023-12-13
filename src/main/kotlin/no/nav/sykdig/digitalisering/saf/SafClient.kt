@@ -1,7 +1,7 @@
 package no.nav.sykdig.digitalisering.saf
 
+import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
-import no.nav.sykdig.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -18,7 +18,7 @@ class SafClient(
     @Value("\${saf.url}") private val safUrl: String,
     private val safRestTemplate: RestTemplate,
 ) {
-    val log = logger()
+    val log = applog()
 
     @Retryable
     fun getPdfFraSaf(
@@ -33,25 +33,28 @@ class SafClient(
         headers["Nav-Consumer-Id"] = "syk-dig-backend"
 
         try {
-            val validJournalpostId = try {
-                journalpostId.toLong()
-            } catch (exception: Exception) {
-                throw RuntimeException("Ugyldig journalpostId: $journalpostId er på ugyldigformat")
-            }
+            val validJournalpostId =
+                try {
+                    journalpostId.toLong()
+                } catch (exception: Exception) {
+                    throw RuntimeException("Ugyldig journalpostId: $journalpostId er på ugyldigformat")
+                }
 
-            val validDokumentInfoId = try {
-                dokumentInfoId.toLong()
-            } catch (exception: Exception) {
-                throw RuntimeException("Ugyldig dokumentInfoId: $dokumentInfoId er på ugyldigformat")
-            }
+            val validDokumentInfoId =
+                try {
+                    dokumentInfoId.toLong()
+                } catch (exception: Exception) {
+                    throw RuntimeException("Ugyldig dokumentInfoId: $dokumentInfoId er på ugyldigformat")
+                }
 
             if (journalpostId.toLongOrNull() != null && dokumentInfoId.toLongOrNull() != null) {
-                val response = safRestTemplate.exchange(
-                    "$safUrl/rest/hentdokument/$validJournalpostId/$validDokumentInfoId/ARKIV",
-                    HttpMethod.GET,
-                    HttpEntity<Any>(headers),
-                    ByteArray::class.java,
-                )
+                val response =
+                    safRestTemplate.exchange(
+                        "$safUrl/rest/hentdokument/$validJournalpostId/$validDokumentInfoId/ARKIV",
+                        HttpMethod.GET,
+                        HttpEntity<Any>(headers),
+                        ByteArray::class.java,
+                    )
                 return response.body ?: throw RuntimeException("Tomt svar fra SAF for journalpostId $journalpostId")
             } else {
                 throw RuntimeException("Ugyldig journalpostId: $journalpostId eller dokumentInfoId: $dokumentInfoId er på ugyldigformat")

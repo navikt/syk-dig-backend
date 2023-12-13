@@ -7,7 +7,7 @@ import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import no.nav.sykdig.logger
+import no.nav.sykdig.applog
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -25,14 +25,25 @@ import org.springframework.web.context.request.RequestContextHolder.currentReque
 import java.util.Optional
 
 class SpringTokenValidationContextHolder : TokenValidationContextHolder {
+    private val tokenValidationContextAttribute = SpringTokenValidationContextHolder::class.java.name
 
-    private val TOKEN_VALIDATION_CONTEXT_ATTRIBUTE = SpringTokenValidationContextHolder::class.java.name
-    override fun getTokenValidationContext() = getRequestAttribute(TOKEN_VALIDATION_CONTEXT_ATTRIBUTE)?.let { it as TokenValidationContext } ?: TokenValidationContext(emptyMap())
+    override fun getTokenValidationContext() =
+        getRequestAttribute(tokenValidationContextAttribute)?.let {
+            it as TokenValidationContext
+        } ?: TokenValidationContext(emptyMap())
+
     override fun setTokenValidationContext(ctx: TokenValidationContext?) {
-        setRequestAttribute(TOKEN_VALIDATION_CONTEXT_ATTRIBUTE, ctx)
+        setRequestAttribute(tokenValidationContextAttribute, ctx)
     }
+
     private fun getRequestAttribute(name: String) = currentRequestAttributes().getAttribute(name, SCOPE_REQUEST)
-    private fun setRequestAttribute(name: String, value: Any?) = value?.let { currentRequestAttributes().setAttribute(name, it, SCOPE_REQUEST) } ?: currentRequestAttributes().removeAttribute(name, SCOPE_REQUEST)
+
+    private fun setRequestAttribute(
+        name: String,
+        value: Any?,
+    ) = value?.let {
+        currentRequestAttributes().setAttribute(name, it, SCOPE_REQUEST)
+    } ?: currentRequestAttributes().removeAttribute(name, SCOPE_REQUEST)
 }
 
 @Primary
@@ -47,8 +58,7 @@ class SykDigTokenResolver : JwtBearerTokenResolver {
 @EnableOAuth2Client(cacheEnabled = true)
 @Configuration
 class AadRestTemplateConfiguration {
-
-    val log = logger()
+    val log = applog()
 
     @Bean
     fun istilgangskontrollRestTemplate(
@@ -100,12 +110,13 @@ class AadRestTemplateConfiguration {
         clientConfigurationProperties: ClientConfigurationProperties,
         oAuth2AccessTokenService: OAuth2AccessTokenService,
     ): RestTemplate {
-        val restTemplate = downstreamRestTemplate(
-            registrationName = "onbehalfof-dokarkiv",
-            restTemplateBuilder = restTemplateBuilder,
-            clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
-        )
+        val restTemplate =
+            downstreamRestTemplate(
+                registrationName = "onbehalfof-dokarkiv",
+                restTemplateBuilder = restTemplateBuilder,
+                clientConfigurationProperties = clientConfigurationProperties,
+                oAuth2AccessTokenService = oAuth2AccessTokenService,
+            )
         // Bruker OkHttp til requests for å støtte PATCH.
         val requestFactory = OkHttp3ClientHttpRequestFactory()
         restTemplate.requestFactory = requestFactory
@@ -131,8 +142,9 @@ class AadRestTemplateConfiguration {
         oAuth2AccessTokenService: OAuth2AccessTokenService,
         registrationName: String,
     ): RestTemplate {
-        val clientProperties = clientConfigurationProperties.registration[registrationName]
-            ?: throw RuntimeException("Fant ikke config for $registrationName")
+        val clientProperties =
+            clientConfigurationProperties.registration[registrationName]
+                ?: throw RuntimeException("Fant ikke config for $registrationName")
         return restTemplateBuilder
             .additionalInterceptors(bearerTokenInterceptor(clientProperties, oAuth2AccessTokenService))
             .build()

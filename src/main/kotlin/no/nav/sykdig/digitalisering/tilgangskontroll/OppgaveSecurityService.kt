@@ -14,7 +14,6 @@ import no.nav.sykdig.securelog
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class OppgaveSecurityService(
@@ -23,7 +22,6 @@ class OppgaveSecurityService(
     private val safGraphQlClient: SafJournalpostGraphQlClient,
     private val personService: PersonService,
 ) {
-
     companion object {
         private val securelog = securelog()
         private val auditlog = auditlog()
@@ -36,6 +34,7 @@ class OppgaveSecurityService(
         securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
         return tilgang
     }
+
     fun hasAccessToJournalpost(journalpostResult: JournalpostResult): Boolean {
         return when (journalpostResult) {
             is Journalpost -> return hasAccess(journalpostResult.fnr, getNavEmail())
@@ -43,14 +42,16 @@ class OppgaveSecurityService(
             else -> false
         }
     }
+
     fun hasAccessToJournalpostId(journalpostId: String): Boolean {
         val journalpost = safGraphQlClient.getJournalpost(journalpostId)
         securelog.info("journalpostid $journalpostId ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
 
-        val id = when (journalpost.journalpost?.bruker?.type) {
-            Type.ORGNR -> null
-            else -> journalpost.journalpost?.bruker?.id
-        }
+        val id =
+            when (journalpost.journalpost?.bruker?.type) {
+                Type.ORGNR -> null
+                else -> journalpost.journalpost?.bruker?.id
+            }
 
         if (id == null) {
             securelog.info("Fant ikke id i journalpost: $journalpostId")
@@ -66,7 +67,10 @@ class OppgaveSecurityService(
         return tilgang
     }
 
-    private fun hasAccess(fnr: String, navEmail: String): Boolean {
+    private fun hasAccess(
+        fnr: String,
+        navEmail: String,
+    ): Boolean {
         val tilgang = istilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
         auditlog.info(
             AuditLogger().createcCefMessage(
@@ -74,10 +78,11 @@ class OppgaveSecurityService(
                 navEmail = navEmail,
                 operation = AuditLogger.Operation.READ,
                 requestPath = "/api/graphql",
-                permit = when (tilgang) {
-                    true -> AuditLogger.Permit.PERMIT
-                    false -> AuditLogger.Permit.DENY
-                },
+                permit =
+                    when (tilgang) {
+                        true -> AuditLogger.Permit.PERMIT
+                        false -> AuditLogger.Permit.DENY
+                    },
             ),
         )
 

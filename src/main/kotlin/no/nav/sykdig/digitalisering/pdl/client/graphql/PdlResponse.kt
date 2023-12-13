@@ -87,13 +87,16 @@ data class PdlResponse(
     val hentPerson: PdlPerson?,
     val identer: PdlIdenter?,
 )
+
 data class PdlIdenter(
     val identer: List<PdlIdent>,
 )
+
 data class PdlIdent(
     val ident: String,
     val gruppe: String,
 )
+
 data class PdlPerson(
     val bostedsadresse: List<PdlBostedsadresse>,
     val navn: List<PdlNavn>,
@@ -161,5 +164,4 @@ data class PdlNavn(
     val etternavn: String,
 )
 
-fun mapToPdlResponse(json: String): PdlResponse =
-    objectMapper.readValue<Data>(json).data!!
+fun mapToPdlResponse(json: String): PdlResponse = objectMapper.readValue<Data>(json).data!!

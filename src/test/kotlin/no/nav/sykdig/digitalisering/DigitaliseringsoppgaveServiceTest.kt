@@ -56,35 +56,37 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
 
     val oppgaveId = "1"
 
-    val oppgaveMock = OppgaveDbModel(
-        oppgaveId = oppgaveId,
-        fnr = "20086600138",
-        journalpostId = "2",
-        dokumentInfoId = "131",
-        opprettet = OffsetDateTime.now(),
-        ferdigstilt = null,
-        avvisingsgrunn = null,
-        tilbakeTilGosys = false,
-        sykmeldingId = sykmeldingId,
-        type = "UTLAND",
-        sykmelding = null,
-        endretAv = "Z123456",
-        dokumenter = emptyList(),
-        timestamp = OffsetDateTime.now(),
-        source = "scanning",
-    )
+    val oppgaveMock =
+        OppgaveDbModel(
+            oppgaveId = oppgaveId,
+            fnr = "20086600138",
+            journalpostId = "2",
+            dokumentInfoId = "131",
+            opprettet = OffsetDateTime.now(),
+            ferdigstilt = null,
+            avvisingsgrunn = null,
+            tilbakeTilGosys = false,
+            sykmeldingId = sykmeldingId,
+            type = "UTLAND",
+            sykmelding = null,
+            endretAv = "Z123456",
+            dokumenter = emptyList(),
+            timestamp = OffsetDateTime.now(),
+            source = "scanning",
+        )
 
-    val oppgaveResponseMock = GetOppgaveResponse(
-        versjon = 1,
-        status = Oppgavestatus.OPPRETTET,
-        behandlesAvApplikasjon = "SMM",
-        tilordnetRessurs = "A123456",
-        beskrivelse = "Dette var ikkje bra",
-        oppgavetype = OppgaveType.BEH_SED,
-        tildeltEnhetsnr = "0393",
-        aktivDato = LocalDate.now(),
-        duplikat = false,
-    )
+    val oppgaveResponseMock =
+        GetOppgaveResponse(
+            versjon = 1,
+            status = Oppgavestatus.OPPRETTET,
+            behandlesAvApplikasjon = "SMM",
+            tilordnetRessurs = "A123456",
+            beskrivelse = "Dette var ikkje bra",
+            oppgavetype = OppgaveType.BEH_SED,
+            tildeltEnhetsnr = "0393",
+            aktivDato = LocalDate.now(),
+            duplikat = false,
+        )
 
     val excpetedAvvisingsgrunn = Avvisingsgrunn.MANGLENDE_DIAGNOSE
 
@@ -96,7 +98,7 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
             oppgaveResponseMock
         }
 
-        Mockito.`when`(metricRegister.AVVIST_SENDT_TIL_GOSYS).thenAnswer {
+        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
             SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
         }
         Mockito.`when`(personService.hentPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
@@ -109,14 +111,15 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
                 fodselsdato = LocalDate.of(1980, 5, 5),
             )
         }
-        val avvistOppgave = digitaliseringsoppgaveService.avvisOppgave(
-            oppgave.oppgaveId,
-            "Z123456",
-            "Z123456@trygdeetaten.no",
-            "0393",
-            excpetedAvvisingsgrunn,
-            null,
-        )
+        val avvistOppgave =
+            digitaliseringsoppgaveService.avvisOppgave(
+                oppgave.oppgaveId,
+                "Z123456",
+                "Z123456@trygdeetaten.no",
+                "0393",
+                excpetedAvvisingsgrunn,
+                null,
+            )
         val lagretOppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
 
         assertNotNull(lagretOppgave.oppgaveDbModel.ferdigstilt)
@@ -130,9 +133,11 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
         Mockito.`when`(gosysService.hentOppgave(oppgaveId, sykmeldingId.toString())).thenAnswer {
             oppgaveResponseMock
         }
-        Mockito.`when`(gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString())).thenThrow(RuntimeException("Real bad error"))
+        Mockito.`when`(
+            gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString()),
+        ).thenThrow(RuntimeException("Real bad error"))
 
-        Mockito.`when`(metricRegister.AVVIST_SENDT_TIL_GOSYS).thenAnswer {
+        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
             SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
         }
         Mockito.`when`(personService.hentPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
@@ -172,7 +177,7 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
 
         val excpetedAvvisingsgrunnAnnet = Avvisingsgrunn.ANNET
 
-        Mockito.`when`(metricRegister.AVVIST_SENDT_TIL_GOSYS).thenAnswer {
+        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
             SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
         }
         Mockito.`when`(personService.hentPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
@@ -185,14 +190,15 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
                 fodselsdato = LocalDate.of(1980, 5, 5),
             )
         }
-        val avvistOppgave = digitaliseringsoppgaveService.avvisOppgave(
-            oppgave.oppgaveId,
-            "Z123456",
-            "Z123456@trygdeetaten.no",
-            "0393",
-            excpetedAvvisingsgrunnAnnet,
-            "Feil dato",
-        )
+        val avvistOppgave =
+            digitaliseringsoppgaveService.avvisOppgave(
+                oppgave.oppgaveId,
+                "Z123456",
+                "Z123456@trygdeetaten.no",
+                "0393",
+                excpetedAvvisingsgrunnAnnet,
+                "Feil dato",
+            )
         val lagretOppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
 
         assertNotNull(lagretOppgave.oppgaveDbModel.ferdigstilt)
@@ -208,9 +214,11 @@ class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
         Mockito.`when`(gosysService.hentOppgave(oppgaveId, sykmeldingId.toString())).thenAnswer {
             oppgaveResponseMock
         }
-        Mockito.`when`(gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString())).thenThrow(RuntimeException("Real bad error"))
+        Mockito.`when`(
+            gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString()),
+        ).thenThrow(RuntimeException("Real bad error"))
 
-        Mockito.`when`(metricRegister.AVVIST_SENDT_TIL_GOSYS).thenAnswer {
+        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
             SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
         }
         Mockito.`when`(personService.hentPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
