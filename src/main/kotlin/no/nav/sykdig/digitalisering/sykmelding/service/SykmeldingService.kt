@@ -16,23 +16,27 @@ class SykmeldingService(
     private val journalpostSykmeldingRepository: JournalpostSykmeldingRepository,
     @Qualifier("sykmeldingTopic") private val sykmeldingTopic: String,
 ) {
-
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
     }
 
-    fun createSykmelding(journalpostId: String, tema: String) {
+    fun createSykmelding(
+        journalpostId: String,
+        tema: String,
+    ) {
         try {
             val journalpostSykmelding = journalpostSykmeldingRepository.getJournalpostSykmelding(journalpostId)
 
             if (journalpostSykmelding == null) {
-                val createSykmeldingKafkaMessage = CreateSykmeldingKafkaMessage(
-                    metadata = Metadata(),
-                    data = JournalpostMetadata(
-                        journalpostId,
-                        tema,
-                    ),
-                )
+                val createSykmeldingKafkaMessage =
+                    CreateSykmeldingKafkaMessage(
+                        metadata = Metadata(),
+                        data =
+                            JournalpostMetadata(
+                                journalpostId,
+                                tema,
+                            ),
+                    )
 
                 sykmeldingKafkaProducer.send(
                     ProducerRecord(

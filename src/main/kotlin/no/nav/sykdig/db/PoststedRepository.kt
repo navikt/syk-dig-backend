@@ -1,6 +1,6 @@
 package no.nav.sykdig.db
 
-import no.nav.sykdig.logger
+import no.nav.sykdig.applog
 import no.nav.sykdig.poststed.PostInformasjon
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
@@ -13,7 +13,7 @@ import java.util.UUID
 class PoststedRepository(
     private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
-    val log = logger()
+    val log = applog()
 
     fun getPoststed(postnummer: String): String? {
         return namedParameterJdbcTemplate.query(
@@ -28,7 +28,10 @@ class PoststedRepository(
         }.firstOrNull()
     }
 
-    fun oppdaterPoststed(oppdatertPostinformasjon: List<PostInformasjon>, sporingsId: UUID) {
+    fun oppdaterPoststed(
+        oppdatertPostinformasjon: List<PostInformasjon>,
+        sporingsId: UUID,
+    ) {
         val postinfoFraDb = getAllePoststeder()
         if (postinfoFraDb.size == oppdatertPostinformasjon.size && postinfoFraDb.toHashSet() == oppdatertPostinformasjon.toHashSet()) {
             log.info("Ingen endringer for $sporingsId, avslutter...")

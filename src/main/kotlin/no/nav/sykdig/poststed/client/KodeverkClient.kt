@@ -1,6 +1,6 @@
 package no.nav.sykdig.poststed.client
 
-import no.nav.sykdig.logger
+import no.nav.sykdig.applog
 import no.nav.sykdig.poststed.PostInformasjon
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -18,7 +18,7 @@ class KodeverkClient(
     @Value("\${kodeverk.url}") private val url: String,
     private val kodeverkRestTemplate: RestTemplate,
 ) {
-    val log = logger()
+    val log = applog()
 
     @Retryable
     fun hentKodeverk(callId: UUID): List<PostInformasjon> {
@@ -28,12 +28,13 @@ class KodeverkClient(
         headers["Nav-Consumer-Id"] = "syk-dig-backend"
 
         try {
-            val response = kodeverkRestTemplate.exchange(
-                "$url/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato=${LocalDate.now()}&spraak=nb",
-                HttpMethod.GET,
-                HttpEntity<Any>(headers),
-                GetKodeverkKoderBetydningerResponse::class.java,
-            )
+            val response =
+                kodeverkRestTemplate.exchange(
+                    "$url/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato=${LocalDate.now()}&spraak=nb",
+                    HttpMethod.GET,
+                    HttpEntity<Any>(headers),
+                    GetKodeverkKoderBetydningerResponse::class.java,
+                )
             return response.body?.toPostInformasjonListe() ?: throw RuntimeException("Ingen respons fra kodeverk")
         } catch (e: Exception) {
             log.error("Noe gikk galt ved henting av postinformasjon fra kodeverk: ${e.message}", e)

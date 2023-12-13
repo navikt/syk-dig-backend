@@ -78,27 +78,29 @@ class OppgaveDataFetcherTest {
     fun `querying oppgave`() {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
-                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
-                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                ),
+                oppgaveDbModel =
+                    createDigitalseringsoppgaveDbModel(
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ),
                 person = createPerson(),
             )
         }
 
-        val oppgave: String = dgsQueryExecutor.executeAndExtractJsonPath(
-            """
-            {
-                oppgave(oppgaveId: "123") {
-                    ... on Digitaliseringsoppgave {
-                        values {
-                            fnrPasient                    
+        val oppgave: String =
+            dgsQueryExecutor.executeAndExtractJsonPath(
+                """
+                {
+                    oppgave(oppgaveId: "123") {
+                        ... on Digitaliseringsoppgave {
+                            values {
+                                fnrPasient                    
+                            }
                         }
                     }
                 }
-            }
-            """.trimIndent(),
-            "data.oppgave.values.fnrPasient",
-        )
+                """.trimIndent(),
+                "data.oppgave.values.fnrPasient",
+            )
 
         assertEquals("12345678910", oppgave)
     }
@@ -107,26 +109,28 @@ class OppgaveDataFetcherTest {
     fun `querying oppgave when ferdigstilt should return status`() {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
-                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
-                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                    ferdigstilt = OffsetDateTime.now(),
-                ),
+                oppgaveDbModel =
+                    createDigitalseringsoppgaveDbModel(
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                        ferdigstilt = OffsetDateTime.now(),
+                    ),
                 person = createPerson(),
             )
         }
 
-        val status: String = dgsQueryExecutor.executeAndExtractJsonPath(
-            """
-            {
-                oppgave(oppgaveId: "123") {
-                    ... on DigitaliseringsoppgaveStatus {
-                        status
+        val status: String =
+            dgsQueryExecutor.executeAndExtractJsonPath(
+                """
+                {
+                    oppgave(oppgaveId: "123") {
+                        ... on DigitaliseringsoppgaveStatus {
+                            status
+                        }
                     }
                 }
-            }
-            """.trimIndent(),
-            "data.oppgave.status",
-        )
+                """.trimIndent(),
+                "data.oppgave.status",
+            )
 
         assertEquals(status, "FERDIGSTILT")
     }
@@ -135,27 +139,29 @@ class OppgaveDataFetcherTest {
     fun `querying oppgave when sendt to gosys should return status`() {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
-                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
-                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                    ferdigstilt = OffsetDateTime.now(),
-                    tilbakeTilGosys = true,
-                ),
+                oppgaveDbModel =
+                    createDigitalseringsoppgaveDbModel(
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                        ferdigstilt = OffsetDateTime.now(),
+                        tilbakeTilGosys = true,
+                    ),
                 person = createPerson(),
             )
         }
 
-        val status: String = dgsQueryExecutor.executeAndExtractJsonPath(
-            """
-            {
-                oppgave(oppgaveId: "123") {
-                    ... on DigitaliseringsoppgaveStatus {
-                        status
+        val status: String =
+            dgsQueryExecutor.executeAndExtractJsonPath(
+                """
+                {
+                    oppgave(oppgaveId: "123") {
+                        ... on DigitaliseringsoppgaveStatus {
+                            status
+                        }
                     }
                 }
-            }
-            """.trimIndent(),
-            "data.oppgave.status",
-        )
+                """.trimIndent(),
+                "data.oppgave.status",
+            )
 
         assertEquals(status, "IKKE_EN_SYKMELDING")
     }
@@ -165,26 +171,28 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { false }
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
-                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
-                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                ),
+                oppgaveDbModel =
+                    createDigitalseringsoppgaveDbModel(
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ),
                 person = createPerson(),
             )
         }
 
-        val result = dgsQueryExecutor.execute(
-            """
-            {
-                oppgave(oppgaveId: "123") {
-                    ... on Digitaliseringsoppgave {
-                        values {
-                            fnrPasient                    
+        val result =
+            dgsQueryExecutor.execute(
+                """
+                {
+                    oppgave(oppgaveId: "123") {
+                        ... on Digitaliseringsoppgave {
+                            values {
+                                fnrPasient                    
+                            }
                         }
                     }
                 }
-            }
-            """.trimIndent(),
-        )
+                """.trimIndent(),
+            )
         assertEquals(1, result.errors.size)
         assertEquals("Innlogget bruker har ikke tilgang", result.errors[0].message)
     }
@@ -196,36 +204,38 @@ class OppgaveDataFetcherTest {
                 createDigitalseringsoppgaveDbModel(
                     sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
                 ),
-                person = createPerson(
-                    vegadresse = Vegadresse("7", null, null, "Gateveien", null, "1111"),
-                ),
+                person =
+                    createPerson(
+                        vegadresse = Vegadresse("7", null, null, "Gateveien", null, "1111"),
+                    ),
             )
         }
         Mockito.`when`(poststedRepository.getPoststed("1111")).thenAnswer {
             "Oslo"
         }
-        val poststed: String = dgsQueryExecutor.executeAndExtractJsonPath(
-            """
-            {
-                oppgave(oppgaveId: "123") {
-                    ... on Digitaliseringsoppgave {
-                        values {
-                          fnrPasient
-                        }
-                        person {
-                            bostedsadresse {
-                                __typename
-                                ... on Vegadresse {
-                                    poststed
+        val poststed: String =
+            dgsQueryExecutor.executeAndExtractJsonPath(
+                """
+                {
+                    oppgave(oppgaveId: "123") {
+                        ... on Digitaliseringsoppgave {
+                            values {
+                              fnrPasient
+                            }
+                            person {
+                                bostedsadresse {
+                                    __typename
+                                    ... on Vegadresse {
+                                        poststed
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            """.trimIndent(),
-            "data.oppgave.person.bostedsadresse.poststed",
-        )
+                """.trimIndent(),
+                "data.oppgave.person.bostedsadresse.poststed",
+            )
         assertEquals("Oslo", poststed)
     }
 
@@ -233,40 +243,43 @@ class OppgaveDataFetcherTest {
     fun `querying oppgave with poststed on matrikkeladresse should use adresse data fetcher`() {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
-                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
-                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                ),
-                person = createPerson(
-                    matrikkeladresse = Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222"),
-                ),
+                oppgaveDbModel =
+                    createDigitalseringsoppgaveDbModel(
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ),
+                person =
+                    createPerson(
+                        matrikkeladresse = Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222"),
+                    ),
             )
         }
 
         Mockito.`when`(poststedRepository.getPoststed("2222")).thenAnswer {
             "Vestnes"
         }
-        val poststed: String = dgsQueryExecutor.executeAndExtractJsonPath(
-            """
-            {
-                oppgave(oppgaveId: "123") {
-                    ... on Digitaliseringsoppgave {
-                        values {
-                          fnrPasient
-                        }
-                        person {
-                            bostedsadresse {
-                                __typename
-                                ... on Matrikkeladresse {
-                                    poststed
+        val poststed: String =
+            dgsQueryExecutor.executeAndExtractJsonPath(
+                """
+                {
+                    oppgave(oppgaveId: "123") {
+                        ... on Digitaliseringsoppgave {
+                            values {
+                              fnrPasient
+                            }
+                            person {
+                                bostedsadresse {
+                                    __typename
+                                    ... on Matrikkeladresse {
+                                        poststed
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            """.trimIndent(),
-            "data.oppgave.person.bostedsadresse.poststed",
-        )
+                """.trimIndent(),
+                "data.oppgave.person.bostedsadresse.poststed",
+            )
 
         assertEquals("Vestnes", poststed)
     }
@@ -275,37 +288,40 @@ class OppgaveDataFetcherTest {
     fun `lagre oppgave UNDER_AREBID should update oppgave`() {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
-                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
-                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                ),
+                oppgaveDbModel =
+                    createDigitalseringsoppgaveDbModel(
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ),
                 person = createPerson(),
             )
         }
 
-        val result = dgsQueryExecutor.execute(
-            """
-            mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
-                lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
-                    ... on Digitaliseringsoppgave {
-                        oppgaveId
+        val result =
+            dgsQueryExecutor.execute(
+                """
+                mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
+                    lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
+                        ... on Digitaliseringsoppgave {
+                            oppgaveId
+                        }
                     }
                 }
-            }
-            """.trimIndent(),
-            mapOf(
-                "id" to "345",
-                "enhetId" to "1234",
-                "values" to mapOf(
-                    "fnrPasient" to "20086600138",
-                    "behandletTidspunkt" to null,
-                    "skrevetLand" to null,
-                    "perioder" to null,
-                    "hovedDiagnose" to null,
-                    "biDiagnoser" to null,
+                """.trimIndent(),
+                mapOf(
+                    "id" to "345",
+                    "enhetId" to "1234",
+                    "values" to
+                        mapOf(
+                            "fnrPasient" to "20086600138",
+                            "behandletTidspunkt" to null,
+                            "skrevetLand" to null,
+                            "perioder" to null,
+                            "hovedDiagnose" to null,
+                            "biDiagnoser" to null,
+                        ),
+                    "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID,
                 ),
-                "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID,
-            ),
-        )
+            )
 
         assertEquals(0, result.errors.size)
         verify(
@@ -323,37 +339,40 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { false }
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
-                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
-                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                ),
+                oppgaveDbModel =
+                    createDigitalseringsoppgaveDbModel(
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ),
                 person = createPerson(),
             )
         }
 
-        val result = dgsQueryExecutor.execute(
-            """
-            mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
-                lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
-                    ... on Digitaliseringsoppgave {
-                        oppgaveId
+        val result =
+            dgsQueryExecutor.execute(
+                """
+                mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
+                    lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
+                        ... on Digitaliseringsoppgave {
+                            oppgaveId
+                        }
                     }
                 }
-            }
-            """.trimIndent(),
-            mapOf(
-                "id" to "345",
-                "enhetId" to "1234",
-                "values" to mapOf(
-                    "fnrPasient" to "20086600138",
-                    "behandletTidspunkt" to null,
-                    "skrevetLand" to null,
-                    "perioder" to null,
-                    "hovedDiagnose" to null,
-                    "biDiagnoser" to null,
+                """.trimIndent(),
+                mapOf(
+                    "id" to "345",
+                    "enhetId" to "1234",
+                    "values" to
+                        mapOf(
+                            "fnrPasient" to "20086600138",
+                            "behandletTidspunkt" to null,
+                            "skrevetLand" to null,
+                            "perioder" to null,
+                            "hovedDiagnose" to null,
+                            "biDiagnoser" to null,
+                        ),
+                    "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID,
                 ),
-                "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID,
-            ),
-        )
+            )
         assertEquals(1, result.errors.size)
         assertEquals("Innlogget bruker har ikke tilgang", result.errors[0].message)
     }
@@ -362,40 +381,44 @@ class OppgaveDataFetcherTest {
     fun `lagre oppgave with FERDIGSTILT should ferdigstille oppgave`() {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
-                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
-                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                ),
+                oppgaveDbModel =
+                    createDigitalseringsoppgaveDbModel(
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ),
                 person = createPerson(),
             )
         }
 
-        val result = dgsQueryExecutor.execute(
-            """
-            mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
-                lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
-                    ... on Digitaliseringsoppgave {
-                        oppgaveId
+        val result =
+            dgsQueryExecutor.execute(
+                """
+                mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
+                    lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
+                        ... on Digitaliseringsoppgave {
+                            oppgaveId
+                        }
                     }
                 }
-            }
-            """.trimIndent(),
-            mapOf(
-                "id" to "345",
-                "enhetId" to "1234",
-                "values" to mapOf(
-                    "fnrPasient" to "20086600138",
-                    "behandletTidspunkt" to "2022-10-26",
-                    "skrevetLand" to "POL",
-                    "perioder" to emptyList<PeriodeInput>(),
-                    "hovedDiagnose" to mapOf(
-                        "kode" to "Z09",
-                        "system" to "ICPC2",
-                    ),
-                    "biDiagnoser" to emptyList<DiagnoseInput>(),
+                """.trimIndent(),
+                mapOf(
+                    "id" to "345",
+                    "enhetId" to "1234",
+                    "values" to
+                        mapOf(
+                            "fnrPasient" to "20086600138",
+                            "behandletTidspunkt" to "2022-10-26",
+                            "skrevetLand" to "POL",
+                            "perioder" to emptyList<PeriodeInput>(),
+                            "hovedDiagnose" to
+                                mapOf(
+                                    "kode" to "Z09",
+                                    "system" to "ICPC2",
+                                ),
+                            "biDiagnoser" to emptyList<DiagnoseInput>(),
+                        ),
+                    "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT,
                 ),
-                "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT,
-            ),
-        )
+            )
 
         assertEquals(0, result.errors.size)
         verify(
@@ -404,15 +427,16 @@ class OppgaveDataFetcherTest {
         ).ferdigstillOppgave(
             oppgaveId = "345",
             navEpost = "fake-test-ident",
-            values = FerdistilltRegisterOppgaveValues(
-                fnrPasient = "20086600138",
-                behandletTidspunkt = LocalDate.parse("2022-10-26").toOffsetDateTimeAtNoon()!!,
-                skrevetLand = "POL",
-                perioder = emptyList(),
-                hovedDiagnose = DiagnoseInput(kode = "Z09", system = "ICPC2"),
-                biDiagnoser = emptyList(),
-                folkeRegistertAdresseErBrakkeEllerTilsvarende = null,
-            ),
+            values =
+                FerdistilltRegisterOppgaveValues(
+                    fnrPasient = "20086600138",
+                    behandletTidspunkt = LocalDate.parse("2022-10-26").toOffsetDateTimeAtNoon()!!,
+                    skrevetLand = "POL",
+                    perioder = emptyList(),
+                    hovedDiagnose = DiagnoseInput(kode = "Z09", system = "ICPC2"),
+                    biDiagnoser = emptyList(),
+                    folkeRegistertAdresseErBrakkeEllerTilsvarende = null,
+                ),
             enhetId = "1234",
         )
     }
@@ -421,41 +445,45 @@ class OppgaveDataFetcherTest {
     fun `should throw ClientException when values are not validated correctly`() {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
-                oppgaveDbModel = createDigitalseringsoppgaveDbModel(
-                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                ),
+                oppgaveDbModel =
+                    createDigitalseringsoppgaveDbModel(
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ),
                 person = createPerson(),
             )
         }
 
-        val result = dgsQueryExecutor.execute(
-            """
-            mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
-                lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
-                    ... on Digitaliseringsoppgave {
-                        oppgaveId
+        val result =
+            dgsQueryExecutor.execute(
+                """
+                mutation TestLagreOppgave(${"$"}id: String!, ${"$"}enhetId: String!, ${"$"}values: SykmeldingUnderArbeidValues!, ${"$"}status: SykmeldingUnderArbeidStatus!) {
+                    lagre(oppgaveId: ${"$"}id, enhetId: ${"$"}enhetId, values: ${"$"}values, status: ${"$"}status) {
+                        ... on Digitaliseringsoppgave {
+                            oppgaveId
+                        }
                     }
                 }
-            }
-            """.trimIndent(),
-            mapOf(
-                "id" to "345",
-                "enhetId" to "1234",
-                "values" to mapOf(
-                    "fnrPasient" to "testfnr-pasient",
-                    "behandletTidspunkt" to "2022-10-26",
-                    // empty string is not valid
-                    "skrevetLand" to "",
-                    "perioder" to emptyList<PeriodeInput>(),
-                    "hovedDiagnose" to mapOf(
-                        "kode" to "Køde",
-                        "system" to "ICDCPC12",
-                    ),
-                    "biDiagnoser" to emptyList<DiagnoseInput>(),
+                """.trimIndent(),
+                mapOf(
+                    "id" to "345",
+                    "enhetId" to "1234",
+                    "values" to
+                        mapOf(
+                            "fnrPasient" to "testfnr-pasient",
+                            "behandletTidspunkt" to "2022-10-26",
+                            // empty string is not valid
+                            "skrevetLand" to "",
+                            "perioder" to emptyList<PeriodeInput>(),
+                            "hovedDiagnose" to
+                                mapOf(
+                                    "kode" to "Køde",
+                                    "system" to "ICDCPC12",
+                                ),
+                            "biDiagnoser" to emptyList<DiagnoseInput>(),
+                        ),
+                    "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT,
                 ),
-                "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT,
-            ),
-        )
+            )
 
         assertEquals(1, result.errors.size)
         assertEquals("Landet sykmeldingen er skrevet må være satt", result.errors[0].message)

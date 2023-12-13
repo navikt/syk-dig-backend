@@ -1,10 +1,10 @@
 package no.nav.sykdig.digitalisering.pdl.client
 
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
+import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PDL_QUERY
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlResponse
 import no.nav.sykdig.digitalisering.pdl.client.graphql.mapToPdlResponse
-import no.nav.sykdig.logger
 import no.nav.sykdig.securelog
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -13,11 +13,14 @@ import org.springframework.stereotype.Component
 class PdlClient(
     private val pdlGraphQlClient: CustomGraphQLClient,
 ) {
-    val log = logger()
+    val log = applog()
     val securelog = securelog()
 
     @Retryable
-    fun hentPerson(id: String, callId: String): PdlResponse {
+    fun hentPerson(
+        id: String,
+        callId: String,
+    ): PdlResponse {
         try {
             val response = pdlGraphQlClient.executeQuery(PDL_QUERY, mapOf("ident" to id))
 

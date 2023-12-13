@@ -1,7 +1,8 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
 import no.nav.syfo.model.ReceivedSykmelding
-import no.nav.sykdig.config.kafka.okSykmeldingTopic
+import no.nav.sykdig.applog
+import no.nav.sykdig.config.kafka.OK_SYKMLEDING_TOPIC
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
@@ -9,7 +10,6 @@ import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
-import no.nav.sykdig.logger
 import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
@@ -24,7 +24,7 @@ class FerdigstillingService(
     private val oppgaveClient: OppgaveClient,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
 ) {
-    val log = logger()
+    val log = applog()
     val securelog = securelog()
 
     fun ferdigstill(
@@ -34,13 +34,14 @@ class FerdigstillingService(
         validatedValues: FerdistilltRegisterOppgaveValues,
     ) {
         requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
-        val receivedSykmelding = mapToReceivedSykmelding(
-            ferdigstillteRegisterOppgaveValues = validatedValues,
-            sykmeldt = sykmeldt,
-            sykmeldingId = oppgave.sykmeldingId.toString(),
-            journalpostId = oppgave.journalpostId,
-            opprettet = oppgave.opprettet.toLocalDateTime(),
-        )
+        val receivedSykmelding =
+            mapToReceivedSykmelding(
+                ferdigstillteRegisterOppgaveValues = validatedValues,
+                sykmeldt = sykmeldt,
+                sykmeldingId = oppgave.sykmeldingId.toString(),
+                journalpostId = oppgave.journalpostId,
+                opprettet = oppgave.opprettet.toLocalDateTime(),
+            )
         val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
         securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
@@ -65,11 +66,11 @@ class FerdigstillingService(
 
         try {
             sykmeldingOKProducer.send(
-                ProducerRecord(okSykmeldingTopic, receivedSykmelding.sykmelding.id, receivedSykmelding),
+                ProducerRecord(OK_SYKMLEDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
             ).get()
             log.info(
                 "Sykmelding sendt to kafka topic {} sykmelding id {}",
-                okSykmeldingTopic,
+                OK_SYKMLEDING_TOPIC,
                 receivedSykmelding.sykmelding.id,
             )
         } catch (exception: Exception) {

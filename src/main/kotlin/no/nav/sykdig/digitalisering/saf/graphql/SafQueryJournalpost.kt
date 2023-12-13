@@ -21,6 +21,7 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
 data class SafQueryJournalpost(
     val journalpost: SafJournalpost?,
 )
+
 data class SafJournalpost(
     val journalstatus: Journalstatus?,
     val avsenderMottaker: AvsenderMottaker?,
@@ -42,6 +43,7 @@ enum class AvsenderMottakerIdType {
     UKJENT,
     UTL_ORG,
 }
+
 data class AvsenderMottaker(
     val id: String?,
     val type: AvsenderMottakerIdType?,

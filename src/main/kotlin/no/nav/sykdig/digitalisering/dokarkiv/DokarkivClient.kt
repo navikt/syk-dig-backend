@@ -2,10 +2,10 @@ package no.nav.sykdig.digitalisering.dokarkiv
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.syfo.model.Periode
+import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
-import no.nav.sykdig.logger
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
@@ -27,21 +27,24 @@ class DokarkivClient(
     @Value("\${dokarkiv.url}") private val url: String,
     private val dokarkivRestTemplate: RestTemplate,
 ) {
-    val log = logger()
+    val log = applog()
     val securelog = securelog()
+
     fun updateDocument(
         journalpostid: String,
         documentId: String,
         tittel: String,
     ) {
-        val oppaterDokumentRequest = OppdaterDokumentRequest(
-            dokumenter = listOf(
-                DokumentInfo(
-                    dokumentInfoId = documentId,
-                    tittel = tittel,
-                ),
-            ),
-        )
+        val oppaterDokumentRequest =
+            OppdaterDokumentRequest(
+                dokumenter =
+                    listOf(
+                        DokumentInfo(
+                            dokumentInfoId = documentId,
+                            tittel = tittel,
+                        ),
+                    ),
+            )
         dokarkivRestTemplate.put(
             "$url/$journalpostid",
             oppaterDokumentRequest,
@@ -98,16 +101,17 @@ class DokarkivClient(
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = createOppdaterJournalpostRequest(
-            landAlpha3,
-            fnr,
-            dokumentinfoId,
-            perioder,
-            source,
-            avvisningsGrunn,
-            orginalAvsenderMottaker,
-            sykmeldtNavn,
-        )
+        val body =
+            createOppdaterJournalpostRequest(
+                landAlpha3,
+                fnr,
+                dokumentinfoId,
+                perioder,
+                source,
+                avvisningsGrunn,
+                orginalAvsenderMottaker,
+                sykmeldtNavn,
+            )
 
         try {
             securelog.info("createOppdaterJournalpostRequest: ${objectMapper.writeValueAsString(body)}")
@@ -142,11 +146,9 @@ class DokarkivClient(
         "${formaterDato(perioder.sortedSykmeldingPeriodeFOMDate().first().fom)} -" +
             " ${formaterDato(perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
 
-    fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> =
-        sortedBy { it.fom }
+    fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> = sortedBy { it.fom }
 
-    fun List<Periode>.sortedSykmeldingPeriodeTOMDate(): List<Periode> =
-        sortedBy { it.tom }
+    fun List<Periode>.sortedSykmeldingPeriodeTOMDate(): List<Periode> = sortedBy { it.tom }
 
     fun formaterDato(dato: LocalDate): String {
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
@@ -166,80 +168,92 @@ class DokarkivClient(
         when (source) {
             "rina" -> {
                 return OppdaterJournalpostRequest(
-                    avsenderMottaker = createAvsenderMottaker(
-                        orginalAvsenderMottaker = orginalAvsenderMottaker,
-                        land = if (landAlpha3 != null) {
-                            mapFromAlpha3Toalpha2(landAlpha3)
-                        } else {
-                            null
-                        },
-                        source = source,
-                        sykmeldtNavn = sykmeldtNavn,
-                        sykmeldtFnr = fnr,
-                    ),
-                    bruker = DokBruker(
-                        id = fnr,
-                    ),
-                    tittel = createTitleRina(perioder, avvisningsGrunn),
-                    dokumenter = listOf(
-                        DokumentInfo(
-                            dokumentInfoId = dokumentinfoId,
-                            tittel = createTitleRina(perioder, avvisningsGrunn),
+                    avsenderMottaker =
+                        createAvsenderMottaker(
+                            orginalAvsenderMottaker = orginalAvsenderMottaker,
+                            land =
+                                if (landAlpha3 != null) {
+                                    mapFromAlpha3Toalpha2(landAlpha3)
+                                } else {
+                                    null
+                                },
+                            source = source,
+                            sykmeldtNavn = sykmeldtNavn,
+                            sykmeldtFnr = fnr,
                         ),
-                    ),
+                    bruker =
+                        DokBruker(
+                            id = fnr,
+                        ),
+                    tittel = createTitleRina(perioder, avvisningsGrunn),
+                    dokumenter =
+                        listOf(
+                            DokumentInfo(
+                                dokumentInfoId = dokumentinfoId,
+                                tittel = createTitleRina(perioder, avvisningsGrunn),
+                            ),
+                        ),
                 )
             }
 
             "navno" -> {
                 return OppdaterJournalpostRequest(
                     tema = "SYK",
-                    avsenderMottaker = createAvsenderMottaker(
-                        orginalAvsenderMottaker = orginalAvsenderMottaker,
-                        land = if (landAlpha3 != null) {
-                            mapFromAlpha3Toalpha2(landAlpha3)
-                        } else {
-                            null
-                        },
-                        source = source,
-                        sykmeldtNavn = sykmeldtNavn,
-                        sykmeldtFnr = fnr,
-                    ),
-                    bruker = DokBruker(
-                        id = fnr,
-                    ),
-                    tittel = createNavNoTittle(perioder, avvisningsGrunn),
-                    dokumenter = listOf(
-                        DokumentInfo(
-                            dokumentInfoId = dokumentinfoId,
-                            tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                    avsenderMottaker =
+                        createAvsenderMottaker(
+                            orginalAvsenderMottaker = orginalAvsenderMottaker,
+                            land =
+                                if (landAlpha3 != null) {
+                                    mapFromAlpha3Toalpha2(landAlpha3)
+                                } else {
+                                    null
+                                },
+                            source = source,
+                            sykmeldtNavn = sykmeldtNavn,
+                            sykmeldtFnr = fnr,
                         ),
-                    ),
+                    bruker =
+                        DokBruker(
+                            id = fnr,
+                        ),
+                    tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                    dokumenter =
+                        listOf(
+                            DokumentInfo(
+                                dokumentInfoId = dokumentinfoId,
+                                tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                            ),
+                        ),
                 )
             }
 
             else -> {
                 return OppdaterJournalpostRequest(
-                    avsenderMottaker = createAvsenderMottaker(
-                        orginalAvsenderMottaker = orginalAvsenderMottaker,
-                        land = if (landAlpha3 != null) {
-                            mapFromAlpha3Toalpha2(landAlpha3)
-                        } else {
-                            null
-                        },
-                        source = source,
-                        sykmeldtNavn = sykmeldtNavn,
-                        sykmeldtFnr = fnr,
-                    ),
-                    bruker = DokBruker(
-                        id = fnr,
-                    ),
-                    tittel = createTittle(perioder, avvisningsGrunn),
-                    dokumenter = listOf(
-                        DokumentInfo(
-                            dokumentInfoId = dokumentinfoId,
-                            tittel = createTittle(perioder, avvisningsGrunn),
+                    avsenderMottaker =
+                        createAvsenderMottaker(
+                            orginalAvsenderMottaker = orginalAvsenderMottaker,
+                            land =
+                                if (landAlpha3 != null) {
+                                    mapFromAlpha3Toalpha2(landAlpha3)
+                                } else {
+                                    null
+                                },
+                            source = source,
+                            sykmeldtNavn = sykmeldtNavn,
+                            sykmeldtFnr = fnr,
                         ),
-                    ),
+                    bruker =
+                        DokBruker(
+                            id = fnr,
+                        ),
+                    tittel = createTittle(perioder, avvisningsGrunn),
+                    dokumenter =
+                        listOf(
+                            DokumentInfo(
+                                dokumentInfoId = dokumentinfoId,
+                                tittel = createTittle(perioder, avvisningsGrunn),
+                            ),
+                        ),
                 )
             }
         }
@@ -300,7 +314,10 @@ class DokarkivClient(
         }
     }
 
-    fun createTitleRina(perioder: List<Periode>?, avvisningsGrunn: String?): String {
+    fun createTitleRina(
+        perioder: List<Periode>?,
+        avvisningsGrunn: String?,
+    ): String {
         return if (!avvisningsGrunn.isNullOrEmpty()) {
             "Avvist Søknad om kontantytelser: $avvisningsGrunn"
         } else if (perioder.isNullOrEmpty()) {
@@ -310,7 +327,10 @@ class DokarkivClient(
         }
     }
 
-    fun createTittle(perioder: List<Periode>?, avvisningsGrunn: String?): String {
+    fun createTittle(
+        perioder: List<Periode>?,
+        avvisningsGrunn: String?,
+    ): String {
         return if (!avvisningsGrunn.isNullOrEmpty()) {
             "Avvist Utenlandsk papirsykmelding: $avvisningsGrunn"
         } else if (perioder.isNullOrEmpty()) {
@@ -320,7 +340,10 @@ class DokarkivClient(
         }
     }
 
-    fun createNavNoTittle(perioder: List<Periode>?, avvisningsGrunn: String?): String {
+    fun createNavNoTittle(
+        perioder: List<Periode>?,
+        avvisningsGrunn: String?,
+    ): String {
         return if (!avvisningsGrunn.isNullOrEmpty()) {
             "Avvist Egenerklæring for utenlandske sykemeldinger: $avvisningsGrunn"
         } else if (perioder.isNullOrEmpty()) {
@@ -353,9 +376,10 @@ class DokarkivClient(
         headers.accept = listOf(MediaType.APPLICATION_JSON)
         headers["Nav-Callid"] = sykmeldingId
 
-        val body = FerdigstillJournalpostRequest(
-            journalfoerendeEnhet = enhet,
-        )
+        val body =
+            FerdigstillJournalpostRequest(
+                journalfoerendeEnhet = enhet,
+            )
         try {
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId/ferdigstill",

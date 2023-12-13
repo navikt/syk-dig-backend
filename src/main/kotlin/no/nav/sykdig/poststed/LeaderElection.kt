@@ -1,6 +1,6 @@
 package no.nav.sykdig.poststed
 
-import no.nav.sykdig.logger
+import no.nav.sykdig.applog
 import no.nav.sykdig.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
@@ -15,8 +15,7 @@ class LeaderElection(
     private val plainTextUtf8RestTemplate: RestTemplate,
     @Value("\${elector.path}") private val electorPath: String,
 ) {
-
-    val log = logger()
+    val log = applog()
 
     fun isLeader(): Boolean {
         if (electorPath == "dont_look_for_leader") {
@@ -29,15 +28,17 @@ class LeaderElection(
     private fun kallElector(): Boolean {
         val hostname: String = InetAddress.getLocalHost().hostName
 
-        val uriString = UriComponentsBuilder.fromHttpUrl(getHttpPath(electorPath))
-            .toUriString()
-        val result = plainTextUtf8RestTemplate
-            .exchange(
-                uriString,
-                HttpMethod.GET,
-                null,
-                String::class.java,
-            )
+        val uriString =
+            UriComponentsBuilder.fromHttpUrl(getHttpPath(electorPath))
+                .toUriString()
+        val result =
+            plainTextUtf8RestTemplate
+                .exchange(
+                    uriString,
+                    HttpMethod.GET,
+                    null,
+                    String::class.java,
+                )
         if (result.statusCode != HttpStatus.OK) {
             val message = "Kall mot elector feiler med HTTP-" + result.statusCode
             log.error(message)
@@ -59,5 +60,6 @@ class LeaderElection(
             true -> url
             else -> "http://$url"
         }
+
     private data class Leader(val name: String)
 }

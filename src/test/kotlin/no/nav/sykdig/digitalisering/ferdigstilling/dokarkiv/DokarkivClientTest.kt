@@ -15,7 +15,6 @@ import org.springframework.web.client.RestTemplate
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 class DokarkivClientTest : FellesTestOppsett() {
-
     @Mock
     lateinit var dokarkivRestTemplate: RestTemplate
 

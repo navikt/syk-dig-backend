@@ -22,8 +22,11 @@ class JournalpostService(
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val journalpostSykmeldingRepository: JournalpostSykmeldingRepository,
 ) {
-
-    fun createSykmeldingFromJournalpost(journalpost: SafJournalpost, journalpostId: String, isNorsk: Boolean): JournalpostResult {
+    fun createSykmeldingFromJournalpost(
+        journalpost: SafJournalpost,
+        journalpostId: String,
+        isNorsk: Boolean,
+    ): JournalpostResult {
         if (isWrongTema(journalpost)) {
             return JournalpostStatus(
                 journalpostId = journalpostId,
@@ -48,11 +51,12 @@ class JournalpostService(
                 )
             }
             false -> {
-                val fnrEllerAktorId = getFnrEllerAktorId(journalpost)
-                    ?: return JournalpostStatus(
-                        journalpostId = journalpostId,
-                        status = JournalpostStatusEnum.MANGLER_FNR,
-                    )
+                val fnrEllerAktorId =
+                    getFnrEllerAktorId(journalpost)
+                        ?: return JournalpostStatus(
+                            journalpostId = journalpostId,
+                            status = JournalpostStatusEnum.MANGLER_FNR,
+                        )
 
                 val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
                 val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
@@ -68,12 +72,16 @@ class JournalpostService(
         }
     }
 
-    fun getJournalpostResult(journalpost: SafJournalpost, journalpostId: String): JournalpostResult {
-        val fnrEllerAktorId = getFnrEllerAktorId(journalpost)
-            ?: return JournalpostStatus(
-                journalpostId = journalpostId,
-                status = JournalpostStatusEnum.MANGLER_FNR,
-            )
+    fun getJournalpostResult(
+        journalpost: SafJournalpost,
+        journalpostId: String,
+    ): JournalpostResult {
+        val fnrEllerAktorId =
+            getFnrEllerAktorId(journalpost)
+                ?: return JournalpostStatus(
+                    journalpostId = journalpostId,
+                    status = JournalpostStatusEnum.MANGLER_FNR,
+                )
 
         val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
         if (isWrongChannel(journalpost)) {
@@ -95,9 +103,10 @@ class JournalpostService(
         return Journalpost(
             journalpostId,
             journalpost.journalstatus?.name ?: "MANGLER_STATUS",
-            dokumenter = journalpost.dokumenter.map {
-                Document(it.tittel ?: "Mangler Tittel", it.dokumentInfoId)
-            },
+            dokumenter =
+                journalpost.dokumenter.map {
+                    Document(it.tittel ?: "Mangler Tittel", it.dokumentInfoId)
+                },
             fnr = fnr,
         )
     }

@@ -40,110 +40,132 @@ fun mapToFellesformat(
     return XMLEIFellesformat().apply {
         any.add(
             XMLMsgHead().apply {
-                msgInfo = XMLMsgInfo().apply {
-                    type = XMLCS().apply {
-                        dn = "Medisinsk vurdering av arbeidsmulighet ved sykdom, sykmelding"
-                        v = "SYKMELD"
+                msgInfo =
+                    XMLMsgInfo().apply {
+                        type =
+                            XMLCS().apply {
+                                dn = "Medisinsk vurdering av arbeidsmulighet ved sykdom, sykmelding"
+                                v = "SYKMELD"
+                            }
+                        miGversion = "v1.2 2006-05-24"
+                        genDate = datoOpprettet?.toString()
+                            ?: LocalDateTime.of(validatedValues.perioder.first().fom, LocalTime.NOON).toString()
+                        msgId = sykmeldingId
+                        ack =
+                            XMLCS().apply {
+                                dn = "Ja"
+                                v = "J"
+                            }
+                        sender =
+                            XMLSender().apply {
+                                comMethod =
+                                    XMLCS().apply {
+                                        dn = "EDI"
+                                        v = "EDI"
+                                    }
+                                organisation = XMLOrganisation().apply {}
+                            }
+                        receiver =
+                            XMLReceiver().apply {
+                                comMethod =
+                                    XMLCS().apply {
+                                        dn = "EDI"
+                                        v = "EDI"
+                                    }
+                                organisation =
+                                    XMLOrganisation().apply {
+                                        organisationName = "NAV"
+                                        ident.addAll(
+                                            listOf(
+                                                XMLIdent().apply {
+                                                    id = "79768"
+                                                    typeId =
+                                                        XMLCV().apply {
+                                                            dn = "Identifikator fra Helsetjenesteenhetsregisteret (HER-id)"
+                                                            s = "2.16.578.1.12.4.1.1.9051"
+                                                            v = "HER"
+                                                        }
+                                                },
+                                                XMLIdent().apply {
+                                                    id = "889640782"
+                                                    typeId =
+                                                        XMLCV().apply {
+                                                            dn = "Organisasjonsnummeret i Enhetsregister (Brønøysund)"
+                                                            s = "2.16.578.1.12.4.1.1.9051"
+                                                            v = "ENH"
+                                                        }
+                                                },
+                                            ),
+                                        )
+                                    }
+                            }
                     }
-                    miGversion = "v1.2 2006-05-24"
-                    genDate = datoOpprettet?.toString() ?: LocalDateTime.of(validatedValues.perioder.first().fom, LocalTime.NOON).toString()
-                    msgId = sykmeldingId
-                    ack = XMLCS().apply {
-                        dn = "Ja"
-                        v = "J"
-                    }
-                    sender = XMLSender().apply {
-                        comMethod = XMLCS().apply {
-                            dn = "EDI"
-                            v = "EDI"
-                        }
-                        organisation = XMLOrganisation().apply {}
-                    }
-                    receiver = XMLReceiver().apply {
-                        comMethod = XMLCS().apply {
-                            dn = "EDI"
-                            v = "EDI"
-                        }
-                        organisation = XMLOrganisation().apply {
-                            organisationName = "NAV"
-                            ident.addAll(
-                                listOf(
-                                    XMLIdent().apply {
-                                        id = "79768"
-                                        typeId = XMLCV().apply {
-                                            dn = "Identifikator fra Helsetjenesteenhetsregisteret (HER-id)"
-                                            s = "2.16.578.1.12.4.1.1.9051"
-                                            v = "HER"
-                                        }
-                                    },
-                                    XMLIdent().apply {
-                                        id = "889640782"
-                                        typeId = XMLCV().apply {
-                                            dn = "Organisasjonsnummeret i Enhetsregister (Brønøysund)"
-                                            s = "2.16.578.1.12.4.1.1.9051"
-                                            v = "ENH"
-                                        }
-                                    },
-                                ),
-                            )
-                        }
-                    }
-                }
                 document.add(
                     XMLDocument().apply {
-                        refDoc = XMLRefDoc().apply {
-                            msgType = XMLCS().apply {
-                                dn = "XML-instans"
-                                v = "XML"
-                            }
-                            content = XMLRefDoc.Content().apply {
-                                any.add(
-                                    HelseOpplysningerArbeidsuforhet().apply {
-                                        syketilfelleStartDato = tilSyketilfelleStartDato(validatedValues)
-                                        pasient = HelseOpplysningerArbeidsuforhet.Pasient().apply {
-                                            navn = NavnType().apply {
-                                                fornavn = person.navn.fornavn
-                                                mellomnavn = person.navn.mellomnavn
-                                                etternavn = person.navn.etternavn
-                                            }
-                                            fodselsnummer = Ident().apply {
-                                                id = validatedValues.fnrPasient
-                                                typeId = CV().apply {
-                                                    dn = "Fødselsnummer"
-                                                    s = "2.16.578.1.12.4.1.1.8116"
-                                                    v = "FNR"
-                                                }
-                                            }
-                                        }
-                                        arbeidsgiver = tilArbeidsgiver()
-                                        medisinskVurdering = tilMedisinskVurdering(
-                                            validatedValues.hovedDiagnose,
-                                            validatedValues.biDiagnoser,
+                        refDoc =
+                            XMLRefDoc().apply {
+                                msgType =
+                                    XMLCS().apply {
+                                        dn = "XML-instans"
+                                        v = "XML"
+                                    }
+                                content =
+                                    XMLRefDoc.Content().apply {
+                                        any.add(
+                                            HelseOpplysningerArbeidsuforhet().apply {
+                                                syketilfelleStartDato = tilSyketilfelleStartDato(validatedValues)
+                                                pasient =
+                                                    HelseOpplysningerArbeidsuforhet.Pasient().apply {
+                                                        navn =
+                                                            NavnType().apply {
+                                                                fornavn = person.navn.fornavn
+                                                                mellomnavn = person.navn.mellomnavn
+                                                                etternavn = person.navn.etternavn
+                                                            }
+                                                        fodselsnummer =
+                                                            Ident().apply {
+                                                                id = validatedValues.fnrPasient
+                                                                typeId =
+                                                                    CV().apply {
+                                                                        dn = "Fødselsnummer"
+                                                                        s = "2.16.578.1.12.4.1.1.8116"
+                                                                        v = "FNR"
+                                                                    }
+                                                            }
+                                                    }
+                                                arbeidsgiver = tilArbeidsgiver()
+                                                medisinskVurdering =
+                                                    tilMedisinskVurdering(
+                                                        validatedValues.hovedDiagnose,
+                                                        validatedValues.biDiagnoser,
+                                                    )
+                                                aktivitet =
+                                                    HelseOpplysningerArbeidsuforhet.Aktivitet().apply {
+                                                        periode.addAll(tilPeriodeListe(validatedValues.perioder))
+                                                    }
+                                                prognose = null
+                                                utdypendeOpplysninger = null
+                                                tiltak = null
+                                                meldingTilNav = null
+                                                meldingTilArbeidsgiver = null
+                                                kontaktMedPasient =
+                                                    HelseOpplysningerArbeidsuforhet.KontaktMedPasient().apply {
+                                                        kontaktDato = null
+                                                        begrunnIkkeKontakt = null
+                                                        behandletDato = validatedValues.behandletTidspunkt.toLocalDateTime()
+                                                    }
+                                                behandler = tilBehandler()
+                                                avsenderSystem =
+                                                    HelseOpplysningerArbeidsuforhet.AvsenderSystem().apply {
+                                                        systemNavn = "syk-dig"
+                                                        systemVersjon =
+                                                            journalpostId
+                                                    }
+                                                strekkode = "123456789qwerty"
+                                            },
                                         )
-                                        aktivitet = HelseOpplysningerArbeidsuforhet.Aktivitet().apply {
-                                            periode.addAll(tilPeriodeListe(validatedValues.perioder))
-                                        }
-                                        prognose = null
-                                        utdypendeOpplysninger = null
-                                        tiltak = null
-                                        meldingTilNav = null
-                                        meldingTilArbeidsgiver = null
-                                        kontaktMedPasient = HelseOpplysningerArbeidsuforhet.KontaktMedPasient().apply {
-                                            kontaktDato = null
-                                            begrunnIkkeKontakt = null
-                                            behandletDato = validatedValues.behandletTidspunkt.toLocalDateTime()
-                                        }
-                                        behandler = tilBehandler()
-                                        avsenderSystem = HelseOpplysningerArbeidsuforhet.AvsenderSystem().apply {
-                                            systemNavn = "syk-dig"
-                                            systemVersjon =
-                                                journalpostId
-                                        }
-                                        strekkode = "123456789qwerty"
-                                    },
-                                )
+                                    }
                             }
-                        }
                     },
                 )
             },
@@ -153,39 +175,47 @@ fun mapToFellesformat(
 
 fun tilBehandler(): HelseOpplysningerArbeidsuforhet.Behandler =
     HelseOpplysningerArbeidsuforhet.Behandler().apply {
-        navn = NavnType().apply {
-            fornavn = ""
-            mellomnavn = ""
-            etternavn = ""
-        }
+        navn =
+            NavnType().apply {
+                fornavn = ""
+                mellomnavn = ""
+                etternavn = ""
+            }
         adresse = Address()
         kontaktInfo.add(
             TeleCom().apply {
-                typeTelecom = CS().apply {
-                    v = "HP"
-                    dn = "Hovedtelefon"
-                }
-                teleAddress = URL().apply {
-                    v = "tel:55553336"
-                }
+                typeTelecom =
+                    CS().apply {
+                        v = "HP"
+                        dn = "Hovedtelefon"
+                    }
+                teleAddress =
+                    URL().apply {
+                        v = "tel:55553336"
+                    }
             },
         )
     }
 
-fun tilMedisinskVurdering(hovedDiagnoseInput: DiagnoseInput, biDiagnoserInput: List<DiagnoseInput>):
-    HelseOpplysningerArbeidsuforhet.MedisinskVurdering {
-    val biDiagnoseListe: List<CV> = biDiagnoserInput.map {
-        toMedisinskVurderingDiagnose(it)
-    }
+fun tilMedisinskVurdering(
+    hovedDiagnoseInput: DiagnoseInput,
+    biDiagnoserInput: List<DiagnoseInput>,
+): HelseOpplysningerArbeidsuforhet.MedisinskVurdering {
+    val biDiagnoseListe: List<CV> =
+        biDiagnoserInput.map {
+            toMedisinskVurderingDiagnose(it)
+        }
 
     return HelseOpplysningerArbeidsuforhet.MedisinskVurdering().apply {
-        hovedDiagnose = HelseOpplysningerArbeidsuforhet.MedisinskVurdering.HovedDiagnose().apply {
-            diagnosekode = toMedisinskVurderingDiagnose(hovedDiagnoseInput)
-        }
-        if (biDiagnoseListe.isNotEmpty()) {
-            biDiagnoser = HelseOpplysningerArbeidsuforhet.MedisinskVurdering.BiDiagnoser().apply {
-                diagnosekode.addAll(biDiagnoseListe)
+        hovedDiagnose =
+            HelseOpplysningerArbeidsuforhet.MedisinskVurdering.HovedDiagnose().apply {
+                diagnosekode = toMedisinskVurderingDiagnose(hovedDiagnoseInput)
             }
+        if (biDiagnoseListe.isNotEmpty()) {
+            biDiagnoser =
+                HelseOpplysningerArbeidsuforhet.MedisinskVurdering.BiDiagnoser().apply {
+                    diagnosekode.addAll(biDiagnoseListe)
+                }
         }
 
         isSkjermesForPasient = false
@@ -203,7 +233,10 @@ fun toMedisinskVurderingDiagnose(diagnose: DiagnoseInput): CV =
         dn = getTextFromDiagnose(diagnose.kode, diagnose.system)
     }
 
-fun getTextFromDiagnose(kode: String, diagnoseSystem: String): String {
+fun getTextFromDiagnose(
+    kode: String,
+    diagnoseSystem: String,
+): String {
     return when (diagnoseSystem) {
         "ICD10" -> {
             Diagnosekoder.icd10[kode]!!.text
@@ -229,9 +262,7 @@ fun toDiagnoseKithSystem(diagnoseSystem: String): String {
     }
 }
 
-fun tilSyketilfelleStartDato(
-    validatedValues: FerdistilltRegisterOppgaveValues,
-): LocalDate {
+fun tilSyketilfelleStartDato(validatedValues: FerdistilltRegisterOppgaveValues): LocalDate {
     return validatedValues.perioder.stream().map(PeriodeInput::fom).min(LocalDate::compareTo).get()
 }
 
@@ -244,37 +275,40 @@ fun tilHelseOpplysningerArbeidsuforhetPeriode(periode: PeriodeInput): HelseOpply
     HelseOpplysningerArbeidsuforhet.Aktivitet.Periode().apply {
         periodeFOMDato = periode.fom
         periodeTOMDato = periode.tom
-        aktivitetIkkeMulig = if (periode.type == PeriodeType.AKTIVITET_IKKE_MULIG) {
-            HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.AktivitetIkkeMulig().apply {
-                medisinskeArsaker = null
-                arbeidsplassen = null
+        aktivitetIkkeMulig =
+            if (periode.type == PeriodeType.AKTIVITET_IKKE_MULIG) {
+                HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.AktivitetIkkeMulig().apply {
+                    medisinskeArsaker = null
+                    arbeidsplassen = null
+                }
+            } else {
+                null
             }
-        } else {
-            null
-        }
         avventendeSykmelding = null
-        gradertSykmelding = if (periode.type == PeriodeType.GRADERT) {
-            if (periode.grad == null || periode.grad >= 100) {
-                throw IllegalStateException("Gradert sykmelding må ha grad")
-            }
+        gradertSykmelding =
+            if (periode.type == PeriodeType.GRADERT) {
+                if (periode.grad == null || periode.grad >= 100) {
+                    throw IllegalStateException("Gradert sykmelding må ha grad")
+                }
 
-            HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.GradertSykmelding().apply {
-                sykmeldingsgrad = periode.grad
-                isReisetilskudd = false
+                HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.GradertSykmelding().apply {
+                    sykmeldingsgrad = periode.grad
+                    isReisetilskudd = false
+                }
+            } else {
+                null
             }
-        } else {
-            null
-        }
         behandlingsdager = null
         isReisetilskudd = false
     }
 
 fun tilArbeidsgiver(): HelseOpplysningerArbeidsuforhet.Arbeidsgiver =
     HelseOpplysningerArbeidsuforhet.Arbeidsgiver().apply {
-        harArbeidsgiver = CS().apply {
-            dn = "Én arbeidsgiver"
-            v = "1"
-        }
+        harArbeidsgiver =
+            CS().apply {
+                dn = "Én arbeidsgiver"
+                v = "1"
+            }
 
         navnArbeidsgiver = ""
         yrkesbetegnelse = ""

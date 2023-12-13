@@ -1,6 +1,6 @@
 package no.nav.sykdig.config.kafka
 
-import no.nav.sykdig.logger
+import no.nav.sykdig.applog
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
@@ -16,7 +16,7 @@ class AivenKafkaErrorHandler : DefaultErrorHandler(
         it.maxInterval = 60_000L * 10
     },
 ) {
-    private val log = logger()
+    private val log = applog()
 
     override fun handleRemaining(
         thrownException: Exception,

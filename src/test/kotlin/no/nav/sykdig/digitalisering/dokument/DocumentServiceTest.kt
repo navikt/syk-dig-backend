@@ -18,7 +18,6 @@ import java.time.OffsetDateTime
 import java.util.UUID
 
 class DocumentServiceTest {
-
     private val oppgaveRepository = Mockito.mock(OppgaveRepository::class.java)
     private val dokarkivClient = Mockito.mock(DokarkivClient::class.java)
 
@@ -47,12 +46,13 @@ class DocumentServiceTest {
         )
 
         documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, nyTittel)
-        val newListOfDocuments = listOf(
-            DokumentDbModel(
-                dokumentInfoId,
-                nyTittel,
-            ),
-        )
+        val newListOfDocuments =
+            listOf(
+                DokumentDbModel(
+                    dokumentInfoId,
+                    nyTittel,
+                ),
+            )
         verify(oppgaveRepository, times(1)).updateDocuments(
             oppgaveId,
             newListOfDocuments,
@@ -68,20 +68,22 @@ class DocumentServiceTest {
         val journalpostId = "journalpost2"
         val dokumentInfoId = "4"
 
-        val documents = listOf(
-            DokumentDbModel("1", "1"),
-            DokumentDbModel("2", "2"),
-            DokumentDbModel("3", "3"),
-            DokumentDbModel("4", "4"),
-            DokumentDbModel("5", "5"),
-        )
-        val newDocuments = listOf(
-            DokumentDbModel("1", "1"),
-            DokumentDbModel("2", "2"),
-            DokumentDbModel("3", "3"),
-            DokumentDbModel("4", "4-ny"),
-            DokumentDbModel("5", "5"),
-        )
+        val documents =
+            listOf(
+                DokumentDbModel("1", "1"),
+                DokumentDbModel("2", "2"),
+                DokumentDbModel("3", "3"),
+                DokumentDbModel("4", "4"),
+                DokumentDbModel("5", "5"),
+            )
+        val newDocuments =
+            listOf(
+                DokumentDbModel("1", "1"),
+                DokumentDbModel("2", "2"),
+                DokumentDbModel("3", "3"),
+                DokumentDbModel("4", "4-ny"),
+                DokumentDbModel("5", "5"),
+            )
         `when`(oppgaveRepository.getOppgave(oppgaveId)).thenReturn(
             getOppgave(oppgaveId, "fnr", journalpostId, documents),
         )
@@ -98,10 +100,11 @@ class DocumentServiceTest {
         val journalpostId = "journalpost3"
         val dokumentInfoId = "3"
 
-        val documents = listOf(
-            DokumentDbModel("1", "1"),
-            DokumentDbModel("2", "2"),
-        )
+        val documents =
+            listOf(
+                DokumentDbModel("1", "1"),
+                DokumentDbModel("2", "2"),
+            )
 
         `when`(oppgaveRepository.getOppgave(oppgaveId)).thenReturn(
             getOppgave(oppgaveId, "fnr", journalpostId, documents),
@@ -120,10 +123,11 @@ class DocumentServiceTest {
         val journalpostId = "journalpost4"
         val dokumentInfoId = "2"
 
-        val documents = listOf(
-            DokumentDbModel("1", "1"),
-            DokumentDbModel("2", "2"),
-        )
+        val documents =
+            listOf(
+                DokumentDbModel("1", "1"),
+                DokumentDbModel("2", "2"),
+            )
 
         `when`(oppgaveRepository.getOppgave(oppgaveId)).thenReturn(
             getOppgave(oppgaveId, "fnr", journalpostId, documents),

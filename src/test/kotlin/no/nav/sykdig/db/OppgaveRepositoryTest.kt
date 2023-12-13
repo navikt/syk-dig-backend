@@ -16,7 +16,6 @@ import java.time.OffsetDateTime
 
 @Transactional
 class OppgaveRepositoryTest : FellesTestOppsett() {
-
     @BeforeEach
     fun before() {
         oppgaveRepository.lagreOppgave(
@@ -39,33 +38,36 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
         val preOppgave = oppgaveRepository.getOppgave("345")!!
         oppgaveRepository.updateOppgave(
             oppgave = preOppgave,
-            sykmelding = toSykmelding(
-                preOppgave,
-                UferdigRegisterOppgaveValues(
-                    fnrPasient = "nytt-fnr-pasient",
-                    behandletTidspunkt = LocalDate.parse("2020-01-01").toOffsetDateTimeAtNoon(),
-                    skrevetLand = "ZMB",
-                    perioder = listOf(
-                        PeriodeInput(
-                            type = PeriodeType.AKTIVITET_IKKE_MULIG,
-                            fom = LocalDate.parse("2020-01-01"),
-                            tom = LocalDate.parse("2020-01-15"),
-                        ),
-                        PeriodeInput(
-                            type = PeriodeType.GRADERT,
-                            fom = LocalDate.parse("2021-01-01"),
-                            tom = LocalDate.parse("2021-01-15"),
-                            grad = 68,
-                        ),
+            sykmelding =
+                toSykmelding(
+                    preOppgave,
+                    UferdigRegisterOppgaveValues(
+                        fnrPasient = "nytt-fnr-pasient",
+                        behandletTidspunkt = LocalDate.parse("2020-01-01").toOffsetDateTimeAtNoon(),
+                        skrevetLand = "ZMB",
+                        perioder =
+                            listOf(
+                                PeriodeInput(
+                                    type = PeriodeType.AKTIVITET_IKKE_MULIG,
+                                    fom = LocalDate.parse("2020-01-01"),
+                                    tom = LocalDate.parse("2020-01-15"),
+                                ),
+                                PeriodeInput(
+                                    type = PeriodeType.GRADERT,
+                                    fom = LocalDate.parse("2021-01-01"),
+                                    tom = LocalDate.parse("2021-01-15"),
+                                    grad = 68,
+                                ),
+                            ),
+                        hovedDiagnose = DiagnoseInput(kode = "Z00", system = "ICPC-2"),
+                        biDiagnoser =
+                            listOf(
+                                DiagnoseInput(kode = "Z01", system = "ICPC-22"),
+                                DiagnoseInput(kode = "Z02", system = "ICPC-23"),
+                            ),
+                        folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
                     ),
-                    hovedDiagnose = DiagnoseInput(kode = "Z00", system = "ICPC-2"),
-                    biDiagnoser = listOf(
-                        DiagnoseInput(kode = "Z01", system = "ICPC-22"),
-                        DiagnoseInput(kode = "Z02", system = "ICPC-23"),
-                    ),
-                    folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
                 ),
-            ),
             navEpost = "fake-test-ident",
             false,
         )

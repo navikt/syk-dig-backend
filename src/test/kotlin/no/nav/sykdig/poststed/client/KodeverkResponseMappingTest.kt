@@ -5,13 +5,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class KodeverkResponseMappingTest {
-
     @Test
     fun kodeverkresponseMappesRiktig() {
-        val kodeverkrespons = objectMapper.readValue(
-            KodeverkResponseMappingTest::class.java.getResourceAsStream("/kodeverkrespons.json"),
-            GetKodeverkKoderBetydningerResponse::class.java,
-        )
+        val kodeverkrespons =
+            objectMapper.readValue(
+                KodeverkResponseMappingTest::class.java.getResourceAsStream("/kodeverkrespons.json"),
+                GetKodeverkKoderBetydningerResponse::class.java,
+            )
 
         val postinformasjonListe = kodeverkrespons.toPostInformasjonListe()
         assertEquals("ULEFOSS", postinformasjonListe.find { it.postnummer == "3831" }?.poststed)

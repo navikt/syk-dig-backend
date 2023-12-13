@@ -6,6 +6,7 @@ import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import graphql.schema.DataFetchingEnvironment
+import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.DigitaliseringsoppgaveService
 import no.nav.sykdig.digitalisering.exceptions.ClientException
 import no.nav.sykdig.digitalisering.mapToDigitaliseringsoppgave
@@ -20,7 +21,6 @@ import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatus
 import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatusEnum
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
-import no.nav.sykdig.logger
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
 import no.nav.sykdig.utils.validateDiagnose
 import org.springframework.security.access.prepost.PreAuthorize
@@ -32,7 +32,7 @@ class DigitaliseringsoppgaveDataFetcher(
     val digitaliseringsoppgaveService: DigitaliseringsoppgaveService,
 ) {
     companion object {
-        private val log = logger()
+        private val log = applog()
     }
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
@@ -165,9 +165,7 @@ class DigitaliseringsoppgaveDataFetcher(
     }
 }
 
-private fun validateRegisterOppgaveValues(
-    values: SykmeldingUnderArbeidValues,
-): FerdistilltRegisterOppgaveValues {
+private fun validateRegisterOppgaveValues(values: SykmeldingUnderArbeidValues): FerdistilltRegisterOppgaveValues {
     val behandletTidspunkt = values.behandletTidspunkt.toOffsetDateTimeAtNoon()
     requireNotEmptyOrNull(values.fnrPasient) { "Fødselsnummer til pasient må være satt" }
     requireNotEmptyOrNull(behandletTidspunkt) { "Tidspunkt for behandling må være satt" }
@@ -217,7 +215,10 @@ private fun uferdigRegisterOppgaveValus(sykmeldingUnderArbeidValues: SykmeldingU
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun <T : Any> requireNotEmptyOrNull(value: T?, lazyMessage: () -> Any): T {
+inline fun <T : Any> requireNotEmptyOrNull(
+    value: T?,
+    lazyMessage: () -> Any,
+): T {
     contract {
         returns() implies (value != null)
     }

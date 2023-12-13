@@ -1,7 +1,7 @@
 package no.nav.sykdig.poststed
 
+import no.nav.sykdig.applog
 import no.nav.sykdig.db.PoststedRepository
-import no.nav.sykdig.logger
 import no.nav.sykdig.poststed.client.KodeverkClient
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -13,7 +13,7 @@ class PoststedCronJob(
     val kodeverkClient: KodeverkClient,
     val poststedRepository: PoststedRepository,
 ) {
-    val log = logger()
+    val log = applog()
 
     @Scheduled(cron = "0 0 6 * * *")
     fun run() {

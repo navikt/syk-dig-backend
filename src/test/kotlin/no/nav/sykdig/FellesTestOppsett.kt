@@ -19,7 +19,6 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 abstract class FellesTestOppsett {
-
     @Autowired
     lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 

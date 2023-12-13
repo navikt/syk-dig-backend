@@ -1,6 +1,6 @@
 package no.nav.sykdig.digitalisering.tilgangskontroll
 
-import no.nav.sykdig.logger
+import no.nav.sykdig.applog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -21,7 +21,7 @@ class IstilgangskontrollOboClient(
         const val NAV_PERSONIDENT_HEADER = "nav-personident"
     }
 
-    val log = logger()
+    val log = applog()
 
     @Retryable
     fun sjekkTilgangVeileder(fnr: String): Boolean {
@@ -30,12 +30,13 @@ class IstilgangskontrollOboClient(
         headers[NAV_PERSONIDENT_HEADER] = fnr
 
         try {
-            val response = istilgangskontrollRestTemplate.exchange(
-                accessToUserV2Url(),
-                GET,
-                HttpEntity<Any>(headers),
-                String::class.java,
-            )
+            val response =
+                istilgangskontrollRestTemplate.exchange(
+                    accessToUserV2Url(),
+                    GET,
+                    HttpEntity<Any>(headers),
+                    String::class.java,
+                )
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
             return if (e.statusCode.value() == 403) {

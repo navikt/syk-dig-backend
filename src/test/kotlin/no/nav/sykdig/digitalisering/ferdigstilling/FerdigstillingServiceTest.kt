@@ -76,21 +76,24 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val sykmeldingId = UUID.randomUUID()
         val journalpostId = "9898"
         val dokumentInfoId = "111"
-        val journalpost = SafQueryJournalpost(
-            journalpost = SafJournalpost(
-                journalstatus = Journalstatus.JOURNALFOERT,
-                avsenderMottaker = AvsenderMottaker(
-                    id = "12345678910",
-                    navn = "Fornavn Etternavn",
-                    type = AvsenderMottakerIdType.FNR,
-                    land = null,
-                ),
-                dokumenter = emptyList(),
-                bruker = null,
-                tema = TEMA_SYKMELDING,
-                kanal = CHANNEL_SCAN_IM,
-            ),
-        )
+        val journalpost =
+            SafQueryJournalpost(
+                journalpost =
+                    SafJournalpost(
+                        journalstatus = Journalstatus.JOURNALFOERT,
+                        avsenderMottaker =
+                            AvsenderMottaker(
+                                id = "12345678910",
+                                navn = "Fornavn Etternavn",
+                                type = AvsenderMottakerIdType.FNR,
+                                land = null,
+                            ),
+                        dokumenter = emptyList(),
+                        bruker = null,
+                        tema = TEMA_SYKMELDING,
+                        kanal = CHANNEL_SCAN_IM,
+                    ),
+            )
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpost)).thenAnswer { false }
         Mockito.`when`(safJournalpostGraphQlClient.getAvvsenderMottar(journalpost)).thenAnswer {
@@ -102,53 +105,58 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
             )
         }
 
-        val perioder = listOf(
-            Periode(
-                fom = LocalDate.now().minusMonths(1),
-                tom = LocalDate.now().minusWeeks(2),
-                aktivitetIkkeMulig =
-                AktivitetIkkeMulig(medisinskArsak = null, arbeidsrelatertArsak = null),
-                avventendeInnspillTilArbeidsgiver = null,
-                behandlingsdager = null,
-                gradert = null,
-                reisetilskudd = false,
-            ),
-        )
-
-        val validatedValues = FerdistilltRegisterOppgaveValues(
-            fnrPasient = "12345678910",
-            behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
-            skrevetLand = "SWE",
-            perioder = listOf(
-                PeriodeInput(
-                    PeriodeType.AKTIVITET_IKKE_MULIG,
-                    LocalDate.now().minusMonths(1),
-                    LocalDate.now().minusWeeks(2),
+        val perioder =
+            listOf(
+                Periode(
+                    fom = LocalDate.now().minusMonths(1),
+                    tom = LocalDate.now().minusWeeks(2),
+                    aktivitetIkkeMulig =
+                        AktivitetIkkeMulig(medisinskArsak = null, arbeidsrelatertArsak = null),
+                    avventendeInnspillTilArbeidsgiver = null,
+                    behandlingsdager = null,
+                    gradert = null,
+                    reisetilskudd = false,
                 ),
-            ),
-            hovedDiagnose = DiagnoseInput("A070", "ICD10"),
-            biDiagnoser = emptyList(),
-            folkeRegistertAdresseErBrakkeEllerTilsvarende = true,
-        )
+            )
 
-        val sykmeldt = Person(
-            fnr = "12345678910",
-            navn = Navn("Fornavn", null, "Etternavn"),
-            aktorId = "aktorid",
-            bostedsadresse = null,
-            oppholdsadresse = null,
-            fodselsdato = LocalDate.of(1970, 1, 1),
-        )
+        val validatedValues =
+            FerdistilltRegisterOppgaveValues(
+                fnrPasient = "12345678910",
+                behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
+                skrevetLand = "SWE",
+                perioder =
+                    listOf(
+                        PeriodeInput(
+                            PeriodeType.AKTIVITET_IKKE_MULIG,
+                            LocalDate.now().minusMonths(1),
+                            LocalDate.now().minusWeeks(2),
+                        ),
+                    ),
+                hovedDiagnose = DiagnoseInput("A070", "ICD10"),
+                biDiagnoser = emptyList(),
+                folkeRegistertAdresseErBrakkeEllerTilsvarende = true,
+            )
+
+        val sykmeldt =
+            Person(
+                fnr = "12345678910",
+                navn = Navn("Fornavn", null, "Etternavn"),
+                aktorId = "aktorid",
+                bostedsadresse = null,
+                oppholdsadresse = null,
+                fodselsdato = LocalDate.of(1970, 1, 1),
+            )
 
         ferdigstillingService.ferdigstill(
             enhet = "2990",
-            oppgave = createDigitalseringsoppgaveDbModel(
-                oppgaveId = "123",
-                fnr = "12345678910",
-                sykmeldingId = sykmeldingId,
-                journalpostId = journalpostId,
-                dokumentInfoId = dokumentInfoId,
-            ),
+            oppgave =
+                createDigitalseringsoppgaveDbModel(
+                    oppgaveId = "123",
+                    fnr = "12345678910",
+                    sykmeldingId = sykmeldingId,
+                    journalpostId = journalpostId,
+                    dokumentInfoId = dokumentInfoId,
+                ),
             sykmeldt = sykmeldt,
             validatedValues = validatedValues,
         )
@@ -175,54 +183,59 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val fnrLege = ""
         val sykmeldingId = UUID.randomUUID()
         val journalPostId = "452234"
-        val hoveddiagnose = Diagnose(
-            system = "ICD10",
-            kode = "A070",
-            tekst = "Balantidiasis Dysenteri som skyldes Balantidium",
-        )
+        val hoveddiagnose =
+            Diagnose(
+                system = "ICD10",
+                kode = "A070",
+                tekst = "Balantidiasis Dysenteri som skyldes Balantidium",
+            )
 
         val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
         val behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z")
 
-        val validatedValues = FerdistilltRegisterOppgaveValues(
-            fnrPasient = fnrPasient,
-            behandletTidspunkt = behandletTidspunkt,
-            skrevetLand = "POL",
-            perioder = listOf(
-                PeriodeInput(
-                    type = PeriodeType.AKTIVITET_IKKE_MULIG,
-                    fom = LocalDate.of(2019, Month.AUGUST, 15),
-                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                    grad = null,
+        val validatedValues =
+            FerdistilltRegisterOppgaveValues(
+                fnrPasient = fnrPasient,
+                behandletTidspunkt = behandletTidspunkt,
+                skrevetLand = "POL",
+                perioder =
+                    listOf(
+                        PeriodeInput(
+                            type = PeriodeType.AKTIVITET_IKKE_MULIG,
+                            fom = LocalDate.of(2019, Month.AUGUST, 15),
+                            tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
+                            grad = null,
+                        ),
+                    ),
+                hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
+                biDiagnoser = emptyList(),
+                folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
+            )
+
+        val person =
+            Person(
+                fnrPasient,
+                Navn("fornavn", null, "etternavn"),
+                "aktorid",
+                Bostedsadresse(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
                 ),
-            ),
-            hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
-            biDiagnoser = emptyList(),
-            folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
-        )
+                null,
+                LocalDate.of(1970, 1, 1),
+            )
 
-        val person = Person(
-            fnrPasient,
-            Navn("fornavn", null, "etternavn"),
-            "aktorid",
-            Bostedsadresse(
-                null,
-                null,
-                null,
-                null,
-                null,
-            ),
-            null,
-            LocalDate.of(1970, 1, 1),
-        )
-
-        val receivedSykmelding = mapToReceivedSykmelding(
-            validatedValues,
-            person,
-            sykmeldingId.toString(),
-            journalPostId,
-            datoOpprettet.toLocalDateTime(),
-        )
+        val receivedSykmelding =
+            mapToReceivedSykmelding(
+                validatedValues,
+                person,
+                sykmeldingId.toString(),
+                journalPostId,
+                datoOpprettet.toLocalDateTime(),
+            )
 
         assertEquals(fnrPasient, receivedSykmelding.personNrPasient)
         assertEquals(fnrLege, receivedSykmelding.personNrLege)
@@ -270,54 +283,59 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val fnrPasient = "12345678910"
         val sykmeldingId = UUID.randomUUID()
         val journalPostId = "452234"
-        val hoveddiagnose = Diagnose(
-            system = "ICD10",
-            kode = "A070",
-            tekst = "Balantidiasis Dysenteri som skyldes Balantidium",
-        )
+        val hoveddiagnose =
+            Diagnose(
+                system = "ICD10",
+                kode = "A070",
+                tekst = "Balantidiasis Dysenteri som skyldes Balantidium",
+            )
 
         val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
         val behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z")
 
-        val validatedValues = FerdistilltRegisterOppgaveValues(
-            fnrPasient = fnrPasient,
-            behandletTidspunkt = behandletTidspunkt,
-            skrevetLand = "POL",
-            perioder = listOf(
-                PeriodeInput(
-                    type = PeriodeType.GRADERT,
-                    fom = LocalDate.of(2019, Month.AUGUST, 15),
-                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                    grad = 69,
+        val validatedValues =
+            FerdistilltRegisterOppgaveValues(
+                fnrPasient = fnrPasient,
+                behandletTidspunkt = behandletTidspunkt,
+                skrevetLand = "POL",
+                perioder =
+                    listOf(
+                        PeriodeInput(
+                            type = PeriodeType.GRADERT,
+                            fom = LocalDate.of(2019, Month.AUGUST, 15),
+                            tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
+                            grad = 69,
+                        ),
+                    ),
+                hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
+                biDiagnoser = emptyList(),
+                folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
+            )
+
+        val person =
+            Person(
+                fnrPasient,
+                Navn("fornavn", null, "etternavn"),
+                "aktorid",
+                Bostedsadresse(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
                 ),
-            ),
-            hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
-            biDiagnoser = emptyList(),
-            folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
-        )
+                null,
+                LocalDate.of(1970, 1, 1),
+            )
 
-        val person = Person(
-            fnrPasient,
-            Navn("fornavn", null, "etternavn"),
-            "aktorid",
-            Bostedsadresse(
-                null,
-                null,
-                null,
-                null,
-                null,
-            ),
-            null,
-            LocalDate.of(1970, 1, 1),
-        )
-
-        val receivedSykmelding = mapToReceivedSykmelding(
-            validatedValues,
-            person,
-            sykmeldingId.toString(),
-            journalPostId,
-            datoOpprettet.toLocalDateTime(),
-        )
+        val receivedSykmelding =
+            mapToReceivedSykmelding(
+                validatedValues,
+                person,
+                sykmeldingId.toString(),
+                journalPostId,
+                datoOpprettet.toLocalDateTime(),
+            )
 
         assertEquals(1, receivedSykmelding.sykmelding.perioder.size)
         assertNotNull(receivedSykmelding.sykmelding.perioder.first().gradert)
@@ -328,56 +346,61 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
         val fnrPasient = "12345678910"
         val sykmeldingId = UUID.randomUUID()
         val journalPostId = "452234"
-        val hoveddiagnose = Diagnose(
-            system = "ICD10",
-            kode = "A070",
-            tekst = "Balantidiasis Dysenteri som skyldes Balantidium",
-        )
+        val hoveddiagnose =
+            Diagnose(
+                system = "ICD10",
+                kode = "A070",
+                tekst = "Balantidiasis Dysenteri som skyldes Balantidium",
+            )
 
         val datoOpprettet = OffsetDateTime.parse("2022-11-14T12:00:00Z")
         val behandletTidspunkt = OffsetDateTime.parse("2022-10-26T12:00:00Z")
 
-        val validatedValues = FerdistilltRegisterOppgaveValues(
-            fnrPasient = fnrPasient,
-            behandletTidspunkt = behandletTidspunkt,
-            skrevetLand = "POL",
-            perioder = listOf(
-                PeriodeInput(
-                    type = PeriodeType.GRADERT,
-                    fom = LocalDate.of(2019, Month.AUGUST, 15),
-                    tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                    grad = 120,
-                ),
-            ),
-            hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
-            biDiagnoser = emptyList(),
-            folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
-        )
-
-        val person = Person(
-            fnrPasient,
-            Navn("fornavn", null, "etternavn"),
-            "aktorid",
-            Bostedsadresse(
-                null,
-                null,
-                null,
-                null,
-                null,
-            ),
-            null,
-            LocalDate.of(1970, 1, 1),
-        )
-
-        val exception = assertThrows(IllegalStateException::class.java) {
-            mapToReceivedSykmelding(
-                validatedValues,
-                person,
-                sykmeldingId.toString(),
-                journalPostId,
-                datoOpprettet.toLocalDateTime(),
+        val validatedValues =
+            FerdistilltRegisterOppgaveValues(
+                fnrPasient = fnrPasient,
+                behandletTidspunkt = behandletTidspunkt,
+                skrevetLand = "POL",
+                perioder =
+                    listOf(
+                        PeriodeInput(
+                            type = PeriodeType.GRADERT,
+                            fom = LocalDate.of(2019, Month.AUGUST, 15),
+                            tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
+                            grad = 120,
+                        ),
+                    ),
+                hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
+                biDiagnoser = emptyList(),
+                folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
             )
-        }
+
+        val person =
+            Person(
+                fnrPasient,
+                Navn("fornavn", null, "etternavn"),
+                "aktorid",
+                Bostedsadresse(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                ),
+                null,
+                LocalDate.of(1970, 1, 1),
+            )
+
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                mapToReceivedSykmelding(
+                    validatedValues,
+                    person,
+                    sykmeldingId.toString(),
+                    journalPostId,
+                    datoOpprettet.toLocalDateTime(),
+                )
+            }
         assertEquals(exception.message, "Gradert sykmelding må ha grad")
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.security.web.SecurityFilterChain
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
 class SecurityConfiguration() {
-
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain? {
         return http.authorizeHttpRequests { authorizeRequests ->
