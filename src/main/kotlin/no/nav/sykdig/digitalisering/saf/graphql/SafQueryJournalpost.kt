@@ -14,6 +14,12 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
                 dokumentInfoId
                 tittel
             }
+            avsenderMottaker {
+                id
+                type
+                navn
+                land
+            }
         }
     }
 """
