@@ -1,9 +1,9 @@
 package no.nav.sykdig.digitalisering.sykmelding.service
 
+import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.pdl.PersonService
-import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_IM
-import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_NETS
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.digitalisering.saf.graphql.Type
@@ -13,6 +13,8 @@ import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.generated.types.JournalpostStatusEnum
+import no.nav.sykdig.metrics.MetricRegister
+import no.nav.sykdig.securelog
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,7 +23,13 @@ class JournalpostService(
     private val personService: PersonService,
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val journalpostSykmeldingRepository: JournalpostSykmeldingRepository,
+    private val metricRegister: MetricRegister,
 ) {
+    companion object {
+        private val securelog = securelog()
+        private val log = applog()
+    }
+
     fun createSykmeldingFromJournalpost(
         journalpost: SafJournalpost,
         journalpostId: String,
@@ -37,7 +45,13 @@ class JournalpostService(
             true -> {
                 sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
                 journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
-
+                log.info(
+                    "oppretter sykmelding fra journalpost {} {} {}",
+                    kv("journalpostId", journalpostId),
+                    kv("kanal", journalpost.kanal),
+                    kv("type", "norsk papirsykmelding"),
+                )
+                metricRegister.incrementNewSykmelding("norsk", journalpost.kanal)
                 return JournalpostStatus(
                     journalpostId = journalpostId,
                     status = JournalpostStatusEnum.OPPRETTET,
@@ -50,12 +64,25 @@ class JournalpostService(
                             journalpostId = journalpostId,
                             status = JournalpostStatusEnum.MANGLER_FNR,
                         )
-
                 val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
                 val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
 
-                journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
+                log.info(
+                    "oppretter sykmelding fra journalpost {} {} {}",
+                    kv("journalpostId", journalpostId),
+                    kv("kanal", journalpost.kanal),
+                    kv("type", "utenlandsk sykmelding"),
+                )
+                securelog.info(
+                    "oppretter sykmelding fra journalpost {} {} {} {}",
+                    kv("journalpostId", journalpostId),
+                    kv("kanal", journalpost.kanal),
+                    kv("type", "utenlandsk sykmelding"),
+                    kv("fnr", fnr),
+                )
 
+                metricRegister.incrementNewSykmelding("utenlandsk", journalpost.kanal)
+                journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
                 return JournalpostStatus(
                     journalpostId = journalpostId,
                     status = JournalpostStatusEnum.OPPRETTET,
@@ -77,6 +104,8 @@ class JournalpostService(
                 )
 
         val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
+        log.info("Henter journalpost {} {}", kv("journalpostId", journalpostId), kv("kanal", journalpost.kanal))
+        securelog.info("Henter journalpost {} {} {}", kv("journalpostId", journalpostId), kv("kanal", journalpost.kanal), kv("fnr", fnr))
         if (isWrongTema(journalpost)) {
             return JournalpostStatus(
                 journalpostId = journalpostId,
@@ -97,10 +126,6 @@ class JournalpostService(
 
     fun isSykmeldingCreated(id: String): Boolean {
         return journalpostSykmeldingRepository.getJournalpostSykmelding(id) != null
-    }
-
-    private fun isWrongChannel(journalpost: SafJournalpost): Boolean {
-        return !listOf(CHANNEL_SCAN_IM, CHANNEL_SCAN_NETS).contains(journalpost.kanal)
     }
 
     private fun isWrongTema(journalpost: SafJournalpost): Boolean {
