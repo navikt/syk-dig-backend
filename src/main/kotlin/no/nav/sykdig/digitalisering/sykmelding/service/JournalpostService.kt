@@ -33,15 +33,8 @@ class JournalpostService(
                 status = JournalpostStatusEnum.FEIL_TEMA,
             )
         }
-
         when (isNorsk) {
             true -> {
-                if (isWrongChannel(journalpost)) {
-                    return JournalpostStatus(
-                        journalpostId = journalpostId,
-                        status = JournalpostStatusEnum.FEIL_KANAL,
-                    )
-                }
                 sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
                 journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
 
@@ -84,21 +77,12 @@ class JournalpostService(
                 )
 
         val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
-        if (isWrongChannel(journalpost)) {
-            return JournalpostStatus(
-                journalpostId = journalpostId,
-                status = JournalpostStatusEnum.FEIL_KANAL,
-            )
-        }
         if (isWrongTema(journalpost)) {
             return JournalpostStatus(
                 journalpostId = journalpostId,
                 status = JournalpostStatusEnum.FEIL_TEMA,
             )
         }
-
-        // TODO: Kan vi returnere OPPRETTET med oppgaveId
-        // dersom det allerede er en opprettet utelandsk journalpost i databasen?
 
         return Journalpost(
             journalpostId,
