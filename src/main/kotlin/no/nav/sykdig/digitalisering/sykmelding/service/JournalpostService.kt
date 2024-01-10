@@ -49,6 +49,7 @@ class JournalpostService(
                     kv("kanal", journalpost.kanal),
                     kv("type", "norsk papirsykmelding"),
                 )
+
                 metricRegister.incrementNewSykmelding("norsk", journalpost.kanal)
                 return JournalpostStatus(
                     journalpostId = journalpostId,
@@ -74,6 +75,7 @@ class JournalpostService(
                 )
 
                 metricRegister.incrementNewSykmelding("utenlandsk", journalpost.kanal)
+
                 journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
                 return JournalpostStatus(
                     journalpostId = journalpostId,
@@ -96,7 +98,12 @@ class JournalpostService(
                 )
 
         val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
-        securelog.info("Henter journalpost {} {} {}", kv("journalpostId", journalpostId), kv("kanal", journalpost.kanal), kv("fnr", fnr))
+        securelog.info(
+            "Henter journalpost {} {} {}",
+            kv("journalpostId", journalpostId),
+            kv("kanal", journalpost.kanal),
+            kv("fnr", fnr),
+        )
         if (isWrongTema(journalpost)) {
             return JournalpostStatus(
                 journalpostId = journalpostId,
