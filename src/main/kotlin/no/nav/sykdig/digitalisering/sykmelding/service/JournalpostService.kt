@@ -1,7 +1,6 @@
 package no.nav.sykdig.digitalisering.sykmelding.service
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
@@ -13,6 +12,7 @@ import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.generated.types.JournalpostStatusEnum
+import no.nav.sykdig.metrics.MetricRegister
 import no.nav.sykdig.securelog
 import org.springframework.stereotype.Service
 
@@ -22,10 +22,10 @@ class JournalpostService(
     private val personService: PersonService,
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val journalpostSykmeldingRepository: JournalpostSykmeldingRepository,
+    private val metricRegister: MetricRegister,
 ) {
     companion object {
         private val securelog = securelog()
-        private val log = applog()
     }
 
     fun createSykmeldingFromJournalpost(
@@ -50,6 +50,7 @@ class JournalpostService(
                     kv("type", "norsk papirsykmelding"),
                 )
 
+                metricRegister.incrementNewSykmelding("norsk", journalpost.kanal)
                 return JournalpostStatus(
                     journalpostId = journalpostId,
                     status = JournalpostStatusEnum.OPPRETTET,
@@ -62,9 +63,9 @@ class JournalpostService(
                             journalpostId = journalpostId,
                             status = JournalpostStatusEnum.MANGLER_FNR,
                         )
-
                 val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
                 val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
+
                 securelog.info(
                     "oppretter sykmelding fra journalpost {} {} {} {}",
                     kv("journalpostId", journalpostId),
@@ -72,6 +73,9 @@ class JournalpostService(
                     kv("type", "utenlandsk sykmelding"),
                     kv("fnr", fnr),
                 )
+
+                metricRegister.incrementNewSykmelding("utenlandsk", journalpost.kanal)
+
                 journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
                 return JournalpostStatus(
                     journalpostId = journalpostId,

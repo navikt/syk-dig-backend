@@ -1,12 +1,13 @@
 package no.nav.sykdig.metrics
 
 import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Tags
 import org.springframework.stereotype.Component
 
 const val METRICS_NS = "sykdigbackend"
 
 @Component
-class MetricRegister(registry: MeterRegistry) {
+class MetricRegister(private val registry: MeterRegistry) {
     val reg = registry
 
     val mottatOppgave =
@@ -28,4 +29,14 @@ class MetricRegister(registry: MeterRegistry) {
         registry.counter(
             "${METRICS_NS}_avvist_sendt_til_gosys_counter",
         )
+
+    fun incrementNewSykmelding(
+        type: String,
+        kanal: String?,
+    ) {
+        registry.counter(
+            "${METRICS_NS}_create_sykmelding_counter",
+            Tags.of("type", type, "kanal", kanal),
+        ).increment()
+    }
 }
