@@ -1,7 +1,6 @@
 package no.nav.sykdig.digitalisering.sykmelding.service
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
@@ -27,7 +26,6 @@ class JournalpostService(
 ) {
     companion object {
         private val securelog = securelog()
-        private val log = applog()
     }
 
     fun createSykmeldingFromJournalpost(
@@ -45,7 +43,7 @@ class JournalpostService(
             true -> {
                 sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
                 journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
-                log.info(
+                securelog.info(
                     "oppretter sykmelding fra journalpost {} {} {}",
                     kv("journalpostId", journalpostId),
                     kv("kanal", journalpost.kanal),
@@ -67,12 +65,6 @@ class JournalpostService(
                 val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
                 val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
 
-                log.info(
-                    "oppretter sykmelding fra journalpost {} {} {}",
-                    kv("journalpostId", journalpostId),
-                    kv("kanal", journalpost.kanal),
-                    kv("type", "utenlandsk sykmelding"),
-                )
                 securelog.info(
                     "oppretter sykmelding fra journalpost {} {} {} {}",
                     kv("journalpostId", journalpostId),
@@ -104,7 +96,6 @@ class JournalpostService(
                 )
 
         val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
-        log.info("Henter journalpost {} {}", kv("journalpostId", journalpostId), kv("kanal", journalpost.kanal))
         securelog.info("Henter journalpost {} {} {}", kv("journalpostId", journalpostId), kv("kanal", journalpost.kanal), kv("fnr", fnr))
         if (isWrongTema(journalpost)) {
             return JournalpostStatus(
