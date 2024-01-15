@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
+import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKEPENGER
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.digitalisering.sykmelding.db.JournalpostSykmeldingRepository
@@ -127,7 +128,7 @@ class JournalpostService(
     }
 
     private fun isWrongTema(journalpost: SafJournalpost): Boolean {
-        return journalpost.tema != TEMA_SYKMELDING
+        return journalpost.tema != TEMA_SYKMELDING && journalpost.tema != TEMA_SYKEPENGER
     }
 
     private fun getFnrEllerAktorId(journalpost: SafJournalpost): String? {
