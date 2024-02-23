@@ -1,19 +1,19 @@
 package no.nav.sykdig.db
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.syfo.model.AktivitetIkkeMulig
-import no.nav.syfo.model.Diagnose
-import no.nav.syfo.model.Gradert
-import no.nav.syfo.model.MedisinskVurdering
-import no.nav.syfo.model.Periode
-import no.nav.syfo.model.UtenlandskSykmelding
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
+import no.nav.sykdig.digitalisering.sykmelding.AktivitetIkkeMulig
+import no.nav.sykdig.digitalisering.sykmelding.Diagnose
+import no.nav.sykdig.digitalisering.sykmelding.Gradert
+import no.nav.sykdig.digitalisering.sykmelding.MedisinskVurdering
+import no.nav.sykdig.digitalisering.sykmelding.Periode
+import no.nav.sykdig.digitalisering.sykmelding.UtenlandskSykmelding
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
-import no.nav.sykdig.model.Sykmelding
+import no.nav.sykdig.model.SDSykmelding
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 import no.nav.sykdig.objectMapper
 import org.postgresql.util.PGobject
@@ -245,7 +245,7 @@ fun toSykmelding(
         val msgId = UUID.randomUUID().toString()
         return SykmeldingUnderArbeid(
             sykmelding =
-                Sykmelding(
+                SDSykmelding(
                     id = oppgave.sykmeldingId.toString(),
                     msgId = msgId,
                     medisinskVurdering = values.mapToMedisinskVurdering(),

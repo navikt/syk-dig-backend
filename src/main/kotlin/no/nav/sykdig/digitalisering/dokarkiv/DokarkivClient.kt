@@ -1,11 +1,11 @@
 package no.nav.sykdig.digitalisering.dokarkiv
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.syfo.model.Periode
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
+import no.nav.sykdig.digitalisering.sykmelding.Periode
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value

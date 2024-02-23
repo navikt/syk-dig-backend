@@ -8,7 +8,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DuplicateKeyException
 
-class JournalpostSykmeldingRepositoryTest : FellesTestOppsett() {
+class JournalpostSDSykmeldingRepositoryTest : FellesTestOppsett() {
     @Autowired
     lateinit var journalpostSykmeldingRepository: JournalpostSykmeldingRepository
 

@@ -1,6 +1,6 @@
 package no.nav.sykdig.utils
 
-import no.nav.syfo.sm.Diagnosekoder
+import no.nav.helse.diagnosekoder.Diagnosekoder
 import no.nav.sykdig.digitalisering.exceptions.ClientException
 import no.nav.sykdig.generated.types.DiagnoseInput
 

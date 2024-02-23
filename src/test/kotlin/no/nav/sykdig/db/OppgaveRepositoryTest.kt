@@ -66,6 +66,7 @@ class OppgaveRepositoryTest : FellesTestOppsett() {
                                 DiagnoseInput(kode = "Z02", system = "ICPC-23"),
                             ),
                         folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
+                        erAdresseUtland = null,
                     ),
                 ),
             navEpost = "fake-test-ident",

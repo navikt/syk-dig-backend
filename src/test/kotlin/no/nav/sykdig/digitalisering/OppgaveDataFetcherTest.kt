@@ -329,7 +329,7 @@ class OppgaveDataFetcherTest {
             times(1),
         ).updateOppgave(
             oppgaveId = "345",
-            values = UferdigRegisterOppgaveValues(fnrPasient = "20086600138", null, null, null, null, null, null),
+            values = UferdigRegisterOppgaveValues(fnrPasient = "20086600138", null, null, null, null, null, null, null),
             navEpost = "fake-test-ident",
         )
     }
@@ -436,6 +436,7 @@ class OppgaveDataFetcherTest {
                     hovedDiagnose = DiagnoseInput(kode = "Z09", system = "ICPC2"),
                     biDiagnoser = emptyList(),
                     folkeRegistertAdresseErBrakkeEllerTilsvarende = null,
+                    erAdresseUtland = null,
                 ),
             enhetId = "1234",
         )

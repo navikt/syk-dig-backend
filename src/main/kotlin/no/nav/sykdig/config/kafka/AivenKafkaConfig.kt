@@ -1,7 +1,7 @@
 package no.nav.sykdig.config.kafka
 
-import no.nav.syfo.model.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.sykmelding.CreateSykmeldingKafkaMessage
+import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.utils.JacksonKafkaSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG

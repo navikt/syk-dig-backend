@@ -1,10 +1,10 @@
 package no.nav.sykdig.model
 
-import no.nav.syfo.model.UtenlandskSykmelding
+import no.nav.sykdig.digitalisering.sykmelding.UtenlandskSykmelding
 import java.time.LocalDateTime
 
 data class SykmeldingUnderArbeid(
-    val sykmelding: Sykmelding,
+    val sykmelding: SDSykmelding,
     var fnrPasient: String,
     val fnrLege: String?,
     val legeHprNr: String?,

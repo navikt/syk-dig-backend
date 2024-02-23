@@ -1,9 +1,9 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.mapping
 
-import no.nav.syfo.model.ReceivedSykmelding
-import no.nav.syfo.model.UtenlandskSykmelding
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
+import no.nav.sykdig.digitalisering.sykmelding.UtenlandskSykmelding
 import java.time.LocalDateTime
 
 fun mapToReceivedSykmelding(
