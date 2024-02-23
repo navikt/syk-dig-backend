@@ -33,6 +33,8 @@ type OppgaveValues {
     hoveddiagnose: DiagnoseValue
     biDiagnoser: [DiagnoseValue!]
     folkeRegistertAdresseErBrakkeEllerTilsvarende: Boolean
+    """Adressen er oppholds-, post- eller kontaktadresse i utlandet"""
+    erAdresseUtland: Boolean
 }
 
 type PeriodeValue {
@@ -56,6 +58,8 @@ input SykmeldingUnderArbeidValues {
     hovedDiagnose: DiagnoseInput
     biDiagnoser: [DiagnoseInput!]
     folkeRegistertAdresseErBrakkeEllerTilsvarende: Boolean
+    """Adressen er oppholds-, post- eller kontaktadresse i utlandet"""
+    erAdresseUtland: Boolean
 }
 
 input DiagnoseInput {
