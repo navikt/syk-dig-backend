@@ -105,7 +105,7 @@ class DigitaliseringsoppgaveDataFetcher(
             }
 
             SykmeldingUnderArbeidStatus.UNDER_ARBEID -> {
-                val uferdigRegisterOppgaveValues = uferdigRegisterOppgaveValus(values)
+                val uferdigRegisterOppgaveValues = uferdigRegisterOppgaveValues(values)
                 digitaliseringsoppgaveService.updateOppgave(
                     oppgaveId = oppgaveId,
                     values = uferdigRegisterOppgaveValues,
@@ -185,6 +185,7 @@ private fun validateRegisterOppgaveValues(values: SykmeldingUnderArbeidValues): 
         hovedDiagnose = values.hovedDiagnose,
         biDiagnoser = values.biDiagnoser,
         folkeRegistertAdresseErBrakkeEllerTilsvarende = values.folkeRegistertAdresseErBrakkeEllerTilsvarende,
+        erAdresseUtland = values.erAdresseUtland,
     )
 }
 
@@ -202,7 +203,7 @@ private fun validateBiDiagnoser(biDiagnoser: List<DiagnoseInput>?) {
     }
 }
 
-private fun uferdigRegisterOppgaveValus(sykmeldingUnderArbeidValues: SykmeldingUnderArbeidValues): RegisterOppgaveValues {
+private fun uferdigRegisterOppgaveValues(sykmeldingUnderArbeidValues: SykmeldingUnderArbeidValues): RegisterOppgaveValues {
     return UferdigRegisterOppgaveValues(
         fnrPasient = sykmeldingUnderArbeidValues.fnrPasient,
         behandletTidspunkt = sykmeldingUnderArbeidValues.behandletTidspunkt.toOffsetDateTimeAtNoon(),
@@ -211,6 +212,7 @@ private fun uferdigRegisterOppgaveValus(sykmeldingUnderArbeidValues: SykmeldingU
         hovedDiagnose = sykmeldingUnderArbeidValues.hovedDiagnose,
         biDiagnoser = sykmeldingUnderArbeidValues.biDiagnoser,
         folkeRegistertAdresseErBrakkeEllerTilsvarende = sykmeldingUnderArbeidValues.folkeRegistertAdresseErBrakkeEllerTilsvarende,
+        erAdresseUtland = sykmeldingUnderArbeidValues.erAdresseUtland,
     )
 }
 

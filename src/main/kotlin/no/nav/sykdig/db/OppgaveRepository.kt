@@ -290,6 +290,7 @@ private fun toUtenlandskSykmelding(values: RegisterOppgaveValues): UtenlandskSyk
         UtenlandskSykmelding(
             land = skrevetLand,
             folkeRegistertAdresseErBrakkeEllerTilsvarende = values.folkeRegistertAdresseErBrakkeEllerTilsvarende ?: false,
+            erAdresseUtland = values.erAdresseUtland ?: false,
         )
     }
 }

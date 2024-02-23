@@ -34,13 +34,13 @@ fun mapToReceivedSykmelding(
         sykmelding = sykmelding,
         personNrPasient = sykmeldt.fnr,
         tlfPasient = null,
-        personNrLege = "",
         // Denne skal være blank siden vi ikke har fnr for lege, men feltet er påkrevd i formatet
+        personNrLege = "",
         navLogId = sykmeldingId,
         msgId = sykmeldingId,
         legekontorOrgNr = null,
-        legekontorOrgName = "",
         // Denne skal være blank siden vi ikkje har noe org name på legekontoret, men feltet er påkrevd i formatet
+        legekontorOrgName = "",
         legekontorHerId = null,
         legekontorReshId = null,
         mottattDato = opprettet,
@@ -56,6 +56,7 @@ fun mapToReceivedSykmelding(
             UtenlandskSykmelding(
                 ferdigstillteRegisterOppgaveValues.skrevetLand,
                 ferdigstillteRegisterOppgaveValues.folkeRegistertAdresseErBrakkeEllerTilsvarende ?: false,
+                erAdresseUtland = ferdigstillteRegisterOppgaveValues.erAdresseUtland ?: false,
             ),
     )
 }
