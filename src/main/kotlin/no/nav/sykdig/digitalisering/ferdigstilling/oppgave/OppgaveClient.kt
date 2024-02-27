@@ -1,9 +1,13 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
+import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.getFristForFerdigstillingAvOppgave
+import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
+import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
@@ -69,7 +73,7 @@ class OppgaveClient(
                     HttpEntity<Any>(headers),
                     GetOppgaveResponse::class.java,
                 )
-            return response.body ?: throw RuntimeException("Fant ikke oppgave med id $oppgaveId")
+            return response.body ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $oppgaveId")
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
@@ -85,6 +89,52 @@ class OppgaveClient(
             log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
             throw e
         }
+    }
+
+    @Retryable
+    fun getOppgaver(
+        journalpostId: String,
+        journalpost: SafJournalpost,
+    ): List<TempOppgaveResponse> {
+        val headers = HttpHeaders()
+        val urlWithParams = urlWithParams(journalpostId, journalpost)
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-Correlation-ID"] = UUID.randomUUID().toString()
+        try {
+            val response =
+                oppgaveRestTemplate.exchange(
+                    urlWithParams,
+                    HttpMethod.GET,
+                    HttpEntity<Any>(headers),
+                    OppgaveResponse::class.java,
+                )
+            return response.body?.oppgaver ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $journalpostId")
+        } catch (e: HttpClientErrorException) {
+            log.error(
+                "HttpClientErrorException med responskode ${e.statusCode.value()} fra journalpost: ${e.message}",
+                e,
+            )
+            throw e
+        } catch (e: HttpServerErrorException) {
+            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra journalpost: ${e.message}", e)
+            throw e
+        }
+    }
+
+    private fun urlWithParams(
+        journalpostId: String,
+        journalpost: SafJournalpost,
+    ): String {
+        val urlWithParams = "$url?journalpostId=$journalpostId"
+        if (journalpost.bruker == null) throw NoOppgaveException("ingen oppgaver på journalpostId $journalpost fordi bruker er null")
+
+        if (journalpost.bruker.type == Type.FNR || journalpost.bruker.type == Type.AKTOERID) {
+            return urlWithParams + "&aktoerId=${journalpost.bruker.id}"
+        }
+        if (journalpost.bruker.type == Type.ORGNR) {
+            return urlWithParams + "&aktoerId=${journalpost.bruker.id}"
+        }
+        throw NoOppgaveException("ingen oppgaver på journalpostId $journalpost fordi bruker er null")
     }
 
     @Retryable
@@ -126,6 +176,44 @@ class OppgaveClient(
         } catch (e: HttpServerErrorException) {
             log.error(
                 "HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
+                    "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
+                e,
+            )
+            throw e
+        }
+    }
+
+    @Retryable
+    fun ferdigstillJournalføringsoppgave(
+        oppgaveId: Int,
+        oppgaveVersjon: Int,
+        journalpostId: String,
+    ) {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-Correlation-ID"] = UUID.randomUUID().toString()
+
+        val body =
+            PatchFerdigStillOppgaveRequest(
+                versjon = oppgaveVersjon,
+                status = Oppgavestatus.FERDIGSTILT,
+                id = oppgaveId,
+            )
+        try {
+            oppgaveRestTemplate.exchange(
+                "$url/$oppgaveId",
+                HttpMethod.PATCH,
+                HttpEntity(body, headers),
+                String::class.java,
+            )
+            log.info(
+                "Ferdigstilt journalføringsopoppgave {} {}",
+                kv("journalpostId", journalpostId),
+                kv("oppgaveId", oppgaveId),
+            )
+        } catch (e: HttpServerErrorException) {
+            log.error(
+                "HttpServerErrorException for oppgaveId $oppgaveId og journalpostId $journalpostId med responskode " +
                     "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                 e,
             )

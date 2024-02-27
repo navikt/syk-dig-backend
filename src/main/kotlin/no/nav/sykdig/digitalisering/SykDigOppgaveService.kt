@@ -1,11 +1,14 @@
 package no.nav.sykdig.digitalisering
 
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.applog
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.db.toSykmelding
+import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.TempOppgaveResponse
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
@@ -14,6 +17,7 @@ import no.nav.sykdig.digitalisering.tilgangskontroll.getNavEmail
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
+import no.nav.sykdig.securelog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
@@ -27,6 +31,7 @@ class SykDigOppgaveService(
     private val oppgaveClient: OppgaveClient,
 ) {
     private val log = applog()
+    private val securelog = securelog()
 
     fun opprettOgLagreOppgave(
         journalpost: SafJournalpost,
@@ -74,6 +79,64 @@ class SykDigOppgaveService(
         }
         log.info("Hentet oppgave med id $oppgaveId")
         return oppgave
+    }
+
+    fun ferdigstillExistingJournalføringsoppgave(
+        journalpostId: String,
+        journalpost: SafJournalpost,
+    ) {
+        log.info(
+            "Henter eksisterende journalføringsoppgave for å ferdigstille før vi digitaliserer utenlandsk/papirsykmelding {}",
+            kv("journalpostId", journalpostId),
+        )
+        val existingOppgave = getExistingOppgave(journalpostId, journalpost)
+        if (existingOppgave == null) {
+            log.warn("oppgave er null, får ikke lukket oppgave {}", kv("journalpostId", journalpostId))
+            return
+        }
+        if (existingOppgave.id == null) {
+            log.warn("oppgaveId er null, får ikke lukket oppgave {}", kv("journalpostId", journalpostId))
+            return
+        }
+        oppgaveClient.ferdigstillJournalføringsoppgave(existingOppgave.id, existingOppgave.versjon, journalpostId)
+        log.info(
+            "Ferdigstilt journalføringsoppgave {} {}",
+            kv("journalpostId", journalpostId),
+            kv("oppgaveId", existingOppgave.id),
+        )
+        securelog.info(
+            "Ferdigstilt journalføringsoppgave {} {} {}",
+            kv("journalpostId", journalpostId),
+            kv("oppgaveId", existingOppgave.id),
+            kv("aktørId", existingOppgave.aktoerId),
+        )
+    }
+
+    fun getExistingOppgave(
+        journalpostId: String,
+        journalpost: SafJournalpost,
+    ): TempOppgaveResponse? {
+        try {
+            val oppgaver =
+                oppgaveClient.getOppgaver(journalpostId, journalpost).filter {
+                    it.tema == "SYM" || it.tema == "SYK"
+                }
+            if (oppgaver.size != 1) {
+                log.warn(
+                    "Antall eksisterende oppgaver er enten for mange eller for få til at vi kan lukke de {} {}",
+                    kv("journalpostId", journalpostId),
+                    kv("antall oppgaver", oppgaver.size),
+                )
+                return null
+            }
+            return oppgaver.single()
+        } catch (e: NoOppgaveException) {
+            log.error(
+                "klarte ikke hente oppgave(r) tilhørende journalpostId $journalpostId",
+                e,
+            )
+            throw e
+        }
     }
 
     fun updateOppgave(
