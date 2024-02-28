@@ -40,6 +40,7 @@ class RegelvalideringServiceTest {
             hovedDiagnose = DiagnoseInput("A000", "ICD10"),
             biDiagnoser = emptyList(),
             folkeRegistertAdresseErBrakkeEllerTilsvarende = true,
+            erAdresseUtland = null,
         )
 
     @Test

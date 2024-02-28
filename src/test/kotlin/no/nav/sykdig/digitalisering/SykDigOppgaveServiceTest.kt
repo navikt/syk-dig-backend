@@ -76,6 +76,7 @@ class SykDigOppgaveServiceTest : FellesTestOppsett() {
                     perioder = null,
                     biDiagnoser = null,
                     folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
+                    erAdresseUtland = null,
                 ),
             navEpost = "X987654",
         )
@@ -112,6 +113,7 @@ class SykDigOppgaveServiceTest : FellesTestOppsett() {
                     hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
                     biDiagnoser = emptyList(),
                     folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
+                    erAdresseUtland = null,
                 ),
             enhetId = "2990",
             sykmeldt =

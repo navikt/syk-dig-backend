@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.mapping
 
+import no.nav.helse.diagnosekoder.Diagnosekoder
 import no.nav.helse.eiFellesformat.XMLEIFellesformat
 import no.nav.helse.msgHead.XMLCS
 import no.nav.helse.msgHead.XMLCV
@@ -19,7 +20,6 @@ import no.nav.helse.sm2013.Ident
 import no.nav.helse.sm2013.NavnType
 import no.nav.helse.sm2013.TeleCom
 import no.nav.helse.sm2013.URL
-import no.nav.syfo.sm.Diagnosekoder
 import no.nav.sykdig.digitalisering.exceptions.MappingException
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person

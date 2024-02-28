@@ -1,17 +1,17 @@
 package no.nav.sykdig.model
 
-import no.nav.syfo.model.Arbeidsgiver
-import no.nav.syfo.model.Behandler
-import no.nav.syfo.model.KontaktMedPasient
-import no.nav.syfo.model.MedisinskVurdering
-import no.nav.syfo.model.MeldingTilNAV
-import no.nav.syfo.model.Periode
-import no.nav.syfo.model.Prognose
-import no.nav.syfo.model.SporsmalSvar
+import no.nav.sykdig.digitalisering.sykmelding.Arbeidsgiver
+import no.nav.sykdig.digitalisering.sykmelding.Behandler
+import no.nav.sykdig.digitalisering.sykmelding.KontaktMedPasient
+import no.nav.sykdig.digitalisering.sykmelding.MedisinskVurdering
+import no.nav.sykdig.digitalisering.sykmelding.MeldingTilNAV
+import no.nav.sykdig.digitalisering.sykmelding.Periode
+import no.nav.sykdig.digitalisering.sykmelding.Prognose
+import no.nav.sykdig.digitalisering.sykmelding.SporsmalSvar
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-data class Sykmelding(
+data class SDSykmelding(
     val id: String,
     val msgId: String,
     var medisinskVurdering: MedisinskVurdering?,

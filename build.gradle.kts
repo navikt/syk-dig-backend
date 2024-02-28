@@ -24,7 +24,7 @@ repositories {
 
 val postgresVersion = "42.7.1"
 val snakeYamlVersion = "2.2"
-val smCommonVersion = "2.0.8"
+val diagnosekoderVersion = "1.2024.0"
 val tokenSupportVersion = "3.2.0"
 val testContainersVersion = "1.19.4"
 val logstashLogbackEncoderVersion = "7.4"
@@ -61,11 +61,10 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("org.flywaydb:flyway-core")
     implementation("org.yaml:snakeyaml:$snakeYamlVersion") // overstyrer sårbar dependency
-    implementation("no.nav.helse:syfosm-common-models:$smCommonVersion")
     implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegen")
     implementation("no.nav.helse.xml:sm2013:$syfoXmlCodegen")
     implementation("no.nav.helse.xml:kith-hodemelding:$syfoXmlCodegen")
-    implementation("no.nav.helse:syfosm-common-diagnosis-codes:$smCommonVersion")
+    implementation("no.nav.helse:diagnosekoder:$diagnosekoderVersion")
     implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
     implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
     implementation("javax.activation:activation:$javaxActivationVersion")

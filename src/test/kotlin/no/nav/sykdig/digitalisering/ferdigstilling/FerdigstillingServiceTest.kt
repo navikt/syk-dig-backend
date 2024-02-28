@@ -1,12 +1,5 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
-import no.nav.syfo.model.AktivitetIkkeMulig
-import no.nav.syfo.model.AvsenderSystem
-import no.nav.syfo.model.Diagnose
-import no.nav.syfo.model.KontaktMedPasient
-import no.nav.syfo.model.Periode
-import no.nav.syfo.model.ReceivedSykmelding
-import no.nav.syfo.model.SporsmalSvar
 import no.nav.sykdig.FellesTestOppsett
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
@@ -25,6 +18,13 @@ import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
+import no.nav.sykdig.digitalisering.sykmelding.AktivitetIkkeMulig
+import no.nav.sykdig.digitalisering.sykmelding.AvsenderSystem
+import no.nav.sykdig.digitalisering.sykmelding.Diagnose
+import no.nav.sykdig.digitalisering.sykmelding.KontaktMedPasient
+import no.nav.sykdig.digitalisering.sykmelding.Periode
+import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
+import no.nav.sykdig.digitalisering.sykmelding.SporsmalSvar
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
@@ -135,6 +135,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 hovedDiagnose = DiagnoseInput("A070", "ICD10"),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = true,
+                erAdresseUtland = null,
             )
 
         val sykmeldt =
@@ -210,6 +211,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
+                erAdresseUtland = null,
             )
 
         val person =
@@ -310,6 +312,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
+                erAdresseUtland = null,
             )
 
         val person =
@@ -373,6 +376,7 @@ class FerdigstillingServiceTest : FellesTestOppsett() {
                 hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
+                erAdresseUtland = null,
             )
 
         val person =
