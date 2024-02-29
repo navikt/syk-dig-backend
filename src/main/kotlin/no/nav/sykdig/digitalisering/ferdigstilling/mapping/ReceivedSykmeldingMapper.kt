@@ -60,7 +60,7 @@ fun mapToReceivedSykmelding(
                 ferdigstillteRegisterOppgaveValues.folkeRegistertAdresseErBrakkeEllerTilsvarende ?: false,
                 erAdresseUtland = ferdigstillteRegisterOppgaveValues.erAdresseUtland ?: false,
             ),
-        validationResut =
+        validationResult =
             ValidationResult(
                 status = Status.OK,
                 ruleHits = emptyList(),

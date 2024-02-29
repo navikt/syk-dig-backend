@@ -29,5 +29,5 @@ data class ReceivedSykmelding(
      * TSS-ident, this is only used for infotrygd compat and should be removed in thefuture
      */
     val tssid: String?,
-    val validationResut: ValidationResult,
+    val validationResult: ValidationResult,
 )
