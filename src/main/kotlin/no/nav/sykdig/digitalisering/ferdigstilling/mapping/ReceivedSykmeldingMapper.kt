@@ -3,7 +3,9 @@ package no.nav.sykdig.digitalisering.ferdigstilling.mapping
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
+import no.nav.sykdig.digitalisering.sykmelding.Status
 import no.nav.sykdig.digitalisering.sykmelding.UtenlandskSykmelding
+import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
 import java.time.LocalDateTime
 
 fun mapToReceivedSykmelding(
@@ -57,6 +59,11 @@ fun mapToReceivedSykmelding(
                 ferdigstillteRegisterOppgaveValues.skrevetLand,
                 ferdigstillteRegisterOppgaveValues.folkeRegistertAdresseErBrakkeEllerTilsvarende ?: false,
                 erAdresseUtland = ferdigstillteRegisterOppgaveValues.erAdresseUtland ?: false,
+            ),
+        validationResut =
+            ValidationResult(
+                status = Status.OK,
+                ruleHits = emptyList(),
             ),
     )
 }
