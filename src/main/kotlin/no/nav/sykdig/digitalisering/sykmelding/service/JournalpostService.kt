@@ -40,7 +40,6 @@ class JournalpostService(
                 status = JournalpostStatusEnum.FEIL_TEMA,
             )
         }
-        sykDigOppgaveService.ferdigstillExistingJournalføringsoppgave(journalpostId, journalpost)
         if (isNorsk) {
             sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
             journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
@@ -64,7 +63,8 @@ class JournalpostService(
                     status = JournalpostStatusEnum.MANGLER_FNR,
                 )
         val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
-        val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
+        val aktorId = personService.hentPerson(fnrEllerAktorId, journalpostId).aktorId
+        val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr, aktorId)
 
         securelog.info(
             "oppretter sykmelding fra journalpost {} {} {} {}",
@@ -76,6 +76,7 @@ class JournalpostService(
 
         metricRegister.incrementNewSykmelding("utenlandsk", journalpost.kanal)
 
+        sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(journalpostId, journalpost)
         journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
         return JournalpostStatus(
             journalpostId = journalpostId,

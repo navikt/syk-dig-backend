@@ -28,6 +28,7 @@ class OppgaveSecurityService(
     }
 
     fun hasAccessToOppgave(oppgaveId: String): Boolean {
+        securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val navEmail = getNavEmail()
         val tilgang = hasAccess(oppgave.fnr, navEmail)

@@ -278,7 +278,10 @@ class OppgaveClient(
         }
     }
 
-    fun opprettOppgave(journalpostId: String): GetOppgaveResponse {
+    fun opprettOppgave(
+        journalpostId: String,
+        aktoerId: String,
+    ): GetOppgaveResponse {
         val headers = HttpHeaders()
         val xCorrelationId = UUID.randomUUID().toString()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -290,6 +293,7 @@ class OppgaveClient(
                     HttpMethod.POST,
                     HttpEntity(
                         CreateOppgaveRequest(
+                            aktoerId = aktoerId,
                             journalpostId = journalpostId,
                             tema = TEMA_SYKMELDING,
                             oppgavetype = OPPGAVETYPE,
@@ -305,8 +309,7 @@ class OppgaveClient(
                     ),
                     GetOppgaveResponse::class.java,
                 )
-
-            secureLog.info("OpprettOppgave: $journalpostId: ${objectMapper.writeValueAsString(result.body)}")
+            secureLog.info("OpprettOppgave: $journalpostId: ${objectMapper.writeValueAsString(result.body)}, aktørId: $aktoerId")
             val oppgave = result.body!!
             log.info("OpprettOppgave fra journalpostId: $journalpostId  med oppgaveId: ${oppgave.id}")
             return oppgave

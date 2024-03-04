@@ -37,10 +37,12 @@ class SykDigOppgaveService(
         journalpost: SafJournalpost,
         journalpostId: String,
         fnr: String,
+        aktoerId: String,
     ): String {
         val response =
             oppgaveClient.opprettOppgave(
                 journalpostId = journalpostId,
+                aktoerId = aktoerId,
             )
 
         val dokumenter =
@@ -81,7 +83,7 @@ class SykDigOppgaveService(
         return oppgave
     }
 
-    fun ferdigstillExistingJournalføringsoppgave(
+    fun ferdigstillExistingJournalfoeringsoppgave(
         journalpostId: String,
         journalpost: SafJournalpost,
     ) {
