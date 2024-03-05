@@ -8,6 +8,7 @@ import no.nav.sykdig.db.toSykmelding
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveType
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.TempOppgaveResponse
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
@@ -121,13 +122,18 @@ class SykDigOppgaveService(
         try {
             val oppgaver =
                 oppgaveClient.getOppgaver(journalpostId, journalpost).filter {
-                    it.tema == "SYM" || it.tema == "SYK"
+                    it.tema == "SYM" || it.tema == "SYK" || it.oppgavetype == OppgaveType.JFR
                 }
             if (oppgaver.size != 1) {
+                val oppgaverInfo =
+                    oppgaver.joinToString(separator = ", ", prefix = "[", postfix = "]") { oppgave ->
+                        "id=${oppgave.id}, status=${oppgave.status}, tildeltEnhetsnr=${oppgave.tildeltEnhetsnr}"
+                    }
                 log.warn(
-                    "Antall eksisterende oppgaver er enten for mange eller for få til at vi kan lukke de {} {}",
+                    "Antall eksisterende oppgaver er enten for mange eller for få til at vi kan lukke de {} {} {}",
                     kv("journalpostId", journalpostId),
                     kv("antall oppgaver", oppgaver.size),
+                    kv("info", oppgaverInfo),
                 )
                 return null
             }

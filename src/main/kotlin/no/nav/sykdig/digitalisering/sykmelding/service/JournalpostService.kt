@@ -40,6 +40,7 @@ class JournalpostService(
                 status = JournalpostStatusEnum.FEIL_TEMA,
             )
         }
+        sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(journalpostId, journalpost)
         if (isNorsk) {
             sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
             journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
@@ -76,7 +77,6 @@ class JournalpostService(
 
         metricRegister.incrementNewSykmelding("utenlandsk", journalpost.kanal)
 
-        sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(journalpostId, journalpost)
         journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
         return JournalpostStatus(
             journalpostId = journalpostId,

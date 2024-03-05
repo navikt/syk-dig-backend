@@ -26,6 +26,7 @@ data class TempOppgaveResponse(
     val id: Int? = null,
     val tema: String? = null,
     val tildeltEnhetsnr: String,
+    val oppgavetype: OppgaveType,
 )
 
 data class OppgaveResponse(

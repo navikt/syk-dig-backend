@@ -7,7 +7,6 @@ import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.getFristForFerdigstillingAvOppgave
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
-import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
@@ -125,16 +124,8 @@ class OppgaveClient(
         journalpostId: String,
         journalpost: SafJournalpost,
     ): String {
-        val urlWithParams = "$url?journalpostId=$journalpostId"
         if (journalpost.bruker == null) throw NoOppgaveException("ingen oppgaver på journalpostId $journalpost fordi bruker er null")
-
-        if (journalpost.bruker.type == Type.FNR || journalpost.bruker.type == Type.AKTOERID) {
-            return urlWithParams + "&aktoerId=${journalpost.bruker.id}"
-        }
-        if (journalpost.bruker.type == Type.ORGNR) {
-            return urlWithParams + "&aktoerId=${journalpost.bruker.id}"
-        }
-        throw NoOppgaveException("ingen oppgaver på journalpostId $journalpost fordi bruker er null")
+        return "$url?journalpostId=$journalpostId&statuskategori=AAPEN"
     }
 
     @Retryable
