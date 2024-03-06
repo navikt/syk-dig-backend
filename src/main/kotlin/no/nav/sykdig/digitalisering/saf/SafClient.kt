@@ -1,7 +1,8 @@
 package no.nav.sykdig.digitalisering.saf
 
 import no.nav.sykdig.applog
-import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
+import no.nav.sykdig.digitalisering.api.DocumentController.ErrorTypes
+import no.nav.sykdig.digitalisering.api.DocumentController.PdfLoadingState
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -25,7 +26,7 @@ class SafClient(
         journalpostId: String,
         dokumentInfoId: String,
         callId: String,
-    ): ByteArray {
+    ): PdfLoadingState {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
         headers.accept = listOf(MediaType.APPLICATION_PDF)
@@ -37,14 +38,16 @@ class SafClient(
                 try {
                     journalpostId.toLong()
                 } catch (exception: Exception) {
-                    throw RuntimeException("Ugyldig journalpostId: $journalpostId er på ugyldigformat")
+                    log.error("Ugyldig dokumentInfoId: $dokumentInfoId er på ugyldig format")
+                    return PdfLoadingState.Bad(ErrorTypes.INVALID_FORMAT)
                 }
 
             val validDokumentInfoId =
                 try {
                     dokumentInfoId.toLong()
                 } catch (exception: Exception) {
-                    throw RuntimeException("Ugyldig dokumentInfoId: $dokumentInfoId er på ugyldigformat")
+                    log.error("Ugyldig dokumentInfoId: $dokumentInfoId er på ugyldig format")
+                    return PdfLoadingState.Bad(ErrorTypes.INVALID_FORMAT)
                 }
 
             if (journalpostId.toLongOrNull() != null && dokumentInfoId.toLongOrNull() != null) {
@@ -55,21 +58,28 @@ class SafClient(
                         HttpEntity<Any>(headers),
                         ByteArray::class.java,
                     )
-                return response.body ?: throw RuntimeException("Tomt svar fra SAF for journalpostId $journalpostId")
+
+                if (response.body?.isEmpty() == true) {
+                    log.error("Tomt svar fra SAF for journalpostId $journalpostId")
+                    return PdfLoadingState.Bad(ErrorTypes.EMPTY_RESPONSE)
+                } else {
+                    return PdfLoadingState.Good(response.body!!)
+                }
             } else {
-                throw RuntimeException("Ugyldig journalpostId: $journalpostId eller dokumentInfoId: $dokumentInfoId er på ugyldigformat")
+                log.error("Ugyldig journalpostId: $journalpostId eller dokumentInfoId: $dokumentInfoId er på ugyldig format")
+                return PdfLoadingState.Bad(ErrorTypes.INVALID_FORMAT)
             }
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til journalpostId $journalpostId: ${e.message}")
-                throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
+                return PdfLoadingState.Bad(ErrorTypes.SAKSBEHANDLER_IKKE_TILGANG)
             } else {
                 log.error("HttpClientErrorException med responskode ${e.statusCode.value()} fra SAF: ${e.message}", e)
             }
-            throw RuntimeException("HttpClientErrorException fra SAF")
+            return PdfLoadingState.Bad(ErrorTypes.SAF_CLIENT_ERROR)
         } catch (e: HttpServerErrorException) {
             log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra SAF: ${e.message}", e)
-            throw RuntimeException("HttpServerErrorException fra SAF")
+            return PdfLoadingState.Bad(ErrorTypes.SAF_CLIENT_ERROR)
         }
     }
 }
