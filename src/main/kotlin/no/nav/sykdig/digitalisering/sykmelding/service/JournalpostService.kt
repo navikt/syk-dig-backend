@@ -40,51 +40,49 @@ class JournalpostService(
                 status = JournalpostStatusEnum.FEIL_TEMA,
             )
         }
-        when (isNorsk) {
-            true -> {
-                sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
-                journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
-                securelog.info(
-                    "oppretter sykmelding fra journalpost {} {} {}",
-                    kv("journalpostId", journalpostId),
-                    kv("kanal", journalpost.kanal),
-                    kv("type", "norsk papirsykmelding"),
-                )
+        sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(journalpostId, journalpost)
+        if (isNorsk) {
+            sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
+            journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
+            securelog.info(
+                "oppretter sykmelding fra journalpost {} {} {}",
+                kv("journalpostId", journalpostId),
+                kv("kanal", journalpost.kanal),
+                kv("type", "norsk papirsykmelding"),
+            )
 
-                metricRegister.incrementNewSykmelding("norsk", journalpost.kanal)
-                return JournalpostStatus(
-                    journalpostId = journalpostId,
-                    status = JournalpostStatusEnum.OPPRETTET,
-                )
-            }
-            false -> {
-                val fnrEllerAktorId =
-                    getFnrEllerAktorId(journalpost)
-                        ?: return JournalpostStatus(
-                            journalpostId = journalpostId,
-                            status = JournalpostStatusEnum.MANGLER_FNR,
-                        )
-                val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
-                val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr)
-
-                securelog.info(
-                    "oppretter sykmelding fra journalpost {} {} {} {}",
-                    kv("journalpostId", journalpostId),
-                    kv("kanal", journalpost.kanal),
-                    kv("type", "utenlandsk sykmelding"),
-                    kv("fnr", fnr),
-                )
-
-                metricRegister.incrementNewSykmelding("utenlandsk", journalpost.kanal)
-
-                journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
-                return JournalpostStatus(
-                    journalpostId = journalpostId,
-                    status = JournalpostStatusEnum.OPPRETTET,
-                    oppgaveId = oppgaveId,
-                )
-            }
+            metricRegister.incrementNewSykmelding("norsk", journalpost.kanal)
+            return JournalpostStatus(
+                journalpostId = journalpostId,
+                status = JournalpostStatusEnum.OPPRETTET,
+            )
         }
+        val fnrEllerAktorId =
+            getFnrEllerAktorId(journalpost)
+                ?: return JournalpostStatus(
+                    journalpostId = journalpostId,
+                    status = JournalpostStatusEnum.MANGLER_FNR,
+                )
+        val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
+        val aktorId = personService.hentPerson(fnrEllerAktorId, journalpostId).aktorId
+        val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr, aktorId)
+
+        securelog.info(
+            "oppretter sykmelding fra journalpost {} {} {} {}",
+            kv("journalpostId", journalpostId),
+            kv("kanal", journalpost.kanal),
+            kv("type", "utenlandsk sykmelding"),
+            kv("fnr", fnr),
+        )
+
+        metricRegister.incrementNewSykmelding("utenlandsk", journalpost.kanal)
+
+        journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
+        return JournalpostStatus(
+            journalpostId = journalpostId,
+            status = JournalpostStatusEnum.OPPRETTET,
+            oppgaveId = oppgaveId,
+        )
     }
 
     fun getJournalpostResult(

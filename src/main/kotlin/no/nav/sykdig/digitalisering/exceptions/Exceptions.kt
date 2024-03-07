@@ -7,3 +7,5 @@ class IkkeTilgangException(override val message: String) : GraphQLException(mess
 class ClientException(override val message: String) : GraphQLException(message)
 
 class MappingException(override val message: String) : Exception(message)
+
+class NoOppgaveException(override val message: String) : RuntimeException(message)

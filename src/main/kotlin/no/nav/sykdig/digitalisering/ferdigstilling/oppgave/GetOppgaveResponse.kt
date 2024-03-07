@@ -17,3 +17,18 @@ data class GetOppgaveResponse(
     val tildeltEnhetsnr: String,
     val duplikat: Boolean?,
 )
+
+data class TempOppgaveResponse(
+    val versjon: Int,
+    val aktoerId: String,
+    val status: Oppgavestatus,
+    val aktivDato: LocalDate? = null,
+    val id: Int? = null,
+    val tema: String? = null,
+    val tildeltEnhetsnr: String,
+    val oppgavetype: OppgaveType,
+)
+
+data class OppgaveResponse(
+    val oppgaver: List<TempOppgaveResponse>,
+)

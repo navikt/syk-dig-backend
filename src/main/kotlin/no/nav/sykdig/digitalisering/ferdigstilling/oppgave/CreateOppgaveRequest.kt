@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 import java.time.LocalDate
 
 data class CreateOppgaveRequest(
+    val aktoerId: String,
     val journalpostId: String,
     val opprettetAvEnhetsnr: String? = null,
     val tema: String,

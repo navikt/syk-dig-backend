@@ -34,13 +34,11 @@ class JournalpostDataFetcher(
         @InputArgument id: String,
     ): JournalpostResult {
         val trimedJournalpostId = id.trim()
-
         val journalpost =
             safGraphQlClient.getJournalpost(trimedJournalpostId).journalpost ?: return JournalpostStatus(
                 journalpostId = trimedJournalpostId,
                 status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
             )
-
         securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
 
         if (journalpostService.isSykmeldingCreated(trimedJournalpostId)) {
