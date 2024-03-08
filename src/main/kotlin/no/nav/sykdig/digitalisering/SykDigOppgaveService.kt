@@ -122,7 +122,7 @@ class SykDigOppgaveService(
         try {
             val oppgaver =
                 oppgaveClient.getOppgaver(journalpostId, journalpost).filter {
-                    it.tema == "SYM" || it.tema == "SYK" || it.oppgavetype == OppgaveType.JFR
+                    (it.tema == "SYM" || it.tema == "SYK") && it.oppgavetype == OppgaveType.JFR
                 }
             if (oppgaver.size != 1) {
                 val oppgaverInfo =
