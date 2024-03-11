@@ -117,6 +117,9 @@ class OppgaveClient(
         } catch (e: HttpServerErrorException) {
             log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra journalpost: ${e.message}", e)
             throw e
+        } catch (e: Exception) {
+            log.error("Exception. Fra journalpost: ${e.message}", e)
+            throw e
         }
     }
 
@@ -208,6 +211,9 @@ class OppgaveClient(
                     "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                 e,
             )
+            throw e
+        } catch (e: Exception){
+            log.error("Exception. Fra journalpost: ${e.message}", e)
             throw e
         }
     }

@@ -101,6 +101,7 @@ class SykDigOppgaveService(
             log.warn("oppgaveId er null, får ikke lukket oppgave {}", kv("journalpostId", journalpostId))
             return
         }
+        log.info("Prøver å ferdigstille eksisterende journalføringsoppgave {} {}", kv("journalpostId", journalpostId), kv("oppgaveId", existingOppgave.id))
         oppgaveClient.ferdigstillJournalføringsoppgave(existingOppgave.id, existingOppgave.versjon, journalpostId)
         log.info(
             "Ferdigstilt journalføringsoppgave {} {}",
@@ -120,24 +121,25 @@ class SykDigOppgaveService(
         journalpost: SafJournalpost,
     ): TempOppgaveResponse? {
         try {
-            val oppgaver =
-                oppgaveClient.getOppgaver(journalpostId, journalpost).filter {
-                    (it.tema == "SYM" || it.tema == "SYK") && it.oppgavetype == OppgaveType.JFR
-                }
-            if (oppgaver.size != 1) {
+            val oppgaver = oppgaveClient.getOppgaver(journalpostId, journalpost)
+            log.info("hentet ${oppgaver.size}, på journalpostId $journalpostId")
+            val filtrerteOppgaver = oppgaver.filter {
+                (it.tema == "SYM" || it.tema == "SYK") && it.oppgavetype == OppgaveType.JFR
+            }
+            if (filtrerteOppgaver.size != 1) {
                 val oppgaverInfo =
-                    oppgaver.joinToString(separator = ", ", prefix = "[", postfix = "]") { oppgave ->
+                    filtrerteOppgaver.joinToString(separator = ", ", prefix = "[", postfix = "]") { oppgave ->
                         "id=${oppgave.id}, status=${oppgave.status}, tildeltEnhetsnr=${oppgave.tildeltEnhetsnr}"
                     }
                 log.warn(
-                    "Antall eksisterende oppgaver er enten for mange eller for få til at vi kan lukke de {} {} {}",
+                    "Antall eksisterende filtrerteOppgaver er enten for mange eller for få til at vi kan lukke de {} {} {}",
                     kv("journalpostId", journalpostId),
-                    kv("antall oppgaver", oppgaver.size),
+                    kv("antall filtrerteOppgaver", filtrerteOppgaver.size),
                     kv("info", oppgaverInfo),
                 )
                 return null
             }
-            return oppgaver.single()
+            return filtrerteOppgaver.single()
         } catch (e: NoOppgaveException) {
             log.error(
                 "klarte ikke hente oppgave(r) tilhørende journalpostId $journalpostId",
