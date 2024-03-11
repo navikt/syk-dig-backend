@@ -9,7 +9,8 @@ import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveType
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.TempOppgaveResponse
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.AllOppgaveResponse
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.AllOppgaveType
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
@@ -119,12 +120,12 @@ class SykDigOppgaveService(
     fun getExistingOppgave(
         journalpostId: String,
         journalpost: SafJournalpost,
-    ): TempOppgaveResponse? {
+    ): AllOppgaveResponse? {
         try {
             val oppgaver = oppgaveClient.getOppgaver(journalpostId, journalpost)
             log.info("hentet ${oppgaver.size}, på journalpostId $journalpostId")
             val filtrerteOppgaver = oppgaver.filter {
-                (it.tema == "SYM" || it.tema == "SYK") && it.oppgavetype == OppgaveType.JFR
+                (it.tema == "SYM" || it.tema == "SYK") && it.oppgavetype == AllOppgaveType.JFR
             }
             if (filtrerteOppgaver.size != 1) {
                 val oppgaverInfo =

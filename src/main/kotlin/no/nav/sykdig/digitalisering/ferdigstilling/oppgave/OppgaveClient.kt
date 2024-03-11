@@ -94,7 +94,7 @@ class OppgaveClient(
     fun getOppgaver(
         journalpostId: String,
         journalpost: SafJournalpost,
-    ): List<TempOppgaveResponse> {
+    ): List<AllOppgaveResponse> {
         val headers = HttpHeaders()
         val urlWithParams = urlWithParams(journalpostId, journalpost)
         headers.contentType = MediaType.APPLICATION_JSON
@@ -107,21 +107,21 @@ class OppgaveClient(
                     urlWithParams,
                     HttpMethod.GET,
                     HttpEntity<Any>(headers),
-                    OppgaveResponse::class.java,
+                    AllOppgaveResponses::class.java,
                 )
             log.info("Mottok respons for journalpostId $journalpostId med antall oppgaver: ${response.body?.oppgaver?.size ?: "ingen"}")
             return response.body?.oppgaver ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $journalpostId")
         } catch (e: HttpClientErrorException) {
             log.error(
-                "HttpClientErrorException med responskode ${e.statusCode.value()} fra journalpost: ${e.message}",
+                "HttpClientErrorException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}",
                 e,
             )
             throw e
         } catch (e: HttpServerErrorException) {
-            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra journalpost: ${e.message}", e)
+            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}", e)
             throw e
         } catch (e: Exception) {
-            log.error("Generell Exception. Detaljer: ${e.localizedMessage}", e)
+            log.error("Generell Exception blir kastet ved henting av oppgaver på journalpostId $journalpostId. Detaljer: ${e.message}", e)
             throw e
         }
     }
