@@ -99,6 +99,8 @@ class OppgaveClient(
         val urlWithParams = urlWithParams(journalpostId, journalpost)
         headers.contentType = MediaType.APPLICATION_JSON
         headers["X-Correlation-ID"] = UUID.randomUUID().toString()
+
+        log.info("Kaller oppgaveRestTemplate.exchange med URL: $urlWithParams og journalpostId: $journalpostId")
         try {
             val response =
                 oppgaveRestTemplate.exchange(
@@ -107,6 +109,7 @@ class OppgaveClient(
                     HttpEntity<Any>(headers),
                     OppgaveResponse::class.java,
                 )
+            log.info("Mottok respons for journalpostId $journalpostId med antall oppgaver: ${response.body?.oppgaver?.size ?: "ingen"}")
             return response.body?.oppgaver ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $journalpostId")
         } catch (e: HttpClientErrorException) {
             log.error(
@@ -118,7 +121,7 @@ class OppgaveClient(
             log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra journalpost: ${e.message}", e)
             throw e
         } catch (e: Exception) {
-            log.error("Exception. Fra journalpost: ${e.message}", e)
+            log.error("Generell Exception. Detaljer: ${e.localizedMessage}", e)
             throw e
         }
     }
