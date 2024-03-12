@@ -118,7 +118,10 @@ class OppgaveClient(
             )
             throw e
         } catch (e: HttpServerErrorException) {
-            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}", e)
+            log.error(
+                "HttpServerErrorException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}",
+                e,
+            )
             throw e
         } catch (e: Exception) {
             log.error("Generell Exception blir kastet ved henting av oppgaver på journalpostId $journalpostId. Detaljer: ${e.message}", e)
@@ -215,7 +218,7 @@ class OppgaveClient(
                 e,
             )
             throw e
-        } catch (e: Exception){
+        } catch (e: Exception) {
             log.error("Exception. Fra journalpost: ${e.message}", e)
             throw e
         }
