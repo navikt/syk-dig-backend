@@ -191,7 +191,7 @@ fun tilBehandler(): HelseOpplysningerArbeidsuforhet.Behandler =
                     }
                 teleAddress =
                     URL().apply {
-                        v = "tel:55553336"
+                        v = ""
                     }
             },
         )
