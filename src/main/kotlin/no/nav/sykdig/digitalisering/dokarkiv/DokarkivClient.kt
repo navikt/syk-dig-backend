@@ -332,11 +332,11 @@ class DokarkivClient(
         avvisningsGrunn: String?,
     ): String {
         return if (!avvisningsGrunn.isNullOrEmpty()) {
-            "Avvist Utenlandsk papirsykmelding: $avvisningsGrunn"
+            "Avvist utenlandsk sykmelding: $avvisningsGrunn"
         } else if (perioder.isNullOrEmpty()) {
-            "Utenlandsk papirsykmelding"
+            "Digitalisert utenlandsk sykmelding"
         } else {
-            "Utenlandsk papirsykmelding ${getFomTomTekst(perioder)}"
+            "Digitalisert utenlandsk sykmelding ${getFomTomTekst(perioder)}"
         }
     }
 
