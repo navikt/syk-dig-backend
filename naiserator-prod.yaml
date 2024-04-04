@@ -69,8 +69,10 @@ spec:
         - application: istilgangskontroll
           namespace: teamsykefravr
           cluster: prod-gcp
+        - application: kodeverk-api
+          namespace: team-rocket
+          cluster: prod-gcp
       external:
-        - host: kodeverk.prod-fss-pub.nais.io
         - host: saf.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
@@ -90,7 +92,7 @@ spec:
     - name: PDL_CLIENT_ID
       value: prod-fss.pdl.pdl-api
     - name: KODEVERK_URL
-      value: https://kodeverk.prod-fss-pub.nais.io
+      value: http://kodeverk-api.team-rocket
     - name: DOKARKIV_URL
       value: https://dokarkiv.prod-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
     - name: DOKARKIV_CLIENT_ID
