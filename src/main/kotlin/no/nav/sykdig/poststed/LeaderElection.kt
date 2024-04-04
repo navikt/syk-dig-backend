@@ -22,10 +22,10 @@ class LeaderElection(
             log.info("Ser ikke etter leader, returnerer at jeg er leader")
             return true
         }
-        return kallElector()
+        return isPodLeader()
     }
 
-    private fun kallElector(): Boolean {
+    private fun isPodLeader(): Boolean {
         val hostname: String = InetAddress.getLocalHost().hostName
 
         val uriString =
