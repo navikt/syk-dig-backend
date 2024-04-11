@@ -7,6 +7,10 @@ inline fun <reified T> T.applog(): Logger {
     return LoggerFactory.getLogger(T::class.java)
 }
 
+fun applog(clazz: String): Logger {
+    return LoggerFactory.getLogger(clazz)
+}
+
 inline fun <reified T> T.securelog(): Logger {
     return LoggerFactory.getLogger("securelog")
 }

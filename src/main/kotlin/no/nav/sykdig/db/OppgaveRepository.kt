@@ -1,6 +1,7 @@
 package no.nav.sykdig.db
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.sykmelding.AktivitetIkkeMulig
 import no.nav.sykdig.digitalisering.sykmelding.Diagnose
@@ -241,12 +242,13 @@ fun toSykmelding(
     oppgave: OppgaveDbModel,
     values: RegisterOppgaveValues,
 ): SykmeldingUnderArbeid {
+    val sykmeldingsId = oppgave.sykmeldingId.toString()
     if (oppgave.sykmelding == null) {
         val msgId = UUID.randomUUID().toString()
         return SykmeldingUnderArbeid(
             sykmelding =
                 SDSykmelding(
-                    id = oppgave.sykmeldingId.toString(),
+                    id = sykmeldingsId,
                     msgId = msgId,
                     medisinskVurdering = values.mapToMedisinskVurdering(),
                     arbeidsgiver = null,
@@ -272,7 +274,7 @@ fun toSykmelding(
             legekontorHerId = null,
             legekontorOrgName = null,
             mottattDato = null,
-            utenlandskSykmelding = toUtenlandskSykmelding(values),
+            utenlandskSykmelding = toUtenlandskSykmelding(values, sykmeldingsId),
         )
     } else {
         val sykmelding: SykmeldingUnderArbeid = oppgave.sykmelding
@@ -280,16 +282,28 @@ fun toSykmelding(
         sykmelding.sykmelding.perioder = values.perioder.mapToPerioder()
         sykmelding.sykmelding.behandletTidspunkt = values.behandletTidspunkt
         sykmelding.fnrPasient = values.fnrPasient
-        sykmelding.utenlandskSykmelding = toUtenlandskSykmelding(values)
+        sykmelding.utenlandskSykmelding = toUtenlandskSykmelding(values, sykmeldingsId)
         return sykmelding
     }
 }
 
-private fun toUtenlandskSykmelding(values: RegisterOppgaveValues): UtenlandskSykmelding? {
+private fun toUtenlandskSykmelding(
+    values: RegisterOppgaveValues,
+    sykmeldingsId: String,
+): UtenlandskSykmelding? {
+    val log = applog(OppgaveRepository::class.java.toString())
+    log.info(
+        "folkeRegistertAdresseErBrakkeEllerTilsvarende: {}, og erAdresseUtland: {} \n med sykmeldingsId={}",
+        values.folkeRegistertAdresseErBrakkeEllerTilsvarende,
+        values.erAdresseUtland,
+        sykmeldingsId,
+    )
     return values.skrevetLand?.let { skrevetLand ->
         UtenlandskSykmelding(
             land = skrevetLand,
-            folkeRegistertAdresseErBrakkeEllerTilsvarende = values.folkeRegistertAdresseErBrakkeEllerTilsvarende ?: false,
+            folkeRegistertAdresseErBrakkeEllerTilsvarende =
+                values.folkeRegistertAdresseErBrakkeEllerTilsvarende
+                    ?: false,
             erAdresseUtland = values.erAdresseUtland ?: false,
         )
     }
