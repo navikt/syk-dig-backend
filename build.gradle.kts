@@ -2,10 +2,10 @@ import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "3.2.2"
+    id("org.springframework.boot") version "3.2.4"
     id("io.spring.dependency-management") version "1.1.4"
-    kotlin("jvm") version "1.9.22"
-    kotlin("plugin.spring") version "1.9.22"
+    kotlin("jvm") version "1.9.23"
+    kotlin("plugin.spring") version "1.9.23"
     id("com.netflix.dgs.codegen") version "5.12.4"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("org.cyclonedx.bom") version "1.8.2"
@@ -22,18 +22,18 @@ repositories {
     }
 }
 
-val postgresVersion = "42.7.1"
+val postgresVersion = "42.7.3"
 val snakeYamlVersion = "2.2"
 val diagnosekoderVersion = "1.2024.0"
-val tokenSupportVersion = "3.2.0"
-val testContainersVersion = "1.19.4"
+val tokenSupportVersion = "4.1.4"
+val testContainersVersion = "1.19.7"
 val logstashLogbackEncoderVersion = "7.4"
 val javaJwtVersion = "4.4.0"
-val springBootResourceVersion = "3.2.2"
+val springBootResourceVersion = "3.2.4"
 val graphqlVersion = "20.2"
-val kafkaClientsVersion = "3.6.1"
+val kafkaClientsVersion = "3.7.0"
 val syfoXmlCodegen = "2.0.1"
-val springSecurityWebVersion = "6.2.1"
+val springSecurityWebVersion = "6.2.3"
 val okhttp3version = "4.12.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
