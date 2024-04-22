@@ -22,6 +22,7 @@ class PdlGraphQlConfiguration {
         return GraphQLClient.createCustom(pdlUrl) { url, _, body ->
             val httpHeaders = HttpHeaders()
             httpHeaders["TEMA"] = "SYM"
+            httpHeaders["Behandlingsnummer"] = "B229"
             httpHeaders.contentType = MediaType.APPLICATION_JSON
 
             val response =
