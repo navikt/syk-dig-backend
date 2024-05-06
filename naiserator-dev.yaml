@@ -51,10 +51,9 @@ spec:
       runtime: java
   resources:
     limits:
-      cpu: 300m
-      memory: 1Gi
+      memory: 2Gi
     requests:
-      cpu: 20m
+      cpu: 100m
       memory: 768Mi
   vault:
     enabled: false
