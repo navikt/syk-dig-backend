@@ -13,7 +13,7 @@ plugins {
 
 group = "no.nav.sykdig"
 version = "1.0.0"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 repositories {
     mavenCentral()

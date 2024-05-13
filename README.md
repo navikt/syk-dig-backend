@@ -11,7 +11,7 @@ This project contains the application code and infrastructure for syk-dig-backen
 
 #### Requirements
 
-* JDK 17
+* JDK 21
 * Docker
 
 
