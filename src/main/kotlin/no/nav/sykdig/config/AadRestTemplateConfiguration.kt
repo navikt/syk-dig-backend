@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST
 import org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes
-import java.util.Optional
 
 class SpringTokenValidationContextHolder : TokenValidationContextHolder {
     private val tokenValidationContextAttribute = SpringTokenValidationContextHolder::class.java.name
@@ -49,9 +48,9 @@ class SpringTokenValidationContextHolder : TokenValidationContextHolder {
 @Primary
 @Component
 class SykDigTokenResolver : JwtBearerTokenResolver {
-    override fun token(): Optional<String> {
+    override fun token(): String? {
         val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
-        return Optional.of(autentication.token.tokenValue)
+        return autentication.token.tokenValue
     }
 }
 
@@ -156,7 +155,7 @@ class AadRestTemplateConfiguration {
     ): ClientHttpRequestInterceptor {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
             val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
-            request.headers.setBearerAuth(response.accessToken)
+            request.headers.setBearerAuth(response?.accessToken)
             execution.execute(request, body)
         }
     }
