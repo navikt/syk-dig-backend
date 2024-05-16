@@ -55,10 +55,10 @@ spec:
         - id: elastic
   resources:
     limits:
-      memory: 2Gi
+      memory: 3Gi
     requests:
       cpu: 100m
-      memory: 768Mi
+      memory: 900Mi
   vault:
     enabled: false
   kafka:
