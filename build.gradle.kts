@@ -78,7 +78,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springBootResourceVersion")
     implementation("com.squareup.okhttp3:okhttp:$okhttp3version")
     implementation("com.papertrailapp:logback-syslog4j:$logbacksyslog4jVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     constraints {
         testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion") {
