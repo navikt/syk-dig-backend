@@ -42,6 +42,7 @@ val javaTimeAdapterVersion = "1.1.3"
 val graphqlDgsPlatformDependenciesVersion = "7.3.6"
 val logbacksyslog4jVersion = "1.0.0"
 val commonsCompressVersion = "1.26.2"
+val commonsLang3Version = "3.14.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
@@ -81,6 +82,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.apache.commons:commons-lang3:$commonsLang3Version")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     constraints {
         testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion") {
