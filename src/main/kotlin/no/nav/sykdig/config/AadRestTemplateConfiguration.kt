@@ -5,8 +5,8 @@ import no.nav.security.token.support.client.core.context.JwtBearerTokenResolver
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
-import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
+import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.sykdig.applog
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
@@ -20,30 +20,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST
-import org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes
-
-class SpringTokenValidationContextHolder : TokenValidationContextHolder {
-    private val tokenValidationContextAttribute = SpringTokenValidationContextHolder::class.java.name
-
-    override fun getTokenValidationContext() =
-        getRequestAttribute(tokenValidationContextAttribute)?.let {
-            it as TokenValidationContext
-        } ?: TokenValidationContext(emptyMap())
-
-    override fun setTokenValidationContext(ctx: TokenValidationContext?) {
-        setRequestAttribute(tokenValidationContextAttribute, ctx)
-    }
-
-    private fun getRequestAttribute(name: String) = currentRequestAttributes().getAttribute(name, SCOPE_REQUEST)
-
-    private fun setRequestAttribute(
-        name: String,
-        value: Any?,
-    ) = value?.let {
-        currentRequestAttributes().setAttribute(name, it, SCOPE_REQUEST)
-    } ?: currentRequestAttributes().removeAttribute(name, SCOPE_REQUEST)
-}
 
 @Primary
 @Component
