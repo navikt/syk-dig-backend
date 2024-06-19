@@ -46,16 +46,27 @@ abstract class FellesTestOppsett {
         @Container
         val kafkaContainer: KafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1"))
 
+        init {
+            postgresql.start()
+            kafkaContainer.start()
+        }
+
         @JvmStatic
         @DynamicPropertySource
         fun dynamicProperties(registry: DynamicPropertyRegistry) {
-            postgresql.start()
-            kafkaContainer.start()
-
             registry.add("spring.datasource.url") { "${postgresql.jdbcUrl}&reWriteBatchedInserts=true" }
             registry.add("spring.datasource.username", postgresql::getUsername)
             registry.add("spring.datasource.password", postgresql::getPassword)
             registry.add("KAFKA_BROKERS", kafkaContainer::getBootstrapServers)
+        }
+
+        @AfterAll
+        @JvmStatic
+        fun stopContainers() {
+            logger.info("Stopping PostgreSQL and Kafka containers")
+            postgresql.stop()
+            kafkaContainer.stop()
+            logger.info("Containers stopped")
         }
     }
 }
