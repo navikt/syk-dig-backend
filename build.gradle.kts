@@ -78,6 +78,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:$okhttp3version")
     implementation("com.papertrailapp:logback-syslog4j:$logbacksyslog4jVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("no.nav.security:token-validation-core")
+    implementation("no.nav.security:token-client-spring")
+    implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
 }
