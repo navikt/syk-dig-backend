@@ -4,8 +4,8 @@ import org.jlleitschuh.gradle.ktlint.KtlintExtension
 plugins {
     id("org.springframework.boot") version "3.2.5"
     id("io.spring.dependency-management") version "1.1.5"
-    kotlin("jvm") version "1.9.24"
-    kotlin("plugin.spring") version "1.9.24"
+    kotlin("jvm") version "2.0.0"
+    kotlin("plugin.spring") version "2.0.0"
     id("com.netflix.dgs.codegen") version "5.12.4"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("org.cyclonedx.bom") version "1.8.2"
@@ -78,6 +78,10 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:$okhttp3version")
     implementation("com.papertrailapp:logback-syslog4j:$logbacksyslog4jVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.testcontainers:kafka")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     implementation("no.nav.security:token-validation-core")
     implementation("no.nav.security:token-client-spring")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
@@ -86,7 +90,7 @@ dependencies {
 }
 
 tasks {
-    withType<Test> {
+    test {
         useJUnitPlatform()
         testLogging {
             events("skipped", "failed")
@@ -100,14 +104,14 @@ tasks {
         generateClient = true
     }
 
-    getByName<Jar>("jar") {
+    jar {
         enabled = false
     }
     "compileKotlin" {
         dependsOn("ktlintFormat")
     }
 
-    "check" {
+    check {
         dependsOn("ktlintCheck")
     }
 }
