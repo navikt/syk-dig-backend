@@ -20,6 +20,18 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 abstract class FellesTestOppsett {
+    @Autowired
+    lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
+
+    @Autowired
+    lateinit var oppgaveRepository: OppgaveRepository
+
+    @AfterAll
+    fun opprydning() {
+        namedParameterJdbcTemplate.update("DELETE FROM sykmelding", MapSqlParameterSource())
+        namedParameterJdbcTemplate.update("DELETE FROM journalpost_sykmelding", MapSqlParameterSource())
+    }
+
     companion object {
         init {
 
@@ -36,17 +48,5 @@ abstract class FellesTestOppsett {
                 System.setProperty("spring.datasource.password", password)
             }
         }
-    }
-
-    @Autowired
-    lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
-
-    @Autowired
-    lateinit var oppgaveRepository: OppgaveRepository
-
-    @AfterAll
-    fun opprydning() {
-        namedParameterJdbcTemplate.update("DELETE FROM sykmelding", MapSqlParameterSource())
-        namedParameterJdbcTemplate.update("DELETE FROM journalpost_sykmelding", MapSqlParameterSource())
     }
 }
