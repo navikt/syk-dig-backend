@@ -4,8 +4,8 @@ import org.jlleitschuh.gradle.ktlint.KtlintExtension
 plugins {
     id("org.springframework.boot") version "3.2.5"
     id("io.spring.dependency-management") version "1.1.5"
-    kotlin("jvm") version "1.9.24"
-    kotlin("plugin.spring") version "1.9.24"
+    kotlin("jvm") version "2.0.0"
+    kotlin("plugin.spring") version "2.0.0"
     id("com.netflix.dgs.codegen") version "5.12.4"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("org.cyclonedx.bom") version "1.8.2"
@@ -41,6 +41,8 @@ val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
 val graphqlDgsPlatformDependenciesVersion = "7.3.6"
 val logbacksyslog4jVersion = "1.0.0"
+val commonsCompressVersion = "1.26.2"
+val commonsLang3Version = "3.14.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
@@ -77,16 +79,26 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springBootResourceVersion")
     implementation("com.squareup.okhttp3:okhttp:$okhttp3version")
     implementation("com.papertrailapp:logback-syslog4j:$logbacksyslog4jVersion")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("no.nav.security:token-validation-core")
     implementation("no.nav.security:token-client-spring")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
+    implementation("org.apache.commons:commons-lang3:$commonsLang3Version")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.testcontainers:kafka")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
+    constraints {
+        testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion") {
+            because("overstyrer sårbar dependency fra com.opentable.components:otj-pg-embedded")
+        }
+    }
 }
 
 tasks {
-    withType<Test> {
+    test {
         useJUnitPlatform()
         testLogging {
             events("skipped", "failed")
@@ -100,14 +112,14 @@ tasks {
         generateClient = true
     }
 
-    getByName<Jar>("jar") {
+    jar {
         enabled = false
     }
     "compileKotlin" {
         dependsOn("ktlintFormat")
     }
 
-    "check" {
+    check {
         dependsOn("ktlintCheck")
     }
 }
