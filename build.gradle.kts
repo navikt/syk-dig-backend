@@ -25,15 +25,15 @@ repositories {
 val postgresVersion = "42.7.3"
 val snakeYamlVersion = "2.2"
 val diagnosekoderVersion = "1.2024.0"
-val tokenSupportVersion = "4.1.8"
+val tokenSupportVersion = "5.0.1"
 val testContainersVersion = "1.19.8"
 val logstashLogbackEncoderVersion = "7.4"
 val javaJwtVersion = "4.4.0"
-val springBootResourceVersion = "3.3.0"
+val springBootResourceVersion = "3.3.1"
 val graphqlVersion = "20.2"
 val kafkaClientsVersion = "3.7.0"
 val syfoXmlCodegen = "2.0.1"
-val springSecurityWebVersion = "6.2.4"
+val springSecurityWebVersion = "6.3.1"
 val okhttp3version = "4.12.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
@@ -51,6 +51,7 @@ dependencies {
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.micrometer:micrometer-registry-prometheus")
