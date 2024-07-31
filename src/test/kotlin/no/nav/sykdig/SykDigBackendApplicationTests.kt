@@ -2,7 +2,7 @@ package no.nav.sykdig
 
 import org.junit.jupiter.api.Test
 
-class SykDigBackendApplicationTests : FellesTestOppsett() {
+class SykDigBackendApplicationTests : IntegrationTest() {
     @Test
     fun contextLoads() {
     }

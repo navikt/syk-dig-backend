@@ -19,7 +19,7 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
-abstract class FellesTestOppsett {
+abstract class IntegrationTest {
     @Autowired
     lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 
@@ -27,7 +27,7 @@ abstract class FellesTestOppsett {
     lateinit var oppgaveRepository: OppgaveRepository
 
     @AfterAll
-    fun opprydning() {
+    fun cleanup() {
         namedParameterJdbcTemplate.update("DELETE FROM sykmelding", MapSqlParameterSource())
         namedParameterJdbcTemplate.update("DELETE FROM journalpost_sykmelding", MapSqlParameterSource())
     }

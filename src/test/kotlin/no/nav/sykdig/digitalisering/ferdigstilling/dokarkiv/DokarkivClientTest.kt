@@ -1,6 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
 
-import no.nav.sykdig.FellesTestOppsett
+import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
-class DokarkivClientTest : FellesTestOppsett() {
+class DokarkivClientTest : IntegrationTest() {
     @Mock
     lateinit var dokarkivRestTemplate: RestTemplate
 

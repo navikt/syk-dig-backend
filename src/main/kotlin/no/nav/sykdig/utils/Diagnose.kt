@@ -9,6 +9,17 @@ fun validateDiagnose(diagnose: DiagnoseInput) {
     validateDiagnoseKode(diagnose.system, diagnose.kode)
 }
 
+fun getDiagnoseText(
+    system: String,
+    kode: String,
+): String {
+    return when (system) {
+        "ICD10" -> Diagnosekoder.icd10[kode]?.text ?: throw ClientException("Diagnosekoden som er benyttet: $kode er ukjent")
+        "ICPC2" -> Diagnosekoder.icpc2[kode]?.text ?: throw ClientException("Diagnosekoden som er benyttet: $kode er ukjent")
+        else -> throw ClientException("Diagnosekode system som er benyttet: $system er ukjent")
+    }
+}
+
 private fun validateDiagnoseSystem(system: String) {
     if ("ICD10" != system && "ICPC2" != system) {
         throw ClientException("Diagnosekode system som er benyttet: $system er ukjent")
