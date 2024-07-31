@@ -1,6 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
-import no.nav.sykdig.FellesTestOppsett
+import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
@@ -50,7 +50,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
-class FerdigstillingServiceTest : FellesTestOppsett() {
+class FerdigstillingServiceTest : IntegrationTest() {
     @MockBean
     lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
 

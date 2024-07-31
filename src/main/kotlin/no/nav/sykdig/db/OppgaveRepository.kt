@@ -17,6 +17,7 @@ import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.model.SDSykmelding
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 import no.nav.sykdig.objectMapper
+import no.nav.sykdig.utils.getDiagnoseText
 import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -345,8 +346,7 @@ private fun RegisterOppgaveValues.mapToMedisinskVurdering() =
                 Diagnose(
                     kode = it.kode,
                     system = it.system,
-                    tekst = null,
-                    // TODO enhance
+                    tekst = getDiagnoseText(it.system, it.kode),
                 )
             },
         biDiagnoser =
@@ -354,8 +354,7 @@ private fun RegisterOppgaveValues.mapToMedisinskVurdering() =
                 Diagnose(
                     kode = it.kode,
                     system = it.system,
-                    tekst = null,
-                    // TODO enhance
+                    tekst = getDiagnoseText(it.system, it.kode),
                 )
             } ?: emptyList(),
         annenFraversArsak = null,

@@ -1,13 +1,13 @@
 package no.nav.sykdig.oppgavemottak
 
-import no.nav.sykdig.FellesTestOppsett
+import no.nav.sykdig.IntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.UUID
 
-class MottaOppgaverFraKafkaTest : FellesTestOppsett() {
+class MottaOppgaverFraKafkaTest : IntegrationTest() {
     @Autowired
     lateinit var mottaOppgaverFraKafka: MottaOppgaverFraKafka
 

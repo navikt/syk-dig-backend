@@ -1,7 +1,7 @@
 package no.nav.sykdig.digitalisering
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.sykdig.FellesTestOppsett
+import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
@@ -33,7 +33,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
-class DigitaliseringsoppgaveServiceTest : FellesTestOppsett() {
+class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
     @Autowired
     lateinit var sykDigOppgaveService: SykDigOppgaveService
 

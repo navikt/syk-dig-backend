@@ -1,6 +1,6 @@
 package no.nav.sykdig.db
 
-import no.nav.sykdig.FellesTestOppsett
+import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.poststed.PostInformasjon
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Transactional
-class PoststedRepositoryTest : FellesTestOppsett() {
+class PoststedRepositoryTest : IntegrationTest() {
     @Autowired
     lateinit var poststedRepository: PoststedRepository
 

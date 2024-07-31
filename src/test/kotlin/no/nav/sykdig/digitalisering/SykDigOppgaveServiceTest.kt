@@ -1,6 +1,6 @@
 package no.nav.sykdig.digitalisering
 
-import no.nav.sykdig.FellesTestOppsett
+import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
@@ -30,7 +30,7 @@ import java.time.ZoneOffset
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 @Transactional
-class SykDigOppgaveServiceTest : FellesTestOppsett() {
+class SykDigOppgaveServiceTest : IntegrationTest() {
     @MockBean
     lateinit var ferdigstillingService: FerdigstillingService
 
@@ -71,7 +71,7 @@ class SykDigOppgaveServiceTest : FellesTestOppsett() {
                 UferdigRegisterOppgaveValues(
                     fnrPasient = "12345678910",
                     skrevetLand = "SWE",
-                    hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
+                    hovedDiagnose = DiagnoseInput("A070", "ICD10"),
                     behandletTidspunkt = null,
                     perioder = null,
                     biDiagnoser = null,
@@ -110,7 +110,7 @@ class SykDigOppgaveServiceTest : FellesTestOppsett() {
                                 LocalDate.now().minusWeeks(2),
                             ),
                         ),
-                    hovedDiagnose = DiagnoseInput("A070", "2.16.578.1.12.4.1.1.7170"),
+                    hovedDiagnose = DiagnoseInput("A070", "ICD10"),
                     biDiagnoser = emptyList(),
                     folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
                     erAdresseUtland = null,
