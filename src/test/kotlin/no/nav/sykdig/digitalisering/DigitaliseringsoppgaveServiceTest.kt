@@ -52,9 +52,9 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
     @MockBean
     lateinit var ferdigstillingService: FerdigstillingService
 
-    val sykmeldingId = UUID.randomUUID()
+    final val sykmeldingId = UUID.randomUUID()
 
-    val oppgaveId = "1"
+    final val oppgaveId = "1"
 
     val oppgaveMock =
         OppgaveDbModel(

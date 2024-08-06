@@ -253,12 +253,16 @@ fun getTextFromDiagnose(
 }
 
 fun toDiagnoseKithSystem(diagnoseSystem: String): String {
-    return if ("ICD10" == diagnoseSystem) {
-        "2.16.578.1.12.4.1.1.7110"
-    } else if ("ICPC2" == diagnoseSystem) {
-        "2.16.578.1.12.4.1.1.7170"
-    } else {
-        throw MappingException("Ukjent diagnose system")
+    return when (diagnoseSystem) {
+        "ICD10" -> {
+            "2.16.578.1.12.4.1.1.7110"
+        }
+        "ICPC2" -> {
+            "2.16.578.1.12.4.1.1.7170"
+        }
+        else -> {
+            throw MappingException("Ukjent diagnose system")
+        }
     }
 }
 
