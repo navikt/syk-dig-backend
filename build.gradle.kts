@@ -2,7 +2,7 @@ import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "3.2.5"
+    id("org.springframework.boot") version "3.3.2"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("jvm") version "2.0.10"
     kotlin("plugin.spring") version "2.0.10"
@@ -41,7 +41,7 @@ val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
 val graphqlDgsPlatformDependenciesVersion = "7.3.6"
 val logbacksyslog4jVersion = "1.0.0"
-val commonsCompressVersion = "1.26.2"
+val commonsCompressVersion = "1.27.0"
 val commonsLang3Version = "3.16.0"
 
 dependencies {
