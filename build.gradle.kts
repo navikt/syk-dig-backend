@@ -2,8 +2,8 @@ import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "3.3.2"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot") version "3.2.5"
+    id("io.spring.dependency-management") version "1.1.5"
     kotlin("jvm") version "2.0.0"
     kotlin("plugin.spring") version "2.0.0"
     id("com.netflix.dgs.codegen") version "5.12.4"
