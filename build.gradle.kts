@@ -3,7 +3,7 @@ import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
     id("org.springframework.boot") version "3.2.5"
-    id("io.spring.dependency-management") version "1.1.5"
+    id("io.spring.dependency-management") version "1.1.6"
     kotlin("jvm") version "2.0.10"
     kotlin("plugin.spring") version "2.0.10"
     id("com.netflix.dgs.codegen") version "5.12.4"
