@@ -41,7 +41,7 @@ val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
 val graphqlDgsPlatformDependenciesVersion = "7.3.6"
 val logbacksyslog4jVersion = "1.0.0"
-val commonsCompressVersion = "1.26.2"
+val commonsCompressVersion = "1.27.0"
 val commonsLang3Version = "3.16.0"
 
 dependencies {
