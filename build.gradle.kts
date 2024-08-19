@@ -43,6 +43,7 @@ val graphqlDgsPlatformDependenciesVersion = "7.3.6"
 val logbacksyslog4jVersion = "1.0.0"
 val commonsCompressVersion = "1.27.0"
 val commonsLang3Version = "3.16.0"
+val httpClient5version = "5.2"
 val flywayVersion = "9.22.3"
 
 dependencies {
@@ -85,10 +86,10 @@ dependencies {
     implementation("no.nav.security:token-client-spring")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("org.apache.commons:commons-lang3:$commonsLang3Version")
+    implementation("org.apache.httpcomponents.client5:httpclient5:$httpClient5version")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:kafka")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:kafka:$testContainersVersion")

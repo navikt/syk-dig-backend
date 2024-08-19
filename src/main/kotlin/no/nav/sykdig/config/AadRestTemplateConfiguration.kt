@@ -8,6 +8,8 @@ import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.sykdig.applog
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -15,7 +17,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.client.OkHttp3ClientHttpRequestFactory
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
@@ -92,8 +94,10 @@ class AadRestTemplateConfiguration {
                 clientConfigurationProperties = clientConfigurationProperties,
                 oAuth2AccessTokenService = oAuth2AccessTokenService,
             )
-        // Bruker OkHttp til requests for å støtte PATCH.
-        val requestFactory = OkHttp3ClientHttpRequestFactory()
+        // Bruker HttpComponentsClientHttpRequestFactory til requests for å støtte PATCH.
+        val httpClient: CloseableHttpClient = HttpClients.createDefault()
+        val requestFactory = HttpComponentsClientHttpRequestFactory(httpClient)
+
         restTemplate.requestFactory = requestFactory
         return restTemplate
     }
