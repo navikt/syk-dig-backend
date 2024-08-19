@@ -43,8 +43,8 @@ val graphqlDgsPlatformDependenciesVersion = "7.3.6"
 val logbacksyslog4jVersion = "1.0.0"
 val commonsCompressVersion = "1.27.0"
 val commonsLang3Version = "3.16.0"
-val flywayVersion = "9.5.0"
 val httpClient5version = "5.2"
+val flywayVersion = "9.22.3"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))

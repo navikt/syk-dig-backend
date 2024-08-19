@@ -36,9 +36,7 @@ management:
     endpoints.web:
         base-path: /internal
         exposure.include: health,prometheus
-    health:
-        livenessstate.enabled: true
-        readinessState.enabled: true
+
 
 aiven-kafka:
     auto-offset-reset: earliest

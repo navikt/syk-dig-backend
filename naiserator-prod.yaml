@@ -32,16 +32,12 @@ spec:
     cpuThresholdPercentage: 90
   port: 8080
   liveness:
-    path: /internal/health/livenessState
-    initialDelay: 10
-    timeout: 5
-    periodSeconds: 5
-    failureThreshold: 30
+    path: /internal/health
   readiness:
-    path: /internal/health/readinessState
-    initialDelay: 30
-    periodSeconds: 5
-    timeout: 5
+    path: /internal/health
+  startup:
+    path: /internal/health
+    initialDelay: 60
   prometheus:
     enabled: true
     path: /internal/prometheus
