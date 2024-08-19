@@ -85,6 +85,8 @@ dependencies {
     implementation("no.nav.security:token-client-spring")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("org.apache.commons:commons-lang3:$commonsLang3Version")
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.2")
+    implementation("org.springframework.boot:spring-boot-starter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:kafka")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
