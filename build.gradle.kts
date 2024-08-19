@@ -44,6 +44,7 @@ val logbacksyslog4jVersion = "1.0.0"
 val commonsCompressVersion = "1.27.0"
 val commonsLang3Version = "3.16.0"
 val flywayVersion = "9.5.0"
+val httpClient5version = "5.2"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
@@ -85,7 +86,7 @@ dependencies {
     implementation("no.nav.security:token-client-spring")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("org.apache.commons:commons-lang3:$commonsLang3Version")
-    implementation("org.apache.httpcomponents.client5:httpclient5:5.2")
+    implementation("org.apache.httpcomponents.client5:httpclient5:$httpClient5version")
     implementation("org.springframework.boot:spring-boot-starter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:kafka")

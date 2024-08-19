@@ -94,8 +94,8 @@ class AadRestTemplateConfiguration {
                 clientConfigurationProperties = clientConfigurationProperties,
                 oAuth2AccessTokenService = oAuth2AccessTokenService,
             )
+        // Bruker CloseableHttpClient til requests for å støtte PATCH.
         val httpClient: CloseableHttpClient = HttpClients.createDefault()
-
         val requestFactory = HttpComponentsClientHttpRequestFactory(httpClient)
 
         restTemplate.requestFactory = requestFactory
