@@ -2,10 +2,10 @@ import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
-    id("org.springframework.boot") version "3.3.2"
+    id("org.springframework.boot") version "3.3.3"
     id("io.spring.dependency-management") version "1.1.6"
-    kotlin("jvm") version "2.0.10"
-    kotlin("plugin.spring") version "2.0.10"
+    kotlin("jvm") version "2.0.20"
+    kotlin("plugin.spring") version "2.0.20"
     id("com.netflix.dgs.codegen") version "5.12.4"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
@@ -21,18 +21,18 @@ repositories {
     }
 }
 
-val postgresVersion = "42.7.3"
+val postgresVersion = "42.7.4"
 val snakeYamlVersion = "2.2"
 val diagnosekoderVersion = "1.2024.0"
-val tokenSupportVersion = "5.0.1"
+val tokenSupportVersion = "5.0.2"
 val testContainersVersion = "1.20.1"
 val logstashLogbackEncoderVersion = "8.0"
 val javaJwtVersion = "4.4.0"
-val springBootResourceVersion = "3.3.2"
+val springBootResourceVersion = "3.3.3"
 val graphqlVersion = "20.2"
 val kafkaClientsVersion = "3.8.0"
 val syfoXmlCodegen = "2.0.1"
-val springSecurityWebVersion = "6.3.1"
+val springSecurityWebVersion = "6.3.3"
 val okhttp3version = "4.12.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
@@ -40,10 +40,10 @@ val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
 val graphqlDgsPlatformDependenciesVersion = "7.3.6"
 val logbacksyslog4jVersion = "1.0.0"
-val commonsCompressVersion = "1.27.0"
+val commonsCompressVersion = "1.27.1"
 val commonsLang3Version = "3.16.0"
-val httpClient5version = "5.2"
-val flywayVersion = "9.22.3"
+val httpClient5version = "5.3.1"
+val flywayVersion = "10.17.2"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
