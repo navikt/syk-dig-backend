@@ -26,6 +26,7 @@ spec:
           - name: cloudsql.logical_decoding
             value: "on"
         pointInTimeRecovery: true
+        tier: db-custom-1-3840
   replicas:
     min: 2
     max: 4
