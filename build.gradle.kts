@@ -44,6 +44,7 @@ val commonsCompressVersion = "1.27.0"
 val commonsLang3Version = "3.16.0"
 val httpClient5version = "5.2"
 val flywayVersion = "9.22.3"
+val opentelemetryVersion = "2.3.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
@@ -86,6 +87,8 @@ dependencies {
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("org.apache.commons:commons-lang3:$commonsLang3Version")
     implementation("org.apache.httpcomponents.client5:httpclient5:$httpClient5version")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$opentelemetryVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:kafka")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
