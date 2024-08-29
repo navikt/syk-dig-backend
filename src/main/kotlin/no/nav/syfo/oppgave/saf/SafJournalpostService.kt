@@ -1,18 +1,20 @@
 package no.nav.syfo.oppgave.saf
 
 import no.nav.syfo.accesstoken.AccessTokenClient
-import no.nav.syfo.logger
 import no.nav.syfo.oppgave.saf.client.SafGraphQlClient
 import no.nav.syfo.oppgave.saf.client.model.DokumentInfo
 import no.nav.syfo.oppgave.saf.client.model.JournalpostResponse
 import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
+import no.nav.sykdig.applog
 
 class SafJournalpostService(
     private val safGraphQlClient: SafGraphQlClient,
     private val accessTokenClient: AccessTokenClient,
     private val scope: String,
 ) {
-    suspend fun getDokumenter(
+    val logger = applog()
+
+    fun getDokumenter(
         journalpostId: String,
         sporingsId: String,
         source: String,
@@ -23,7 +25,7 @@ class SafJournalpostService(
                 token = accessTokenClient.getAccessToken(scope),
                 sporingsId = sporingsId,
             )
-        journalpost.errors?.forEach {
+        journalpost!!.errors?.forEach {
             logger.error(
                 "Feil ved henting av journalpost med id $journalpostId fra SAF: ${it.message}",
             )

@@ -45,6 +45,7 @@ val commonsLang3Version = "3.16.0"
 val httpClient5version = "5.2"
 val flywayVersion = "9.22.3"
 val opentelemetryVersion = "2.3.0"
+val prometheusVersion = "0.16.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
@@ -89,6 +90,8 @@ dependencies {
     implementation("org.apache.httpcomponents.client5:httpclient5:$httpClient5version")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$opentelemetryVersion")
+    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:kafka")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")

@@ -2,13 +2,13 @@ package no.nav.syfo.oppgave
 
 import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.syfo.logger
 import no.nav.syfo.oppgave.client.OppdaterOppgaveRequest
 import no.nav.syfo.oppgave.client.OppgaveClient
 import no.nav.syfo.oppgave.client.OppgaveResponse
 import no.nav.syfo.oppgave.saf.SafJournalpostService
 import no.nav.syfo.oppgave.sykdig.DigitaliseringsoppgaveKafka
 import no.nav.syfo.oppgave.sykdig.SykDigProducer
+import no.nav.sykdig.applog
 import java.util.UUID
 
 const val NAV_OPPFOLGNING_UTLAND = "0393"
@@ -25,6 +25,7 @@ class OppgaveService(
         fnr: String,
     ) {
         val sporingsId = UUID.randomUUID().toString()
+        val logger = applog()
         val oppgave = oppgaveClient.hentOppgave(oppgaveId = oppgaveId, sporingsId = sporingsId)
 
         if (
@@ -70,7 +71,8 @@ class OppgaveService(
                         ),
                     )
                     logger.info(
-                        "Sendt sykmelding til syk-dig for oppgaveId $oppgaveId, sporingsId $sporingsId, journalpostId ${oppgave.journalpostId}",
+                        "Sendt sykmelding til syk-dig for oppgaveId $oppgaveId, sporingsId $sporingsId, journalpostId " +
+                            "${oppgave.journalpostId}",
                     )
                 } else {
                     logger.warn("Oppgaven $oppgaveId har ikke dokumenter, hopper over")

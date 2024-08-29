@@ -1,25 +1,33 @@
 package no.nav.syfo.oppgave.client
 
 import no.nav.syfo.accesstoken.AccessTokenClient
+import no.nav.sykdig.applog
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 
 class OppgaveClient(
     private val url: String,
     private val accessTokenClient: AccessTokenClient,
-    private val httpClient: HttpClient,
+    private val webClient: WebClient,
     private val scope: String,
 ) {
+    val logger = applog()
+
     suspend fun hentOppgave(
         oppgaveId: Long,
         sporingsId: String,
     ): OppgaveResponse {
-        try {
-            return httpClient
-                .get("$url/$oppgaveId") {
-                    val token = accessTokenClient.getAccessToken(scope)
-                    header("Authorization", "Bearer $token")
-                    header("X-Correlation-ID", sporingsId)
-                }
-                .body<OppgaveResponse>()
+        return try {
+            val token = accessTokenClient.getAccessToken(scope)
+            webClient.get()
+                .uri("$url/$oppgaveId")
+                .header("Authorization", "Bearer $token")
+                .header("X-Correlation-ID", sporingsId)
+                .retrieve()
+                .bodyToMono<OppgaveResponse>()
+                .block()
         } catch (e: Exception) {
             logger.error(
                 "Noe gikk galt ved henting av oppgave med id $oppgaveId, sporingsId $sporingsId",
@@ -33,20 +41,25 @@ class OppgaveClient(
         oppdaterOppgaveRequest: OppdaterOppgaveRequest,
         sporingsId: String,
     ) {
-        val httpResponse: HttpResponse =
-            httpClient.patch("$url/${oppdaterOppgaveRequest.id}") {
-                contentType(ContentType.Application.Json)
-                val token = accessTokenClient.getAccessToken(scope)
-                header("Authorization", "Bearer $token")
-                header("X-Correlation-ID", sporingsId)
-                setBody(oppdaterOppgaveRequest)
-            }
-        if (httpResponse.status != HttpStatusCode.OK) {
+        val token = accessTokenClient.getAccessToken(scope)
+
+        val response =
+            webClient.patch()
+                .uri("$url/${oppdaterOppgaveRequest.id}")
+                .header("Authorization", "Bearer $token")
+                .header("X-Correlation-ID", sporingsId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(oppdaterOppgaveRequest)
+                .retrieve()
+                .toBodilessEntity()
+                .block()
+
+        if (response.statusCode != HttpStatus.OK) {
             logger.error(
-                "Noe gikk galt ved oppdatering av oppgave for sporingsId $sporingsId: ${httpResponse.status}, ${httpResponse.body<String>()}",
+                "Noe gikk galt ved oppdatering av oppgave for sporingsId $sporingsId: ${response.statusCode}",
             )
             throw RuntimeException(
-                "Noe gikk galt ved oppdatering av oppgave, responskode ${httpResponse.status}",
+                "Noe gikk galt ved oppdatering av oppgave, responskode ${response.statusCode}",
             )
         }
     }

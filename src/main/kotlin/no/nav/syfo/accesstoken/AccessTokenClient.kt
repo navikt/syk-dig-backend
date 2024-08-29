@@ -23,8 +23,7 @@ class AccessTokenClient(
                 ?: run {
                     logger.debug("Henter nytt token fra Azure AD")
 
-                    // Make a synchronous (blocking) call using WebClient
-                    val response: AadAccessTokenV2 =
+                    val response: AadAccessTokenV2? =
                         webClient.post()
                             .uri(aadAccessTokenUrl)
                             .header("Content-type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -37,7 +36,7 @@ class AccessTokenClient(
 
                     val tokenMedExpiry =
                         AadAccessTokenMedExpiry(
-                            access_token = response.access_token,
+                            access_token = response!!.access_token,
                             expires_in = response.expires_in,
                             expiresOn = Instant.now().plusSeconds(response.expires_in.toLong()),
                         )

@@ -11,3 +11,8 @@ class SykDigBackendApplication
 fun main(args: Array<String>) {
     runApplication<SykDigBackendApplication>(*args)
 }
+
+data class ApplicationState(
+    var alive: Boolean = true,
+    var ready: Boolean = true,
+)

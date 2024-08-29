@@ -1,4 +1,4 @@
-package no.nav.syfo.util.kafka
+package no.nav.syfo.kafka.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
