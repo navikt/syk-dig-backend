@@ -294,8 +294,9 @@ private fun toUtenlandskSykmelding(
 ): UtenlandskSykmelding? {
     val log = applog(OppgaveRepository::class.java.toString())
     log.info(
-        "folkeRegistertAdresseErBrakkeEllerTilsvarende: {}, og erAdresseUtland: {} \n med sykmeldingsId={}",
+        "folkeRegistertAdresseErBrakkeEllerTilsvarende: {}, og skrevetLand {}, og erAdresseUtland: {} \n med sykmeldingsId={}",
         values.folkeRegistertAdresseErBrakkeEllerTilsvarende,
+        values.skrevetLand,
         values.erAdresseUtland,
         sykmeldingsId,
     )
