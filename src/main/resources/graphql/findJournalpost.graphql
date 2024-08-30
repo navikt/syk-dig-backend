@@ -1,0 +1,14 @@
+query FindJournalpost($journalpostId: String!) {
+  journalpost(journalpostId: $journalpostId) {
+    dokumenter {
+      dokumentInfoId
+      brevkode
+      tittel
+      dokumentvarianter {
+        variantformat
+      }
+    }
+    journalstatus,
+    kanal
+  }
+}
