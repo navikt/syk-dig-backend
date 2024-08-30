@@ -15,7 +15,7 @@ class OppgaveClient(
 ) {
     val logger = applog()
 
-    suspend fun hentOppgave(
+    fun hentOppgave(
         oppgaveId: Long,
         sporingsId: String,
     ): OppgaveResponse {

@@ -46,12 +46,16 @@ val httpClient5version = "5.2"
 val flywayVersion = "9.22.3"
 val opentelemetryVersion = "2.3.0"
 val prometheusVersion = "0.16.0"
+val mockkVersion = "1.13.10"
+val kluentVersion = "1.73"
+val coroutinesVersion = "1.8.1"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations")
@@ -98,6 +102,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     constraints {
         testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion") {
             because("overstyrer sårbar dependency fra com.opentable.components:otj-pg-embedded")
