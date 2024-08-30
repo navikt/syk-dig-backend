@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.sykdig.applog
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
 
 class AccessTokenClient(
     private val aadAccessTokenUrl: String,
@@ -12,40 +14,42 @@ class AccessTokenClient(
     private val clientSecret: String,
     private val webClient: WebClient,
 ) {
-    @Volatile
-    private var tokenMap = HashMap<String, AadAccessTokenMedExpiry>()
+    private val tokenMap = ConcurrentHashMap<String, AadAccessTokenMedExpiry>()
     val logger = applog()
 
-    fun getAccessToken(resource: String): String {
+    fun getAccessToken(resource: String): Mono<String> {
         val omToMinutter = Instant.now().plusSeconds(120L)
-        return {
-            tokenMap[resource]?.takeUnless { it.expiresOn.isBefore(omToMinutter) }
-                ?: run {
-                    logger.debug("Henter nytt token fra Azure AD")
+        val existingToken = tokenMap[resource]
 
-                    val response: AadAccessTokenV2? =
-                        webClient.post()
-                            .uri(aadAccessTokenUrl)
-                            .header("Content-type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                            .bodyValue(
-                                "client_id=$clientId&scope=$resource&grant_type=client_credentials&client_secret=$clientSecret",
-                            )
-                            .retrieve()
-                            .bodyToMono(AadAccessTokenV2::class.java)
-                            .block()
+        if (existingToken != null && !existingToken.expiresOn.isBefore(omToMinutter)) {
+            return Mono.just(existingToken.access_token)
+        }
 
-                    val tokenMedExpiry =
-                        AadAccessTokenMedExpiry(
-                            access_token = response!!.access_token,
-                            expires_in = response.expires_in,
-                            expiresOn = Instant.now().plusSeconds(response.expires_in.toLong()),
-                        )
+        logger.debug("Fetching new token from Azure AD")
 
-                    tokenMap[resource] = tokenMedExpiry
-                    logger.debug("Har hentet accesstoken")
-                    tokenMedExpiry
-                }
-        }.toString()
+        return webClient.post()
+            .uri(aadAccessTokenUrl)
+            .header("Content-type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .bodyValue(
+                "client_id=$clientId&scope=$resource&grant_type=client_credentials&client_secret=$clientSecret",
+            )
+            .retrieve()
+            .bodyToMono(AadAccessTokenV2::class.java)
+            .doOnNext { response ->
+                val tokenMedExpiry =
+                    AadAccessTokenMedExpiry(
+                        access_token = response.access_token,
+                        expires_in = response.expires_in,
+                        expiresOn = Instant.now().plusSeconds(response.expires_in.toLong()),
+                    )
+                tokenMap[resource] = tokenMedExpiry
+                logger.debug("Successfully fetched access token")
+            }
+            .map { it.access_token }
+            .onErrorMap { error ->
+                logger.error("Failed to fetch access token", error)
+                error
+            }
     }
 }
 

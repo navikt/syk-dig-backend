@@ -37,7 +37,7 @@ class OppgaveClient(
         }
     }
 
-    suspend fun oppdaterOppgave(
+    fun oppdaterOppgave(
         oppdaterOppgaveRequest: OppdaterOppgaveRequest,
         sporingsId: String,
     ) {

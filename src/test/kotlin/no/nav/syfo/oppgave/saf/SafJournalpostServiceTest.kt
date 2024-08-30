@@ -15,6 +15,7 @@ import org.amshove.kluent.internal.assertFailsWith
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import reactor.core.publisher.Mono
 
 class SafJournalpostServiceTest {
     private val safGraphQlClient = mockk<SafGraphQlClient>()
@@ -26,7 +27,7 @@ class SafJournalpostServiceTest {
     @BeforeEach
     fun setup() {
         clearMocks(safGraphQlClient, accessTokenClient)
-        coEvery { accessTokenClient.getAccessToken(any()) } returns "token"
+        coEvery { accessTokenClient.getAccessToken(any()) } returns Mono.just("token")
     }
 
     @Test

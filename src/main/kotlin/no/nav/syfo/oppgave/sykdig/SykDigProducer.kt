@@ -38,7 +38,7 @@ class SykDigProducer(
             )
             logger.error(
                 "Noe gikk galt ved skriving av digitaliseringsoppgave til kafka for oppgaveId ${digitaliseringsoppgave.oppgaveId} " +
-                    "og sporingsId " + "$sporingsId",
+                    "og sporingsId " + sporingsId,
                 ex.message,
             )
             throw ex

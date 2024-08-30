@@ -22,7 +22,7 @@ class SafJournalpostService(
         val journalpost =
             safGraphQlClient.findJournalpost(
                 journalpostId = journalpostId,
-                token = accessTokenClient.getAccessToken(scope),
+                token = accessTokenClient.getAccessToken(scope).toString(),
                 sporingsId = sporingsId,
             )
         journalpost!!.errors?.forEach {

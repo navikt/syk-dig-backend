@@ -20,7 +20,7 @@ class OppgaveService(
     private val cluster: String,
 ) {
     @WithSpan
-    suspend fun handleOppgave(
+    fun handleOppgave(
         @SpanAttribute oppgaveId: Long,
         fnr: String,
     ) {
@@ -36,7 +36,8 @@ class OppgaveService(
             !oppgave.journalpostId.isNullOrEmpty()
         ) {
             logger.info(
-                "Oppgave med id $oppgaveId og journalpostId ${oppgave.journalpostId} gjelder utenlandsk sykmelding, sporingsId $sporingsId",
+                "Oppgave med id $oppgaveId og journalpostId ${oppgave.journalpostId} gjelder utenlandsk sykmelding, " +
+                    "sporingsId $sporingsId",
             )
 
             logger.info(
@@ -71,7 +72,8 @@ class OppgaveService(
                         ),
                     )
                     logger.info(
-                        "Sendt sykmelding til syk-dig for oppgaveId $oppgaveId, sporingsId $sporingsId, journalpostId " +
+                        "Sendt sykmelding til syk-dig for oppgaveId $oppgaveId, " +
+                            "sporingsId $sporingsId, journalpostId " +
                             "${oppgave.journalpostId}",
                     )
                 } else {
@@ -79,7 +81,8 @@ class OppgaveService(
                 }
             } else {
                 logger.warn(
-                    "Oppgaven $oppgaveId, journalpostId ${oppgave.journalpostId} er ikke tildelt $NAV_OPPFOLGNING_UTLAND",
+                    "Oppgaven $oppgaveId, journalpostId ${oppgave.journalpostId} er ikke tildelt " +
+                        NAV_OPPFOLGNING_UTLAND,
                 )
             }
         }
