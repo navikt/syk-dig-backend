@@ -8,6 +8,7 @@ plugins {
     kotlin("plugin.spring") version "2.0.10"
     id("com.netflix.dgs.codegen") version "5.12.4"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "no.nav.sykdig"
@@ -112,6 +113,20 @@ dependencies {
 }
 
 tasks {
+
+    shadowJar {
+        archiveBaseName.set("app")
+        archiveClassifier.set("")
+        isZip64 = true
+        manifest {
+            attributes(
+                mapOf(
+                    "Main-Class" to "no.nav.sykdig.SykDigBackendApplication.kt",
+                ),
+            )
+        }
+    }
+
     test {
         useJUnitPlatform()
         testLogging {

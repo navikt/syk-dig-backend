@@ -27,7 +27,7 @@ class OppgaveClient(
                 .header("X-Correlation-ID", sporingsId)
                 .retrieve()
                 .bodyToMono<OppgaveResponse>()
-                .block()
+                .block()!!
         } catch (e: Exception) {
             logger.error(
                 "Noe gikk galt ved henting av oppgave med id $oppgaveId, sporingsId $sporingsId",
@@ -54,13 +54,15 @@ class OppgaveClient(
                 .toBodilessEntity()
                 .block()
 
-        if (response.statusCode != HttpStatus.OK) {
-            logger.error(
-                "Noe gikk galt ved oppdatering av oppgave for sporingsId $sporingsId: ${response.statusCode}",
-            )
-            throw RuntimeException(
-                "Noe gikk galt ved oppdatering av oppgave, responskode ${response.statusCode}",
-            )
+        if (response != null) {
+            if (response.statusCode != HttpStatus.OK) {
+                logger.error(
+                    "Noe gikk galt ved oppdatering av oppgave for sporingsId $sporingsId: ${response.statusCode}",
+                )
+                throw RuntimeException(
+                    "Noe gikk galt ved oppdatering av oppgave, responskode ${response.statusCode}",
+                )
+            }
         }
     }
 }
