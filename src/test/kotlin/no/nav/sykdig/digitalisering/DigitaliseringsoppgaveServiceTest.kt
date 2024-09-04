@@ -134,7 +134,57 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
     }
 
     @Test
-    fun testJournalpostSykmeldingNOT() {
+    fun testJournalpostSykmeldingAvvist2() {
+        val journalpostId = "journalpostAvvist2"
+        val oppgaveId1 = "journalpostAvvist-oppgave-avvist-2"
+        val oppgaveId2 = "journalpostAvvist-oppgave-avvist-3"
+        journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
+        val oppgave =
+            oppgaveMock.copy(
+                oppgaveId1,
+                sykmeldingId = UUID.randomUUID(),
+                journalpostId = journalpostId,
+            )
+        Mockito.`when`(gosysService.hentOppgave(anyString(), anyString())).thenAnswer {
+            oppgaveResponseMock
+        }
+
+        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
+            SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
+        }
+        Mockito.`when`(personService.hentPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
+            Person(
+                fnr = "20086600138",
+                navn = Navn("Fornavn", null, "Etternavn"),
+                aktorId = "aktorid",
+                bostedsadresse = null,
+                oppholdsadresse = null,
+                fodselsdato = LocalDate.of(1980, 5, 5),
+            )
+        }
+        oppgaveRepository.lagreOppgave(oppgave)
+
+        val oppgave2 =
+            oppgaveMock.copy(
+                oppgaveId2,
+                sykmeldingId = UUID.randomUUID(),
+                journalpostId = journalpostId,
+            )
+        oppgaveRepository.lagreOppgave(oppgave2)
+        digitaliseringsoppgaveService.avvisOppgave(
+            oppgave.oppgaveId,
+            "Z123456",
+            "Z123456@trygdeetaten.no",
+            "0393",
+            Avvisingsgrunn.MANGLENDE_DIAGNOSE,
+            null,
+        )
+        val journalpostSykmelding = journalpostSykmeldingRepository.getJournalpostSykmelding(journalpostId)
+        assertNotNull(journalpostSykmelding)
+    }
+
+    @Test
+    fun testJournalpostSykmelding() {
         journalpostSykmeldingRepository.insertJournalpostId("journalpostAvvist")
         val oppgave =
             oppgaveMock.copy(
