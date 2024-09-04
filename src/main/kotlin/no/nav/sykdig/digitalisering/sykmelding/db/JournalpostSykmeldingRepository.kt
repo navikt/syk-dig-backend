@@ -18,10 +18,8 @@ class JournalpostSykmeldingRepository(private val namedParameterJdbcTemplate: Na
 
     fun getJournalpostSykmelding(journalpostId: String): JournalpostSykmelding? {
         val sql = """
-        SELECT journalpost_id, created
-        FROM journalpost_sykmelding 
-        WHERE journalpost_id = :journalpost_id
-        AND not exists(select avvisings_grunn from oppgave where journalpost_id = :journalpost_id)
+        select * from journalpost_sykmelding where journalpost_id = :journalpost_id
+    and not exists(select 1 from oppgave where journalpost_id = :journalpost_id and avvisings_grunn is not null);
     """
         val params = mapOf("journalpost_id" to journalpostId)
         return namedParameterJdbcTemplate.query(sql, params) { resultSet: ResultSet, _: Int ->
