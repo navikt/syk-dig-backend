@@ -6,13 +6,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.oppgavelytter.oppgave.OppgaveService
 import no.nav.sykdig.applog
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 
 @Service
 class OppgaveConsumer(
-    @Value("\${oppgave.topic.name}") private val oppgaveTopic: String,
     private val oppgaveService: OppgaveService,
     private val applicationState: no.nav.sykdig.ApplicationState,
 ) {

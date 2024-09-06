@@ -37,6 +37,9 @@ management:
         base-path: /internal
         exposure.include: health,prometheus
 
+oppgave:
+    topic:
+        name:"teamsykmelding.syk-dig-oppgave"
 
 aiven-kafka:
     auto-offset-reset: earliest

@@ -22,6 +22,10 @@ KAFKA_CREDSTORE_PASSWORD: ""
 KAFKA_SECURITY_PROTOCOL: "PLAINTEXT"
 KAFKA_KEYSTORE_PATH: ""
 
+oppgave:
+  topic:
+    name:"teamsykmelding.syk-dig-oppgave"
+
 aiven-kafka:
   auto-offset-reset: latest
 
