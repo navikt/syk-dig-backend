@@ -7,9 +7,7 @@ import no.nav.oppgavelytter.kafka.toConsumerConfig
 import no.nav.oppgavelytter.kafka.toProducerConfig
 import no.nav.oppgavelytter.kafka.util.JacksonKafkaDeserializer
 import no.nav.oppgavelytter.kafka.util.JacksonKafkaSerializer
-import no.nav.oppgavelytter.oppgave.OppgaveService
 import no.nav.oppgavelytter.oppgave.client.OppgaveClient
-import no.nav.oppgavelytter.oppgave.kafka.OppgaveConsumer
 import no.nav.oppgavelytter.oppgave.kafka.OppgaveKafkaAivenRecord
 import no.nav.oppgavelytter.oppgave.saf.SafJournalpostService
 import no.nav.oppgavelytter.oppgave.saf.client.SafGraphQlClient
@@ -82,22 +80,6 @@ suspend fun main(args: Array<String>) {
             ),
             environmentVariables.sykDigTopic,
         )
-
-    val oppgaveConsumer =
-        OppgaveConsumer(
-            oppgaveTopic = environmentVariables.oppgaveTopic,
-            kafkaConsumer = getKafkaConsumer(),
-            oppgaveService =
-                OppgaveService(
-                    oppgaveClient,
-                    safJournalpostService,
-                    sykDigProducer,
-                    environmentVariables.cluster,
-                ),
-            applicationState = applicationState,
-        )
-
-    oppgaveConsumer.startConsumer()
 }
 
 fun createWebClient(): WebClient {
