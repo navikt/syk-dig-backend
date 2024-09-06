@@ -48,7 +48,7 @@ class OppgaveService(
                     safJournalpostService.getDokumenter(
                         journalpostId = oppgave.journalpostId,
                         sporingsId = sporingsId,
-                        source = setSoruce(oppgave),
+                        source = setSource(oppgave),
                     )
                 if (dokumenter != null) {
                     oppgaveClient.oppdaterOppgave(
@@ -68,7 +68,7 @@ class OppgaveService(
                             dokumentInfoId = dokumenter.first().dokumentInfoId,
                             type = "UTLAND",
                             dokumenter = dokumenter,
-                            source = setSoruce(oppgave),
+                            source = setSource(oppgave),
                         ),
                     )
                     logger.info(
@@ -107,7 +107,7 @@ class OppgaveService(
             oppgavetype == "JFR"
     }
 
-    private fun setSoruce(oppgave: OppgaveResponse): String {
+    private fun setSource(oppgave: OppgaveResponse): String {
         return if (oppgave.gjelderUtenlandskSykmeldingFraRina()) {
             "rina"
         } else if (oppgave.gjelderUtenlandskSykmeldingFraNAVNO()) {
