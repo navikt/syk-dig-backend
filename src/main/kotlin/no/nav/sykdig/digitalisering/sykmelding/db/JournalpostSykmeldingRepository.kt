@@ -10,7 +10,7 @@ class JournalpostSykmeldingRepository(private val namedParameterJdbcTemplate: Na
     fun insertJournalpostId(journalpostId: String): Int {
         val sql = """
         INSERT INTO journalpost_sykmelding (journalpost_id, created) 
-        VALUES (:journalpost_id, NOW())
+        VALUES (:journalpost_id, NOW()) on conflict do nothing 
     """
         val params = mapOf("journalpost_id" to journalpostId)
         return namedParameterJdbcTemplate.update(sql, params)
@@ -18,9 +18,9 @@ class JournalpostSykmeldingRepository(private val namedParameterJdbcTemplate: Na
 
     fun getJournalpostSykmelding(journalpostId: String): JournalpostSykmelding? {
         val sql = """
-        SELECT journalpost_id, created
-        FROM journalpost_sykmelding 
-        WHERE journalpost_id = :journalpost_id
+        select * from journalpost_sykmelding where journalpost_id = :journalpost_id
+    
+            and (exists(select 1 from oppgave where journalpost_id = :journalpost_id and avvisings_grunn is null) or not exists(select 1 from oppgave where journalpost_id = :journalpost_id));
     """
         val params = mapOf("journalpost_id" to journalpostId)
         return namedParameterJdbcTemplate.query(sql, params) { resultSet: ResultSet, _: Int ->
