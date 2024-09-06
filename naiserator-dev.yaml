@@ -56,8 +56,6 @@ spec:
     requests:
       cpu: 100m
       memory: 900Mi
-  vault:
-    enabled: false
   kafka:
     pool: nav-dev
   azure:
