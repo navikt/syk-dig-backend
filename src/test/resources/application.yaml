@@ -24,7 +24,7 @@ KAFKA_KEYSTORE_PATH: ""
 
 oppgave:
   topic:
-    name:"teamsykmelding.syk-dig-oppgave"
+    name: "teamsykmelding.syk-dig-oppgave"
 
 aiven-kafka:
   auto-offset-reset: latest
