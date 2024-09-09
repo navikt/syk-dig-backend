@@ -19,7 +19,7 @@ class MottaOppgaverFraKafka(
         sykmeldingId: String,
         digitaliseringsoppgave: DigitaliseringsoppgaveKafka,
     ) {
-        log.info("Mottatt oppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
+        log.info("Mottatt Kafkaoppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
         val opprettet = OffsetDateTime.now(ZoneOffset.UTC)
         oppgaveRepository.lagreOppgave(
             toOppgaveDbModel(digitaliseringsoppgave, opprettet, sykmeldingId),
