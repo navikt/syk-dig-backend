@@ -16,7 +16,7 @@ class OppgaveConsumer(
 ) {
     private val logger = applog()
 
-    @KafkaListener(topics = ["\${oppgave.topic.name}"], groupId = "syk-dig-backend-consumer")
+    @KafkaListener(topics = ["teamsykmelding.syk-dig-oppgave"], groupId = "syk-dig-backend-consumer")
     fun consume(oppgaveKafkaAivenRecord: OppgaveKafkaAivenRecord) {
         logger.info("Consuming from topic \${oppgave.topic.name}")
         if (applicationState.ready) {
