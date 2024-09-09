@@ -39,7 +39,7 @@ management:
 
 oppgave:
     topic:
-        name:"teamsykmelding.syk-dig-oppgave"
+        name: "teamsykmelding.syk-dig-oppgave"
 
 aiven-kafka:
     auto-offset-reset: earliest
