@@ -6,6 +6,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.oppgavelytter.oppgave.OppgaveService
 import no.nav.sykdig.applog
+import no.nav.sykdig.config.kafka.SYK_DIG_OPPGAVE_TOPIC
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 
@@ -16,7 +17,11 @@ class OppgaveConsumer(
 ) {
     private val logger = applog()
 
-    @KafkaListener(topics = ["teamsykmelding.syk-dig-oppgave"], groupId = "syk-dig-backend-consumer")
+    @KafkaListener(
+        topics = [SYK_DIG_OPPGAVE_TOPIC],
+        properties = ["auto.offset.reset = earliest"],
+        containerFactory = "aivenKafkaListenerContainerFactory",
+    )
     fun consume(oppgaveKafkaAivenRecord: OppgaveKafkaAivenRecord) {
         logger.info("Consuming from topic \${oppgave.topic.name}")
         if (applicationState.ready) {
