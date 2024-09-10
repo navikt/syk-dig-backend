@@ -9,7 +9,6 @@ import no.nav.sykdig.applog
 
 class SafJournalpostService(
     private val safGraphQlClient: SafGraphQlClient,
-    private val accessTokenClient: AccessTokenClient,
     private val scope: String,
 ) {
     val logger = applog()
