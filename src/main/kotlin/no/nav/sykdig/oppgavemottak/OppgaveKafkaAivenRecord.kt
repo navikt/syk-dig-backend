@@ -1,4 +1,4 @@
-package no.nav.oppgavelytter.oppgave.kafka
+package no.nav.sykdig.oppgavemottak
 
 import java.time.LocalDateTime
 

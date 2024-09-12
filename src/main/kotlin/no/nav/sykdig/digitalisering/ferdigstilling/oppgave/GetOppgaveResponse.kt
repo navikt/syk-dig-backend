@@ -5,17 +5,22 @@ import java.time.LocalDate
 data class GetOppgaveResponse(
     val versjon: Int,
     val status: Oppgavestatus,
+    val id: Int? = null,
+    val oppgavetype: String,
+    val journalpostId: String?,
     val behandlesAvApplikasjon: String? = null,
     val tilordnetRessurs: String? = null,
     val mappeId: Int? = null,
     val beskrivelse: String? = null,
-    val oppgavetype: OppgaveType,
     val aktivDato: LocalDate? = null,
     val prioritet: String? = null,
-    val id: Int? = null,
     val tema: String? = null,
     val tildeltEnhetsnr: String,
+    val ferdigstiltTidspunkt: String?,
     val duplikat: Boolean?,
+    val metadata: Map<String, String?>?,
+    val behandlingstype: String?,
+    val behandlingstema: String?,
 )
 
 data class AllOppgaveResponse(

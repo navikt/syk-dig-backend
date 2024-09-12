@@ -224,8 +224,50 @@ class OppgaveClient(
         }
     }
 
-    @Retryable
     fun oppdaterOppgave(
+        oppdaterOppgaveRequest: OppdaterOppgaveRequest,
+        sykmeldingId: String,
+    ) {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-Correlation-ID"] = sykmeldingId
+        val oppgaveId = oppdaterOppgaveRequest.id
+
+        try {
+            oppgaveRestTemplate.exchange(
+                "$url/$oppgaveId",
+                HttpMethod.PATCH,
+                HttpEntity(oppdaterOppgaveRequest, headers),
+                String::class.java,
+            )
+            log.info("OppdaterOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+                log.warn(
+                    "Syk-dig-backend har ikke tilgang til å " +
+                        "oppdaterOppgave oppgaveId $oppgaveId: ${e.message}",
+                )
+                throw IkkeTilgangException("Syk-dig har ikke tilgang til oppgave")
+            } else {
+                log.error(
+                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+                        "fra Oppgave ved oppdaterOppgave: ${e.message}",
+                    e,
+                )
+                throw e
+            }
+        } catch (e: HttpServerErrorException) {
+            log.error(
+                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+                    "fra Oppgave ved oppdaterOppgave: ${e.message}",
+                e,
+            )
+            throw e
+        }
+    }
+
+    @Retryable
+    fun oppdaterGosysOppgave(
         oppgaveId: String,
         sykmeldingId: String,
         oppgaveVersjon: Int,

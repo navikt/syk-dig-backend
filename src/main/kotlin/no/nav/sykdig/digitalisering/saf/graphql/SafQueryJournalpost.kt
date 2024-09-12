@@ -13,6 +13,10 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
             dokumenter {
                 dokumentInfoId
                 tittel
+                brevkode
+                dokumentvarianter {
+                    variantformat
+                } 
             }
             avsenderMottaker {
                 id
@@ -76,6 +80,12 @@ enum class Journalstatus {
 data class DokumentInfo(
     val dokumentInfoId: String,
     val tittel: String?,
+    val brevkode: String?,
+    val dokumentvarianter: List<Dokumentvariant>?,
+)
+
+data class Dokumentvariant(
+    val variantformat: String,
 )
 
 data class Bruker(

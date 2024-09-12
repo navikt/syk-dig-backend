@@ -1,4 +1,4 @@
-package no.nav.oppgavelytter.oppgave.saf.model
+package no.nav.syfo.oppgave.saf.model
 
 data class DokumentMedTittel(
     val dokumentInfoId: String,

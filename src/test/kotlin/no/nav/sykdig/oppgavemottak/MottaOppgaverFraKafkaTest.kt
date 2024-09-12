@@ -14,8 +14,8 @@ class MottaOppgaverFraKafkaTest : IntegrationTest() {
     @Test
     fun testReposistory() {
         val sykmeldingId = UUID.randomUUID().toString()
-        val digitaliseringsoppgaveKafka =
-            DigitaliseringsoppgaveKafka(
+        val digitaliseringsoppgaveScanning =
+            DigitaliseringsoppgaveScanning(
                 oppgaveId = "1234",
                 fnr = "12345678910",
                 journalpostId = "11",
@@ -24,7 +24,7 @@ class MottaOppgaverFraKafkaTest : IntegrationTest() {
                 dokumenter = emptyList(),
             )
 
-        mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)
+        mottaOppgaverFraKafka.behandleOppgave(sykmeldingId, digitaliseringsoppgaveScanning)
 
         val oppgave = oppgaveRepository.getOppgave("1234")
 
@@ -44,8 +44,8 @@ class MottaOppgaverFraKafkaTest : IntegrationTest() {
     @Test
     fun testInsertDuplicateOppgave() {
         val sykmeldingId = UUID.randomUUID().toString()
-        val digitaliseringsoppgaveKafka =
-            DigitaliseringsoppgaveKafka(
+        val digitaliseringsoppgaveScanning =
+            DigitaliseringsoppgaveScanning(
                 oppgaveId = "1234",
                 fnr = "12345678910",
                 journalpostId = "11",
@@ -54,15 +54,15 @@ class MottaOppgaverFraKafkaTest : IntegrationTest() {
                 dokumenter = emptyList(),
             )
 
-        mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)
-        mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)
+        mottaOppgaverFraKafka.behandleOppgave(sykmeldingId, digitaliseringsoppgaveScanning)
+        mottaOppgaverFraKafka.behandleOppgave(sykmeldingId, digitaliseringsoppgaveScanning)
     }
 
     @Test
     fun testInsertWithMultipleDocuments() {
         val sykmeldingId = UUID.randomUUID().toString()
-        val digitaliseringsoppgaveKafka =
-            DigitaliseringsoppgaveKafka(
+        val digitaliseringsoppgaveScanning =
+            DigitaliseringsoppgaveScanning(
                 oppgaveId = "12345",
                 fnr = "12345678910",
                 journalpostId = "11",
@@ -81,7 +81,7 @@ class MottaOppgaverFraKafkaTest : IntegrationTest() {
                     ),
             )
 
-        mottaOppgaverFraKafka.lagre(sykmeldingId, digitaliseringsoppgaveKafka)
+        mottaOppgaverFraKafka.behandleOppgave(sykmeldingId, digitaliseringsoppgaveScanning)
         val lagretOppdave = oppgaveRepository.getOppgave("12345")
         assertEquals(2, lagretOppdave?.dokumenter?.size)
     }

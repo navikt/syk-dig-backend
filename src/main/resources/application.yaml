@@ -38,8 +38,10 @@ management:
         exposure.include: health,prometheus
 
 oppgave:
-    topic:
-        name: "teamsykmelding.syk-dig-oppgave"
+    topic: ${OPPGAVE_TOPIC}
+
+nais:
+    cluster: ${NAIS_CLUSTER_NAME}
 
 aiven-kafka:
     auto-offset-reset: earliest
