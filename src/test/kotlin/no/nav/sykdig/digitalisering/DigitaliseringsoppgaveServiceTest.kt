@@ -84,12 +84,20 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
             versjon = 1,
             status = Oppgavestatus.OPPRETTET,
             behandlesAvApplikasjon = "SMM",
+            id = 1,
             tilordnetRessurs = "A123456",
             beskrivelse = "Dette var ikkje bra",
-            oppgavetype = OppgaveType.BEH_SED,
+            oppgavetype = OppgaveType.BEH_SED.toString(),
             tildeltEnhetsnr = "0393",
             aktivDato = LocalDate.now(),
             duplikat = false,
+            ferdigstiltTidspunkt = null,
+            tema = null,
+            metadata = null,
+            journalpostId = null,
+            prioritet = null,
+            behandlingstema = null,
+            behandlingstype = null,
         )
 
     val excpetedAvvisingsgrunn = Avvisingsgrunn.MANGLENDE_DIAGNOSE

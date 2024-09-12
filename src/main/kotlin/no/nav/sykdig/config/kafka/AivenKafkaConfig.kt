@@ -67,9 +67,7 @@ class AivenKafkaConfig(
         )
 
     @Bean
-    fun aivenKafkaListenerContainerFactory(
-        aivenKafkaErrorHandler: AivenKafkaErrorHandler,
-    ): ConcurrentKafkaListenerContainerFactory<String, String> {
+    fun aivenKafkaListenerContainerFactory(aivenKafkaErrorHandler: AivenKafkaErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> {
         val config =
             mapOf(
                 ConsumerConfig.GROUP_ID_CONFIG to "syk-dig-backend-consumer",

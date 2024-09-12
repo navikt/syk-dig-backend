@@ -42,7 +42,7 @@ class OppgaveListener(
                 acknowledgment.acknowledge()
             }
         } catch (e: Exception) {
-            log.info("Error deserializing OppgaveKafkaAirvenRecord")
+            log.info("Error deserializing OppgaveKafkaAivenRecord")
         }
     }
 }

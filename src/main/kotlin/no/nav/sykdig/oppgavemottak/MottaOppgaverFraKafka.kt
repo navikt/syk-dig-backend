@@ -1,6 +1,5 @@
 package no.nav.sykdig.oppgavemottak
 
-import no.nav.oppgavelytter.oppgave.NAV_OPPFOLGNING_UTLAND
 import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
 import no.nav.sykdig.applog
 import no.nav.sykdig.db.OppgaveRepository
@@ -14,14 +13,16 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
+
+const val NAV_OPPFOLGNING_UTLAND = "0393"
 
 @Component
 class MottaOppgaverFraKafka(
+    @Value("\${nais.cluster}") private val cluster: String,
     private val oppgaveRepository: OppgaveRepository,
     private val metricRegister: MetricRegister,
     private val oppgaveClient: OppgaveClient,
-    @Value("\${nais.cluster}") private val cluster: String,
     private val safJournalpostService: SafJournalpostService,
 ) {
     val logger = applog()
@@ -43,7 +44,8 @@ class MottaOppgaverFraKafka(
             !oppgave.journalpostId.isNullOrEmpty()
         ) {
             logger.info(
-                "Oppgave med id $oppgaveId og journalpostId ${oppgave.journalpostId} gjelder utenlandsk sykmelding, sykmeldingId $sykmeldingId",
+                "Oppgave med id $oppgaveId og journalpostId ${oppgave.journalpostId} gjelder utenlandsk sykmelding, sykmeldingId " +
+                    sykmeldingId,
             )
 
             logger.info(
@@ -76,12 +78,7 @@ class MottaOppgaverFraKafka(
                             source = setSoruce(oppgave),
                         )
 
-                    logger.info("Mottatt oppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
-                    val opprettet = OffsetDateTime.now(ZoneOffset.UTC)
-                    oppgaveRepository.lagreOppgave(
-                        toOppgaveDbModel(digitaliseringsoppgave, opprettet, sykmeldingId),
-                    )
-                    metricRegister.mottatOppgave.increment()
+                    lagre(digitaliseringsoppgave, sykmeldingId)
                 } else {
                     logger.warn("Oppgaven $oppgaveId har ikke dokumenter, hopper over")
                 }
@@ -91,6 +88,18 @@ class MottaOppgaverFraKafka(
                 )
             }
         }
+    }
+
+    fun lagre(
+        digitaliseringsoppgave: DigitaliseringsoppgaveScanning,
+        sykmeldingId: String,
+    ) {
+        logger.info("Mottatt oppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
+        val opprettet = OffsetDateTime.now(ZoneOffset.UTC)
+        oppgaveRepository.lagreOppgave(
+            toOppgaveDbModel(digitaliseringsoppgave, opprettet, sykmeldingId),
+        )
+        metricRegister.mottatOppgave.increment()
     }
 
     private fun GetOppgaveResponse.gjelderUtenlandskSykmeldingFraRina(): Boolean {
