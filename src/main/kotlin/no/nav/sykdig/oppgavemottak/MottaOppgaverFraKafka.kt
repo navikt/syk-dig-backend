@@ -51,12 +51,12 @@ class MottaOppgaverFraKafka(
             logger.info(
                 "Utenlandsk sykmelding: OppgaveId $oppgaveId, journalpostId ${oppgave.journalpostId}",
             )
-            if (oppgave.erTildeltNavOppfolgningUtlang() || cluster == "dev-gcp") {
+            if (oppgave.erTildeltNavOppfolgningUtland() || cluster == "dev-gcp") {
                 val dokumenter =
                     safJournalpostService.getDokumenter(
                         journalpostId = oppgave.journalpostId,
                         sykmeldingId = sykmeldingId,
-                        source = setSoruce(oppgave),
+                        source = setSource(oppgave),
                     )
                 if (dokumenter != null) {
                     oppgaveClient.oppdaterOppgave(
@@ -75,7 +75,7 @@ class MottaOppgaverFraKafka(
                             dokumentInfoId = dokumenter.first().dokumentInfoId,
                             type = "UTLAND",
                             dokumenter = dokumenter,
-                            source = setSoruce(oppgave),
+                            source = setSource(oppgave),
                         )
 
                     lagre(digitaliseringsoppgave, sykmeldingId)
@@ -121,7 +121,7 @@ class MottaOppgaverFraKafka(
             oppgavetype == "JFR"
     }
 
-    private fun setSoruce(oppgave: GetOppgaveResponse): String {
+    private fun setSource(oppgave: GetOppgaveResponse): String {
         return if (oppgave.gjelderUtenlandskSykmeldingFraRina()) {
             "rina"
         } else if (oppgave.gjelderUtenlandskSykmeldingFraNAVNO()) {
@@ -131,7 +131,7 @@ class MottaOppgaverFraKafka(
         }
     }
 
-    private fun GetOppgaveResponse.erTildeltNavOppfolgningUtlang() = tildeltEnhetsnr == NAV_OPPFOLGNING_UTLAND
+    private fun GetOppgaveResponse.erTildeltNavOppfolgningUtland() = tildeltEnhetsnr == NAV_OPPFOLGNING_UTLAND
 }
 
 data class DigitaliseringsoppgaveScanning(
