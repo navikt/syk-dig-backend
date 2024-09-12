@@ -46,22 +46,22 @@ class FerdigstillingService(
         securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
-        } else {
-            val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvvsenderMottar(journalpost)
-            dokarkivClient.oppdaterOgFerdigstillJournalpost(
-                landAlpha3 = validatedValues.skrevetLand,
-                fnr = sykmeldt.fnr,
-                enhet = enhet,
-                dokumentinfoId = oppgave.dokumentInfoId,
-                journalpostId = oppgave.journalpostId,
-                sykmeldingId = oppgave.sykmeldingId.toString(),
-                perioder = receivedSykmelding.sykmelding.perioder,
-                source = oppgave.source,
-                avvisningsGrunn = null,
-                sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
-                orginalAvsenderMottaker = hentAvvsenderMottar,
-            )
         }
+        val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvvsenderMottar(journalpost)
+        dokarkivClient.oppdaterOgFerdigstillJournalpost(
+            landAlpha3 = validatedValues.skrevetLand,
+            fnr = sykmeldt.fnr,
+            enhet = enhet,
+            dokumentinfoId = oppgave.dokumentInfoId,
+            journalpostId = oppgave.journalpostId,
+            sykmeldingId = oppgave.sykmeldingId.toString(),
+            perioder = receivedSykmelding.sykmelding.perioder,
+            source = oppgave.source,
+            avvisningsGrunn = null,
+            sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
+            orginalAvsenderMottaker = hentAvvsenderMottar,
+        )
+
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
 
         try {
