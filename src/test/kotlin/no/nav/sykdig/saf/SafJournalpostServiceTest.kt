@@ -25,25 +25,25 @@ class SafJournalpostServiceTest {
         val sykmeldingId = "syk-456"
         val source = "rina"
 
-        val dokumentInfo =
-            DokumentInfo(
-                dokumentInfoId = "dok1",
-                tittel = "Dokument 1",
-                dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV")),
-                brevkode = "",
+        coEvery { safJournalpostGraphQlClient.getJournalpost(journalpostId) } returns
+            SafQueryJournalpost(
+                SafJournalpost(
+                    journalstatus = Journalstatus.MOTTATT,
+                    dokumenter =
+                        listOf(
+                            DokumentInfo(
+                                dokumentInfoId = "dok1",
+                                tittel = "Dokument 1",
+                                dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV")),
+                                brevkode = "",
+                            ),
+                        ),
+                    kanal = "EESSI",
+                    avsenderMottaker = null,
+                    bruker = null,
+                    tema = null,
+                ),
             )
-
-        val safJournalpost =
-            SafJournalpost(
-                journalstatus = Journalstatus.MOTTATT,
-                dokumenter = listOf(dokumentInfo),
-                kanal = "EESSI",
-                avsenderMottaker = null,
-                bruker = null,
-                tema = null,
-            )
-
-        coEvery { safJournalpostGraphQlClient.getJournalpost(journalpostId) } returns SafQueryJournalpost(safJournalpost)
 
         val result = safJournalpostService.getDokumenter(journalpostId, sykmeldingId, source)
 
@@ -59,25 +59,25 @@ class SafJournalpostServiceTest {
         val sykmeldingId = "syk-456"
         val source = "rina"
 
-        val dokumentInfo =
-            DokumentInfo(
-                dokumentInfoId = "dok1",
-                tittel = "Dokument 1",
-                dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV")),
-                brevkode = "",
+        coEvery { safJournalpostGraphQlClient.getJournalpost(journalpostId) } returns
+            SafQueryJournalpost(
+                SafJournalpost(
+                    journalstatus = Journalstatus.JOURNALFOERT,
+                    dokumenter =
+                        listOf(
+                            DokumentInfo(
+                                dokumentInfoId = "dok1",
+                                tittel = "Dokument 1",
+                                dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV")),
+                                brevkode = "",
+                            ),
+                        ),
+                    kanal = "EESSI",
+                    avsenderMottaker = null,
+                    bruker = null,
+                    tema = null,
+                ),
             )
-
-        val safJournalpost =
-            SafJournalpost(
-                journalstatus = Journalstatus.JOURNALFOERT,
-                dokumenter = listOf(dokumentInfo),
-                kanal = "EESSI",
-                avsenderMottaker = null,
-                bruker = null,
-                tema = null,
-            )
-
-        coEvery { safJournalpostGraphQlClient.getJournalpost(journalpostId) } returns SafQueryJournalpost(safJournalpost)
         val result = safJournalpostService.getDokumenter(journalpostId, sykmeldingId, source)
         assertNull(result)
     }
@@ -88,24 +88,25 @@ class SafJournalpostServiceTest {
         val sykmeldingId = "syk-456"
         val source = "rina"
 
-        val dokumentInfo =
-            DokumentInfo(
-                dokumentInfoId = "dok1",
-                tittel = "Dokument 1",
-                dokumentvarianter = listOf(Dokumentvariant(variantformat = "NON-ARKIV")),
-                brevkode = "1",
+        coEvery { safJournalpostGraphQlClient.getJournalpost(journalpostId) } returns
+            SafQueryJournalpost(
+                SafJournalpost(
+                    journalstatus = Journalstatus.MOTTATT,
+                    dokumenter =
+                        listOf(
+                            DokumentInfo(
+                                dokumentInfoId = "dok1",
+                                tittel = "Dokument 1",
+                                dokumentvarianter = listOf(Dokumentvariant(variantformat = "NON-ARKIV")),
+                                brevkode = "1",
+                            ),
+                        ),
+                    kanal = "EESSI",
+                    avsenderMottaker = null,
+                    bruker = null,
+                    tema = null,
+                ),
             )
-        val safJournalpost =
-            SafJournalpost(
-                journalstatus = Journalstatus.MOTTATT,
-                dokumenter = listOf(dokumentInfo),
-                kanal = "EESSI",
-                avsenderMottaker = null,
-                bruker = null,
-                tema = null,
-            )
-
-        coEvery { safJournalpostGraphQlClient.getJournalpost(journalpostId) } returns SafQueryJournalpost(safJournalpost)
 
         val exception =
             assertFailsWith<RuntimeException> {
