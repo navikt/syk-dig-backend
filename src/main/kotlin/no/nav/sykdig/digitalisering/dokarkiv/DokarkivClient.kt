@@ -8,6 +8,9 @@ import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
 import no.nav.sykdig.digitalisering.sykmelding.Periode
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
+import no.nav.sykdig.utils.createTitleNavNo
+import no.nav.sykdig.utils.createTitleRina
+import no.nav.sykdig.utils.createTitle
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -18,8 +21,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Component
@@ -142,19 +143,6 @@ class DokarkivClient(
         }
     }
 
-    private fun getFomTomTekst(perioder: List<Periode>) =
-        "${formaterDato(perioder.sortedSykmeldingPeriodeFOMDate().first().fom)} -" +
-            " ${formaterDato(perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
-
-    fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> = sortedBy { it.fom }
-
-    fun List<Periode>.sortedSykmeldingPeriodeTOMDate(): List<Periode> = sortedBy { it.tom }
-
-    fun formaterDato(dato: LocalDate): String {
-        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-        return dato.format(formatter)
-    }
-
     private fun createOppdaterJournalpostRequest(
         landAlpha3: String?,
         fnr: String,
@@ -216,12 +204,12 @@ class DokarkivClient(
                         DokBruker(
                             id = fnr,
                         ),
-                    tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                    tittel = createTitleNavNo(perioder, avvisningsGrunn),
                     dokumenter =
                         listOf(
                             DokumentInfo(
                                 dokumentInfoId = dokumentinfoId,
-                                tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                                tittel = createTitleNavNo(perioder, avvisningsGrunn),
                             ),
                         ),
                 )
@@ -246,12 +234,12 @@ class DokarkivClient(
                         DokBruker(
                             id = fnr,
                         ),
-                    tittel = createTittle(perioder, avvisningsGrunn),
+                    tittel = createTitle(perioder, avvisningsGrunn),
                     dokumenter =
                         listOf(
                             DokumentInfo(
                                 dokumentInfoId = dokumentinfoId,
-                                tittel = createTittle(perioder, avvisningsGrunn),
+                                tittel = createTitle(perioder, avvisningsGrunn),
                             ),
                         ),
                 )
@@ -311,45 +299,6 @@ class DokarkivClient(
             AvsenderMottakerIdType.ORGNR -> IdType.ORGNR
             AvsenderMottakerIdType.UTL_ORG -> IdType.UTL_ORG
             else -> IdType.FNR
-        }
-    }
-
-    fun createTitleRina(
-        perioder: List<Periode>?,
-        avvisningsGrunn: String?,
-    ): String {
-        return if (!avvisningsGrunn.isNullOrEmpty()) {
-            "Avvist Søknad om kontantytelser: $avvisningsGrunn"
-        } else if (perioder.isNullOrEmpty()) {
-            "Søknad om kontantytelser"
-        } else {
-            "Søknad om kontantytelser ${getFomTomTekst(perioder)}"
-        }
-    }
-
-    fun createTittle(
-        perioder: List<Periode>?,
-        avvisningsGrunn: String?,
-    ): String {
-        return if (!avvisningsGrunn.isNullOrEmpty()) {
-            "Avvist utenlandsk sykmelding: $avvisningsGrunn"
-        } else if (perioder.isNullOrEmpty()) {
-            "Digitalisert utenlandsk sykmelding"
-        } else {
-            "Digitalisert utenlandsk sykmelding ${getFomTomTekst(perioder)}"
-        }
-    }
-
-    fun createNavNoTittle(
-        perioder: List<Periode>?,
-        avvisningsGrunn: String?,
-    ): String {
-        return if (!avvisningsGrunn.isNullOrEmpty()) {
-            "Avvist Egenerklæring for utenlandske sykemeldinger: $avvisningsGrunn"
-        } else if (perioder.isNullOrEmpty()) {
-            "Egenerklæring for utenlandske sykemeldinger"
-        } else {
-            "Egenerklæring for utenlandske sykemeldinger ${getFomTomTekst(perioder)}"
         }
     }
 

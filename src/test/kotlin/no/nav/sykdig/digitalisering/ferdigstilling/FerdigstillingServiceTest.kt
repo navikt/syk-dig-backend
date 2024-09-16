@@ -4,6 +4,7 @@ import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.dokument.DocumentService
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
@@ -63,12 +64,15 @@ class FerdigstillingServiceTest : IntegrationTest() {
     @Autowired
     lateinit var sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>
 
+    @Autowired
+    lateinit var dokumentService: DocumentService
+
     lateinit var ferdigstillingService: FerdigstillingService
 
     @BeforeEach
     fun setup() {
         ferdigstillingService =
-            FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer)
+            FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService)
     }
 
     @Test
@@ -96,7 +100,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
             )
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpost)).thenAnswer { false }
-        Mockito.`when`(safJournalpostGraphQlClient.getAvvsenderMottar(journalpost)).thenAnswer {
+        Mockito.`when`(safJournalpostGraphQlClient.getAvsenderMottar(journalpost)).thenAnswer {
             AvsenderMottaker(
                 id = "12345678910",
                 navn = "Fornavn Etternavn",
