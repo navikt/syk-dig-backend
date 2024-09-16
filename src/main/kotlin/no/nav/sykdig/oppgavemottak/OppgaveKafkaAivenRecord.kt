@@ -1,6 +1,7 @@
 package no.nav.sykdig.oppgavemottak
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -40,6 +41,7 @@ data class Kategorisering(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Hendelse(
     val hendelsestype: Hendelsestype,
+    @JsonDeserialize(using = LocalDateTimeArrayDeserializer::class)
     val tidspunkt: LocalDateTime?,
 )
 
