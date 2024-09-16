@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import java.time.LocalDateTime
 
 class LocalDateTimeArrayDeserializer : JsonDeserializer<LocalDateTime>() {
-    override fun deserialize(parser: JsonParser, ctxt: DeserializationContext): LocalDateTime {
+    override fun deserialize(
+        parser: JsonParser,
+        ctxt: DeserializationContext,
+    ): LocalDateTime {
         val node = parser.codec.readTree<com.fasterxml.jackson.databind.node.ArrayNode>(parser)
         val year = node.get(0).asInt()
         val month = node.get(1).asInt()
