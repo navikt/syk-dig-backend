@@ -13,7 +13,7 @@ class OppgaveListener(
     val mottaOppgaverFraKafka: MottaOppgaverFraKafka,
 ) {
     companion object {
-        private val log = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(this::class.java)
     }
 
     @KafkaListener(
@@ -26,6 +26,7 @@ class OppgaveListener(
         acknowledgment: Acknowledgment,
     ) {
         try {
+            logger.info("Reading message from \"\\\${oppgave.topic}\"")
             val oppgaveRecord: OppgaveKafkaAivenRecord = objectMapper.readValue(cr.value())
             // usikker på om vi må nullsjekke her(?)
 
@@ -42,7 +43,7 @@ class OppgaveListener(
                 acknowledgment.acknowledge()
             }
         } catch (e: Exception) {
-            log.info("Error deserializing OppgaveKafkaAivenRecord")
+            logger.info("Error deserializing OppgaveKafkaAivenRecord")
         }
     }
 }
