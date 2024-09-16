@@ -65,6 +65,7 @@ class OppgaveClient(
         headers["X-Correlation-ID"] = sykmeldingId
 
         try {
+            log.info("Calling oppgaveRestTemplate $oppgaveRestTemplate")
             val response =
                 oppgaveRestTemplate.exchange(
                     "$url/$oppgaveId",
