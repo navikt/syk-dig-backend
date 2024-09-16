@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering.ferdigstilling
 import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMLEDING_TOPIC
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.dokument.DocumentService
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
@@ -13,6 +14,9 @@ import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
+import no.nav.sykdig.utils.createTitleNavNo
+import no.nav.sykdig.utils.createTitleRina
+import no.nav.sykdig.utils.createTitle
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Component
@@ -23,6 +27,7 @@ class FerdigstillingService(
     private val dokarkivClient: DokarkivClient,
     private val oppgaveClient: OppgaveClient,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
+    private val dokumentService: DocumentService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -43,11 +48,13 @@ class FerdigstillingService(
                 opprettet = oppgave.opprettet.toLocalDateTime(),
             )
         val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
+
         securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
+            updateAvvistTittel(oppgave, receivedSykmelding)
         } else {
-            val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvvsenderMottar(journalpost)
+            val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
                 landAlpha3 = validatedValues.skrevetLand,
                 fnr = sykmeldt.fnr,
@@ -79,6 +86,41 @@ class FerdigstillingService(
         }
     }
 
+    private fun updateAvvistTittel(
+        oppgave: OppgaveDbModel,
+        receivedSykmelding: ReceivedSykmelding,
+    ) {
+        val dokument = oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
+        if (dokument != null) {
+            log.info("found avvist document, updating title")
+            val tittel =
+                when (oppgave.source) {
+                    "RINA" ->
+                        createTitleRina(
+                            perioder = receivedSykmelding.sykmelding.perioder,
+                            avvisningsGrunn = oppgave.avvisingsgrunn,
+                        )
+
+                    "NAV_NO" ->
+                        createTitleNavNo(
+                            perioder = receivedSykmelding.sykmelding.perioder,
+                            avvisningsGrunn = oppgave.avvisingsgrunn,
+                        )
+
+                    else ->
+                        createTitle(
+                            perioder = receivedSykmelding.sykmelding.perioder,
+                            avvisningsGrunn = oppgave.avvisingsgrunn,
+                        )
+                }
+            dokumentService.updateDocumentTitle(
+                oppgaveId = oppgave.oppgaveId,
+                dokumentInfoId = dokument.dokumentInfoId,
+                tittel = tittel,
+            )
+        }
+    }
+
     fun ferdigstillAvvistJournalpost(
         enhet: String,
         oppgave: OppgaveDbModel,
@@ -92,7 +134,7 @@ class FerdigstillingService(
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
-            val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvvsenderMottar(journalpost)
+            val hentAvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
                 landAlpha3 = null,
                 fnr = sykmeldt.fnr,
@@ -104,7 +146,7 @@ class FerdigstillingService(
                 source = oppgave.source,
                 avvisningsGrunn = avvisningsGrunn,
                 sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
-                orginalAvsenderMottaker = hentAvvsenderMottar,
+                orginalAvsenderMottaker = hentAvsenderMottar,
             )
         }
     }
