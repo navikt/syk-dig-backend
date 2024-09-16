@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
@@ -65,6 +66,7 @@ class OppgaveClient(
         headers["X-Correlation-ID"] = sykmeldingId
 
         try {
+            log.info("Calling oppgaveRestTemplate " + SecurityContextHolder.getContext().authentication)
             val response =
                 oppgaveRestTemplate.exchange(
                     "$url/$oppgaveId",
@@ -86,6 +88,10 @@ class OppgaveClient(
             }
         } catch (e: HttpServerErrorException) {
             log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
+            throw e
+        }
+        catch (e: Exception) {
+            log.error("Other Exception fra Oppgave: ${e.message}", e)
             throw e
         }
     }
