@@ -89,6 +89,10 @@ class OppgaveClient(
             log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
             throw e
         }
+        catch (e: Exception) {
+            log.error("Other Exception fra Oppgave: ${e.message}", e)
+            throw e
+        }
     }
 
     @Retryable
