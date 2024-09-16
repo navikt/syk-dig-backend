@@ -1,7 +1,6 @@
 package no.nav.sykdig.oppgavemottak
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,7 +16,6 @@ data class Oppgave(
     val kategorisering: Kategorisering,
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class Bruker(
     val ident: String,
     val identType: IdentType,
@@ -30,7 +28,6 @@ enum class IdentType {
     SAMHANDLERNR,
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class Kategorisering(
     val tema: String,
     val oppgavetype: String,
@@ -38,10 +35,8 @@ data class Kategorisering(
     val behandlingstype: String?,
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class Hendelse(
     val hendelsestype: Hendelsestype,
-    @JsonDeserialize(using = LocalDateTimeArrayDeserializer::class)
     val tidspunkt: LocalDateTime?,
 )
 

@@ -30,13 +30,16 @@ class MottaOppgaverFraKafka(
     fun behandleOppgave(oppgaveKafkaAivenRecord: OppgaveKafkaAivenRecord) {
         val sykmeldingId = UUID.randomUUID().toString()
         val oppgaveId = oppgaveKafkaAivenRecord.oppgave.oppgaveId
+        logger.info(
+            "Leser oppgave: OppgaveId $oppgaveId",
+        )
         val oppgave =
             oppgaveClient.getOppgave(
                 oppgaveId = oppgaveKafkaAivenRecord.oppgave.oppgaveId.toString(),
                 sykmeldingId = sykmeldingId,
             )
         logger.info(
-            "Leser oppgave: OppgaveId $oppgaveId, journalpostId ${oppgave.journalpostId}",
+            "Lest oppgave: OppgaveId $oppgaveId, journalpostId ${oppgave.journalpostId}",
         )
         if (
             (
