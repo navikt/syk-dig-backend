@@ -66,6 +66,7 @@ class OppgaveClient(
         headers["X-Correlation-ID"] = sykmeldingId
 
         try {
+            log.info("Headers $headers")
             log.info("Calling oppgaveRestTemplate " + SecurityContextHolder.getContext().authentication)
             val response =
                 oppgaveRestTemplate.exchange(
@@ -89,8 +90,7 @@ class OppgaveClient(
         } catch (e: HttpServerErrorException) {
             log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
             throw e
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             log.error("Other Exception fra Oppgave: ${e.message}", e)
             throw e
         }

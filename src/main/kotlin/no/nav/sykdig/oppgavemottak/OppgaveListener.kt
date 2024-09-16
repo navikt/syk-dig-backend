@@ -1,6 +1,7 @@
 package no.nav.sykdig.oppgavemottak
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.sykdig.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -45,5 +46,13 @@ class OppgaveListener(
         } catch (e: Exception) {
             logger.info("Error deserializing OppgaveKafkaAivenRecord " + e.message)
         }
+    }
+
+    fun extractJwtToken(request: HttpServletRequest): String? {
+        val authorizationHeader = request.getHeader("Authorization")
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7)
+        }
+        return null
     }
 }
