@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
@@ -65,7 +66,7 @@ class OppgaveClient(
         headers["X-Correlation-ID"] = sykmeldingId
 
         try {
-            log.info("Calling oppgaveRestTemplate $oppgaveRestTemplate")
+            log.info("Calling oppgaveRestTemplate " + SecurityContextHolder.getContext().authentication)
             val response =
                 oppgaveRestTemplate.exchange(
                     "$url/$oppgaveId",
