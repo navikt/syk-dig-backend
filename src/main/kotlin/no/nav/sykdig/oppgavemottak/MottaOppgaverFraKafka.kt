@@ -35,7 +35,8 @@ class MottaOppgaverFraKafka(
                 oppgaveId = oppgaveKafkaAivenRecord.oppgave.oppgaveId.toString(),
                 sykmeldingId = sykmeldingId,
             )
-
+        logger.info(
+            "Leser oppgave: OppgaveId $oppgaveId, journalpostId ${oppgave.journalpostId}")
         if (
             (
                 oppgave.gjelderUtenlandskSykmeldingFraRina() ||

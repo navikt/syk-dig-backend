@@ -26,7 +26,7 @@ class OppgaveListener(
         acknowledgment: Acknowledgment,
     ) {
         try {
-            logger.info("Reading message from \"\\\${oppgave.topic}\"")
+            logger.info("Reading message from \${oppgave.topic}")
             val oppgaveRecord: OppgaveKafkaAivenRecord = objectMapper.readValue(cr.value())
             // usikker på om vi må nullsjekke her(?)
 
@@ -37,7 +37,7 @@ class OppgaveListener(
             val hasValidBruker = oppgaveRecord.oppgave.bruker != null && oppgaveRecord.oppgave.bruker.identType == IdentType.FOLKEREGISTERIDENT
 
             val isValidOppgave = isOppgaveOpprettet && isValidTema && isCorrectBehandlingstype && isCorrectOppgavetype && hasValidBruker
-
+            logger.info("Oppgave $oppgaveRecord is valid $isValidOppgave")
             if (isValidOppgave) {
                 mottaOppgaverFraKafka.behandleOppgave(oppgaveRecord)
                 acknowledgment.acknowledge()
