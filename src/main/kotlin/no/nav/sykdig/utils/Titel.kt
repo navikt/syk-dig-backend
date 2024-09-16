@@ -17,7 +17,7 @@ fun createTitleRina(
     }
 }
 
-fun createTittle(
+fun createTitle(
     perioder: List<Periode>?,
     avvisningsGrunn: String?,
 ): String {
@@ -30,7 +30,7 @@ fun createTittle(
     }
 }
 
-fun createNavNoTittle(
+fun createTitleNavNo(
     perioder: List<Periode>?,
     avvisningsGrunn: String?,
 ): String {

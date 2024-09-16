@@ -43,7 +43,7 @@ class SafJournalpostGraphQlClient(
         }
     }
 
-    fun getAvvsenderMottar(safQueryJournalpost: SafQueryJournalpost): AvsenderMottaker? {
+    fun getAvsenderMottar(safQueryJournalpost: SafQueryJournalpost): AvsenderMottaker? {
         try {
             return safQueryJournalpost.journalpost?.avsenderMottaker
         } catch (exception: Exception) {

@@ -8,9 +8,9 @@ import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
 import no.nav.sykdig.digitalisering.sykmelding.Periode
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
-import no.nav.sykdig.utils.createNavNoTittle
+import no.nav.sykdig.utils.createTitleNavNo
 import no.nav.sykdig.utils.createTitleRina
-import no.nav.sykdig.utils.createTittle
+import no.nav.sykdig.utils.createTitle
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -204,12 +204,12 @@ class DokarkivClient(
                         DokBruker(
                             id = fnr,
                         ),
-                    tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                    tittel = createTitleNavNo(perioder, avvisningsGrunn),
                     dokumenter =
                         listOf(
                             DokumentInfo(
                                 dokumentInfoId = dokumentinfoId,
-                                tittel = createNavNoTittle(perioder, avvisningsGrunn),
+                                tittel = createTitleNavNo(perioder, avvisningsGrunn),
                             ),
                         ),
                 )
@@ -234,12 +234,12 @@ class DokarkivClient(
                         DokBruker(
                             id = fnr,
                         ),
-                    tittel = createTittle(perioder, avvisningsGrunn),
+                    tittel = createTitle(perioder, avvisningsGrunn),
                     dokumenter =
                         listOf(
                             DokumentInfo(
                                 dokumentInfoId = dokumentinfoId,
-                                tittel = createTittle(perioder, avvisningsGrunn),
+                                tittel = createTitle(perioder, avvisningsGrunn),
                             ),
                         ),
                 )
