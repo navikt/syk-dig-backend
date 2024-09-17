@@ -62,9 +62,10 @@ no.nav.security.jwt:
     client:
         registration:
             oppgave-m2m:
-                provider: aad
-                client-id: ${AZURE_APP_CLIENT_ID}
-                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                authentication:
+                    client-id: ${AZURE_APP_CLIENT_ID}
+                    client-secret: ${AZURE_APP_CLIENT_SECRET}
+                    client-auth-method: client_secret_basic
                 scope: api://${OPPGAVE_CLIENT_ID}/.default
                 grant-type: client_credentials
                 token-uri: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
