@@ -124,6 +124,7 @@ class AadRestTemplateConfiguration {
         oAuth2AccessTokenService: OAuth2AccessTokenService,
         registrationName: String,
     ): RestTemplate {
+        log.info(" Init DownStreamRestTemplate")
         val clientProperties =
             clientConfigurationProperties.registration[registrationName]
                 ?: throw RuntimeException("Fant ikke config for $registrationName")

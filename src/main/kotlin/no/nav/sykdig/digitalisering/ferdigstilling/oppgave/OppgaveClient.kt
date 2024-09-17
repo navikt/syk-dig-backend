@@ -1,7 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.security.token.support.client.core.context.JwtBearerTokenResolver
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
