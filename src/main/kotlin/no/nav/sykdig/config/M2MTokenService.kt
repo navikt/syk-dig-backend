@@ -10,6 +10,7 @@ class M2MTokenService(
     private val clientConfigurationProperties: ClientConfigurationProperties,
 ) {
     val log = applog()
+
     fun getOppgaveM2MToken(): String {
         clientConfigurationProperties.registration.forEach { (key, value) ->
             log.info("Client registration found: $key")
