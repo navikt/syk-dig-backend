@@ -44,7 +44,7 @@ class OppgaveListener(
                 acknowledgment.acknowledge()
             }
         } catch (e: Exception) {
-            logger.info("Error deserializing OppgaveKafkaAivenRecord " + e.message)
+            logger.info("Feil i å opprette oppgave " + e.message)
         }
     }
 

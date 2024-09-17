@@ -26,7 +26,9 @@ import org.springframework.web.client.RestTemplate
 @Primary
 @Component
 class SykDigTokenResolver : JwtBearerTokenResolver {
+    val log = applog()
     override fun token(): String? {
+        log.info("Henter auth token")
         val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         return autentication.token.tokenValue
     }
