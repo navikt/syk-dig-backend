@@ -102,15 +102,11 @@ no.nav.security.jwt:
                     client-secret: ${AZURE_APP_CLIENT_SECRET}
                     client-auth-method: client_secret_basic
             oppgave-m2m:
-                provider: aad
                 client-id: ${AZURE_APP_CLIENT_ID}
                 client-secret: ${AZURE_APP_CLIENT_SECRET}
                 scope: api://${OPPGAVE_CLIENT_ID}/.default
                 authorization-grant-type: client_credentials
-        provider:
-            aad:
                 token-uri: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
-                jwk-set-uri: ${AZURE_OPENID_CONFIG_JWKS_URI}
 
 logging.config: "classpath:logback.xml"
 
