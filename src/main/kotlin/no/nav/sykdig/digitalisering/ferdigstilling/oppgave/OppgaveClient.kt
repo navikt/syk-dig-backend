@@ -64,7 +64,7 @@ class OppgaveClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers["X-Correlation-ID"] = sykmeldingId
-
+        headers.setBearerAuth("Bearer testtoken")
         try {
             log.info("Headers $headers")
             log.info("Calling oppgaveRestTemplate " + SecurityContextHolder.getContext().authentication)
