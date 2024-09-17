@@ -28,18 +28,18 @@ spring:
                     issuer-uri: ${AZURE_OPENID_CONFIG_ISSUER}
                     jwk-set-uri: ${AZURE_OPENID_CONFIG_JWKS_URI}
                     audiences: ${AZURE_APP_CLIENT_ID}
-                client:
-                    registration:
-                        oppgave-m2m:
-                            provider: aad
-                            client-id: ${AZURE_APP_CLIENT_ID}
-                            client-secret: ${AZURE_APP_CLIENT_SECRET}
-                            scope: api://${OPPGAVE_CLIENT_ID}/.default
-                            authorization-grant-type: client_credentials
-                    provider:
-                        aad:
-                            token-uri: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
-                            jwk-set-uri: ${AZURE_OPENID_CONFIG_JWKS_URI}
+            client:
+                registration:
+                    oppgave-m2m:
+                        provider: aad
+                        client-id: ${AZURE_APP_CLIENT_ID}
+                        client-secret: ${AZURE_APP_CLIENT_SECRET}
+                        scope: api://${OPPGAVE_CLIENT_ID}/.default
+                        authorization-grant-type: client_credentials
+                provider:
+                    aad:
+                        token-uri: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+                        jwk-set-uri: ${AZURE_OPENID_CONFIG_JWKS_URI}
 management:
     endpoint:
         prometheus.enabled: true

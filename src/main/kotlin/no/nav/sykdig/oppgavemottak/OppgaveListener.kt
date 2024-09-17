@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest
 import no.nav.sykdig.applog
 import no.nav.sykdig.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component

@@ -10,9 +10,8 @@ import org.springframework.web.client.RestTemplate
 @Component
 class M2MRestTemplate(
     private val restTemplateBuilder: RestTemplateBuilder,
-    private val m2mTokenService: M2MTokenService
+    private val m2mTokenService: M2MTokenService,
 ) {
-
     fun oppgaveM2mRestTemplate(): RestTemplate {
         return restTemplateBuilder
             .additionalInterceptors(bearerTokenInterceptor())
