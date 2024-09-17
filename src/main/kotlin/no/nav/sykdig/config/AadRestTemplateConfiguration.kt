@@ -138,6 +138,7 @@ class AadRestTemplateConfiguration {
     ): ClientHttpRequestInterceptor {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
             val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
+            log.info("Fetched OAuth2 token: ${response.accessToken}")
             request.headers.setBearerAuth(response.accessToken!!)
             execution.execute(request, body)
         }
