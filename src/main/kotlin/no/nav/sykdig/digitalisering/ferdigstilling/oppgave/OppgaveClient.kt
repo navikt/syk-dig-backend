@@ -99,8 +99,7 @@ class OppgaveClient(
         val urlWithParams = urlWithParams(journalpostId, journalpost)
         headers.contentType = MediaType.APPLICATION_JSON
         headers["X-Correlation-ID"] = UUID.randomUUID().toString()
-
-        log.info("Kaller oppgaveRestTemplate.exchange med URL: $urlWithParams og journalpostId: $journalpostId")
+        
         try {
             val response =
                 oppgaveRestTemplate.exchange(
