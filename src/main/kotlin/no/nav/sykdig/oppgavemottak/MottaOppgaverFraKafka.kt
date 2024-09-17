@@ -34,7 +34,7 @@ class MottaOppgaverFraKafka(
             "Leser oppgave: OppgaveId $oppgaveId",
         )
         val oppgave =
-            oppgaveClient.getOppgave(
+            oppgaveClient.getOppgaveM2m(
                 oppgaveId = oppgaveKafkaAivenRecord.oppgave.oppgaveId.toString(),
                 sykmeldingId = sykmeldingId,
             )

@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.applog
+import no.nav.sykdig.config.M2MRestTemplate
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.getFristForFerdigstillingAvOppgave
@@ -39,6 +40,7 @@ private const val BEHANDLINGS_TYPE_UTLAND = "ae0106"
 class OppgaveClient(
     @Value("\${oppgave.url}") private val url: String,
     private val oppgaveRestTemplate: RestTemplate,
+    private val oppgaveM2MRestTemplate: M2MRestTemplate,
 ) {
     val log = applog()
     val secureLog = securelog()
@@ -57,6 +59,46 @@ class OppgaveClient(
     }
 
     @Retryable
+    fun getOppgaveM2m(
+        oppgaveId: String,
+        sykmeldingId: String,
+    ): GetOppgaveResponse {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-Correlation-ID"] = sykmeldingId
+
+        try {
+            log.info("Headers $headers")
+            log.info("Calling oppgaveRestTemplate " + SecurityContextHolder.getContext().authentication)
+            val response =
+                oppgaveM2MRestTemplate.oppgaveM2mRestTemplate().exchange(
+                    "$url/$oppgaveId",
+                    HttpMethod.GET,
+                    HttpEntity<Any>(headers),
+                    GetOppgaveResponse::class.java,
+                )
+            return response.body ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $oppgaveId")
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+                log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
+                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
+            } else {
+                log.error(
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
+                    e,
+                )
+                throw e
+            }
+        } catch (e: HttpServerErrorException) {
+            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
+            throw e
+        } catch (e: Exception) {
+            log.error("Other Exception fra Oppgave: ${e.message}", e)
+            throw e
+        }
+    }
+
+    @Retryable
     fun getOppgave(
         oppgaveId: String,
         sykmeldingId: String,
@@ -64,7 +106,6 @@ class OppgaveClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers["X-Correlation-ID"] = sykmeldingId
-        headers.setBearerAuth("Bearer testtoken")
         try {
             log.info("Headers $headers")
             log.info("Calling oppgaveRestTemplate " + SecurityContextHolder.getContext().authentication)
