@@ -62,7 +62,7 @@ no.nav.security.jwt:
     client:
         registration:
             oppgave-m2m:
-                token-endpoint-uri: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+                token-uri: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
                 grant-type: client_credentials
                 scope: api://${OPPGAVE_CLIENT_ID}/.default
                 authentication:
