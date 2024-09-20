@@ -13,13 +13,13 @@ class SafJournalpostService(
 ) {
     val logger = applog()
 
-    fun getDokumenter(
+    fun getDokumenterM2m(
         journalpostId: String,
         sykmeldingId: String,
         source: String,
     ): List<DokumentMedTittel>? {
         val journalpost =
-            safJournalpostGraphQlClient.getJournalpost(
+            safJournalpostGraphQlClient.getJournalpostM2m(
                 journalpostId = journalpostId,
             )
 

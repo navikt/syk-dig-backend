@@ -14,13 +14,26 @@ class M2MRestTemplate(
 ) {
     fun oppgaveM2mRestTemplate(): RestTemplate {
         return restTemplateBuilder
-            .additionalInterceptors(bearerTokenInterceptor())
+            .additionalInterceptors(bearerTokenInterceptorOppgave())
             .build()
     }
 
-    private fun bearerTokenInterceptor(): ClientHttpRequestInterceptor {
+    private fun bearerTokenInterceptorOppgave(): ClientHttpRequestInterceptor {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
             val token = m2mTokenService.getOppgaveM2MToken()
+            request.headers.setBearerAuth(token)
+            execution.execute(request, body)
+        }
+    }
+    fun safM2mRestTemplate(): RestTemplate {
+        return restTemplateBuilder
+            .additionalInterceptors(bearerTokenInterceptorSaf())
+            .build()
+    }
+
+    private fun bearerTokenInterceptorSaf(): ClientHttpRequestInterceptor {
+        return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
+            val token = m2mTokenService.getSafM2MToken()
             request.headers.setBearerAuth(token)
             execution.execute(request, body)
         }

@@ -45,7 +45,7 @@ class SafJournalpostServiceTest {
                 ),
             )
 
-        val result = safJournalpostService.getDokumenter(journalpostId, sykmeldingId, source)
+        val result = safJournalpostService.getDokumenterM2m(journalpostId, sykmeldingId, source)
 
         assertNotNull(result)
         assertEquals(1, result!!.size)
@@ -78,7 +78,7 @@ class SafJournalpostServiceTest {
                     tema = null,
                 ),
             )
-        val result = safJournalpostService.getDokumenter(journalpostId, sykmeldingId, source)
+        val result = safJournalpostService.getDokumenterM2m(journalpostId, sykmeldingId, source)
         assertNull(result)
     }
 
@@ -110,7 +110,7 @@ class SafJournalpostServiceTest {
 
         val exception =
             assertFailsWith<RuntimeException> {
-                safJournalpostService.getDokumenter(journalpostId, sykmeldingId, source)
+                safJournalpostService.getDokumenterM2m(journalpostId, sykmeldingId, source)
             }
         assertEquals("Journalpost mangler PDF, $sykmeldingId", exception.message)
     }

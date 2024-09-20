@@ -12,8 +12,24 @@ import org.springframework.stereotype.Component
 @Component
 class SafJournalpostGraphQlClient(
     private val safGraphQlClient: CustomGraphQLClient,
+    private val safM2MGraphQlClient: CustomGraphQLClient,
 ) {
     val log = applog()
+
+    @Retryable
+    fun getJournalpostM2m(journalpostId: String): SafQueryJournalpost {
+        try {
+            val response = safM2MGraphQlClient.executeQuery(SAF_QUERY_FIND_JOURNALPOST, mapOf("id" to journalpostId))
+
+            val errors = response.errors
+            errors.forEach { log.error("Feilmelding fra SAF: ${it.message} for $journalpostId") }
+
+            return response.dataAsObject(SafQueryJournalpost::class.java)
+        } catch (e: Exception) {
+            log.error("Noe gikk galt ved kall til SAF", e)
+            throw e
+        }
+    }
 
     @Retryable
     fun getJournalpost(journalpostId: String): SafQueryJournalpost {

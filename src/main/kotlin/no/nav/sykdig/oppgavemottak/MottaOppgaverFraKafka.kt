@@ -47,7 +47,7 @@ class MottaOppgaverFraKafka(
             )
             if (oppgave.erTildeltNavOppfolgningUtland() || cluster == "dev-gcp") {
                 val dokumenter =
-                    safJournalpostService.getDokumenter(
+                    safJournalpostService.getDokumenterM2m(
                         journalpostId = oppgave.journalpostId,
                         sykmeldingId = sykmeldingId,
                         source = setSource(oppgave),
