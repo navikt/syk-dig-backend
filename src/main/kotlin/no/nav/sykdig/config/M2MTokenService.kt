@@ -1,7 +1,6 @@
 package no.nav.sykdig.config
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
-import no.nav.sykdig.applog
 import no.nav.sykdig.securelog
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
@@ -16,7 +15,6 @@ class M2MTokenService(
     private val oAuth2AccessTokenService: OAuth2AccessTokenService,
     private val clientConfigurationProperties: ClientConfigurationProperties,
 ) {
-    val log = applog()
     val securelog = securelog()
 
     fun getOppgaveM2MToken(): String {

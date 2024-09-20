@@ -1,7 +1,6 @@
 package no.nav.sykdig.oppgavemottak
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import jakarta.servlet.http.HttpServletRequest
 import no.nav.sykdig.applog
 import no.nav.sykdig.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -25,7 +24,6 @@ class OppgaveListener(
         acknowledgment: Acknowledgment,
     ) {
         try {
-            logger.info("Reading message from Kafka topic " + cr.value())
             val oppgaveRecord: OppgaveKafkaAivenRecord = objectMapper.readValue(cr.value())
             val isOppgaveOpprettet = oppgaveRecord.hendelse.hendelsestype == Hendelsestype.OPPGAVE_OPPRETTET
             val isValidTema = oppgaveRecord.oppgave.kategorisering.tema in listOf("SYM", "SYK")
@@ -40,15 +38,7 @@ class OppgaveListener(
                 acknowledgment.acknowledge()
             }
         } catch (e: Exception) {
-            logger.info("Feil i å opprette oppgave " + e.message)
+            logger.info("Feil ved oppretting oppgave " + e.message)
         }
-    }
-
-    fun extractJwtToken(request: HttpServletRequest): String? {
-        val authorizationHeader = request.getHeader("Authorization")
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            return authorizationHeader.substring(7)
-        }
-        return null
     }
 }

@@ -30,17 +30,11 @@ class MottaOppgaverFraKafka(
     fun behandleOppgave(oppgaveKafkaAivenRecord: OppgaveKafkaAivenRecord) {
         val sykmeldingId = UUID.randomUUID().toString()
         val oppgaveId = oppgaveKafkaAivenRecord.oppgave.oppgaveId
-        logger.info(
-            "Leser oppgave: OppgaveId $oppgaveId",
-        )
         val oppgave =
-            oppgaveClient.getOppgaveM2m(
+            oppgaveClient.getOppgavem2m(
                 oppgaveId = oppgaveKafkaAivenRecord.oppgave.oppgaveId.toString(),
                 sykmeldingId = sykmeldingId,
             )
-        logger.info(
-            "Lest oppgave: OppgaveId $oppgaveId, journalpostId ${oppgave.journalpostId}",
-        )
         if (
             (
                 oppgave.gjelderUtenlandskSykmeldingFraRina() ||
@@ -48,11 +42,6 @@ class MottaOppgaverFraKafka(
             ) &&
             !oppgave.journalpostId.isNullOrEmpty()
         ) {
-            logger.info(
-                "Oppgave med id $oppgaveId og journalpostId ${oppgave.journalpostId} gjelder utenlandsk sykmelding, sykmeldingId " +
-                    sykmeldingId,
-            )
-
             logger.info(
                 "Utenlandsk sykmelding: OppgaveId $oppgaveId, journalpostId ${oppgave.journalpostId}",
             )
@@ -99,7 +88,6 @@ class MottaOppgaverFraKafka(
         digitaliseringsoppgave: DigitaliseringsoppgaveScanning,
         sykmeldingId: String,
     ) {
-        logger.info("Mottatt oppgave med id ${digitaliseringsoppgave.oppgaveId} for sykmeldingId $sykmeldingId")
         val opprettet = OffsetDateTime.now(ZoneOffset.UTC)
         oppgaveRepository.lagreOppgave(
             toOppgaveDbModel(digitaliseringsoppgave, opprettet, sykmeldingId),

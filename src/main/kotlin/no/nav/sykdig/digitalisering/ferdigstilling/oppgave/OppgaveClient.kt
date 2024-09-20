@@ -16,7 +16,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
@@ -59,7 +58,7 @@ class OppgaveClient(
     }
 
     @Retryable
-    fun getOppgaveM2m(
+    fun getOppgavem2m(
         oppgaveId: String,
         sykmeldingId: String,
     ): GetOppgaveResponse {
@@ -68,9 +67,6 @@ class OppgaveClient(
         headers["X-Correlation-ID"] = sykmeldingId
 
         try {
-            log.info("Headers $headers")
-            log.info("Calling oppgaveRestTemplate " + SecurityContextHolder.getContext().authentication)
-            //fra loggen: Calling oppgaveRestTemplate null
             val response =
                 oppgaveM2MRestTemplate.oppgaveM2mRestTemplate().exchange(
                     "$url/$oppgaveId",
@@ -81,8 +77,8 @@ class OppgaveClient(
             return response.body ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $oppgaveId")
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
+                log.warn("syk-dig-backend har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
+                throw IkkeTilgangException("syk-dig-backend har ikke tilgang til oppgave")
             } else {
                 log.error(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
@@ -108,8 +104,6 @@ class OppgaveClient(
         headers.contentType = MediaType.APPLICATION_JSON
         headers["X-Correlation-ID"] = sykmeldingId
         try {
-            log.info("Headers $headers")
-            log.info("Calling oppgaveRestTemplate " + SecurityContextHolder.getContext().authentication)
             val response =
                 oppgaveRestTemplate.exchange(
                     "$url/$oppgaveId",
