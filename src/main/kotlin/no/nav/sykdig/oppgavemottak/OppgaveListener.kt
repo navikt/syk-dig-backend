@@ -38,7 +38,7 @@ class OppgaveListener(
                 acknowledgment.acknowledge()
             }
         } catch (e: Exception) {
-            logger.info("Feil ved oppretting oppgave " + e.message)
+            logger.error("Feil ved oppretting av oppgave " + e.message)
         }
     }
 }
