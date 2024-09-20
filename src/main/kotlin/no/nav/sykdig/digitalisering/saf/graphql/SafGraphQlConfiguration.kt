@@ -18,9 +18,9 @@ class SafGraphQlConfiguration {
     @Bean
     fun safM2MGraphQlClient(
         @Value("\${saf.url}") safUrl: String,
-        safM2MRestTemplate: M2MRestTemplate,
+        safRestTemplate: M2MRestTemplate,
     ): CustomGraphQLClient {
-        return graphQLClient(safUrl, safM2MRestTemplate.safM2mRestTemplate())
+        return graphQLClient(safUrl, safRestTemplate.safM2mRestTemplate())
     }
 
     @Bean

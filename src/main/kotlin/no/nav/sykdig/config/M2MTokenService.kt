@@ -40,12 +40,12 @@ class M2MTokenService(
 
         val clientProperties =
             clientConfigurationProperties.registration["saf-m2m"]
-                ?: throw RuntimeException("Client properties for 'oppgave-m2m' not found")
+                ?: throw RuntimeException("Client properties for 'saf-m2m' not found")
 
         securelog.info("Client registration found $clientProperties")
 
         val accessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)
 
-        return accessTokenResponse.accessToken ?: throw RuntimeException("Failed to retrieve M2M access token")
+        return accessTokenResponse.accessToken ?: throw RuntimeException("Failed to retrieve M2M access token for SAF")
     }
 }
