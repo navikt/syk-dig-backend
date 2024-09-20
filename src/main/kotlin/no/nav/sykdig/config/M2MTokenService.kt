@@ -25,8 +25,8 @@ class M2MTokenService(
         }
 
         val clientProperties =
-            clientConfigurationProperties.registration["oppgave-m2m"]
-                ?: throw RuntimeException("Client properties for 'oppgave-m2m' not found")
+            clientConfigurationProperties.registration["oppgave-maskin"]
+                ?: throw RuntimeException("Client properties for 'oppgave-maskin' not found")
 
         securelog.info("Client registration found $clientProperties")
 

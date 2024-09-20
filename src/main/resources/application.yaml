@@ -61,7 +61,7 @@ no.nav.security.jwt:
             accepted_audience: ${AZURE_APP_CLIENT_ID}
     client:
         registration:
-            oppgave-m2m:
+            oppgave-maskin:
                 client-id: ${AZURE_APP_CLIENT_ID}
                 client-secret: ${AZURE_APP_CLIENT_SECRET}
                 scope: api://${OPPGAVE_CLIENT_ID}/.default
