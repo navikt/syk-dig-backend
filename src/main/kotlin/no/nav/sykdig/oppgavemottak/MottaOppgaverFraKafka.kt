@@ -31,7 +31,7 @@ class MottaOppgaverFraKafka(
         val sykmeldingId = UUID.randomUUID().toString()
         val oppgaveId = oppgaveKafkaAivenRecord.oppgave.oppgaveId
         val oppgave =
-            oppgaveClient.getOppgavem2m(
+            oppgaveClient.getOppgaveM2m(
                 oppgaveId = oppgaveKafkaAivenRecord.oppgave.oppgaveId.toString(),
                 sykmeldingId = sykmeldingId,
             )

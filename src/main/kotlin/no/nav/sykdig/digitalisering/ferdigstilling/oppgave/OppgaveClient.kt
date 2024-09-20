@@ -58,7 +58,7 @@ class OppgaveClient(
     }
 
     @Retryable
-    fun getOppgavem2m(
+    fun getOppgaveM2m(
         oppgaveId: String,
         sykmeldingId: String,
     ): GetOppgaveResponse {

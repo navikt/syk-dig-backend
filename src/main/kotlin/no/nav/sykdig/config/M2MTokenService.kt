@@ -17,7 +17,7 @@ class M2MTokenService(
 ) {
     val securelog = securelog()
 
-    fun getOppgaveM2MToken(): String {
+    fun getOppgaveM2mToken(): String {
         clientConfigurationProperties.registration.forEach { (key, value) ->
             securelog.info("Client registration found: $key")
         }
@@ -33,7 +33,7 @@ class M2MTokenService(
         return accessTokenResponse.accessToken ?: throw RuntimeException("Failed to retrieve M2M access token")
     }
 
-    fun getSafM2MToken(): String {
+    fun getSafM2mToken(): String {
         clientConfigurationProperties.registration.forEach { (key, value) ->
             securelog.info("Client registration found: $key")
         }

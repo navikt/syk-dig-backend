@@ -20,7 +20,7 @@ class M2MRestTemplate(
 
     private fun bearerTokenInterceptorOppgave(): ClientHttpRequestInterceptor {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
-            val token = m2mTokenService.getOppgaveM2MToken()
+            val token = m2mTokenService.getOppgaveM2mToken()
             request.headers.setBearerAuth(token)
             execution.execute(request, body)
         }
@@ -34,7 +34,7 @@ class M2MRestTemplate(
 
     private fun bearerTokenInterceptorSaf(): ClientHttpRequestInterceptor {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
-            val token = m2mTokenService.getSafM2MToken()
+            val token = m2mTokenService.getSafM2mToken()
             request.headers.setBearerAuth(token)
             execution.execute(request, body)
         }
