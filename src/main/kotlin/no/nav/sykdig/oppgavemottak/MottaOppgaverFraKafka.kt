@@ -53,7 +53,7 @@ class MottaOppgaverFraKafka(
                         source = setSource(oppgave),
                     )
                 if (dokumenter != null) {
-                    oppgaveClient.oppdaterOppgave(
+                    oppgaveClient.oppdaterOppgaveM2m(
                         OppdaterOppgaveRequest(
                             id = oppgaveId.toInt(),
                             behandlesAvApplikasjon = "SMD",

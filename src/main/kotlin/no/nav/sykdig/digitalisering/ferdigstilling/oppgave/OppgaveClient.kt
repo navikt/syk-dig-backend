@@ -266,7 +266,7 @@ class OppgaveClient(
         }
     }
 
-    fun oppdaterOppgave(
+    fun oppdaterOppgaveM2m(
         oppdaterOppgaveRequest: OppdaterOppgaveRequest,
         sykmeldingId: String,
     ) {
@@ -276,7 +276,7 @@ class OppgaveClient(
         val oppgaveId = oppdaterOppgaveRequest.id
 
         try {
-            oppgaveRestTemplate.exchange(
+            oppgaveM2MRestTemplate.oppgaveM2mRestTemplate().exchange(
                 "$url/$oppgaveId",
                 HttpMethod.PATCH,
                 HttpEntity(oppdaterOppgaveRequest, headers),
