@@ -70,6 +70,7 @@ class OppgaveClient(
         try {
             log.info("Headers $headers")
             log.info("Calling oppgaveRestTemplate " + SecurityContextHolder.getContext().authentication)
+            //fra loggen: Calling oppgaveRestTemplate null
             val response =
                 oppgaveM2MRestTemplate.oppgaveM2mRestTemplate().exchange(
                     "$url/$oppgaveId",
