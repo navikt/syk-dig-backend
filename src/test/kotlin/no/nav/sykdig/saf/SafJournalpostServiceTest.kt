@@ -25,7 +25,7 @@ class SafJournalpostServiceTest {
         val sykmeldingId = "syk-456"
         val source = "rina"
 
-        coEvery { safJournalpostGraphQlClient.getJournalpost(journalpostId) } returns
+        coEvery { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
             SafQueryJournalpost(
                 SafJournalpost(
                     journalstatus = Journalstatus.MOTTATT,
@@ -59,7 +59,7 @@ class SafJournalpostServiceTest {
         val sykmeldingId = "syk-456"
         val source = "rina"
 
-        coEvery { safJournalpostGraphQlClient.getJournalpost(journalpostId) } returns
+        coEvery { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
             SafQueryJournalpost(
                 SafJournalpost(
                     journalstatus = Journalstatus.JOURNALFOERT,
@@ -88,7 +88,7 @@ class SafJournalpostServiceTest {
         val sykmeldingId = "syk-456"
         val source = "rina"
 
-        coEvery { safJournalpostGraphQlClient.getJournalpost(journalpostId) } returns
+        coEvery { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
             SafQueryJournalpost(
                 SafJournalpost(
                     journalstatus = Journalstatus.MOTTATT,

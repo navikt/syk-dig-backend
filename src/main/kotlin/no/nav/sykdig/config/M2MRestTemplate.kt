@@ -25,6 +25,7 @@ class M2MRestTemplate(
             execution.execute(request, body)
         }
     }
+
     fun safM2mRestTemplate(): RestTemplate {
         return restTemplateBuilder
             .additionalInterceptors(bearerTokenInterceptorSaf())
