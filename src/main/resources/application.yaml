@@ -61,9 +61,7 @@ no.nav.security.jwt:
             accepted_audience: ${AZURE_APP_CLIENT_ID}
     client:
         registration:
-            oppgave-maskin:
-                client-id: ${AZURE_APP_CLIENT_ID}
-                client-secret: ${AZURE_APP_CLIENT_SECRET}
+            oppgave-m2m:
                 scope: api://${OPPGAVE_CLIENT_ID}/.default
                 grant-type: client_credentials
                 token-uri: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
