@@ -112,6 +112,10 @@ no.nav.security.jwt:
 
 logging.config: "classpath:logback.xml"
 
+logging:
+    level:
+        org.springframework.boot.context.properties: DEBUG
+
 dgs:
     graphql:
         path: /api/graphql
