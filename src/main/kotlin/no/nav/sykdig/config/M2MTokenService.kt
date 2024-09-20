@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service
 
 @Configuration
 @EnableConfigurationProperties(ClientConfigurationProperties::class)
-class ClientPropertiesConfig {
-
-}
+class ClientPropertiesConfig
 
 @Service
 class M2MTokenService(
@@ -31,7 +29,6 @@ class M2MTokenService(
                 ?: throw RuntimeException("Client properties for 'oppgave-m2m' not found")
 
         securelog.info("Client registration found $clientProperties")
-
 
         val accessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)
 
