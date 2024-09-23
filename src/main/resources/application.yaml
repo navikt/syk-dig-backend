@@ -46,6 +46,7 @@ nais:
 
 aiven-kafka:
     auto-offset-reset: earliest
+    groupId: "syk-dig-oppgavelytter-consumer"
 
 istilgangskontroll.url: "http://istilgangskontroll.teamsykefravr"
 saf.url: ${SAF_URL}

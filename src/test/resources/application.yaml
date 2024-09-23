@@ -30,6 +30,7 @@ nais:
 
 aiven-kafka:
   auto-offset-reset: latest
+  groupId: "syk-dig-oppgavelytter-consumer"
 
 istilgangskontroll.url: http://istilgangskontroll
 saf.url: http://saf
