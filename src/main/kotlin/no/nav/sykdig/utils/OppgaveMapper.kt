@@ -2,12 +2,12 @@ package no.nav.sykdig.utils
 
 import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
-import no.nav.sykdig.oppgavemottak.DigitaliseringsoppgaveKafka
+import no.nav.sykdig.oppgavemottak.DigitaliseringsoppgaveScanning
 import java.time.OffsetDateTime
 import java.util.UUID
 
 fun toOppgaveDbModel(
-    digitaliseringsoppgave: DigitaliseringsoppgaveKafka,
+    digitaliseringsoppgave: DigitaliseringsoppgaveScanning,
     opprettet: OffsetDateTime,
     sykmeldingId: String,
 ) = OppgaveDbModel(

@@ -15,6 +15,14 @@ import org.springframework.web.client.RestTemplate
 @Configuration
 class SafGraphQlConfiguration {
     @Bean
+    fun safM2mGraphQlClient(
+        @Value("\${saf.url}") safUrl: String,
+        safM2mRestTemplate: RestTemplate,
+    ): CustomGraphQLClient {
+        return graphQLClient(safUrl, safM2mRestTemplate)
+    }
+
+    @Bean
     fun safGraphQlClient(
         @Value("\${saf.url}") safUrl: String,
         safRestTemplate: RestTemplate,

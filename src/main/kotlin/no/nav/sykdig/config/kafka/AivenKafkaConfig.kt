@@ -29,6 +29,7 @@ class AivenKafkaConfig(
     @Value("\${KAFKA_TRUSTSTORE_PATH}") private val kafkaTruststorePath: String,
     @Value("\${KAFKA_CREDSTORE_PASSWORD}") private val kafkaCredstorePassword: String,
     @Value("\${KAFKA_KEYSTORE_PATH}") private val kafkaKeystorePath: String,
+    @Value("\${aiven-kafka.groupId}") private val kafkaGroupName: String,
     @Value("\${aiven-kafka.auto-offset-reset}") private val kafkaAutoOffsetReset: String,
 ) {
     private val javaKeystore = "JKS"
@@ -67,12 +68,10 @@ class AivenKafkaConfig(
         )
 
     @Bean
-    fun aivenKafkaListenerContainerFactory(
-        aivenKafkaErrorHandler: AivenKafkaErrorHandler,
-    ): ConcurrentKafkaListenerContainerFactory<String, String> {
+    fun aivenKafkaListenerContainerFactory(aivenKafkaErrorHandler: AivenKafkaErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> {
         val config =
             mapOf(
-                ConsumerConfig.GROUP_ID_CONFIG to "syk-dig-backend-consumer",
+                ConsumerConfig.GROUP_ID_CONFIG to kafkaGroupName,
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to kafkaAutoOffsetReset,
                 ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,

@@ -16,3 +16,9 @@ data class PatchToGosysOppgaveRequest(
     val tilordnetRessurs: String?,
     val beskrivelse: String?,
 )
+
+data class OppdaterOppgaveRequest(
+    val id: Int,
+    val versjon: Int,
+    val behandlesAvApplikasjon: String,
+)

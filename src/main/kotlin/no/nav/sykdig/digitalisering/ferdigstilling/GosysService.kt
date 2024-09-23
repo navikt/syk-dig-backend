@@ -16,7 +16,7 @@ class GosysService(
     ) {
         val oppgave = oppgaveClient.getOppgave(oppgaveId, sykmeldingId)
 
-        oppgaveClient.oppdaterOppgave(
+        oppgaveClient.oppdaterGosysOppgave(
             oppgaveId,
             sykmeldingId,
             oppgave.versjon,
@@ -35,7 +35,7 @@ class GosysService(
     ) {
         val oppgave = oppgaveClient.getOppgave(oppgaveId, sykmeldingId)
 
-        oppgaveClient.oppdaterOppgave(
+        oppgaveClient.oppdaterGosysOppgave(
             oppgaveId,
             sykmeldingId,
             oppgave.versjon,

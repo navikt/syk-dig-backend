@@ -71,6 +71,7 @@ class SykDigOppgaveService(
                 source = "syk-dig",
             )
         oppgaveRepository.lagreOppgave(oppgave)
+        log.info("Oppgave med id $oppgaveId lagret")
         return oppgaveId
     }
 

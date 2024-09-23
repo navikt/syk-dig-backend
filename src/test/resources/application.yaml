@@ -22,8 +22,15 @@ KAFKA_CREDSTORE_PASSWORD: ""
 KAFKA_SECURITY_PROTOCOL: "PLAINTEXT"
 KAFKA_KEYSTORE_PATH: ""
 
+oppgave:
+  topic: "teamsykmelding.syk-dig-oppgave"
+
+nais:
+  cluster: "dev-gcp"
+
 aiven-kafka:
-  auto-offset-reset: latest
+  auto-offset-reset: none
+  groupId: "syk-dig-oppgavelytter-consumer"
 
 istilgangskontroll.url: http://istilgangskontroll
 saf.url: http://saf

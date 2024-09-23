@@ -7,7 +7,6 @@ import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
-import no.nav.sykdig.applog
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -35,8 +34,6 @@ class SykDigTokenResolver : JwtBearerTokenResolver {
 @EnableOAuth2Client(cacheEnabled = true)
 @Configuration
 class AadRestTemplateConfiguration {
-    val log = applog()
-
     @Bean
     fun istilgangskontrollRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,

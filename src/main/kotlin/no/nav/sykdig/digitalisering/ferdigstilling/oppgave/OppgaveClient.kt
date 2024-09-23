@@ -38,6 +38,7 @@ private const val BEHANDLINGS_TYPE_UTLAND = "ae0106"
 class OppgaveClient(
     @Value("\${oppgave.url}") private val url: String,
     private val oppgaveRestTemplate: RestTemplate,
+    private val oppgaveM2mRestTemplate: RestTemplate,
 ) {
     val log = applog()
     val secureLog = securelog()
@@ -56,7 +57,7 @@ class OppgaveClient(
     }
 
     @Retryable
-    fun getOppgave(
+    fun getOppgaveM2m(
         oppgaveId: String,
         sykmeldingId: String,
     ): GetOppgaveResponse {
@@ -64,6 +65,43 @@ class OppgaveClient(
         headers.contentType = MediaType.APPLICATION_JSON
         headers["X-Correlation-ID"] = sykmeldingId
 
+        try {
+            val response =
+                oppgaveM2mRestTemplate.exchange(
+                    "$url/$oppgaveId",
+                    HttpMethod.GET,
+                    HttpEntity<Any>(headers),
+                    GetOppgaveResponse::class.java,
+                )
+            return response.body ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $oppgaveId")
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+                log.warn("syk-dig-backend har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
+                throw IkkeTilgangException("syk-dig-backend har ikke tilgang til oppgave")
+            } else {
+                log.error(
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
+                    e,
+                )
+                throw e
+            }
+        } catch (e: HttpServerErrorException) {
+            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
+            throw e
+        } catch (e: Exception) {
+            log.error("Other Exception fra Oppgave: ${e.message}", e)
+            throw e
+        }
+    }
+
+    @Retryable
+    fun getOppgave(
+        oppgaveId: String,
+        sykmeldingId: String,
+    ): GetOppgaveResponse {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-Correlation-ID"] = sykmeldingId
         try {
             val response =
                 oppgaveRestTemplate.exchange(
@@ -86,6 +124,9 @@ class OppgaveClient(
             }
         } catch (e: HttpServerErrorException) {
             log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
+            throw e
+        } catch (e: Exception) {
+            log.error("Other Exception fra Oppgave: ${e.message}", e)
             throw e
         }
     }
@@ -224,8 +265,50 @@ class OppgaveClient(
         }
     }
 
+    fun oppdaterOppgaveM2m(
+        oppdaterOppgaveRequest: OppdaterOppgaveRequest,
+        sykmeldingId: String,
+    ) {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-Correlation-ID"] = sykmeldingId
+        val oppgaveId = oppdaterOppgaveRequest.id
+
+        try {
+            oppgaveM2mRestTemplate.exchange(
+                "$url/$oppgaveId",
+                HttpMethod.PATCH,
+                HttpEntity(oppdaterOppgaveRequest, headers),
+                String::class.java,
+            )
+            log.info("OppdaterOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+                log.warn(
+                    "Syk-dig-backend har ikke tilgang til å " +
+                        "oppdaterOppgave oppgaveId $oppgaveId: ${e.message}",
+                )
+                throw IkkeTilgangException("Syk-dig har ikke tilgang til oppgave")
+            } else {
+                log.error(
+                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+                        "fra Oppgave ved oppdaterOppgave: ${e.message}",
+                    e,
+                )
+                throw e
+            }
+        } catch (e: HttpServerErrorException) {
+            log.error(
+                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+                    "fra Oppgave ved oppdaterOppgave: ${e.message}",
+                e,
+            )
+            throw e
+        }
+    }
+
     @Retryable
-    fun oppdaterOppgave(
+    fun oppdaterGosysOppgave(
         oppgaveId: String,
         sykmeldingId: String,
         oppgaveVersjon: Int,

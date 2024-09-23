@@ -109,3 +109,5 @@ spec:
       value: https://oppgave-q1.dev-fss-pub.nais.io/api/v1/oppgaver
     - name: OPPGAVE_CLIENT_ID
       value: dev-fss.oppgavehandtering.oppgave-q1
+    - name: OPPGAVE_TOPIC
+      value: oppgavehandtering.oppgavehendelse-q1-v1
