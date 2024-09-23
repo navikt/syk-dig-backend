@@ -3,7 +3,6 @@ package no.nav.sykdig.digitalisering.saf.graphql
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
 import com.netflix.graphql.dgs.client.GraphQLClient
 import com.netflix.graphql.dgs.client.HttpResponse
-import no.nav.sykdig.config.M2MRestTemplate
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
