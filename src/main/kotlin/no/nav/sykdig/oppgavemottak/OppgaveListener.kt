@@ -16,6 +16,7 @@ class OppgaveListener(
 
     @KafkaListener(
         topics = ["\${oppgave.topic}"],
+        groupId = "syk-dig-oppgavelytter-consumer",
         properties = ["auto.offset.reset = none"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
