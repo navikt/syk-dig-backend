@@ -16,15 +16,15 @@ class OppgaveListener(
 
     @KafkaListener(
         topics = ["\${oppgave.topic}"],
-        properties = ["auto.offset.reset = earliest"],
+        properties = ["auto.offset.reset = none"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
     fun listen(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
+        val oppgaveRecord: OppgaveKafkaAivenRecord = objectMapper.readValue(cr.value())
         try {
-            val oppgaveRecord: OppgaveKafkaAivenRecord = objectMapper.readValue(cr.value())
             val isOppgaveOpprettet = oppgaveRecord.hendelse.hendelsestype == Hendelsestype.OPPGAVE_OPPRETTET
             val isValidTema = oppgaveRecord.oppgave.kategorisering.tema in listOf("SYM", "SYK")
             val isCorrectBehandlingstype = oppgaveRecord.oppgave.kategorisering.behandlingstype == "ae0106"
@@ -35,10 +35,11 @@ class OppgaveListener(
 
             if (isValidOppgave) {
                 mottaOppgaverFraKafka.behandleOppgave(oppgaveRecord)
-                acknowledgment.acknowledge()
             }
+            acknowledgment.acknowledge()
         } catch (e: Exception) {
-            logger.error("Feil ved oppretting av oppgave " + e.message)
+            logger.error("Feil ved oppretting av oppgave med oppgaveId: ${oppgaveRecord.oppgave.oppgaveId}", e)
+            throw e
         }
     }
 }

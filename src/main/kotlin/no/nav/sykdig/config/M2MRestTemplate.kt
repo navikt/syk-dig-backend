@@ -20,19 +20,19 @@ class M2MRestTemplate(
             .build()
     }
 
+    @Bean
+    fun safM2mRestTemplate(): RestTemplate {
+        return restTemplateBuilder
+            .additionalInterceptors(bearerTokenInterceptorSaf())
+            .build()
+    }
+
     private fun bearerTokenInterceptorOppgave(): ClientHttpRequestInterceptor {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
             val token = m2mTokenService.getOppgaveM2mToken()
             request.headers.setBearerAuth(token)
             execution.execute(request, body)
         }
-    }
-
-    @Bean
-    fun safM2mRestTemplate(): RestTemplate {
-        return restTemplateBuilder
-            .additionalInterceptors(bearerTokenInterceptorSaf())
-            .build()
     }
 
     private fun bearerTokenInterceptorSaf(): ClientHttpRequestInterceptor {

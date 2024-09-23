@@ -2,7 +2,6 @@ package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.applog
-import no.nav.sykdig.config.M2MRestTemplate
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.getFristForFerdigstillingAvOppgave
@@ -39,7 +38,7 @@ private const val BEHANDLINGS_TYPE_UTLAND = "ae0106"
 class OppgaveClient(
     @Value("\${oppgave.url}") private val url: String,
     private val oppgaveRestTemplate: RestTemplate,
-    private val oppgaveM2MRestTemplate: M2MRestTemplate,
+    private val oppgaveM2mRestTemplate: RestTemplate,
 ) {
     val log = applog()
     val secureLog = securelog()
@@ -68,7 +67,7 @@ class OppgaveClient(
 
         try {
             val response =
-                oppgaveM2MRestTemplate.oppgaveM2mRestTemplate().exchange(
+                oppgaveRestTemplate.exchange(
                     "$url/$oppgaveId",
                     HttpMethod.GET,
                     HttpEntity<Any>(headers),
@@ -276,7 +275,7 @@ class OppgaveClient(
         val oppgaveId = oppdaterOppgaveRequest.id
 
         try {
-            oppgaveM2MRestTemplate.oppgaveM2mRestTemplate().exchange(
+            oppgaveM2mRestTemplate.exchange(
                 "$url/$oppgaveId",
                 HttpMethod.PATCH,
                 HttpEntity(oppdaterOppgaveRequest, headers),

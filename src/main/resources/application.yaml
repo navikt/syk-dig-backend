@@ -45,7 +45,7 @@ nais:
     cluster: ${NAIS_CLUSTER_NAME}
 
 aiven-kafka:
-    auto-offset-reset: earliest
+    auto-offset-reset: none
     groupId: "syk-dig-oppgavelytter-consumer"
 
 istilgangskontroll.url: "http://istilgangskontroll.teamsykefravr"
