@@ -148,6 +148,10 @@ fun mapAvvisningsgrunn(
         Avvisingsgrunn.RISIKOSAK -> "Risikosak"
         Avvisingsgrunn.FOR_LANG_PERIODE -> "Sykmeldingen har for lang periode"
         Avvisingsgrunn.BASERT_PAA_TELEFONKONTAKT -> "Sykmelding basert på telefonkontakt"
+        Avvisingsgrunn.VARSLET_I_SAKEN -> "Varslet i saken - under vurdering"
+        Avvisingsgrunn.MAXDATO_OPPNAADD -> "Maksdato er oppnådd"
+        Avvisingsgrunn.LOPENDE_AAP -> "Løpende AAP"
+        Avvisingsgrunn.DUPLIKAT -> "Sykmeldingen er et duplikat"
         Avvisingsgrunn.ANNET -> avvisningsgrunnAnnet ?: throw RuntimeException("Avvisningsgrunn Annet er null")
     }
 }
