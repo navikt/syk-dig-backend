@@ -1,6 +1,6 @@
 package no.nav.sykdig.saf
 
-import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.SafJournalpostService
@@ -25,7 +25,7 @@ class SafJournalpostServiceTest {
         val sykmeldingId = "syk-456"
         val source = "rina"
 
-        coEvery { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
+        every { safJournalpostGraphQlClient.getJournalpostM2m(eq(journalpostId)) } returns
             SafQueryJournalpost(
                 SafJournalpost(
                     journalstatus = Journalstatus.MOTTATT,
@@ -59,7 +59,7 @@ class SafJournalpostServiceTest {
         val sykmeldingId = "syk-456"
         val source = "rina"
 
-        coEvery { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
+        every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
             SafQueryJournalpost(
                 SafJournalpost(
                     journalstatus = Journalstatus.JOURNALFOERT,
@@ -88,7 +88,7 @@ class SafJournalpostServiceTest {
         val sykmeldingId = "syk-456"
         val source = "rina"
 
-        coEvery { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
+        every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
             SafQueryJournalpost(
                 SafJournalpost(
                     journalstatus = Journalstatus.MOTTATT,
