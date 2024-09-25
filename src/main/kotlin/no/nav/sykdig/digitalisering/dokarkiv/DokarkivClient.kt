@@ -127,6 +127,16 @@ class DokarkivClient(
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å oppdatere journalpostId $journalpostId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
+            } else if (e.statusCode.value() == 400) {
+                log.error(
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
+                    e,
+                )
+                if (journalpostId == "676155741") {
+                    log.warn("Skipping update of journalpost $journalpostId")
+                } else {
+                    throw e
+                }
             } else {
                 log.error(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
@@ -341,6 +351,16 @@ class DokarkivClient(
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å ferdigstille journalpostId $journalpostId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
+            } else if (e.statusCode.value() == 400) {
+                log.error(
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
+                    e,
+                )
+                if (journalpostId == "676155741") {
+                    log.warn("Skipping update of journalpost $journalpostId")
+                } else {
+                    throw e
+                }
             } else {
                 log.error(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}",
