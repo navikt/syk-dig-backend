@@ -54,6 +54,7 @@ pdl.url: ${PDL_URL}
 kodeverk.url: ${KODEVERK_URL}
 dokarkiv.url: ${DOKARKIV_URL}
 oppgave.url: ${OPPGAVE_URL}
+smregistrering.url: ${SMREGISTRERING_API_SCOPE}
 
 no.nav.security.jwt:
     issuer:
