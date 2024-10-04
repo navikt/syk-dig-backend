@@ -38,6 +38,7 @@ pdl.url: http://pdl
 kodeverk.url: http://kodeverk
 dokarkiv.url: http://dokarkiv
 oppgave.url: http://oppgave
+smregistrering.url: http://smregistrering
 
 no.nav.security.jwt:
   issuer:

@@ -110,3 +110,5 @@ spec:
       value: prod-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_TOPIC
       value: oppgavehandtering.oppgavehendelse-v1
+    - name: SMREGISTRERING_API_SCOPE
+      value: api://dev-gcp.teamsykmelding.smregistrering-backend/.default
