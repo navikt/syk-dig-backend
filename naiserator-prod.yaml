@@ -77,6 +77,9 @@ spec:
         - application: kodeverk-api
           namespace: team-rocket
           cluster: prod-gcp
+        - application: smregistrering-backend
+          namespace: teamsykmelding
+          cluster: prod-gcp
       external:
         - host: saf.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
