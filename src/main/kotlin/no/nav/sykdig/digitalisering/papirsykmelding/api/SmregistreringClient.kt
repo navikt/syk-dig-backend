@@ -78,7 +78,7 @@ class SmregistreringClient(
                 smregisteringRestTemplate.exchange(
                     "$url/oppgave/$oppgaveId",
                     HttpMethod.GET,
-                    HttpEntity<PapirManuellOppgave>(null, headers),
+                    HttpEntity(null, headers),
                     PapirManuellOppgave::class.java,
                 )
             response
