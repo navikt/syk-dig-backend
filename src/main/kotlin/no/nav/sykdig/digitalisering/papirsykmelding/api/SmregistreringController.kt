@@ -2,6 +2,8 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
 import no.nav.sykdig.securelog
+import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,7 +18,7 @@ class SmregistreringController(
     val securelog = securelog()
     val log = applog()
 
-    // @PostAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")
+    //@PostAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")
     @PostMapping("/api/v1/proxy/oppgave/{oppgaveId}/avvis")
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
@@ -29,7 +31,7 @@ class SmregistreringController(
         return res
     }
 
-    // @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")
+    //@PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")
     @GetMapping("/api/v1/proxy/oppgave/{oppgaveId}")
     @ResponseBody
     fun getPapirsykmeldingManuellOppgave(
