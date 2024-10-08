@@ -73,12 +73,13 @@ class SmregistreringClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(token)
+        log.info("gjør kall til smreg på oppgaveId $oppgaveId")
         return try {
             val response =
                 smregisteringRestTemplate.exchange(
                     "$url/oppgave/$oppgaveId",
                     HttpMethod.GET,
-                    HttpEntity(null, headers),
+                    HttpEntity<Any>(headers),
                     PapirManuellOppgave::class.java,
                 )
             response
