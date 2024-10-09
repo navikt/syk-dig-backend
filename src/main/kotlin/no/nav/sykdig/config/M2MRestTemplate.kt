@@ -14,30 +14,29 @@ class M2MRestTemplate(
     private val m2mTokenService: M2MTokenService,
 ) {
     @Bean
+    fun kodeverkRestTemplate(): RestTemplate {
+        return restTemplateBuilder
+            .additionalInterceptors(bearerTokenInterceptor("kodeverk-m2m"))
+            .build()
+    }
+
+    @Bean
     fun oppgaveM2mRestTemplate(): RestTemplate {
         return restTemplateBuilder
-            .additionalInterceptors(bearerTokenInterceptorOppgave())
+            .additionalInterceptors(bearerTokenInterceptor("oppgave-m2m"))
             .build()
     }
 
     @Bean
     fun safM2mRestTemplate(): RestTemplate {
         return restTemplateBuilder
-            .additionalInterceptors(bearerTokenInterceptorSaf())
+            .additionalInterceptors(bearerTokenInterceptor("saf-m2m"))
             .build()
     }
 
-    private fun bearerTokenInterceptorOppgave(): ClientHttpRequestInterceptor {
+    private fun bearerTokenInterceptor(type: String): ClientHttpRequestInterceptor {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
-            val token = m2mTokenService.getOppgaveM2mToken()
-            request.headers.setBearerAuth(token)
-            execution.execute(request, body)
-        }
-    }
-
-    private fun bearerTokenInterceptorSaf(): ClientHttpRequestInterceptor {
-        return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
-            val token = m2mTokenService.getSafM2mToken()
+            val token = m2mTokenService.getM2MToken(type)
             request.headers.setBearerAuth(token)
             execution.execute(request, body)
         }
