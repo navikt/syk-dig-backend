@@ -41,7 +41,7 @@ class SmregistreringController(
         log.info("henter oppgave med id $oppgaveId gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
         val res = smregistreringClient.getSmregistreringRequest(token, oppgaveId)
-        securelog.info(res.body.toString())
-        return res.body!!
+        securelog.info(res.toString())
+        return res
     }
 }

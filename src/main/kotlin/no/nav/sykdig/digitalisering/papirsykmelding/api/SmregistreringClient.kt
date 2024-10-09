@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
+import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -69,7 +70,7 @@ class SmregistreringClient(
     fun getSmregistreringRequest(
         token: String,
         oppgaveId: String,
-    ): ResponseEntity<PapirManuellOppgave> {
+    ): PapirManuellOppgave {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(token)
@@ -82,7 +83,7 @@ class SmregistreringClient(
                     HttpEntity<Any>(headers),
                     PapirManuellOppgave::class.java,
                 )
-            response
+            response.body ?: throw NoOppgaveException("Fant ikke oppgaver med id $oppgaveId")
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("smregistering_backend $oppgaveId: ${e.message}")
