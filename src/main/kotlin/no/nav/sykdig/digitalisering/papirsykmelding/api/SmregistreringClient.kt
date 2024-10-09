@@ -9,7 +9,6 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
@@ -74,13 +73,13 @@ class SmregistreringClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(token)
-        log.info("gjør kall til smreg på oppgaveId $oppgaveId")
+        log.info("gjør kall til smreg på oppgaveId $oppgaveId header $headers")
         return try {
             val response =
                 smregisteringRestTemplate.exchange(
                     "$url/oppgave/$oppgaveId",
                     HttpMethod.GET,
-                    HttpEntity<Any>(headers),
+                    HttpEntity<String>(headers),
                     PapirManuellOppgave::class.java,
                 )
             response.body ?: throw NoOppgaveException("Fant ikke oppgaver med id $oppgaveId")
