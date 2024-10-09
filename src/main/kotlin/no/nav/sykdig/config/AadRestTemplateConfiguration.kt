@@ -7,6 +7,7 @@ import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import no.nav.sykdig.applog
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -25,8 +26,11 @@ import org.springframework.web.client.RestTemplate
 @Primary
 @Component
 class SykDigTokenResolver : JwtBearerTokenResolver {
+    val log = applog()
+
     override fun token(): String? {
         val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        log.info("token authentication: ${autentication.token.tokenValue}")
         return autentication.token.tokenValue
     }
 }
@@ -34,6 +38,8 @@ class SykDigTokenResolver : JwtBearerTokenResolver {
 @EnableOAuth2Client(cacheEnabled = true)
 @Configuration
 class AadRestTemplateConfiguration {
+    val log = applog()
+
     @Bean
     fun istilgangskontrollRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
@@ -107,19 +113,6 @@ class AadRestTemplateConfiguration {
     ): RestTemplate =
         downstreamRestTemplate(
             registrationName = "onbehalfof-oppgave",
-            restTemplateBuilder = restTemplateBuilder,
-            clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
-        )
-
-    @Bean
-    fun smregisteringRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
-        clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate =
-        downstreamRestTemplate(
-            registrationName = "onbehalfof-smreg",
             restTemplateBuilder = restTemplateBuilder,
             clientConfigurationProperties = clientConfigurationProperties,
             oAuth2AccessTokenService = oAuth2AccessTokenService,

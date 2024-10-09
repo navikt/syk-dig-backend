@@ -2,8 +2,6 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
 import no.nav.sykdig.securelog
-import org.springframework.security.access.prepost.PostAuthorize
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -18,7 +16,7 @@ class SmregistreringController(
     val securelog = securelog()
     val log = applog()
 
-    //@PostAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")
+    // @PostAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")
     @PostMapping("/api/v1/proxy/oppgave/{oppgaveId}/avvis")
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
@@ -31,17 +29,17 @@ class SmregistreringController(
         return res
     }
 
-    //@PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")
-    @GetMapping("/api/v1/proxy/oppgave/{oppgaveId}")
+    // @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")
+    @GetMapping("/api/v1/proxy/oppgave/{oppgaveid}")
     @ResponseBody
     fun getPapirsykmeldingManuellOppgave(
-        @PathVariable oppgaveId: String,
+        @PathVariable oppgaveid: String,
         @RequestHeader("Authorization") authorization: String,
     ): PapirManuellOppgave {
-        log.info("henter oppgave med id $oppgaveId gjennom syk-dig proxy")
+        log.info("henter oppgave med id $oppgaveid gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
-        val res = smregistreringClient.getSmregistreringRequest(token, oppgaveId)
-        securelog.info(res.body.toString())
-        return res.body!!
+        val res = smregistreringClient.getSmregistreringRequest(token, oppgaveid)
+        securelog.info(res.toString())
+        return res
     }
 }
