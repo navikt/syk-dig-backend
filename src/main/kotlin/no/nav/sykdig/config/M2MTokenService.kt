@@ -14,23 +14,12 @@ class M2MTokenService(
     private val oAuth2AccessTokenService: OAuth2AccessTokenService,
     private val clientConfigurationProperties: ClientConfigurationProperties,
 ) {
-    fun getOppgaveM2mToken(): String {
+    fun getM2MToken(type: String): String {
         val clientProperties =
-            clientConfigurationProperties.registration["oppgave-m2m"]
-                ?: throw RuntimeException("Client properties for 'oppgave-m2m' not found")
+            clientConfigurationProperties.registration[type]
+                ?: throw RuntimeException("Client properties for $type not found")
 
         val accessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)
-
         return accessTokenResponse.accessToken ?: throw RuntimeException("Failed to retrieve M2M access token")
-    }
-
-    fun getSafM2mToken(): String {
-        val clientProperties =
-            clientConfigurationProperties.registration["saf-m2m"]
-                ?: throw RuntimeException("Client properties for 'saf-m2m' not found")
-
-        val accessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)
-
-        return accessTokenResponse.accessToken ?: throw RuntimeException("Failed to retrieve M2M access token for SAF")
     }
 }

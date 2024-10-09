@@ -15,9 +15,4 @@ class RestTemplateConfig {
             .messageConverters(StringHttpMessageConverter(StandardCharsets.UTF_8))
             .build()
     }
-
-    @Bean
-    fun kodeverkRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate =
-        restTemplateBuilder
-            .build()
 }
