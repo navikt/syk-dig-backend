@@ -37,7 +37,7 @@ class SmregistreringClient(
         return try {
             val response =
                 smregisteringRestTemplate.exchange(
-                    "$url/oppgave/$oppgaveId/$typeRequest",
+                    "$url/api/v1/oppgave/$oppgaveId/$typeRequest",
                     HttpMethod.POST,
                     HttpEntity(null, headers),
                     String::class.java,
@@ -77,7 +77,7 @@ class SmregistreringClient(
         return try {
             val response =
                 smregisteringRestTemplate.exchange(
-                    "$url/oppgave/$oppgaveId",
+                    "$url/api/v1/oppgave/$oppgaveId",
                     HttpMethod.GET,
                     HttpEntity<String>(headers),
                     PapirManuellOppgave::class.java,
