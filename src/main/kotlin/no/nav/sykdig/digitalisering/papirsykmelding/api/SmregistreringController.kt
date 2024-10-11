@@ -42,4 +42,15 @@ class SmregistreringController(
         securelog.info(res.toString())
         return res
     }
+
+    @GetMapping("/api/v1/proxy/pasient")
+    @ResponseBody
+    fun getPasientNavn(
+        @RequestHeader("Authorization") authorization: String,
+        @RequestHeader("X-Pasient-Fnr") fnr: String,
+    ): PasientNavn {
+        val token = authorization.removePrefix("Bearer ")
+        val res = smregistreringClient.getPasientNavnRequest(token, fnr)
+        return res
+    }
 }
