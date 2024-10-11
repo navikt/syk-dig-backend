@@ -104,6 +104,45 @@ class SmregistreringClient(
             throw e
         }
     }
+
+    @Retryable
+    fun getPasientNavnRequest(
+        token: String,
+        fnr: String,
+    ): PasientNavn {
+        val headers = HttpHeaders()
+        headers.set("X-Pasient-Fnr", fnr)
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.setBearerAuth(token)
+        return try {
+            val response =
+                smregisteringRestTemplate.exchange(
+                    "$url/api/v1/pasient",
+                    HttpMethod.GET,
+                    HttpEntity<String>(headers),
+                    PasientNavn::class.java,
+                )
+            response.body ?: throw NoOppgaveException("Fant ikke person")
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+                throw IkkeTilgangException("Veileder har ikke tilgang til pasient")
+            } else {
+                log.error(
+                    "HttpClientErrorException for pasient med responskode " +
+                        "${e.statusCode.value()} og message: ${e.message}",
+                    e,
+                )
+                throw e
+            }
+        } catch (e: HttpServerErrorException) {
+            log.error(
+                "HttpServerErrorException for pasient med responskode " +
+                    "${e.statusCode.value()} og message: ${e.message}",
+                e,
+            )
+            throw e
+        }
+    }
 }
 
 data class PapirManuellOppgave(
@@ -143,4 +182,10 @@ data class PapirSmRegistering(
     val kontaktMedPasient: KontaktMedPasient?,
     val behandletTidspunkt: LocalDate?,
     val behandler: Behandler?,
+)
+
+data class PasientNavn(
+    val fornavn: String,
+    val mellomnavn: String?,
+    val etternavn: String,
 )
