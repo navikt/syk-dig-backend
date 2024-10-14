@@ -41,7 +41,7 @@ class SmregistreringClient(
                 smregisteringRestTemplate.exchange(
                     "$url/api/v1/oppgave/$oppgaveId/$typeRequest",
                     HttpMethod.POST,
-                    HttpEntity(null, headers),
+                    HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason), headers),
                     String::class.java,
                 )
             log.info("postSmregistreringRequest response mottatt: ${response.body}")
