@@ -5,6 +5,7 @@ import no.nav.sykdig.securelog
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
@@ -22,10 +23,11 @@ class SmregistreringController(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") enhet: String,
+        @RequestBody avvisSykmeldingRequest: String,
     ): String {
         log.info("avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
-        val res = smregistreringClient.postSmregistreringRequest(token, oppgaveId, "avvis", enhet)
+        val res = smregistreringClient.postSmregistreringRequest(token = token, oppgaveId = oppgaveId, typeRequest = "avvis", enhet = enhet, avvisSykmeldingReason = avvisSykmeldingRequest)
         securelog.info(res)
         return res
     }

@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.time.LocalDate
-import java.time.OffsetDateTime
 
 @Component
 class SmregistreringClient(
@@ -31,7 +29,9 @@ class SmregistreringClient(
         oppgaveId: String,
         typeRequest: String,
         enhet: String,
+        avvisSykmeldingReason: String?,
     ): String {
+        log.info("Inne i postSmregistreringRequest")
         val headers = HttpHeaders()
         headers.set("X-Nav-Enhet", enhet)
         headers.contentType = MediaType.APPLICATION_JSON
@@ -44,6 +44,7 @@ class SmregistreringClient(
                     HttpEntity(null, headers),
                     String::class.java,
                 )
+            log.info("postSmregistreringRequest response mottatt: ${response.body}")
             response.body ?: "ingen respons fra server"
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {

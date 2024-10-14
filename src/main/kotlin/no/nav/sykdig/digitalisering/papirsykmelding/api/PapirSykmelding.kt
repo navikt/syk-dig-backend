@@ -47,3 +47,7 @@ data class PasientNavn(
     val mellomnavn: String?,
     val etternavn: String,
 )
+
+data class AvvisSykmeldingRequest(
+    val reason: String?,
+)
