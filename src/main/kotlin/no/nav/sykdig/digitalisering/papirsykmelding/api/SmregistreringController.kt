@@ -21,10 +21,11 @@ class SmregistreringController(
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
+        @RequestHeader("X-Nav-Enhet") enhet: String,
     ): String {
         log.info("avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
-        val res = smregistreringClient.postSmregistreringRequest(token, oppgaveId, "avvis")
+        val res = smregistreringClient.postSmregistreringRequest(token, oppgaveId, "avvis", enhet)
         securelog.info(res)
         return res
     }
