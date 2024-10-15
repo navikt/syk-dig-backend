@@ -51,4 +51,15 @@ class SmregistreringController(
         val res = smregistreringClient.getPasientNavnRequest(token, fnr)
         return res
     }
+
+    @GetMapping("/api/v1/proxy/sykmelder/{hprNummer}")
+    @ResponseBody
+    fun getSykmelder(
+        @PathVariable hprNummer: String,
+        @RequestHeader("Authorization") authorization: String,
+    ): Sykmelder {
+        val token = authorization.removePrefix("Bearer ")
+        val res = smregistreringClient.getSykmelderRequest(token, hprNummer)
+        return res
+    }
 }

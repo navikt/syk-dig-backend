@@ -51,3 +51,24 @@ data class PasientNavn(
 data class AvvisSykmeldingRequest(
     val reason: String?,
 )
+
+data class Sykmelder(
+    val hprNummer: String?,
+    val fnr: String?,
+    val aktorId: String?,
+    val fornavn: String?,
+    val mellomnavn: String?,
+    val etternavn: String?,
+    val godkjenninger: List<Godkjenning>?,
+)
+
+data class Godkjenning(
+    val helsepersonellkategori: Kode? = null,
+    val autorisasjon: Kode? = null,
+)
+
+data class Kode(
+    val aktiv: Boolean,
+    val oid: Int,
+    val verdi: String?,
+)
