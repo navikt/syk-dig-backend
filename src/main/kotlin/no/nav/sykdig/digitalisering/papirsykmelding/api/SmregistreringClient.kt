@@ -37,9 +37,12 @@ class SmregistreringClient(
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(token)
         return try {
+            val url = "$url/api/v1/oppgave/$oppgaveId/$typeRequest"
+            log.info("postSmregistreringRequest url: $url")
+
             val response =
                 smregisteringRestTemplate.exchange(
-                    "$url/api/v1/oppgave/$oppgaveId/$typeRequest",
+                    url,
                     HttpMethod.POST,
                     HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason), headers),
                     String::class.java,
@@ -52,7 +55,7 @@ class SmregistreringClient(
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
                 log.error(
-                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
+                    "1. HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
                         "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                     e,
                 )
@@ -60,7 +63,7 @@ class SmregistreringClient(
             }
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
+                "2. HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
                     "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                 e,
             )
