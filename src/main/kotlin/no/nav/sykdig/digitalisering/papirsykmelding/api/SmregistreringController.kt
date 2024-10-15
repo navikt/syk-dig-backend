@@ -1,7 +1,6 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
-import no.nav.sykdig.securelog
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -15,10 +14,8 @@ import org.springframework.web.bind.annotation.RestController
 class SmregistreringController(
     private val smregistreringClient: SmregistreringClient,
 ) {
-    val securelog = securelog()
     val log = applog()
 
-    // @PostAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")
     @PostMapping("/api/v1/proxy/oppgave/{oppgaveId}/avvis")
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
@@ -28,12 +25,10 @@ class SmregistreringController(
     ): ResponseEntity<Void> {
         log.info("avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
-        smregistreringClient.postSmregistreringRequest(token = token, oppgaveId = oppgaveId, typeRequest = "avvis", enhet = enhet, avvisSykmeldingReason = avvisSykmeldingRequest)
-
+        smregistreringClient.postSmregistreringRequest(token, oppgaveId, "avvis", enhet, avvisSykmeldingRequest)
         return ResponseEntity.noContent().build()
     }
 
-    // @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")
     @GetMapping("/api/v1/proxy/oppgave/{oppgaveid}")
     @ResponseBody
     fun getPapirsykmeldingManuellOppgave(
@@ -43,7 +38,6 @@ class SmregistreringController(
         log.info("henter oppgave med id $oppgaveid gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
         val res = smregistreringClient.getSmregistreringRequest(token, oppgaveid)
-        securelog.info(res.toString())
         return res
     }
 
