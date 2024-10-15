@@ -45,29 +45,22 @@ class SmregistreringClient(
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(token)
         return try {
-            val url = "$url/api/v1/oppgave/$oppgaveId/$typeRequest"
-            log.info("postSmregistreringRequest url: $url")
-
-            val requestBody = AvvisSykmeldingRequest(avvisSykmeldingReason)
-            val requestJson = objectMapper.writeValueAsString(requestBody)
-            log.info("Serialized Request Body: $requestJson")
-
             val response =
                 smregisteringRestTemplate.exchange(
-                    url,
+                    "$url/api/v1/oppgave/$oppgaveId/$typeRequest",
                     HttpMethod.POST,
                     HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason ?: "Årsak ikke satt"), headers),
                     String::class.java,
                 )
-            log.info("postSmregistreringRequest response mottatt: ${response}")
-            response.body ?: throw NoOppgaveException("ingen respons fra server")
+            log.info("postSmregistreringRequest statuskode er: ${response.statusCode}")
+            response.statusCode.toString()
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("smregistering_backend $oppgaveId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
                 log.error(
-                    "1. HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
+                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
                         "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                     e,
                 )
@@ -75,7 +68,7 @@ class SmregistreringClient(
             }
         } catch (e: HttpServerErrorException) {
             log.error(
-                "2. HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
+                "HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
                     "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                 e,
             )
