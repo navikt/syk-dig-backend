@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
 import no.nav.sykdig.securelog
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -24,12 +25,12 @@ class SmregistreringController(
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") enhet: String,
         @RequestBody avvisSykmeldingRequest: String,
-    ): String {
+    ): ResponseEntity<Void> {
         log.info("avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
-        val res = smregistreringClient.postSmregistreringRequest(token = token, oppgaveId = oppgaveId, typeRequest = "avvis", enhet = enhet, avvisSykmeldingReason = avvisSykmeldingRequest)
-        securelog.info(res)
-        return res
+        smregistreringClient.postSmregistreringRequest(token = token, oppgaveId = oppgaveId, typeRequest = "avvis", enhet = enhet, avvisSykmeldingReason = avvisSykmeldingRequest)
+
+        return ResponseEntity.noContent().build()
     }
 
     // @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(oppgaveId)")

@@ -3,15 +3,12 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
-import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
@@ -21,7 +18,7 @@ import org.springframework.web.client.RestTemplate
 @Component
 class SmregistreringClient(
     @Value("\${smregistrering.url}") private val url: String,
-    val smregisteringRestTemplate: RestTemplate
+    val smregisteringRestTemplate: RestTemplate,
 //    restTemplateBuilder: RestTemplateBuilder,
 ) {
     val log = applog()
@@ -38,22 +35,19 @@ class SmregistreringClient(
         typeRequest: String,
         enhet: String,
         avvisSykmeldingReason: String?,
-    ): String {
+    ) {
         log.info("Inne i postSmregistreringRequest")
         val headers = HttpHeaders()
         headers.set("X-Nav-Enhet", enhet)
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(token)
-        return try {
-            val response =
-                smregisteringRestTemplate.exchange(
-                    "$url/api/v1/oppgave/$oppgaveId/$typeRequest",
-                    HttpMethod.POST,
-                    HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason ?: "Årsak ikke satt"), headers),
-                    String::class.java,
-                )
-            log.info("postSmregistreringRequest statuskode er: ${response.statusCode}")
-            response.statusCode.toString()
+        try {
+            smregisteringRestTemplate.exchange(
+                "$url/api/v1/oppgave/$oppgaveId/$typeRequest",
+                HttpMethod.POST,
+                HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason), headers),
+                String::class.java,
+            )
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("smregistering_backend $oppgaveId: ${e.message}")
@@ -155,4 +149,3 @@ class SmregistreringClient(
         }
     }
 }
-
