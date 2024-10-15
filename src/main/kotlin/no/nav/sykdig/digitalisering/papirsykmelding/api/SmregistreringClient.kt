@@ -3,12 +3,15 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
+import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
@@ -18,10 +21,14 @@ import org.springframework.web.client.RestTemplate
 @Component
 class SmregistreringClient(
     @Value("\${smregistrering.url}") private val url: String,
-    private val smregisteringRestTemplate: RestTemplate,
+    restTemplateBuilder: RestTemplateBuilder,
 ) {
     val log = applog()
     val secureLog = securelog()
+
+    private val smregisteringRestTemplate: RestTemplate = restTemplateBuilder
+        .messageConverters(MappingJackson2HttpMessageConverter())
+        .build()
 
     @Retryable
     fun postSmregistreringRequest(
@@ -40,11 +47,15 @@ class SmregistreringClient(
             val url = "$url/api/v1/oppgave/$oppgaveId/$typeRequest"
             log.info("postSmregistreringRequest url: $url")
 
+            val requestBody = AvvisSykmeldingRequest(avvisSykmeldingReason)
+            val requestJson = objectMapper.writeValueAsString(requestBody)
+            log.info("Serialized Request Body: $requestJson")
+
             val response =
                 smregisteringRestTemplate.exchange(
                     url,
                     HttpMethod.POST,
-                    HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason), headers),
+                    HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason ?: "Årsak ikke satt"), headers),
                     String::class.java,
                 )
             log.info("postSmregistreringRequest response mottatt: ${response.body}")
