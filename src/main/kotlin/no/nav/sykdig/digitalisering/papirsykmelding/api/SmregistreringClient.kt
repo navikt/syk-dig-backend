@@ -143,4 +143,42 @@ class SmregistreringClient(
             throw e
         }
     }
+
+    @Retryable
+    fun getSykmelderRequest(
+        token: String,
+        hprNummer: String,
+    ): Sykmelder {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.setBearerAuth(token)
+        try {
+            val response =
+                smregisteringRestTemplate.exchange(
+                    "$url/api/v1/sykmelder/$hprNummer",
+                    HttpMethod.GET,
+                    HttpEntity<String>(headers),
+                    Sykmelder::class.java,
+                )
+            return response.body ?: throw NoOppgaveException("Fant ikke sykmelder")
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+                throw IkkeTilgangException("Veileder har ikke tilgang til sykmelder")
+            } else {
+                log.error(
+                    "HttpClientErrorException for sykmelder med responskode " +
+                            "${e.statusCode.value()} og message: ${e.message}",
+                    e,
+                )
+                throw e
+            }
+        } catch (e: HttpServerErrorException) {
+            log.error(
+                "HttpServerErrorException for sykmelder med responskode " +
+                        "${e.statusCode.value()} og message: ${e.message}",
+                e,
+            )
+            throw e
+        }
+    }
 }
