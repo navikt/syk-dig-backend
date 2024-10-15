@@ -59,8 +59,8 @@ class SmregistreringClient(
                     HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason ?: "Årsak ikke satt"), headers),
                     String::class.java,
                 )
-            log.info("postSmregistreringRequest response mottatt: ${response.body}")
-            response.body ?: "ingen respons fra server"
+            log.info("postSmregistreringRequest response mottatt: ${response}")
+            response.body ?: throw NoOppgaveException("ingen respons fra server")
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("smregistering_backend $oppgaveId: ${e.message}")
