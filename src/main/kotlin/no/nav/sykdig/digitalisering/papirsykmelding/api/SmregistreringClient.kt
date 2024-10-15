@@ -21,14 +21,15 @@ import org.springframework.web.client.RestTemplate
 @Component
 class SmregistreringClient(
     @Value("\${smregistrering.url}") private val url: String,
-    restTemplateBuilder: RestTemplateBuilder,
+    val smregisteringRestTemplate: RestTemplate
+//    restTemplateBuilder: RestTemplateBuilder,
 ) {
     val log = applog()
     val secureLog = securelog()
 
-    private val smregisteringRestTemplate: RestTemplate = restTemplateBuilder
-        .messageConverters(MappingJackson2HttpMessageConverter())
-        .build()
+//    private val smregisteringRestTemplate: RestTemplate = restTemplateBuilder
+//        .messageConverters(MappingJackson2HttpMessageConverter())
+//        .build()
 
     @Retryable
     fun postSmregistreringRequest(
