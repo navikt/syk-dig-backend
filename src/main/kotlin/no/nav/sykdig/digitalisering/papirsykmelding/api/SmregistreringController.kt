@@ -63,3 +63,8 @@ class SmregistreringController(
         return res
     }
 }
+
+// TODO hentFerdigstiltSykmelding
+// TODO sendPapirSykmeldingManuellOppgave
+//TODO endreSykmelding
+//TODO sendOppgaveTilGosys
