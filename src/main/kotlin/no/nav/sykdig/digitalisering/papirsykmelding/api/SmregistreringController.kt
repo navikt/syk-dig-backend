@@ -20,12 +20,12 @@ class SmregistreringController(
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
-        @RequestHeader("X-Nav-Enhet") enhet: String,
+        @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<Void> {
         log.info("avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
-        smregistreringClient.postSmregistreringRequest(token, oppgaveId, "avvis", enhet, avvisSykmeldingRequest)
+        smregistreringClient.postSmregistreringRequest(token, oppgaveId, "avvis", navEnhet, avvisSykmeldingRequest)
         return ResponseEntity.noContent().build()
     }
 
@@ -62,9 +62,21 @@ class SmregistreringController(
         val res = smregistreringClient.getSykmelderRequest(token, hprNummer)
         return res
     }
+
+    @PostMapping("/api/v1/proxy/oppgave/{oppgaveId}/send")
+    fun sendOppgave(
+        @PathVariable oppgaveId: String,
+        @RequestHeader("Authorization") authorization: String,
+        @RequestHeader("X-Nav-Enhet") navEnhet: String,
+        @RequestBody papirSykmelding: SmRegistreringManuell,
+    ): ResponseEntity<Void> {
+        val token = authorization.removePrefix("Bearer ")
+        smregistreringClient.postSendOppgaveRequest(token, oppgaveId, navEnhet, papirSykmelding)
+        return ResponseEntity.noContent().build()
+    }
 }
 
 // TODO hentFerdigstiltSykmelding
 // TODO sendPapirSykmeldingManuellOppgave
-//TODO endreSykmelding
-//TODO sendOppgaveTilGosys
+// TODO endreSykmelding
+// TODO sendOppgaveTilGosys
