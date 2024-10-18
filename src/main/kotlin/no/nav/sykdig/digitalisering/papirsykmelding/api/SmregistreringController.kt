@@ -84,8 +84,8 @@ class SmregistreringController(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
     ): PapirManuellOppgave {
-        log.info("henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
+        log.info("henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy. token $token")
         val res = smregistreringClient.getFerdigstiltSykmeldingRequest(token, sykmeldingId)
         return res
     }
