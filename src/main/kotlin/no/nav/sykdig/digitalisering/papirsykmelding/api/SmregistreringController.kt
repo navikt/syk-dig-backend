@@ -90,3 +90,4 @@ class SmregistreringController(
 
 // TODO sendPapirSykmeldingManuellOppgave
 // TODO endreSykmelding
+// TODO sendOppgaveTilGosys
