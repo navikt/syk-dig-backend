@@ -1,22 +1,25 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@RequestMapping("/api/v1/proxy")
 class SmregistreringController(
     private val smregistreringClient: SmregistreringClient,
 ) {
     val log = applog()
 
-    @PostMapping("/api/v1/proxy/oppgave/{oppgaveId}/avvis")
+    @PostMapping("/oppgave/{oppgaveId}/avvis")
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
@@ -29,7 +32,7 @@ class SmregistreringController(
         return ResponseEntity.noContent().build()
     }
 
-    @GetMapping("/api/v1/proxy/oppgave/{oppgaveid}")
+    @GetMapping("/oppgave/{oppgaveid}")
     @ResponseBody
     fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveid: String,
@@ -41,7 +44,7 @@ class SmregistreringController(
         return res
     }
 
-    @GetMapping("/api/v1/proxy/pasient")
+    @GetMapping("/pasient")
     @ResponseBody
     fun getPasientNavn(
         @RequestHeader("Authorization") authorization: String,
@@ -52,7 +55,7 @@ class SmregistreringController(
         return res
     }
 
-    @GetMapping("/api/v1/proxy/sykmelder/{hprNummer}")
+    @GetMapping("/sykmelder/{hprNummer}")
     @ResponseBody
     fun getSykmelder(
         @PathVariable hprNummer: String,
@@ -63,7 +66,7 @@ class SmregistreringController(
         return res
     }
 
-    @PostMapping("/api/v1/proxy/oppgave/{oppgaveId}/send")
+    @PostMapping("/oppgave/{oppgaveId}/send")
     fun sendOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
@@ -75,7 +78,7 @@ class SmregistreringController(
         return ResponseEntity.noContent().build()
     }
 
-    @GetMapping("/api/v1/proxy/sykmelding/{sykmeldingId}/ferdigstilt")
+    @GetMapping("/sykmelding/{sykmeldingId}/ferdigstilt")
     @ResponseBody
     fun getFerdigstiltSykmelding(
         @PathVariable sykmeldingId: String,
@@ -86,8 +89,17 @@ class SmregistreringController(
         val res = smregistreringClient.getFerdigstiltSykmeldingRequest(token, sykmeldingId)
         return res
     }
+
+    @PostMapping("/oppgave/{oppgaveId}/tilgosys")
+    fun sendOppgaveTilGosys(
+        @PathVariable oppgaveId: String,
+        @RequestHeader("Authorization") authorization: String,
+    ): ResponseEntity<HttpStatusCode> {
+        log.info("Sender oppgave med id $oppgaveId til Gosys gjennom syk-dig proxy")
+        val token = authorization.removePrefix("Bearer ")
+        return smregistreringClient.postOppgaveTilGosysRequest(token, oppgaveId)
+    }
 }
 
 // TODO sendPapirSykmeldingManuellOppgave
 // TODO endreSykmelding
-// TODO sendOppgaveTilGosys
