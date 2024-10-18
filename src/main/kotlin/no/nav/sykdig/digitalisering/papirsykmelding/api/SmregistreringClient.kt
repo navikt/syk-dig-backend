@@ -64,7 +64,7 @@ class SmregistreringClient(
     }
 
     @Retryable
-    fun getSmregistreringRequest(
+    fun getOppgaveRequest(
         token: String,
         oppgaveId: String,
     ): PapirManuellOppgave {

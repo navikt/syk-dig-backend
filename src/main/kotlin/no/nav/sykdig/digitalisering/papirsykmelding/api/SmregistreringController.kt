@@ -37,7 +37,7 @@ class SmregistreringController(
     ): PapirManuellOppgave {
         log.info("henter oppgave med id $oppgaveid gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
-        val res = smregistreringClient.getSmregistreringRequest(token, oppgaveid)
+        val res = smregistreringClient.getOppgaveRequest(token, oppgaveid)
         return res
     }
 
@@ -74,9 +74,19 @@ class SmregistreringController(
         smregistreringClient.postSendOppgaveRequest(token, oppgaveId, navEnhet, papirSykmelding)
         return ResponseEntity.noContent().build()
     }
+
+    @GetMapping("/api/v1/proxy/sykmelding/{sykmeldingId}/ferdigstilt")
+    @ResponseBody
+    fun getFerdigstiltSykmelding(
+        @PathVariable sykmeldingId: String,
+        @RequestHeader("Authorization") authorization: String,
+    ): PapirManuellOppgave {
+        log.info("henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
+        val token = authorization.removePrefix("Bearer ")
+        val res = smregistreringClient.getFerdigstiltSykmeldingRequest(token, sykmeldingId)
+        return res
+    }
 }
 
-// TODO hentFerdigstiltSykmelding
 // TODO sendPapirSykmeldingManuellOppgave
 // TODO endreSykmelding
-// TODO sendOppgaveTilGosys
