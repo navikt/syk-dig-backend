@@ -104,4 +104,16 @@ class SmregistreringController(
         val token = authorization.removePrefix("Bearer ")
         return smregistreringClient.postKorrigerSykmeldingRequest(token, sykmeldingId, navEnhet, papirSykmelding)
     }
+
+    @GetMapping("/pdf/{oppgaveId}/{dokumentInfoId}")
+    @ResponseBody
+    fun registerPdf(
+        @PathVariable oppgaveId: String,
+        @PathVariable dokumentInfoId: String,
+        @RequestHeader("Authorization") authorization: String,
+    ): ResponseEntity<ByteArray> {
+        log.info("henter pdf med oppgaveId $oppgaveId of dokumentinfoId $dokumentInfoId gjennom syk-dig proxy")
+        val token = authorization.removePrefix("Bearer ")
+        return smregistreringClient.getRegisterPdfRequest(token, oppgaveId, dokumentInfoId)
+    }
 }
