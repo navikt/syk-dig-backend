@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -35,43 +36,37 @@ class SmregistreringClient(
         headers.set("X-Nav-Enhet", navEnhet)
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(token)
+
         return try {
             val res = smregisteringRestTemplate.exchange(
                 "$url/api/v1/oppgave/$oppgaveId/$typeRequest",
                 HttpMethod.POST,
                 HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason), headers),
-                HttpStatusCode::class.java,
+                HttpStatusCode::class.java
             )
-            if (res.statusCode.is4xxClientError) {
-                log.error("client error ved avvising av oppgave $oppgaveId med kode ${res.statusCode}")
-                res
-            } else if (res.statusCode.is5xxServerError) {
-                log.error("server error ved avvising av oppgave $oppgaveId med kode ${res.statusCode}")
-                res
-            } else {
-                log.info("avvising av oppgave $oppgaveId fikk følgende responskode ${res.statusCode}")
-                res
-            }
+
+            log.info("Oppgave $oppgaveId avvist med responskode ${res.statusCode}")
+            res
         } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
+            log.error(
+                "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+                        "ved forsøk på å avvise oppgave: ${e.message}", e
+            )
+            return if (e.statusCode == HttpStatus.UNAUTHORIZED || e.statusCode == HttpStatus.FORBIDDEN) {
+                log.error("Veileder har ikke tilgang til oppgave $oppgaveId")
+                ResponseEntity.status(e.statusCode).body(HttpStatusCode.valueOf(e.statusCode.value()))
             } else {
-                log.error(
-                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
-                        "${e.statusCode.value()} fra Oppgave ved avvis: ${e.message}",
-                    e,
-                )
-                throw e
+                ResponseEntity.status(e.statusCode).body(HttpStatusCode.valueOf(e.statusCode.value()))
             }
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
-                    "${e.statusCode.value()} fra Oppgave ved avvis: ${e.message}",
-                e,
+                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+                        "ved forsøk på å avvise oppgave: ${e.message}", e
             )
             throw e
         }
     }
+
 
     @Retryable
     fun getOppgaveRequest(
@@ -207,31 +202,23 @@ class SmregistreringClient(
                 HttpEntity(papirSykmelding, headers),
                 String::class.java,
             )
-            if (res.statusCode.is4xxClientError) {
-                log.error("client error ved registrering av oppgave $oppgaveId med kode ${res.statusCode}")
-                res
-            } else if (res.statusCode.is5xxServerError) {
-                log.error("server error ved registrering av oppgave $oppgaveId med kode ${res.statusCode}")
-                res
-            } else {
-                log.info("registrering av oppgave $oppgaveId fikk følgende responskode ${res.statusCode}")
-                res
-            }
+            log.info("registrering av oppgave $oppgaveId fikk følgende responskode ${res.statusCode}")
+            res
         } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
-            } else {
-                log.error(
-                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
+            log.error(
+                "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
                         "${e.statusCode.value()} fra Oppgave ved sending: ${e.message}",
-                    e,
-                )
-                throw e
+                e,
+            )
+            if (e.statusCode == HttpStatus.UNAUTHORIZED || e.statusCode == HttpStatus.FORBIDDEN) {
+                log.error("Veileder har ikke tilgang til oppgave $oppgaveId")
+                ResponseEntity.status(e.statusCode).body(HttpStatusCode.valueOf(e.statusCode.value()))
             }
+            ResponseEntity.status(e.statusCode).body(e.responseBodyAsString)
         } catch (e: HttpServerErrorException) {
             log.error(
                 "HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
-                    "${e.statusCode.value()} fra Oppgave ved sending: ${e.message}",
+                        "${e.statusCode.value()} fra Oppgave ved sending: ${e.message}",
                 e,
             )
             throw e
@@ -283,42 +270,35 @@ class SmregistreringClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(token)
+
         return try {
-            val res =
-                smregisteringRestTemplate.exchange(
-                    "$url/api/v1/oppgave/$oppgaveId/tilgosys",
-                    HttpMethod.POST,
-                    HttpEntity(null, headers),
-                    HttpStatusCode::class.java,
-                )
-            if (res.statusCode.is4xxClientError) {
-                log.error("client error ved sending av oppgave $oppgaveId til Gosys med kode ${res.statusCode}")
-                res
-            } else if (res.statusCode.is5xxServerError) {
-                log.error("server error ved sending av oppgave $oppgaveId til Gosys med kode ${res.statusCode}")
-                res
-            } else {
-                log.info("oppgave $oppgaveId sendt til Gosys med følgende responskode ${res.statusCode}")
-                res
-            }
+            val res = smregisteringRestTemplate.exchange(
+                "$url/api/v1/oppgave/$oppgaveId/tilgosys",
+                HttpMethod.POST,
+                HttpEntity(null, headers),
+                HttpStatusCode::class.java,
+            )
+
+            log.info("Oppgave $oppgaveId sendt til Gosys med responskode ${res.statusCode}")
+            res
         } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
+            log.error(
+                "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+                        "ved forsøk på å sende oppgave til Gosys: ${e.message}", e
+            )
+            return if (e.statusCode == HttpStatus.UNAUTHORIZED || e.statusCode == HttpStatus.FORBIDDEN) {
+                log.error("Veileder har ikke tilgang til oppgave $oppgaveId")
+                ResponseEntity.status(e.statusCode).body(HttpStatusCode.valueOf(e.statusCode.value()))
             } else {
-                log.error(
-                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
-                        "${e.statusCode.value()} ved forsøk på å sende oppgave til gosys: ${e.message}",
-                    e,
-                )
-                throw e
+                ResponseEntity.status(e.statusCode).body(HttpStatusCode.valueOf(e.statusCode.value()))
             }
         } catch (e: HttpServerErrorException) {
             log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
-                    "${e.statusCode.value()} ved forsøk på å sende oppgave til gosys: ${e.message}",
-                e,
+                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+                        "ved forsøk på å sende oppgave til Gosys: ${e.message}", e
             )
             throw e
         }
     }
+
 }
