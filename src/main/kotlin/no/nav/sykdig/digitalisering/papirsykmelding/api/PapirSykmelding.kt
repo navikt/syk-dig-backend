@@ -89,6 +89,7 @@ data class SmRegistreringManuell(
     val navnFastlege: String?,
     val harUtdypendeOpplysninger: Boolean,
 )
+
 sealed class PdfDocument {
     data class Good(val value: ByteArray) : PdfDocument()
 

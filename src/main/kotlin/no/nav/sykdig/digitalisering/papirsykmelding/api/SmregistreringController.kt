@@ -28,7 +28,7 @@ class SmregistreringController(
     ): ResponseEntity<HttpStatusCode> {
         log.info("avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
-        return smregistreringClient.postAvvisOppgaveRequest(token, oppgaveId, "avvis", navEnhet, avvisSykmeldingRequest)
+        return smregistreringClient.postAvvisOppgaveRequest(token, oppgaveId, navEnhet, avvisSykmeldingRequest)
     }
 
     @GetMapping("/oppgave/{oppgaveid}")
@@ -36,7 +36,7 @@ class SmregistreringController(
     fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveid: String,
         @RequestHeader("Authorization") authorization: String,
-    ): PapirManuellOppgave {
+    ): ResponseEntity<PapirManuellOppgave> {
         log.info("henter oppgave med id $oppgaveid gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
         return smregistreringClient.getOppgaveRequest(token, oppgaveid)
@@ -47,7 +47,7 @@ class SmregistreringController(
     fun getPasientNavn(
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Pasient-Fnr") fnr: String,
-    ): PasientNavn {
+    ): ResponseEntity<PasientNavn> {
         val token = authorization.removePrefix("Bearer ")
         return smregistreringClient.getPasientNavnRequest(token, fnr)
     }
@@ -57,7 +57,7 @@ class SmregistreringController(
     fun getSykmelder(
         @PathVariable hprNummer: String,
         @RequestHeader("Authorization") authorization: String,
-    ): Sykmelder {
+    ): ResponseEntity<Sykmelder> {
         val token = authorization.removePrefix("Bearer ")
         return smregistreringClient.getSykmelderRequest(token, hprNummer)
     }
@@ -78,7 +78,7 @@ class SmregistreringController(
     fun getFerdigstiltSykmelding(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
-    ): PapirManuellOppgave {
+    ): ResponseEntity<PapirManuellOppgave> {
         log.info("henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
         return smregistreringClient.getFerdigstiltSykmeldingRequest(token, sykmeldingId)
