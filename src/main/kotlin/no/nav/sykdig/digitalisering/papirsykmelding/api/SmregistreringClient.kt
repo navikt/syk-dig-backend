@@ -179,4 +179,24 @@ class SmregistreringClient(
         log.info("Korrigering av sykmelding $sykmeldingId fikk følgende responskode ${res.statusCode}")
         return res
     }
+
+    @Retryable
+    fun getRegisterPdfRequest(
+        token: String,
+        oppgaveId: String,
+        dokumentInfoId: String,
+    ): ResponseEntity<ByteArray> {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_PDF
+        headers.setBearerAuth(token)
+
+        val response =
+            smregisteringRestTemplate.exchange(
+                "$url/api/v1/pdf/$oppgaveId/$dokumentInfoId",
+                HttpMethod.GET,
+                HttpEntity<String>(headers),
+                ByteArray::class.java,
+            )
+        return response
+    }
 }
