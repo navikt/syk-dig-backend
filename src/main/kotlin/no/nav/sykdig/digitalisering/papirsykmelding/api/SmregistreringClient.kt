@@ -21,7 +21,7 @@ class SmregistreringClient(
 
     @Retryable
     fun postAvvisOppgaveRequest(
-        token: String,
+        authorization: String,
         oppgaveId: String,
         navEnhet: String,
         avvisSykmeldingReason: String?,
@@ -29,7 +29,7 @@ class SmregistreringClient(
         val headers = HttpHeaders()
         headers.set("X-Nav-Enhet", navEnhet)
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(token)
+        headers.setBearerAuth(removeBearerPrefix(authorization))
 
         val res =
             smregisteringRestTemplate.exchange(
@@ -45,12 +45,12 @@ class SmregistreringClient(
 
     @Retryable
     fun getOppgaveRequest(
-        token: String,
+        authorization: String,
         oppgaveId: String,
     ): ResponseEntity<PapirManuellOppgave> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(token)
+        headers.setBearerAuth(removeBearerPrefix(authorization))
 
         val res =
             smregisteringRestTemplate.exchange(
@@ -64,13 +64,13 @@ class SmregistreringClient(
 
     @Retryable
     fun getPasientNavnRequest(
-        token: String,
+        authorization: String,
         fnr: String,
     ): ResponseEntity<PasientNavn> {
         val headers = HttpHeaders()
         headers.set("X-Pasient-Fnr", fnr)
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(token)
+        headers.setBearerAuth(removeBearerPrefix(authorization))
 
         return smregisteringRestTemplate.exchange(
             "$url/api/v1/pasient",
@@ -82,12 +82,12 @@ class SmregistreringClient(
 
     @Retryable
     fun getSykmelderRequest(
-        token: String,
+        authorization: String,
         hprNummer: String,
     ): ResponseEntity<Sykmelder> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(token)
+        headers.setBearerAuth(removeBearerPrefix(authorization))
 
         return smregisteringRestTemplate.exchange(
             "$url/api/v1/sykmelder/$hprNummer",
@@ -99,7 +99,7 @@ class SmregistreringClient(
 
     @Retryable
     fun postSendOppgaveRequest(
-        token: String,
+        authorization: String,
         oppgaveId: String,
         navEnhet: String,
         papirSykmelding: SmRegistreringManuell,
@@ -107,7 +107,7 @@ class SmregistreringClient(
         val headers = HttpHeaders()
         headers.set("X-Nav-Enhet", navEnhet)
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(token)
+        headers.setBearerAuth(removeBearerPrefix(authorization))
 
         val res =
             smregisteringRestTemplate.exchange(
@@ -122,12 +122,12 @@ class SmregistreringClient(
 
     @Retryable
     fun getFerdigstiltSykmeldingRequest(
-        token: String,
+        authorization: String,
         sykmeldingId: String,
     ): ResponseEntity<PapirManuellOppgave> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(token)
+        headers.setBearerAuth(removeBearerPrefix(authorization))
 
         return smregisteringRestTemplate.exchange(
             "$url/api/v1/sykmelding/$sykmeldingId/ferdigstilt",
@@ -139,12 +139,12 @@ class SmregistreringClient(
 
     @Retryable
     fun postOppgaveTilGosysRequest(
-        token: String,
+        authorization: String,
         oppgaveId: String,
     ): ResponseEntity<HttpStatusCode> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(token)
+        headers.setBearerAuth(removeBearerPrefix(authorization))
 
         val res =
             smregisteringRestTemplate.exchange(
@@ -159,7 +159,7 @@ class SmregistreringClient(
 
     @Retryable
     fun postKorrigerSykmeldingRequest(
-        token: String,
+        authorization: String,
         sykmeldingId: String,
         navEnhet: String,
         papirSykmelding: SmRegistreringManuell,
@@ -167,7 +167,7 @@ class SmregistreringClient(
         val headers = HttpHeaders()
         headers.set("X-Nav-Enhet", navEnhet)
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(token)
+        headers.setBearerAuth(removeBearerPrefix(authorization))
 
         val res =
             smregisteringRestTemplate.exchange(
@@ -182,13 +182,13 @@ class SmregistreringClient(
 
     @Retryable
     fun getRegisterPdfRequest(
-        token: String,
+        authorization: String,
         oppgaveId: String,
         dokumentInfoId: String,
     ): ResponseEntity<ByteArray> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_PDF
-        headers.setBearerAuth(token)
+        headers.setBearerAuth(removeBearerPrefix(authorization))
 
         val response =
             smregisteringRestTemplate.exchange(
@@ -197,6 +197,11 @@ class SmregistreringClient(
                 HttpEntity<String>(headers),
                 ByteArray::class.java,
             )
+        log.info("Hentet pdf for oppgave $oppgaveId og dokumentinfoId $dokumentInfoId med responskode ${response.statusCode}")
         return response
+    }
+
+    fun removeBearerPrefix(authorization: String): String {
+        return authorization.removePrefix("Bearer ")
     }
 }
