@@ -38,19 +38,21 @@ class SmregistreringClient(
         headers.setBearerAuth(token)
 
         return try {
-            val res = smregisteringRestTemplate.exchange(
-                "$url/api/v1/oppgave/$oppgaveId/$typeRequest",
-                HttpMethod.POST,
-                HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason), headers),
-                HttpStatusCode::class.java
-            )
+            val res =
+                smregisteringRestTemplate.exchange(
+                    "$url/api/v1/oppgave/$oppgaveId/$typeRequest",
+                    HttpMethod.POST,
+                    HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason), headers),
+                    HttpStatusCode::class.java,
+                )
 
             log.info("Oppgave $oppgaveId avvist med responskode ${res.statusCode}")
             res
         } catch (e: HttpClientErrorException) {
             log.error(
                 "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                        "ved forsøk på å avvise oppgave: ${e.message}", e
+                    "ved forsøk på å avvise oppgave: ${e.message}",
+                e,
             )
             return if (e.statusCode == HttpStatus.UNAUTHORIZED || e.statusCode == HttpStatus.FORBIDDEN) {
                 log.error("Veileder har ikke tilgang til oppgave $oppgaveId")
@@ -61,12 +63,12 @@ class SmregistreringClient(
         } catch (e: HttpServerErrorException) {
             log.error(
                 "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                        "ved forsøk på å avvise oppgave: ${e.message}", e
+                    "ved forsøk på å avvise oppgave: ${e.message}",
+                e,
             )
             throw e
         }
     }
-
 
     @Retryable
     fun getOppgaveRequest(
@@ -195,34 +197,15 @@ class SmregistreringClient(
         headers.set("X-Nav-Enhet", navEnhet)
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(token)
-        return try {
-            val res = smregisteringRestTemplate.exchange(
-                "$url/api/v1/oppgave/$oppgaveId/send",
-                HttpMethod.POST,
-                HttpEntity(papirSykmelding, headers),
-                String::class.java,
-            )
-            log.info("registrering av oppgave $oppgaveId fikk følgende responskode ${res.statusCode}")
-            res
-        } catch (e: HttpClientErrorException) {
-            log.error(
-                "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
-                        "${e.statusCode.value()} fra Oppgave ved sending: ${e.message}",
-                e,
-            )
-            if (e.statusCode == HttpStatus.UNAUTHORIZED || e.statusCode == HttpStatus.FORBIDDEN) {
-                log.error("Veileder har ikke tilgang til oppgave $oppgaveId")
-                ResponseEntity.status(e.statusCode).body(HttpStatusCode.valueOf(e.statusCode.value()))
-            }
-            ResponseEntity.status(e.statusCode).body(e.responseBodyAsString)
-        } catch (e: HttpServerErrorException) {
-            log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
-                        "${e.statusCode.value()} fra Oppgave ved sending: ${e.message}",
-                e,
-            )
-            throw e
-        }
+
+        val res = smregisteringRestTemplate.exchange(
+            "$url/api/v1/oppgave/$oppgaveId/send",
+            HttpMethod.POST,
+            HttpEntity(papirSykmelding, headers),
+            String::class.java,
+        )
+        log.info("registrering av oppgave $oppgaveId fikk følgende responskode ${res.statusCode}")
+        return res
     }
 
     @Retryable
@@ -272,19 +255,21 @@ class SmregistreringClient(
         headers.setBearerAuth(token)
 
         return try {
-            val res = smregisteringRestTemplate.exchange(
-                "$url/api/v1/oppgave/$oppgaveId/tilgosys",
-                HttpMethod.POST,
-                HttpEntity(null, headers),
-                HttpStatusCode::class.java,
-            )
+            val res =
+                smregisteringRestTemplate.exchange(
+                    "$url/api/v1/oppgave/$oppgaveId/tilgosys",
+                    HttpMethod.POST,
+                    HttpEntity(null, headers),
+                    HttpStatusCode::class.java,
+                )
 
             log.info("Oppgave $oppgaveId sendt til Gosys med responskode ${res.statusCode}")
             res
         } catch (e: HttpClientErrorException) {
             log.error(
                 "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                        "ved forsøk på å sende oppgave til Gosys: ${e.message}", e
+                    "ved forsøk på å sende oppgave til Gosys: ${e.message}",
+                e,
             )
             return if (e.statusCode == HttpStatus.UNAUTHORIZED || e.statusCode == HttpStatus.FORBIDDEN) {
                 log.error("Veileder har ikke tilgang til oppgave $oppgaveId")
@@ -295,10 +280,52 @@ class SmregistreringClient(
         } catch (e: HttpServerErrorException) {
             log.error(
                 "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                        "ved forsøk på å sende oppgave til Gosys: ${e.message}", e
+                    "ved forsøk på å sende oppgave til Gosys: ${e.message}",
+                e,
             )
             throw e
         }
     }
 
+    @Retryable
+    fun postKorrigerSykmeldingRequest(
+        token: String,
+        sykmeldingId: String,
+        navEnhet: String,
+        papirSykmelding: SmRegistreringManuell,
+    ): ResponseEntity<String> {
+        val headers = HttpHeaders()
+        headers.set("X-Nav-Enhet", navEnhet)
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.setBearerAuth(token)
+        return try {
+            val res =
+                smregisteringRestTemplate.exchange(
+                    "$url/api/v1/sykmelding/$sykmeldingId",
+                    HttpMethod.POST,
+                    HttpEntity(papirSykmelding, headers),
+                    String::class.java,
+                )
+            log.info("Korrigering av sykmelding $sykmeldingId fikk følgende responskode ${res.statusCode}")
+            res
+        } catch (e: HttpClientErrorException) {
+            log.error(
+                "HttpClientErrorException for sykmeldingId $sykmeldingId med responskode " +
+                    "${e.statusCode.value()} med message: ${e.message}",
+                e,
+            )
+            if (e.statusCode == HttpStatus.UNAUTHORIZED || e.statusCode == HttpStatus.FORBIDDEN) {
+                log.error("Veileder har ikke tilgang til sykmelding $sykmeldingId")
+                ResponseEntity.status(e.statusCode).body(HttpStatusCode.valueOf(e.statusCode.value()))
+            }
+            ResponseEntity.status(e.statusCode).body(e.responseBodyAsString)
+        } catch (e: HttpServerErrorException) {
+            log.error(
+                "HttpServerErrorException for sykmeldingId $sykmeldingId med responskode " +
+                    "${e.statusCode.value()} med message: ${e.message}",
+                e,
+            )
+            throw e
+        }
+    }
 }
