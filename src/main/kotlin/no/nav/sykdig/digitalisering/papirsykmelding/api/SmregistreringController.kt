@@ -27,8 +27,7 @@ class SmregistreringController(
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<HttpStatusCode> {
         log.info("avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
-        val token = authorization.removePrefix("Bearer ")
-        return smregistreringClient.postAvvisOppgaveRequest(token, oppgaveId, navEnhet, avvisSykmeldingRequest)
+        return smregistreringClient.postAvvisOppgaveRequest(authorization, oppgaveId, navEnhet, avvisSykmeldingRequest)
     }
 
     @GetMapping("/oppgave/{oppgaveid}")
@@ -38,8 +37,7 @@ class SmregistreringController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
         log.info("henter oppgave med id $oppgaveid gjennom syk-dig proxy")
-        val token = authorization.removePrefix("Bearer ")
-        return smregistreringClient.getOppgaveRequest(token, oppgaveid)
+        return smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
     }
 
     @GetMapping("/pasient")
@@ -48,8 +46,7 @@ class SmregistreringController(
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Pasient-Fnr") fnr: String,
     ): ResponseEntity<PasientNavn> {
-        val token = authorization.removePrefix("Bearer ")
-        return smregistreringClient.getPasientNavnRequest(token, fnr)
+        return smregistreringClient.getPasientNavnRequest(authorization, fnr)
     }
 
     @GetMapping("/sykmelder/{hprNummer}")
@@ -58,8 +55,7 @@ class SmregistreringController(
         @PathVariable hprNummer: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<Sykmelder> {
-        val token = authorization.removePrefix("Bearer ")
-        return smregistreringClient.getSykmelderRequest(token, hprNummer)
+        return smregistreringClient.getSykmelderRequest(authorization, hprNummer)
     }
 
     @PostMapping("/oppgave/{oppgaveId}/send")
@@ -69,8 +65,7 @@ class SmregistreringController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<String> {
-        val token = authorization.removePrefix("Bearer ")
-        return smregistreringClient.postSendOppgaveRequest(token, oppgaveId, navEnhet, papirSykmelding)
+        return smregistreringClient.postSendOppgaveRequest(authorization, oppgaveId, navEnhet, papirSykmelding)
     }
 
     @GetMapping("/sykmelding/{sykmeldingId}/ferdigstilt")
@@ -80,8 +75,7 @@ class SmregistreringController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
         log.info("henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
-        val token = authorization.removePrefix("Bearer ")
-        return smregistreringClient.getFerdigstiltSykmeldingRequest(token, sykmeldingId)
+        return smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
     }
 
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
@@ -90,8 +84,7 @@ class SmregistreringController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<HttpStatusCode> {
         log.info("Sender oppgave med id $oppgaveId til Gosys gjennom syk-dig proxy")
-        val token = authorization.removePrefix("Bearer ")
-        return smregistreringClient.postOppgaveTilGosysRequest(token, oppgaveId)
+        return smregistreringClient.postOppgaveTilGosysRequest(authorization, oppgaveId)
     }
 
     @PostMapping("/sykmelding/{sykmeldingId}")
@@ -101,8 +94,7 @@ class SmregistreringController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<String> {
-        val token = authorization.removePrefix("Bearer ")
-        return smregistreringClient.postKorrigerSykmeldingRequest(token, sykmeldingId, navEnhet, papirSykmelding)
+        return smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
     }
 
     @GetMapping("/pdf/{oppgaveId}/{dokumentInfoId}")
@@ -113,7 +105,6 @@ class SmregistreringController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<ByteArray> {
         log.info("henter pdf med oppgaveId $oppgaveId of dokumentinfoId $dokumentInfoId gjennom syk-dig proxy")
-        val token = authorization.removePrefix("Bearer ")
-        return smregistreringClient.getRegisterPdfRequest(token, oppgaveId, dokumentInfoId)
+        return smregistreringClient.getRegisterPdfRequest(authorization, oppgaveId, dokumentInfoId)
     }
 }

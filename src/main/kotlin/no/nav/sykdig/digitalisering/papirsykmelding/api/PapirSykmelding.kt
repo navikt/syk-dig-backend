@@ -90,15 +90,3 @@ data class SmRegistreringManuell(
     val harUtdypendeOpplysninger: Boolean,
 )
 
-sealed class PdfDocument {
-    data class Good(val value: ByteArray) : PdfDocument()
-
-    data class Error(val value: PdfErrors) : PdfDocument()
-}
-
-enum class PdfErrors {
-    DOCUMENT_NOT_FOUND,
-    SAF_CLIENT_ERROR,
-    EMPTY_RESPONSE,
-    SAKSBEHANDLER_IKKE_TILGANG,
-}

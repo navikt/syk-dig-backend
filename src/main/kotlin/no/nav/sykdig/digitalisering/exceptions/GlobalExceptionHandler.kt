@@ -7,42 +7,41 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
-import java.time.LocalDateTime
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
     val log = applog()
 
     @ExceptionHandler(HttpClientErrorException::class)
-    fun handleHttpClientErrorException(e: HttpClientErrorException): ResponseEntity<ErrorResponse> {
+    fun handleHttpClientErrorException(e: HttpClientErrorException): ResponseEntity<String> {
         return when (e.statusCode) {
             HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN -> {
                 log.error("Access denied. Status: ${e.statusCode}. Message: ${e.message}")
-                ResponseEntity.status(e.statusCode).body(ErrorResponse("Veileder har ikke tilgang til oppgaven.", e.statusCode.value(), LocalDateTime.now()))
+                ResponseEntity.status(e.statusCode).body("Veileder har ikke tilgang til oppgaven.")
             }
             HttpStatus.BAD_REQUEST -> {
                 log.error("Bad request. Status: ${e.statusCode}. Message: ${e.responseBodyAsString}")
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse(e.responseBodyAsString, e.statusCode.value(), LocalDateTime.now()))
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.responseBodyAsString)
             }
             HttpStatus.NOT_FOUND -> {
                 log.error("Not found. Status: ${e.statusCode}. Message: ${e.responseBodyAsString}")
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse(e.responseBodyAsString, e.statusCode.value(), LocalDateTime.now()))
+                ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.responseBodyAsString)
             }
             HttpStatus.GONE -> {
                 log.error("Gone. Status: ${e.statusCode}. Message: ${e.responseBodyAsString}")
-                ResponseEntity.status(HttpStatus.GONE).body(ErrorResponse(e.responseBodyAsString, e.statusCode.value(), LocalDateTime.now()))
+                ResponseEntity.status(HttpStatus.GONE).body(e.responseBodyAsString)
             }
             else -> {
                 log.error("Client error. Status: ${e.statusCode}. Message: ${e.responseBodyAsString}")
-                ResponseEntity.status(e.statusCode).body(ErrorResponse(e.responseBodyAsString, e.statusCode.value(), LocalDateTime.now()))
+                ResponseEntity.status(e.statusCode).body(e.responseBodyAsString)
             }
         }
     }
 
     @ExceptionHandler(HttpServerErrorException::class)
-    fun handleHttpServerErrorException(e: HttpServerErrorException): ResponseEntity<ErrorResponse> {
+    fun handleHttpServerErrorException(e: HttpServerErrorException): ResponseEntity<String> {
         log.error("Server error. Status: ${e.statusCode}. Message: ${e.message}", e)
-        return ResponseEntity.status(e.statusCode).body(ErrorResponse("Internal server error occurred.", e.statusCode.value(), LocalDateTime.now()))
+        return ResponseEntity.status(e.statusCode).body("Internal server error occurred.")
     }
 
     @ExceptionHandler(Exception::class)
@@ -51,5 +50,3 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred")
     }
 }
-
-data class ErrorResponse(val message: String, val httpStatus: Int, val timestamp: LocalDateTime)
