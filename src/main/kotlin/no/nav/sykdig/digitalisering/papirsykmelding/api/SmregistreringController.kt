@@ -40,7 +40,6 @@ class SmregistreringController(
         log.info("henter oppgave med id $oppgaveid gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
         return smregistreringClient.getOppgaveRequest(token, oppgaveid)
-
     }
 
     @GetMapping("/pasient")
@@ -83,7 +82,6 @@ class SmregistreringController(
         log.info("henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
         return smregistreringClient.getFerdigstiltSykmeldingRequest(token, sykmeldingId)
-
     }
 
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
@@ -94,5 +92,16 @@ class SmregistreringController(
         log.info("Sender oppgave med id $oppgaveId til Gosys gjennom syk-dig proxy")
         val token = authorization.removePrefix("Bearer ")
         return smregistreringClient.postOppgaveTilGosysRequest(token, oppgaveId)
+    }
+
+    @PostMapping("/sykmelding/{sykmeldingId}")
+    fun korrigerSykmelding(
+        @PathVariable sykmeldingId: String,
+        @RequestHeader("Authorization") authorization: String,
+        @RequestHeader("X-Nav-Enhet") navEnhet: String,
+        @RequestBody papirSykmelding: SmRegistreringManuell,
+    ): ResponseEntity<String> {
+        val token = authorization.removePrefix("Bearer ")
+        return smregistreringClient.postKorrigerSykmeldingRequest(token, sykmeldingId, navEnhet, papirSykmelding)
     }
 }
