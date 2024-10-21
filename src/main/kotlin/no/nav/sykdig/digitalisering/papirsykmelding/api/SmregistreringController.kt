@@ -69,7 +69,7 @@ class SmregistreringController(
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
-    ): ResponseEntity<HttpStatusCode> {
+    ): ResponseEntity<String> {
         val token = authorization.removePrefix("Bearer ")
         return smregistreringClient.postSendOppgaveRequest(token, oppgaveId, navEnhet, papirSykmelding)
     }

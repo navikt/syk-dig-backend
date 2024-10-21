@@ -195,7 +195,7 @@ class SmregistreringClient(
         oppgaveId: String,
         navEnhet: String,
         papirSykmelding: SmRegistreringManuell,
-    ): ResponseEntity<HttpStatusCode> {
+    ): ResponseEntity<String> {
         val headers = HttpHeaders()
         headers.set("X-Nav-Enhet", navEnhet)
         headers.contentType = MediaType.APPLICATION_JSON
@@ -205,7 +205,7 @@ class SmregistreringClient(
                 "$url/api/v1/oppgave/$oppgaveId/send",
                 HttpMethod.POST,
                 HttpEntity(papirSykmelding, headers),
-                HttpStatusCode::class.java,
+                String::class.java,
             )
             if (res.statusCode.is4xxClientError) {
                 log.error("client error ved registrering av oppgave $oppgaveId med kode ${res.statusCode}")
