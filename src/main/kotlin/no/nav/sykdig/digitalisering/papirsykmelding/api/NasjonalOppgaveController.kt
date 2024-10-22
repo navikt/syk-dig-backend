@@ -6,7 +6,6 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgav
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PasientNavn
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
-import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,10 +21,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/proxy")
 class NasjonalOppgaveController(
     private val smregistreringClient: SmregistreringClient,
-    private val nasjonalOppgaveService: NasjonalOppgaveService,
+    private val nasjonalOppgaveService: NasjonalOppgaveService
 ) {
     val log = applog()
-    val securelog = securelog()
 
     @PostMapping("/oppgave/{oppgaveId}/avvis")
     fun avvisOppgave(
@@ -45,12 +43,9 @@ class NasjonalOppgaveController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
         log.info("papirsykmelding: henter oppgave med id $oppgaveid gjennom syk-dig proxy")
-        val papirmanuelloppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
-        securelog.info("papirsykmeldingManuellOppgave ${papirmanuelloppgave.body}")
         val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
         val papirManuellOppgave = oppgave.body
-        if (papirManuellOppgave != null) {
-            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
+        if (papirManuellOppgave != null){
             nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
         }
         return oppgave
