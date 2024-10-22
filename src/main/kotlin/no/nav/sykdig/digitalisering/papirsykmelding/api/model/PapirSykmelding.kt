@@ -1,4 +1,4 @@
-package no.nav.sykdig.digitalisering.papirsykmelding.api
+package no.nav.sykdig.digitalisering.papirsykmelding.api.model
 
 import java.time.LocalDate
 import java.time.OffsetDateTime

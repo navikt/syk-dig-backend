@@ -2,6 +2,11 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
 import no.nav.sykdig.securelog
+import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PasientNavn
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,8 +20,9 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/proxy")
-class SmregistreringController(
+class NasjonalOppgaveController(
     private val smregistreringClient: SmregistreringClient,
+    private val nasjonalOppgaveService: NasjonalOppgaveService
 ) {
     val log = applog()
     val securelog = securelog()
@@ -41,7 +47,12 @@ class SmregistreringController(
         log.info("papirsykmelding: henter oppgave med id $oppgaveid gjennom syk-dig proxy")
         val papirmanuelloppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
         securelog.info("papirsykmeldingManuellOppgave ${papirmanuelloppgave.body}")
-        return papirmanuelloppgave
+        val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
+        val papirManuellOppgave = oppgave.body
+        if (papirManuellOppgave != null){
+            nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
+        }
+        return oppgave
     }
 
     @GetMapping("/pasient")
