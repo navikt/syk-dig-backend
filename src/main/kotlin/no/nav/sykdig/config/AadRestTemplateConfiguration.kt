@@ -123,7 +123,6 @@ class AadRestTemplateConfiguration {
         clientConfigurationProperties: ClientConfigurationProperties,
         oAuth2AccessTokenService: OAuth2AccessTokenService,
     ): RestTemplate {
-        log.info("configurerer smreg resttemplate $clientConfigurationProperties")
         return downstreamRestTemplate(
             registrationName = "onbehalfof-smreg",
             restTemplateBuilder = restTemplateBuilder,
