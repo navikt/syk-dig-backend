@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 
 @Component
 class SmregistreringClient(
@@ -30,10 +31,14 @@ class SmregistreringClient(
         headers.set("X-Nav-Enhet", navEnhet)
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(removeBearerPrefix(authorization))
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/{oppgaveId}/avvis")
+                .buildAndExpand(oppgaveId)
+                .toUri()
 
         val res =
             smregisteringRestTemplate.exchange(
-                "$url/api/v1/oppgave/$oppgaveId/avvis",
+                uri,
                 HttpMethod.POST,
                 HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason), headers),
                 HttpStatusCode::class.java,
@@ -51,10 +56,14 @@ class SmregistreringClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(removeBearerPrefix(authorization))
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/{oppgaveId}")
+                .buildAndExpand(oppgaveId)
+                .toUri()
 
         val res =
             smregisteringRestTemplate.exchange(
-                "$url/api/v1/oppgave/$oppgaveId",
+                uri,
                 HttpMethod.GET,
                 HttpEntity<String>(headers),
                 PapirManuellOppgave::class.java,
@@ -89,8 +98,13 @@ class SmregistreringClient(
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(removeBearerPrefix(authorization))
 
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelder/{hprNummer}")
+                .buildAndExpand(hprNummer)
+                .toUri()
+
         return smregisteringRestTemplate.exchange(
-            "$url/api/v1/sykmelder/$hprNummer",
+            uri,
             HttpMethod.GET,
             HttpEntity<String>(headers),
             Sykmelder::class.java,
@@ -108,10 +122,14 @@ class SmregistreringClient(
         headers.set("X-Nav-Enhet", navEnhet)
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(removeBearerPrefix(authorization))
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/{oppgaveId}/send")
+                .buildAndExpand(oppgaveId)
+                .toUri()
 
         val res =
             smregisteringRestTemplate.exchange(
-                "$url/api/v1/oppgave/$oppgaveId/send",
+                uri,
                 HttpMethod.POST,
                 HttpEntity(papirSykmelding, headers),
                 String::class.java,
@@ -128,9 +146,13 @@ class SmregistreringClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(removeBearerPrefix(authorization))
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelding/{sykmeldingId}/ferdigstilt")
+                .buildAndExpand(sykmeldingId)
+                .toUri()
 
         return smregisteringRestTemplate.exchange(
-            "$url/api/v1/sykmelding/$sykmeldingId/ferdigstilt",
+            uri,
             HttpMethod.GET,
             HttpEntity<String>(headers),
             PapirManuellOppgave::class.java,
@@ -145,10 +167,14 @@ class SmregistreringClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(removeBearerPrefix(authorization))
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/{oppgaveId}/tilgosys")
+                .buildAndExpand(oppgaveId)
+                .toUri()
 
         val res =
             smregisteringRestTemplate.exchange(
-                "$url/api/v1/oppgave/$oppgaveId/tilgosys",
+                uri,
                 HttpMethod.POST,
                 HttpEntity(null, headers),
                 HttpStatusCode::class.java,
@@ -168,10 +194,13 @@ class SmregistreringClient(
         headers.set("X-Nav-Enhet", navEnhet)
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(removeBearerPrefix(authorization))
-
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelding/{sykmeldingId}")
+                .buildAndExpand(sykmeldingId)
+                .toUri()
         val res =
             smregisteringRestTemplate.exchange(
-                "$url/api/v1/sykmelding/$sykmeldingId",
+                uri,
                 HttpMethod.POST,
                 HttpEntity(papirSykmelding, headers),
                 String::class.java,
@@ -189,10 +218,14 @@ class SmregistreringClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_PDF
         headers.setBearerAuth(removeBearerPrefix(authorization))
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/pdf/$oppgaveId/$dokumentInfoId")
+                .buildAndExpand(oppgaveId, dokumentInfoId)
+                .toUri()
 
         val response =
             smregisteringRestTemplate.exchange(
-                "$url/api/v1/pdf/$oppgaveId/$dokumentInfoId",
+                uri,
                 HttpMethod.GET,
                 HttpEntity<String>(headers),
                 ByteArray::class.java,
