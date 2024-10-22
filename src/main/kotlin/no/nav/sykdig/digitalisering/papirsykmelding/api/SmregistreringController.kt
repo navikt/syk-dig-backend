@@ -26,7 +26,7 @@ class SmregistreringController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<HttpStatusCode> {
-        log.info("avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
+        log.info("papirsykmelding: avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
         return smregistreringClient.postAvvisOppgaveRequest(authorization, oppgaveId, navEnhet, avvisSykmeldingRequest)
     }
 
@@ -36,7 +36,7 @@ class SmregistreringController(
         @PathVariable oppgaveid: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-        log.info("henter oppgave med id $oppgaveid gjennom syk-dig proxy")
+        log.info("papirsykmelding: henter oppgave med id $oppgaveid gjennom syk-dig proxy")
         return smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
     }
 
@@ -65,7 +65,7 @@ class SmregistreringController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<String> {
-        log.info("sender oppgave med oppgaveId $oppgaveId gjennom syk-dig proxy")
+        log.info("papirsykmelding: sender oppgave med oppgaveId $oppgaveId gjennom syk-dig proxy")
         return smregistreringClient.postSendOppgaveRequest(authorization, oppgaveId, navEnhet, papirSykmelding)
     }
 
@@ -75,7 +75,7 @@ class SmregistreringController(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-        log.info("henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
+        log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
         return smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
     }
 
@@ -84,7 +84,7 @@ class SmregistreringController(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<HttpStatusCode> {
-        log.info("Sender oppgave med id $oppgaveId til Gosys gjennom syk-dig proxy")
+        log.info("papirsykmelding: Sender oppgave med id $oppgaveId til Gosys gjennom syk-dig proxy")
         return smregistreringClient.postOppgaveTilGosysRequest(authorization, oppgaveId)
     }
 
@@ -95,7 +95,7 @@ class SmregistreringController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<String> {
-        log.info("Korrrigerer sykmelding med id $sykmeldingId gjennom syk-dig proxy")
+        log.info("papirsykmelding: Korrrigerer sykmelding med id $sykmeldingId gjennom syk-dig proxy")
         return smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
     }
 
@@ -106,7 +106,7 @@ class SmregistreringController(
         @PathVariable dokumentInfoId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<ByteArray> {
-        log.info("henter pdf med oppgaveId $oppgaveId of dokumentinfoId $dokumentInfoId gjennom syk-dig proxy")
+        log.info("papirsykmelding: henter pdf med oppgaveId $oppgaveId of dokumentinfoId $dokumentInfoId gjennom syk-dig proxy")
         return smregistreringClient.getRegisterPdfRequest(authorization, oppgaveId, dokumentInfoId)
     }
 }
