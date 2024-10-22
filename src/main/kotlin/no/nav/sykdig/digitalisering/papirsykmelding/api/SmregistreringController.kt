@@ -65,6 +65,7 @@ class SmregistreringController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<String> {
+        log.info("sender oppgave med oppgaveId $oppgaveId gjennom syk-dig proxy")
         return smregistreringClient.postSendOppgaveRequest(authorization, oppgaveId, navEnhet, papirSykmelding)
     }
 
@@ -94,6 +95,7 @@ class SmregistreringController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<String> {
+        log.info("Korrrigerer sykmelding med id $sykmeldingId gjennom syk-dig proxy")
         return smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
     }
 
