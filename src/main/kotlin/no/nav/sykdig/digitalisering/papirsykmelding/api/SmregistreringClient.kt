@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
