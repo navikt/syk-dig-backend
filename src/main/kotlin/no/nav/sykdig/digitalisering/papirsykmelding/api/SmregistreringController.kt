@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
+import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,6 +19,7 @@ class SmregistreringController(
     private val smregistreringClient: SmregistreringClient,
 ) {
     val log = applog()
+    val securelog = securelog()
 
     @PostMapping("/oppgave/{oppgaveId}/avvis")
     fun avvisOppgave(
@@ -37,7 +39,9 @@ class SmregistreringController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
         log.info("papirsykmelding: henter oppgave med id $oppgaveid gjennom syk-dig proxy")
-        return smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
+        val papirmanuelloppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
+        securelog.info("papirsykmeldingManuellOppgave ${papirmanuelloppgave}")
+        return papirmanuelloppgave
     }
 
     @GetMapping("/pasient")
