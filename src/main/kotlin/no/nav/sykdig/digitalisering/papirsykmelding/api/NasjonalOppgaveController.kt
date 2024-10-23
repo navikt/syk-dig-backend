@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
+import no.nav.sykdig.securelog
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PasientNavn
@@ -24,6 +25,7 @@ class NasjonalOppgaveController(
     private val nasjonalOppgaveService: NasjonalOppgaveService
 ) {
     val log = applog()
+    val securelog = securelog()
 
     @PostMapping("/oppgave/{oppgaveId}/avvis")
     fun avvisOppgave(
