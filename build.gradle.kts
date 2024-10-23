@@ -50,6 +50,7 @@ val prometheusVersion = "0.16.0"
 val mockkVersion = "1.13.10"
 val kluentVersion = "1.73"
 val coroutinesVersion = "1.8.1"
+val hibernateVersion = "6.2.6.Final"
 val jacksonDatatypeJsr310Version = "2.18.0"
 
 dependencies {
@@ -84,7 +85,6 @@ dependencies {
     implementation("com.migesok:jaxb-java-time-adapters:$javaTimeAdapterVersion")
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("com.auth0:java-jwt:$javaJwtVersion")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-web:$springSecurityWebVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
@@ -102,6 +102,7 @@ dependencies {
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
 
+    implementation("org.hibernate.orm:hibernate-core:$hibernateVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:kafka")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")

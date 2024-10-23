@@ -1,8 +1,10 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalSykmeldingRepository
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -11,10 +13,36 @@ class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
     private val nasjonalSykmeldingRepository: NasjonalSykmeldingRepository,
 ) {
-    fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave) {
-        nasjonalOppgaveRepository.save(papirManuellOppgave.mapToDao())
+    fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
+        val papirmanuellOppgaveDAO = mapToDao(papirManuellOppgave)
+        return nasjonalOppgaveRepository.save(papirmanuellOppgaveDAO)
     }
 
+    fun mapToDao(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
+        val mapper = jacksonObjectMapper()
+        return NasjonalManuellOppgaveDAO(
+            sykmeldingId = papirManuellOppgave.sykmeldingId,
+            journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
+            fnr = papirManuellOppgave.fnr,
+            aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
+            dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
+            datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet?.toLocalDateTime(),
+            oppgaveId = papirManuellOppgave.oppgaveid,
+            ferdigstilt = false,
+            papirSmRegistrering =
+                mapper.writeValueAsString(
+                    papirManuellOppgave.papirSmRegistering.let {
+                        it.datoOpprettet?.toLocalDateTime()
+                    },
+                ),
+            utfall = null,
+            ferdigstiltAv = null,
+            datoFerdigstilt = null,
+            avvisningsgrunn = null,
+        )
+    }
+
+    // steg 2
     fun ferdigstillNasjonalOppgave(
         sykmeldingId: String,
         utfall: String,
