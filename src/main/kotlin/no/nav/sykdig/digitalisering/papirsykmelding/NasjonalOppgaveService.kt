@@ -2,22 +2,32 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
-import no.nav.sykdig.digitalisering.papirsykmelding.db.TestRepository
+import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalSykmeldingRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class NasjonalOppgaveService(
-    private val repository: NasjonalOppgaveRepository,
-    private val trepo: TestRepository,
+    private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
+    private val nasjonalSykmeldingRepository: NasjonalSykmeldingRepository,
 ) {
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave) {
-        repository.lagreOppgave(papirManuellOppgave)
-        TODO("Not yet implemented")
+        nasjonalOppgaveRepository.save(papirManuellOppgave.mapToDao())
     }
 
-    fun saveOppgave(papirManuellOppgave: PapirManuellOppgave): PapirManuellOppgave {
-        trepo.save(papirManuellOppgave)
+    fun ferdigstillNasjonalOppgave(
+        sykmeldingId: String,
+        utfall: String,
+        ferdigstiltAv: String,
+        avvisningsgrunn: String?,
+        ferdigstiltDato: LocalDateTime,
+    ) {
+        /*val nasjonalOppgave = repository.findBySykmeldingId(sykmeldingId).apply {
+            utfall = utfall,
+            ferdigstiltAv = ferdigstiltAv,
+            avvisningsgrunn = avvisningsgrunn,
+            ferdigstiltDato = ferdigstiltDato
+        }
+        repository.save(nasjonalOppgave)*/
     }
-
-
 }

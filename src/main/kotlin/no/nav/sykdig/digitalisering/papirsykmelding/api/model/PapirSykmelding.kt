@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api.model
 
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -10,7 +11,25 @@ data class PapirManuellOppgave(
     var pdfPapirSykmelding: ByteArray,
     val papirSmRegistering: PapirSmRegistering,
     val documents: List<Document>,
-)
+) {
+    fun mapToDao(): NasjonalManuellOppgaveDAO {
+        return NasjonalManuellOppgaveDAO(
+            sykmeldingId = sykmeldingId,
+            journalpostId = papirSmRegistering.journalpostId,
+            fnr = fnr,
+            aktorId = papirSmRegistering.aktorId,
+            dokumentInfoId = papirSmRegistering.dokumentInfoId,
+            datoOpprettet = papirSmRegistering.datoOpprettet,
+            oppgaveId = oppgaveid,
+            ferdigstilt = false,
+            papirSmRegistrering = papirSmRegistering,
+            utfall = null,
+            ferdigstiltAv = null,
+            datoFerdigstilt = null,
+            avvisningsgrunn = null,
+        )
+    }
+}
 
 data class Document(
     val dokumentInfoId: String,
