@@ -1,6 +1,7 @@
 package no.nav.sykdig
 
 import no.nav.sykdig.db.OppgaveRepository
+import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +23,9 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 abstract class IntegrationTest {
     @Autowired
     lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
+
+    @Autowired
+    lateinit var nasjonalOppgaveRepository: NasjonalOppgaveRepository
 
     @Autowired
     lateinit var oppgaveRepository: OppgaveRepository

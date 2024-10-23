@@ -49,11 +49,10 @@ class NasjonalOppgaveController(
         securelog.info("papirsykmeldingManuellOppgave ${papirmanuelloppgave.body}")
         val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
         val papirManuellOppgave = oppgave.body
-        /*if (papirManuellOppgave != null)
-            {
-                nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
-            }*/
-        securelog.info("papirsykmeldingManuellOppgave $papirManuellOppgave")
+        if (papirManuellOppgave != null) {
+            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
+            nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
+        }
         return oppgave
     }
 
