@@ -40,7 +40,7 @@ class SmregistreringController(
     ): ResponseEntity<PapirManuellOppgave> {
         log.info("papirsykmelding: henter oppgave med id $oppgaveid gjennom syk-dig proxy")
         val papirmanuelloppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
-        securelog.info("papirsykmeldingManuellOppgave ${papirmanuelloppgave}")
+        securelog.info("papirsykmeldingManuellOppgave ${papirmanuelloppgave.body}")
         return papirmanuelloppgave
     }
 
