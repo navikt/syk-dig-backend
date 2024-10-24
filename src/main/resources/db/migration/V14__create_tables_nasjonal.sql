@@ -1,6 +1,7 @@
 create table nasjonal_manuelloppgave
 (
-    sykmelding_id         VARCHAR PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Auto-generated UUID
+    sykmelding_id VARCHAR NOT NULL,
     journalpost_id        VARCHAR  NOT NULL,
     fnr                   VARCHAR  NULL,
     aktor_id              VARCHAR  NULL,
