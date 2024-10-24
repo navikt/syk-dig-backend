@@ -20,53 +20,39 @@ import java.util.*
 @Entity
 @Table(name = "nasjonal_manuelloppgave")
 open class NasjonalManuellOppgaveDAO(
-    @Id
+    @jakarta.persistence.Id @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false, updatable = false)
     var id: UUID? = null,
-
     @Column(name = "sykmelding_id", nullable = false)
     val sykmeldingId: String,
-
     @Column(name = "journalpost_id", nullable = false)
     val journalpostId: String,
-
     @Column(name = "fnr")
     val fnr: String?,
-
     @Column(name = "aktor_id")
     val aktorId: String?,
-
     @Column(name = "dokument_info_id")
     val dokumentInfoId: String?,
-
     @Column(name = "dato_opprettet")
     val datoOpprettet: LocalDateTime?,
-
     @Column(name = "oppgave_id")
     val oppgaveId: Int?,
-
     @Column(name = "ferdigstilt", nullable = false)
     val ferdigstilt: Boolean = false,
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Convert(converter = JsonConverter::class)
     @Column(name = "papir_sm_registrering", columnDefinition = "jsonb")
     val papirSmRegistrering: String,
-
     @Column(name = "utfall")
     var utfall: String?,
-
     @Column(name = "ferdigstilt_av")
     var ferdigstiltAv: String?,
-
     @Column(name = "dato_ferdigstilt")
     var datoFerdigstilt: LocalDateTime?,
-
     @Column(name = "avvisningsgrunn")
-    var avvisningsgrunn: String?
+    var avvisningsgrunn: String?,
 )
-
 
 @Converter
 class JsonConverter : AttributeConverter<PapirSmRegistering, String> {
