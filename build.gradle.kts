@@ -9,6 +9,7 @@ plugins {
     id("com.netflix.dgs.codegen") version "5.12.4"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("org.jetbrains.kotlin.plugin.noarg") version "2.0.10"
 }
 
 group = "no.nav.sykdig"
@@ -20,6 +21,10 @@ repositories {
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
+}
+
+noArg {
+    annotation("jakarta.persistence.Entity") // Add no-args constructors for classes annotated with @Entity
 }
 
 val postgresVersion = "42.7.3"
@@ -84,7 +89,6 @@ dependencies {
     implementation("javax.activation:activation:$javaxActivationVersion")
     implementation("com.migesok:jaxb-java-time-adapters:$javaTimeAdapterVersion")
     implementation("org.hibernate.validator:hibernate-validator")
-    implementation("com.vladmihalcea:hibernate-types-52:2.21.1")
     implementation("com.auth0:java-jwt:$javaJwtVersion")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-web:$springSecurityWebVersion")
