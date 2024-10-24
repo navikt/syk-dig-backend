@@ -50,7 +50,7 @@ val prometheusVersion = "0.16.0"
 val mockkVersion = "1.13.10"
 val kluentVersion = "1.73"
 val coroutinesVersion = "1.8.1"
-val hibernateVersion = "6.2.6.Final"
+val hibernateVersion = "6.6.1.Final"
 val jacksonDatatypeJsr310Version = "2.18.0"
 
 dependencies {
@@ -84,6 +84,7 @@ dependencies {
     implementation("javax.activation:activation:$javaxActivationVersion")
     implementation("com.migesok:jaxb-java-time-adapters:$javaTimeAdapterVersion")
     implementation("org.hibernate.validator:hibernate-validator")
+    implementation("com.vladmihalcea:hibernate-types-52:2.21.1")
     implementation("com.auth0:java-jwt:$javaJwtVersion")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-web:$springSecurityWebVersion")

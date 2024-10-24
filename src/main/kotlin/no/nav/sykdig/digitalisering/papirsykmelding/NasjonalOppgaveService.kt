@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
@@ -20,6 +21,7 @@ class NasjonalOppgaveService(
 
     fun mapToDao(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
         val mapper = jacksonObjectMapper()
+        mapper.registerModules(JavaTimeModule())
         return NasjonalManuellOppgaveDAO(
             sykmeldingId = papirManuellOppgave.sykmeldingId,
             journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
