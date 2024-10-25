@@ -84,6 +84,7 @@ dependencies {
     implementation("com.migesok:jaxb-java-time-adapters:$javaTimeAdapterVersion")
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("com.auth0:java-jwt:$javaJwtVersion")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-web:$springSecurityWebVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")

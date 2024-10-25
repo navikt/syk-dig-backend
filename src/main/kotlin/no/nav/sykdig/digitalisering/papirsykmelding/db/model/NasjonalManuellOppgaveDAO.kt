@@ -14,13 +14,10 @@ import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
-import java.util.UUID
 
 @Table(name = "nasjonal_manuelloppgave")
 open class NasjonalManuellOppgaveDAO(
     @Id
-    @Column("id")
-    val id: UUID? = null,
     @Column("sykmelding_id")
     val sykmeldingId: String,
     @Column("journalpost_id")

@@ -13,15 +13,23 @@ import java.time.OffsetDateTime
 class NasjonalOppgaveRepositoryTest : IntegrationTest() {
     @Test
     fun `given New NasjonalOppgave opprett og hent`() {
-        val savedOppgave = nasjonalOppgaveRepository.save(testData())
-        val retrievedOppgave = nasjonalOppgaveRepository.findById(savedOppgave.id!!.toString())
+        val savedOppgave = nasjonalOppgaveRepository.save(testData("123"))
+        val retrievedOppgave = nasjonalOppgaveRepository.findById(savedOppgave.sykmeldingId)
         Assertions.assertTrue(retrievedOppgave.isPresent)
         assertEquals(savedOppgave.sykmeldingId, retrievedOppgave.get().sykmeldingId)
     }
 
-    fun testData(): NasjonalManuellOppgaveDAO {
+    @Test
+    fun `insert two instances with different sykmeldingId`() {
+        nasjonalOppgaveRepository.save(testData("1"))
+        nasjonalOppgaveRepository.save(testData("2"))
+        val retrievedOppgave = nasjonalOppgaveRepository.findAll()
+        assertEquals(1, retrievedOppgave.count())
+    }
+
+    fun testData(sykmeldingId: String): NasjonalManuellOppgaveDAO {
         return NasjonalManuellOppgaveDAO(
-            sykmeldingId = "123",
+            sykmeldingId = sykmeldingId,
             journalpostId = "123",
             fnr = "fnr",
             aktorId = "aktor",
