@@ -1,28 +1,25 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.objectMapper
 import org.amshove.kluent.internal.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.postgresql.util.PGobject
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 class NasjonalOppgaveRepositoryTest : IntegrationTest() {
     @Test
-    fun `given New NasjonalOppgave`() {
-        val oppgave = nasjonalOppgaveRepository.save(testData())
-        assertEquals("noe", oppgave)
+    fun `given New NasjonalOppgave opprett og hent`() {
+        val savedOppgave = nasjonalOppgaveRepository.save(testData())
+        val retrievedOppgave = nasjonalOppgaveRepository.findById(savedOppgave.id!!.toString())
+        Assertions.assertTrue(retrievedOppgave.isPresent)
+        assertEquals(savedOppgave.sykmeldingId, retrievedOppgave.get().sykmeldingId)
     }
 
     fun testData(): NasjonalManuellOppgaveDAO {
-        val objectMapper = jacksonObjectMapper()
-        objectMapper.registerModules(JavaTimeModule())
         return NasjonalManuellOppgaveDAO(
             sykmeldingId = "123",
             journalpostId = "123",
@@ -33,31 +30,29 @@ class NasjonalOppgaveRepositoryTest : IntegrationTest() {
             oppgaveId = 123,
             ferdigstilt = false,
             papirSmRegistrering =
-                objectMapper.writeValueAsString(
-                    PapirSmRegistering(
-                        journalpostId = "123",
-                        oppgaveId = "123",
-                        fnr = "fnr",
-                        aktorId = "aktor",
-                        dokumentInfoId = "123",
-                        datoOpprettet = OffsetDateTime.now(),
-                        sykmeldingId = "123",
-                        syketilfelleStartDato = LocalDate.now(),
-                        arbeidsgiver = null,
-                        medisinskVurdering = null,
-                        skjermesForPasient = null,
-                        perioder = null,
-                        prognose = null,
-                        utdypendeOpplysninger = null,
-                        tiltakNAV = null,
-                        tiltakArbeidsplassen = null,
-                        andreTiltak = null,
-                        meldingTilNAV = null,
-                        meldingTilArbeidsgiver = null,
-                        kontaktMedPasient = null,
-                        behandletTidspunkt = null,
-                        behandler = null,
-                    ),
+                PapirSmRegistering(
+                    journalpostId = "123",
+                    oppgaveId = "123",
+                    fnr = "fnr",
+                    aktorId = "aktor",
+                    dokumentInfoId = "123",
+                    datoOpprettet = OffsetDateTime.now(),
+                    sykmeldingId = "123",
+                    syketilfelleStartDato = LocalDate.now(),
+                    arbeidsgiver = null,
+                    medisinskVurdering = null,
+                    skjermesForPasient = null,
+                    perioder = null,
+                    prognose = null,
+                    utdypendeOpplysninger = null,
+                    tiltakNAV = null,
+                    tiltakArbeidsplassen = null,
+                    andreTiltak = null,
+                    meldingTilNAV = null,
+                    meldingTilArbeidsgiver = null,
+                    kontaktMedPasient = null,
+                    behandletTidspunkt = null,
+                    behandler = null,
                 ),
             utfall = null,
             ferdigstiltAv = null,
@@ -65,10 +60,4 @@ class NasjonalOppgaveRepositoryTest : IntegrationTest() {
             avvisningsgrunn = null,
         )
     }
-
-    fun <T> T.toPGObject() =
-        PGobject().also {
-            it.type = "json"
-            it.value = objectMapper.writeValueAsString(this)
-        }
 }

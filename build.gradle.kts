@@ -9,7 +9,6 @@ plugins {
     id("com.netflix.dgs.codegen") version "5.12.4"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.jetbrains.kotlin.plugin.noarg") version "2.0.10"
 }
 
 group = "no.nav.sykdig"
@@ -21,10 +20,6 @@ repositories {
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
-}
-
-noArg {
-    annotation("jakarta.persistence.Entity") // Add no-args constructors for classes annotated with @Entity
 }
 
 val postgresVersion = "42.7.3"
@@ -55,7 +50,6 @@ val prometheusVersion = "0.16.0"
 val mockkVersion = "1.13.10"
 val kluentVersion = "1.73"
 val coroutinesVersion = "1.8.1"
-val hibernateVersion = "6.6.1.Final"
 val jacksonDatatypeJsr310Version = "2.18.0"
 
 dependencies {
@@ -107,7 +101,6 @@ dependencies {
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
 
-    implementation("org.hibernate.orm:hibernate-core:$hibernateVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:kafka")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
