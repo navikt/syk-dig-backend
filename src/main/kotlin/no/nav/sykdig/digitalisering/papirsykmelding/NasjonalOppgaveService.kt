@@ -9,6 +9,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalSykmeldingReposit
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Service
 class NasjonalOppgaveService(
@@ -16,53 +17,66 @@ class NasjonalOppgaveService(
     private val nasjonalSykmeldingRepository: NasjonalSykmeldingRepository,
 ) {
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
-        val papirmanuellOppgaveDAO = mapToDao(papirManuellOppgave)
-        return nasjonalOppgaveRepository.save(papirmanuellOppgaveDAO)
+        val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
+        val papirManuellOppgaveDAO = mapToDao(papirManuellOppgave, eksisterendeOppgave?.id)
+        return nasjonalOppgaveRepository.save(papirManuellOppgaveDAO)
     }
 
-    fun mapToDao(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
+    fun mapToDao(
+        papirManuellOppgave: PapirManuellOppgave,
+        existingId: UUID?,
+    ): NasjonalManuellOppgaveDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
 
-        return NasjonalManuellOppgaveDAO(
-            sykmeldingId = papirManuellOppgave.sykmeldingId,
-            journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
-            fnr = papirManuellOppgave.fnr,
-            aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
-            dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
-            datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet?.toLocalDateTime(),
-            oppgaveId = papirManuellOppgave.oppgaveid,
-            ferdigstilt = false,
-            papirSmRegistrering =
-                PapirSmRegistering(
-                    journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
-                    oppgaveId = papirManuellOppgave.papirSmRegistering.oppgaveId,
-                    fnr = papirManuellOppgave.papirSmRegistering.fnr,
-                    aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
-                    dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
-                    datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet,
-                    sykmeldingId = papirManuellOppgave.papirSmRegistering.sykmeldingId,
-                    syketilfelleStartDato = papirManuellOppgave.papirSmRegistering.syketilfelleStartDato,
-                    arbeidsgiver = papirManuellOppgave.papirSmRegistering.arbeidsgiver,
-                    medisinskVurdering = papirManuellOppgave.papirSmRegistering.medisinskVurdering,
-                    skjermesForPasient = papirManuellOppgave.papirSmRegistering.skjermesForPasient,
-                    perioder = papirManuellOppgave.papirSmRegistering.perioder,
-                    prognose = papirManuellOppgave.papirSmRegistering.prognose,
-                    utdypendeOpplysninger = papirManuellOppgave.papirSmRegistering.utdypendeOpplysninger,
-                    tiltakNAV = papirManuellOppgave.papirSmRegistering.tiltakNAV,
-                    tiltakArbeidsplassen = papirManuellOppgave.papirSmRegistering.tiltakArbeidsplassen,
-                    andreTiltak = papirManuellOppgave.papirSmRegistering.andreTiltak,
-                    meldingTilNAV = papirManuellOppgave.papirSmRegistering.meldingTilNAV,
-                    meldingTilArbeidsgiver = papirManuellOppgave.papirSmRegistering.meldingTilArbeidsgiver,
-                    kontaktMedPasient = papirManuellOppgave.papirSmRegistering.kontaktMedPasient,
-                    behandletTidspunkt = papirManuellOppgave.papirSmRegistering.behandletTidspunkt,
-                    behandler = papirManuellOppgave.papirSmRegistering.behandler,
-                ),
-            utfall = null,
-            ferdigstiltAv = null,
-            datoFerdigstilt = null,
-            avvisningsgrunn = null,
-        )
+        val nasjonalManuellOppgaveDAO =
+            NasjonalManuellOppgaveDAO(
+                sykmeldingId = papirManuellOppgave.sykmeldingId,
+                journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
+                fnr = papirManuellOppgave.fnr,
+                aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
+                dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
+                datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet?.toLocalDateTime(),
+                oppgaveId = papirManuellOppgave.oppgaveid,
+                ferdigstilt = false,
+                papirSmRegistrering =
+                    PapirSmRegistering(
+                        journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
+                        oppgaveId = papirManuellOppgave.papirSmRegistering.oppgaveId,
+                        fnr = papirManuellOppgave.papirSmRegistering.fnr,
+                        aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
+                        dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
+                        datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet,
+                        sykmeldingId = papirManuellOppgave.papirSmRegistering.sykmeldingId,
+                        syketilfelleStartDato = papirManuellOppgave.papirSmRegistering.syketilfelleStartDato,
+                        arbeidsgiver = papirManuellOppgave.papirSmRegistering.arbeidsgiver,
+                        medisinskVurdering = papirManuellOppgave.papirSmRegistering.medisinskVurdering,
+                        skjermesForPasient = papirManuellOppgave.papirSmRegistering.skjermesForPasient,
+                        perioder = papirManuellOppgave.papirSmRegistering.perioder,
+                        prognose = papirManuellOppgave.papirSmRegistering.prognose,
+                        utdypendeOpplysninger = papirManuellOppgave.papirSmRegistering.utdypendeOpplysninger,
+                        tiltakNAV = papirManuellOppgave.papirSmRegistering.tiltakNAV,
+                        tiltakArbeidsplassen = papirManuellOppgave.papirSmRegistering.tiltakArbeidsplassen,
+                        andreTiltak = papirManuellOppgave.papirSmRegistering.andreTiltak,
+                        meldingTilNAV = papirManuellOppgave.papirSmRegistering.meldingTilNAV,
+                        meldingTilArbeidsgiver = papirManuellOppgave.papirSmRegistering.meldingTilArbeidsgiver,
+                        kontaktMedPasient = papirManuellOppgave.papirSmRegistering.kontaktMedPasient,
+                        behandletTidspunkt = papirManuellOppgave.papirSmRegistering.behandletTidspunkt,
+                        behandler = papirManuellOppgave.papirSmRegistering.behandler,
+                    ),
+                utfall = null,
+                ferdigstiltAv = null,
+                datoFerdigstilt = null,
+                avvisningsgrunn = null,
+            )
+
+        if (existingId != null) {
+            nasjonalManuellOppgaveDAO.apply {
+                id = existingId
+            }
+        }
+
+        return nasjonalManuellOppgaveDAO
     }
 
     // steg 2

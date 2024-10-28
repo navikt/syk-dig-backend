@@ -20,9 +20,10 @@ class NasjonalOppgaveRepositoryTest : IntegrationTest() {
     }
 
     @Test
-    fun `insert two instances with different sykmeldingId`() {
+    fun `insert two instances with same sykmeldingId`() {
         nasjonalOppgaveRepository.save(testData("1"))
-        nasjonalOppgaveRepository.save(testData("2"))
+        val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId("1")
+        nasjonalOppgaveRepository.save(testData("1"))
         val retrievedOppgave = nasjonalOppgaveRepository.findAll()
         assertEquals(1, retrievedOppgave.count())
     }
