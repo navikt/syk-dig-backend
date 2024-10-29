@@ -67,7 +67,9 @@ class AivenKafkaConfig(
         )
 
     @Bean
-    fun aivenKafkaListenerContainerFactory(aivenKafkaErrorHandler: AivenKafkaErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> {
+    fun aivenKafkaListenerContainerFactory(
+        aivenKafkaErrorHandler: AivenKafkaErrorHandler,
+    ): ConcurrentKafkaListenerContainerFactory<String, String> {
         val config =
             mapOf(
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to kafkaAutoOffsetReset,
