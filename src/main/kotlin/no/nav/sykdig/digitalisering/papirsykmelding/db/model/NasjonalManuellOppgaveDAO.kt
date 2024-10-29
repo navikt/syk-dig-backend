@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering.papirsykmelding.db.model
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import jakarta.persistence.GeneratedValue
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import org.postgresql.util.PGobject
 import org.springframework.context.annotation.Bean
@@ -19,6 +20,7 @@ import java.util.UUID
 @Table(name = "nasjonal_manuelloppgave")
 open class NasjonalManuellOppgaveDAO(
     @Id
+    @GeneratedValue(generator = "UUID")
     var id: UUID? = null,
     @Column("sykmelding_id")
     val sykmeldingId: String,

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
-import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalSykmeldingRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -14,12 +13,14 @@ import java.util.UUID
 @Service
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
-    private val nasjonalSykmeldingRepository: NasjonalSykmeldingRepository,
 ) {
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
-        val papirManuellOppgaveDAO = mapToDao(papirManuellOppgave, eksisterendeOppgave?.id)
-        return nasjonalOppgaveRepository.save(papirManuellOppgaveDAO)
+
+        if (eksisterendeOppgave.isPresent) {
+            return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id))
+        }
+        return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
     }
 
     fun mapToDao(
