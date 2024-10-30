@@ -2,12 +2,14 @@ package no.nav.sykdig.digitalisering.sykmelding.service
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKEPENGER
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.digitalisering.sykmelding.db.JournalpostSykmeldingRepository
+import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
@@ -119,6 +121,32 @@ class JournalpostService(
                 },
             fnr = fnr,
         )
+    }
+
+    fun ferdigstillAvvistOppgave(
+        oppgave: NasjonalManuellOppgaveDAO,
+        bruker: String,
+        navEnhet: String,
+        navEpost: String,
+        avvisingsgrunn: String,
+    ) {
+        val oppgave = sykDigOppgaveService.getOppgave(oppgave.oppgaveId.toString())
+        val sykmeldt =
+            personService.hentPerson(
+                id = oppgave.fnr,
+                callId = oppgave.sykmeldingId.toString(),
+            )
+        val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisingsgrunn, ignoreCase = true) }
+        if (avvistGrunn != null) {
+            sykDigOppgaveService.ferdigstillAvvistOppgave(
+                oppgave = oppgave,
+                navEpost = "",
+                enhetId = navEnhet,
+                sykmeldt = sykmeldt,
+                avvisningsgrunn = avvistGrunn,
+                avvisningsgrunnAnnet = null,
+            )
+        }
     }
 
     fun isSykmeldingCreated(id: String): Boolean {

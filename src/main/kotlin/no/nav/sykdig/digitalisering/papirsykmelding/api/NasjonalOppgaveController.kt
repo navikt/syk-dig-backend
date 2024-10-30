@@ -36,9 +36,18 @@ class NasjonalOppgaveController(
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
-    ): ResponseEntity<HttpStatusCode> {
-        log.info("papirsykmelding: avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
-        return smregistreringClient.postAvvisOppgaveRequest(authorization, oppgaveId, navEnhet, avvisSykmeldingRequest)
+    ): ResponseEntity<PapirManuellOppgave> {
+        log.info("papirsykmelding: henter oppgave med id $oppgaveId gjennom syk-dig proxy")
+        val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
+        val papirManuellOppgave = oppgave.body
+        log.info("papirsykmelding: avviser oppgave med id $oppgaveId")
+        val avvisningsgrunn = avvisSykmeldingRequest
+        val navEpost = avvisSykmeldingRequest
+        if (papirManuellOppgave != null) {
+            securelog.info("avviser nasjonalOppgave i db $papirManuellOppgave")
+            nasjonalOppgaveService.avvisOppgave(papirManuellOppgave, authorization, navEnhet, navEpost, avvisningsgrunn)
+        }
+        return oppgave
     }
 
     @GetMapping("/oppgave/{oppgaveid}")

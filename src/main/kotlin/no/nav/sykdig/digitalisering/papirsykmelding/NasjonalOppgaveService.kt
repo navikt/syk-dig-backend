@@ -6,12 +6,14 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgav
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
+    private val journalpostService: JournalpostService,
 ) {
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
@@ -76,5 +78,19 @@ class NasjonalOppgaveService(
         }
 
         return nasjonalManuellOppgaveDAO
+    }
+
+    fun avvisOppgave(
+        papirManuellOppgave: PapirManuellOppgave,
+        authorization: String,
+        navEnhet: String,
+        navEpost: String,
+        avvisningsgrunn: String,
+    ): NasjonalManuellOppgaveDAO {
+        val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(papirManuellOppgave.oppgaveid)
+        if (eksisterendeOppgave.isPresent) {
+            journalpostService.ferdigstillAvvistOppgave(eksisterendeOppgave.get(), authorization, navEnhet, navEpost, avvisningsgrunn)
+        }
+        return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id))
     }
 }
