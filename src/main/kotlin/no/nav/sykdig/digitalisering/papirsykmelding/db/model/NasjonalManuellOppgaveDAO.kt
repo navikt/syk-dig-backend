@@ -1,34 +1,87 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.db.model
 
-import jakarta.persistence.Column
-import jakarta.persistence.Convert
-import jakarta.persistence.Entity
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.annotations.Type
-import org.hibernate.type.SqlTypes
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import jakarta.persistence.GeneratedValue
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
+import org.postgresql.util.PGobject
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.core.convert.converter.Converter
 import org.springframework.data.annotation.Id
+import org.springframework.data.convert.ReadingConverter
+import org.springframework.data.convert.WritingConverter
+import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
+import java.util.UUID
 
-@Entity
 @Table(name = "nasjonal_manuelloppgave")
-//@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-data class NasjonalManuellOppgaveDAO(
+open class NasjonalManuellOppgaveDAO(
     @Id
+    @GeneratedValue(generator = "UUID")
+    var id: UUID? = null,
+    @Column("sykmelding_id")
     val sykmeldingId: String,
+    @Column("journalpost_id")
     val journalpostId: String,
-    val fnr: String?,
-    val aktorId: String?,
-    val dokumentInfoId: String?,
-    val datoOpprettet: LocalDateTime?,
-    val oppgaveId: Int?,
-    val ferdigstilt: Boolean,
-//    @JdbcTypeCode(SqlTypes.JSON)
-    @Type(type = "jsonb")
-    @Column(name = "papir_sm_registrering")
-    val papirSmRegistrering: String,
-    var utfall: String?,
-    var ferdigstiltAv: String?,
-    var datoFerdigstilt: LocalDateTime?,
-    var avvisningsgrunn: String?,
+    @Column("fnr")
+    val fnr: String? = null,
+    @Column("aktor_id")
+    val aktorId: String? = null,
+    @Column("dokument_info_id")
+    val dokumentInfoId: String? = null,
+    @Column("dato_opprettet")
+    val datoOpprettet: LocalDateTime? = null,
+    @Column("oppgave_id")
+    val oppgaveId: Int? = null,
+    @Column("ferdigstilt")
+    val ferdigstilt: Boolean = false,
+    @Column("papir_sm_registrering")
+    val papirSmRegistrering: PapirSmRegistering,
+    @Column("utfall")
+    var utfall: String? = null,
+    @Column("ferdigstilt_av")
+    var ferdigstiltAv: String? = null,
+    @Column("dato_ferdigstilt")
+    var datoFerdigstilt: LocalDateTime? = null,
+    @Column("avvisningsgrunn")
+    var avvisningsgrunn: String? = null,
 )
+
+@WritingConverter
+class PapirSmRegistreringWritingConverter : Converter<PapirSmRegistering, PGobject> {
+    private val objectMapper = jacksonObjectMapper()
+
+    override fun convert(source: PapirSmRegistering): PGobject {
+        val jsonObject = PGobject()
+        jsonObject.type = "jsonb"
+        objectMapper.registerModule(JavaTimeModule())
+        jsonObject.value = objectMapper.writeValueAsString(source)
+        return jsonObject
+    }
+}
+
+@ReadingConverter
+class PapirSmRegistreringReadingConverter : Converter<PGobject, PapirSmRegistering> {
+    private val objectMapper = jacksonObjectMapper()
+
+    override fun convert(source: PGobject): PapirSmRegistering {
+        objectMapper.registerModule(JavaTimeModule())
+        return objectMapper.readValue(source.value!!, PapirSmRegistering::class.java) // bedre håndtering enn !!
+    }
+}
+
+@Configuration
+class JdbcConfiguration {
+    @Bean
+    fun jdbcCustomConversions(): JdbcCustomConversions {
+        return JdbcCustomConversions(
+            listOf(
+                PapirSmRegistreringWritingConverter(),
+                PapirSmRegistreringReadingConverter(),
+            ),
+        )
+    }
+}
