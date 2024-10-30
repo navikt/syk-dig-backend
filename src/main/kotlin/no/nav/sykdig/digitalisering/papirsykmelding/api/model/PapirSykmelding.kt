@@ -31,7 +31,7 @@ data class PapirSmRegistering(
     val skjermesForPasient: Boolean?,
     val perioder: List<Periode>?,
     val prognose: Prognose?,
-    val utdypendeOpplysninger: SporsmalSvar?,
+    val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
     val tiltakNAV: String?,
     val tiltakArbeidsplassen: String?,
     val andreTiltak: String?,
