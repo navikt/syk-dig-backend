@@ -16,7 +16,9 @@ import java.util.concurrent.CompletableFuture
 class CustomDataFetchingExceptionHandler : DataFetcherExceptionHandler {
     val logger = applog()
 
-    override fun handleException(handlerParameters: DataFetcherExceptionHandlerParameters): CompletableFuture<DataFetcherExceptionHandlerResult> {
+    override fun handleException(
+        handlerParameters: DataFetcherExceptionHandlerParameters,
+    ): CompletableFuture<DataFetcherExceptionHandlerResult> {
         // When handling the exceptions on for GQL, because we are hiding any internal exceptions from the client, we need to log them
         return when (handlerParameters.exception) {
             is ClientException -> {
@@ -57,7 +59,9 @@ class CustomDataFetchingExceptionHandler : DataFetcherExceptionHandler {
         }
     }
 
-    private fun handleNoAccess(handlerParameters: DataFetcherExceptionHandlerParameters): CompletableFuture<DataFetcherExceptionHandlerResult> {
+    private fun handleNoAccess(
+        handlerParameters: DataFetcherExceptionHandlerParameters,
+    ): CompletableFuture<DataFetcherExceptionHandlerResult> {
         val debugInfo: MutableMap<String, Any> = HashMap()
         debugInfo["tilgang"] = "false"
         val graphqlError: GraphQLError =
