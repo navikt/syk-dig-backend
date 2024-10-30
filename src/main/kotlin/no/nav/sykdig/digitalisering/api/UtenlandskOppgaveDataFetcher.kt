@@ -7,7 +7,7 @@ import com.netflix.graphql.dgs.InputArgument
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import graphql.schema.DataFetchingEnvironment
 import no.nav.sykdig.applog
-import no.nav.sykdig.digitalisering.DigitaliseringsoppgaveService
+import no.nav.sykdig.digitalisering.UtenlandskOppgaveService
 import no.nav.sykdig.digitalisering.exceptions.ClientException
 import no.nav.sykdig.digitalisering.mapToDigitaliseringsoppgave
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
@@ -28,8 +28,8 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 @DgsComponent
-class DigitaliseringsoppgaveDataFetcher(
-    val digitaliseringsoppgaveService: DigitaliseringsoppgaveService,
+class UtenlandskOppgaveDataFetcher(
+    val utenlandskOppgaveService: UtenlandskOppgaveService,
 ) {
     companion object {
         private val log = applog()
@@ -42,7 +42,7 @@ class DigitaliseringsoppgaveDataFetcher(
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveResult {
         try {
-            val oppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId)
+            val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveId)
 
             if (oppgave.oppgaveDbModel.tilbakeTilGosys) {
                 log.info("Oppgave med $oppgaveId er markert som tilbake til Gosys, returnerer status IKKE_EN_SYKMELDING")
@@ -91,7 +91,7 @@ class DigitaliseringsoppgaveDataFetcher(
         when (status) {
             SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
                 val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
-                digitaliseringsoppgaveService.ferdigstillOppgave(
+                utenlandskOppgaveService.ferdigstillOppgave(
                     oppgaveId = oppgaveId,
                     navEpost = navEmail,
                     values = ferdistilltRegisterOppgaveValues,
@@ -106,13 +106,13 @@ class DigitaliseringsoppgaveDataFetcher(
 
             SykmeldingUnderArbeidStatus.UNDER_ARBEID -> {
                 val uferdigRegisterOppgaveValues = uferdigRegisterOppgaveValues(values)
-                digitaliseringsoppgaveService.updateOppgave(
+                utenlandskOppgaveService.updateOppgave(
                     oppgaveId = oppgaveId,
                     values = uferdigRegisterOppgaveValues,
                     navEpost = navEmail,
                 ).also { log.info("Lagret oppgave med id $oppgaveId") }
 
-                return mapToDigitaliseringsoppgave(digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveId))
+                return mapToDigitaliseringsoppgave(utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveId))
             }
         }
     }
@@ -125,7 +125,7 @@ class DigitaliseringsoppgaveDataFetcher(
     ): DigitaliseringsoppgaveStatus {
         val navEpost: String = dfe.graphQlContext.get("username")
         val navIdent: String = dfe.graphQlContext.get("nav_ident")
-        digitaliseringsoppgaveService.ferdigstillOppgaveSendTilGosys(
+        utenlandskOppgaveService.ferdigstillOppgaveSendTilGosys(
             oppgaveId = oppgaveId,
             navIdent = navIdent,
             navEpost = navEpost,
@@ -149,7 +149,7 @@ class DigitaliseringsoppgaveDataFetcher(
         val navEpost: String = dfe.graphQlContext.get("username")
         val navIdent: String = dfe.graphQlContext.get("nav_ident")
 
-        digitaliseringsoppgaveService.avvisOppgave(
+        utenlandskOppgaveService.avvisOppgave(
             oppgaveId = oppgaveId,
             navIdent = navIdent,
             navEpost = navEpost,

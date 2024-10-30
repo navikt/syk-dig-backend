@@ -5,7 +5,7 @@ import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
 import no.nav.sykdig.TestGraphQLContextContributor
 import no.nav.sykdig.config.CustomDataFetchingExceptionHandler
 import no.nav.sykdig.db.PoststedRepository
-import no.nav.sykdig.digitalisering.api.DigitaliseringsoppgaveDataFetcher
+import no.nav.sykdig.digitalisering.api.UtenlandskOppgaveDataFetcher
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
@@ -43,7 +43,7 @@ import java.util.UUID
     classes = [
         DgsAutoConfiguration::class,
         DgsExtendedScalarsAutoConfiguration::class,
-        DigitaliseringsoppgaveDataFetcher::class,
+        UtenlandskOppgaveDataFetcher::class,
         AdresseDataFetchers::class,
         CustomDataFetchingExceptionHandler::class,
         TestGraphQLContextContributor::class,
@@ -56,7 +56,7 @@ class OppgaveDataFetcherTest {
     lateinit var poststedRepository: PoststedRepository
 
     @MockBean
-    lateinit var oppgaveService: DigitaliseringsoppgaveService
+    lateinit var oppgaveService: UtenlandskOppgaveService
 
     @MockBean
     lateinit var securityService: OppgaveSecurityService

@@ -34,7 +34,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
-class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
+class UtenlandskOppgaveServiceTest : IntegrationTest() {
     @Autowired
     lateinit var sykDigOppgaveService: SykDigOppgaveService
 
@@ -51,7 +51,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
     lateinit var metricRegister: MetricRegister
 
     @Autowired
-    lateinit var digitaliseringsoppgaveService: DigitaliseringsoppgaveService
+    lateinit var utenlandskOppgaveService: UtenlandskOppgaveService
 
     @MockBean
     lateinit var ferdigstillingService: FerdigstillingService
@@ -129,7 +129,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
             )
         }
         oppgaveRepository.lagreOppgave(oppgave)
-        digitaliseringsoppgaveService.avvisOppgave(
+        utenlandskOppgaveService.avvisOppgave(
             oppgave.oppgaveId,
             "Z123456",
             "Z123456@trygdeetaten.no",
@@ -179,7 +179,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
                 journalpostId = journalpostId,
             )
         oppgaveRepository.lagreOppgave(oppgave2)
-        digitaliseringsoppgaveService.avvisOppgave(
+        utenlandskOppgaveService.avvisOppgave(
             oppgave.oppgaveId,
             "Z123456",
             "Z123456@trygdeetaten.no",
@@ -227,7 +227,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
             )
         }
         val avvistOppgave =
-            digitaliseringsoppgaveService.avvisOppgave(
+            utenlandskOppgaveService.avvisOppgave(
                 oppgave.oppgaveId,
                 "Z123456",
                 "Z123456@trygdeetaten.no",
@@ -235,7 +235,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
                 excpetedAvvisingsgrunn,
                 null,
             )
-        val lagretOppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
+        val lagretOppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
 
         assertNotNull(lagretOppgave.oppgaveDbModel.ferdigstilt)
         assertEquals(avvistOppgave.oppgaveDbModel.ferdigstilt, lagretOppgave.oppgaveDbModel.ferdigstilt)
@@ -267,7 +267,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
         }
 
         assertThrows<RuntimeException> {
-            digitaliseringsoppgaveService.avvisOppgave(
+            utenlandskOppgaveService.avvisOppgave(
                 oppgaveMock.oppgaveId,
                 "Z123456",
                 "Z123456@trygdeetaten.no",
@@ -277,7 +277,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
             )
         }
 
-        val oppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
+        val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
 
         assertNull(oppgave.oppgaveDbModel.ferdigstilt)
     }
@@ -306,7 +306,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
             )
         }
         val avvistOppgave =
-            digitaliseringsoppgaveService.avvisOppgave(
+            utenlandskOppgaveService.avvisOppgave(
                 oppgave.oppgaveId,
                 "Z123456",
                 "Z123456@trygdeetaten.no",
@@ -314,7 +314,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
                 excpetedAvvisingsgrunnAnnet,
                 "Feil dato",
             )
-        val lagretOppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
+        val lagretOppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
 
         assertNotNull(lagretOppgave.oppgaveDbModel.ferdigstilt)
         assertEquals(avvistOppgave.oppgaveDbModel.ferdigstilt, lagretOppgave.oppgaveDbModel.ferdigstilt)
@@ -348,7 +348,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
         }
 
         assertThrows<RuntimeException> {
-            digitaliseringsoppgaveService.avvisOppgave(
+            utenlandskOppgaveService.avvisOppgave(
                 oppgaveMock.oppgaveId,
                 "Z123456",
                 "Z123456@trygdeetaten.no",
@@ -358,7 +358,7 @@ class DigitaliseringsoppgaveServiceTest : IntegrationTest() {
             )
         }
 
-        val oppgave = digitaliseringsoppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
+        val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
 
         assertNull(oppgave.oppgaveDbModel.ferdigstilt)
     }

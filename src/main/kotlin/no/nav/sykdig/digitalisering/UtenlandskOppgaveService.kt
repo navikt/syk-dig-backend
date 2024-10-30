@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
-class DigitaliseringsoppgaveService(
+class UtenlandskOppgaveService(
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val gosysService: GosysService,
     private val personService: PersonService,
