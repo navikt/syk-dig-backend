@@ -1,4 +1,4 @@
-package no.nav.sykdig.digitalisering.papirsykmelding.api
+package no.nav.sykdig.digitalisering.papirsykmelding.api.model
 
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -8,7 +8,7 @@ data class PapirManuellOppgave(
     val sykmeldingId: String,
     val oppgaveid: Int,
     var pdfPapirSykmelding: ByteArray,
-    val papirSmRegistering: PapirSmRegistering?,
+    val papirSmRegistering: PapirSmRegistering,
     val documents: List<Document>,
 )
 
