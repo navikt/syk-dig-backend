@@ -1,11 +1,6 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PasientNavn
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
