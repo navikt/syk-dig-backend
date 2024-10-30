@@ -1,30 +1,55 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.objectMapper
 import org.amshove.kluent.internal.assertEquals
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.postgresql.util.PGobject
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
+import java.util.UUID
 
 class NasjonalOppgaveRepositoryTest : IntegrationTest() {
     @Test
-    fun `given New NasjonalOppgave`() {
-        val oppgave = nasjonalOppgaveRepository.save(testData())
-        assertEquals("noe", oppgave)
+    fun `given New NasjonalOppgave opprett og hent`() {
+        val savedOppgave = nasjonalOppgaveRepository.save(testData(null, "123"))
+        val retrievedOppgave = nasjonalOppgaveRepository.findBySykmeldingId(savedOppgave.sykmeldingId)
+        Assertions.assertTrue(retrievedOppgave.isPresent)
+        assertEquals(savedOppgave.sykmeldingId, retrievedOppgave.get().sykmeldingId)
     }
 
-    fun testData(): NasjonalManuellOppgaveDAO {
-        val objectMapper = jacksonObjectMapper()
-        objectMapper.registerModules(JavaTimeModule())
+    @Test
+    fun `insert two instances with same sykmeldingId`() {
+        nasjonalOppgaveRepository.save(testData(null, "1"))
+        val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId("1")
+        nasjonalOppgaveRepository.save(testData(eksisterendeOppgave.get().id, "1"))
+        val retrievedOppgave = nasjonalOppgaveRepository.findAll()
+        assertEquals(1, retrievedOppgave.count())
+    }
+
+    @Test
+    fun `insert two instances with unique id`() {
+        nasjonalOppgaveRepository.save(testData(null, "3"))
+        nasjonalOppgaveRepository.save(testData(null, "4"))
+        val retrievedOppgave = nasjonalOppgaveRepository.findAll()
+        assertEquals(2, retrievedOppgave.count())
+    }
+
+    @BeforeEach
+    fun setup() {
+        nasjonalOppgaveRepository.deleteAll()
+    }
+
+    fun testData(
+        id: UUID?,
+        sykmeldingId: String,
+    ): NasjonalManuellOppgaveDAO {
         return NasjonalManuellOppgaveDAO(
-            sykmeldingId = "123",
+            id = id,
+            sykmeldingId = sykmeldingId,
             journalpostId = "123",
             fnr = "fnr",
             aktorId = "aktor",
@@ -33,31 +58,29 @@ class NasjonalOppgaveRepositoryTest : IntegrationTest() {
             oppgaveId = 123,
             ferdigstilt = false,
             papirSmRegistrering =
-                objectMapper.writeValueAsString(
-                    PapirSmRegistering(
-                        journalpostId = "123",
-                        oppgaveId = "123",
-                        fnr = "fnr",
-                        aktorId = "aktor",
-                        dokumentInfoId = "123",
-                        datoOpprettet = OffsetDateTime.now(),
-                        sykmeldingId = "123",
-                        syketilfelleStartDato = LocalDate.now(),
-                        arbeidsgiver = null,
-                        medisinskVurdering = null,
-                        skjermesForPasient = null,
-                        perioder = null,
-                        prognose = null,
-                        utdypendeOpplysninger = null,
-                        tiltakNAV = null,
-                        tiltakArbeidsplassen = null,
-                        andreTiltak = null,
-                        meldingTilNAV = null,
-                        meldingTilArbeidsgiver = null,
-                        kontaktMedPasient = null,
-                        behandletTidspunkt = null,
-                        behandler = null,
-                    ),
+                PapirSmRegistering(
+                    journalpostId = "123",
+                    oppgaveId = "123",
+                    fnr = "fnr",
+                    aktorId = "aktor",
+                    dokumentInfoId = "123",
+                    datoOpprettet = OffsetDateTime.now(),
+                    sykmeldingId = "123",
+                    syketilfelleStartDato = LocalDate.now(),
+                    arbeidsgiver = null,
+                    medisinskVurdering = null,
+                    skjermesForPasient = null,
+                    perioder = null,
+                    prognose = null,
+                    utdypendeOpplysninger = null,
+                    tiltakNAV = null,
+                    tiltakArbeidsplassen = null,
+                    andreTiltak = null,
+                    meldingTilNAV = null,
+                    meldingTilArbeidsgiver = null,
+                    kontaktMedPasient = null,
+                    behandletTidspunkt = null,
+                    behandler = null,
                 ),
             utfall = null,
             ferdigstiltAv = null,
@@ -65,10 +88,4 @@ class NasjonalOppgaveRepositoryTest : IntegrationTest() {
             avvisningsgrunn = null,
         )
     }
-
-    fun <T> T.toPGObject() =
-        PGobject().also {
-            it.type = "json"
-            it.value = objectMapper.writeValueAsString(this)
-        }
 }
