@@ -44,6 +44,7 @@ class NasjonalOppgaveController(
         @PathVariable oppgaveid: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
+        log.info("papirsykmelding: henter oppgave med id $oppgaveid gjennom syk-dig proxy")
         val papirmanuelloppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
         securelog.info("papirsykmeldingManuellOppgave ${papirmanuelloppgave.body}")
         val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
