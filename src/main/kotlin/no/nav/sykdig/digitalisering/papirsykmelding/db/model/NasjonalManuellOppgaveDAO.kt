@@ -4,6 +4,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import jakarta.persistence.GeneratedValue
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
+import no.nav.sykdig.objectMapper
 import org.postgresql.util.PGobject
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -52,8 +53,6 @@ open class NasjonalManuellOppgaveDAO(
 
 @WritingConverter
 class PapirSmRegistreringWritingConverter : Converter<PapirSmRegistering, PGobject> {
-    private val objectMapper = jacksonObjectMapper()
-
     override fun convert(source: PapirSmRegistering): PGobject {
         val jsonObject = PGobject()
         jsonObject.type = "jsonb"
