@@ -2,16 +2,19 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.sykdig.digitalisering.helsenett.HelsenettClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.digitalisering.sykmelding.Behandler
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
+    private val helsenettClient: HelsenettClient,
 ) {
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
@@ -76,5 +79,13 @@ class NasjonalOppgaveService(
         }
 
         return nasjonalManuellOppgaveDAO
+    }
+
+    fun hentSykmelder(
+        authorization: String,
+        hprNummer: String,
+        oppgaveId: String,
+    ): Behandler {
+        return helsenettClient.finnBehandler(callId = oppgaveId, authorization = authorization, hprNummer = hprNummer).body
     }
 }
