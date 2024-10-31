@@ -140,7 +140,7 @@ class JournalpostService(
         if (avvistGrunn != null) {
             sykDigOppgaveService.ferdigstillAvvistOppgave(
                 oppgave = oppgave,
-                navEpost = "",
+                navEpost = navEpost,
                 enhetId = navEnhet,
                 sykmeldt = sykmeldt,
                 avvisningsgrunn = avvistGrunn,
