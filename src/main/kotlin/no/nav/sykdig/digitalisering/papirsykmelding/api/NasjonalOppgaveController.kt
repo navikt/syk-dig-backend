@@ -77,9 +77,13 @@ class NasjonalOppgaveController(
     @ResponseBody
     fun getSykmelder(
         @PathVariable hprNummer: String,
+        @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
-    ): ResponseEntity<Sykmelder> {
-        return smregistreringClient.getSykmelderRequest(authorization, hprNummer)
+    ): Behandler {
+        val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
+        val papirManuellOppgave = oppgave.body
+        val sykmelder = nasjonalOppgaveService.hentSykmelder(authorization, papirManuellOppgave.oppgaveid.toString(), hprNummer)
+        return sykmelder
     }
 
     @PostMapping("/oppgave/{oppgaveId}/send")

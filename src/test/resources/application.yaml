@@ -39,6 +39,7 @@ kodeverk.url: http://kodeverk
 dokarkiv.url: http://dokarkiv
 oppgave.url: http://oppgave
 smregistrering.url: http://smregistrering
+helsenett.url: http://syfohelsenettproxy
 
 no.nav.security.jwt:
   issuer:
