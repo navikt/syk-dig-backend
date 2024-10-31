@@ -3,9 +3,10 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PasientNavn
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
+import no.nav.sykdig.digitalisering.pdl.Navn
+import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
@@ -17,12 +18,14 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/v1/proxy")
 class NasjonalOppgaveController(
     private val smregistreringClient: SmregistreringClient,
     private val nasjonalOppgaveService: NasjonalOppgaveService,
+    private val personService: PersonService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -57,10 +60,17 @@ class NasjonalOppgaveController(
     @GetMapping("/pasient")
     @ResponseBody
     fun getPasientNavn(
-        @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Pasient-Fnr") fnr: String,
-    ): ResponseEntity<PasientNavn> {
-        return smregistreringClient.getPasientNavnRequest(authorization, fnr)
+    ): ResponseEntity<Navn> {
+        val callId = UUID.randomUUID().toString()
+        log.info("Henter person med callId $callId")
+
+        val personNavn: Navn =
+            personService.hentPersonNavn(
+                id = fnr,
+                callId = callId,
+            )
+        return ResponseEntity.ok().body(personNavn)
     }
 
     @GetMapping("/sykmelder/{hprNummer}")
