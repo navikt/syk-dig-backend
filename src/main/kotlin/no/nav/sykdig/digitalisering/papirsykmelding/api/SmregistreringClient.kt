@@ -3,7 +3,6 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PasientNavn
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import org.springframework.beans.factory.annotation.Value
@@ -74,24 +73,6 @@ class SmregistreringClient(
                 PapirManuellOppgave::class.java,
             )
         return res
-    }
-
-    @Retryable
-    fun getPasientNavnRequest(
-        authorization: String,
-        fnr: String,
-    ): ResponseEntity<PasientNavn> {
-        val headers = HttpHeaders()
-        headers.set("X-Pasient-Fnr", fnr)
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(removeBearerPrefix(authorization))
-
-        return smregisteringRestTemplate.exchange(
-            "$url/api/v1/pasient",
-            HttpMethod.GET,
-            HttpEntity<String>(headers),
-            PasientNavn::class.java,
-        )
     }
 
     @Retryable

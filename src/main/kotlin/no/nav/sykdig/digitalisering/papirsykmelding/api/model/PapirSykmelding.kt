@@ -42,12 +42,6 @@ data class PapirSmRegistering(
     val behandler: Behandler?,
 )
 
-data class PasientNavn(
-    val fornavn: String,
-    val mellomnavn: String?,
-    val etternavn: String,
-)
-
 data class AvvisSykmeldingRequest(
     val reason: String?,
 )

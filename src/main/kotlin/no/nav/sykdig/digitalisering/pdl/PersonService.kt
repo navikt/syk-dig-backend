@@ -124,4 +124,25 @@ class PersonService(
                 },
         )
     }
+
+    fun hentPersonNavn(
+        id: String,
+        callId: String,
+    ): Navn {
+        val pdlResponse = pdlClient.hentPerson(id, callId)
+        return mapPdlResponseTilPersonNavn(id, pdlResponse)
+    }
+
+    fun mapPdlResponseTilPersonNavn(
+        ident: String,
+        pdlResponse: PdlResponse,
+    ): Navn {
+        val navn = pdlResponse.hentPerson!!.navn.first()
+
+        return Navn(
+            fornavn = navn.fornavn,
+            mellomnavn = navn.mellomnavn,
+            etternavn = navn.etternavn,
+        )
+    }
 }
