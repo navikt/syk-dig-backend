@@ -128,7 +128,7 @@ class JournalpostService(
         bruker: String,
         navEnhet: String,
         navEpost: String,
-        avvisingsgrunn: String,
+        avvisningsgrunn: String?,
     ) {
         val oppgave = sykDigOppgaveService.getOppgave(oppgave.oppgaveId.toString())
         val sykmeldt =
@@ -136,7 +136,7 @@ class JournalpostService(
                 id = oppgave.fnr,
                 callId = oppgave.sykmeldingId.toString(),
             )
-        val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisingsgrunn, ignoreCase = true) }
+        val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisningsgrunn, ignoreCase = true) }
         if (avvistGrunn != null) {
             sykDigOppgaveService.ferdigstillAvvistOppgave(
                 oppgave = oppgave,

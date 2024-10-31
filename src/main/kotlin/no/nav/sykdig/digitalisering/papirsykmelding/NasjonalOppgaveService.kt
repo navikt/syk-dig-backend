@@ -85,7 +85,7 @@ class NasjonalOppgaveService(
         authorization: String,
         navEnhet: String,
         navEpost: String,
-        avvisningsgrunn: String,
+        avvisningsgrunn: String?,
     ): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(papirManuellOppgave.oppgaveid)
         if (eksisterendeOppgave.isPresent) {

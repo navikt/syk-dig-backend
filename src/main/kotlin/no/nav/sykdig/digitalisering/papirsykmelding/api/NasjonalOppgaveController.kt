@@ -2,11 +2,13 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
@@ -41,8 +43,10 @@ class NasjonalOppgaveController(
         val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
         val papirManuellOppgave = oppgave.body
         log.info("papirsykmelding: avviser oppgave med id $oppgaveId")
-        val avvisningsgrunn = avvisSykmeldingRequest
-        val navEpost = avvisSykmeldingRequest
+
+        val avvisningsgrunnRequest = objectMapper.readValue(avvisSykmeldingRequest, AvvisSykmeldingRequest::class.java)
+        val avvisningsgrunn = avvisningsgrunnRequest.reason
+        val navEpost = "TBD"
         if (papirManuellOppgave != null) {
             securelog.info("avviser nasjonalOppgave i db $papirManuellOppgave")
             nasjonalOppgaveService.avvisOppgave(papirManuellOppgave, authorization, navEnhet, navEpost, avvisningsgrunn)
