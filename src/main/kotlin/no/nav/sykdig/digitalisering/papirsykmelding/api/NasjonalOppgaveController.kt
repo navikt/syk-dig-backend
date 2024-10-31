@@ -49,7 +49,7 @@ class NasjonalOppgaveController(
         val papirManuellOppgave = oppgave.body
         if (papirManuellOppgave != null) {
             securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
-            nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
+            // nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
         }
         return oppgave
     }
