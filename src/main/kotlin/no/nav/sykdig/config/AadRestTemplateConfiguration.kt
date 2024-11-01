@@ -118,6 +118,20 @@ class AadRestTemplateConfiguration {
         )
 
     @Bean
+    fun helsenettClientRestTemplate(
+        restTemplateBuilder: RestTemplateBuilder,
+        clientConfigurationProperties: ClientConfigurationProperties,
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+    ): RestTemplate {
+        return downstreamRestTemplate(
+            registrationName = "onbehalfof-helsenett",
+            restTemplateBuilder = restTemplateBuilder,
+            clientConfigurationProperties = clientConfigurationProperties,
+            oAuth2AccessTokenService = oAuth2AccessTokenService,
+        )
+    }
+
+    @Bean
     fun smregisteringRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,
