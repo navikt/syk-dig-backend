@@ -9,12 +9,14 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
+@Component
 class HelsenettClient(
     @Value("\${helsenett.url}") private val url: String,
-    val helseNettRegisteringRestTemplate: RestTemplate,
+    private val helsenettClientRestTemplate: RestTemplate,
 ) {
     val log = applog()
 
@@ -36,7 +38,7 @@ class HelsenettClient(
 
         return try {
             val response =
-                helseNettRegisteringRestTemplate.exchange(
+                helsenettClientRestTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     entity,
