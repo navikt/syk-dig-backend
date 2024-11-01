@@ -29,7 +29,7 @@ class HelsenettClient(
         val headers =
             HttpHeaders().apply {
                 accept = listOf(MediaType.APPLICATION_JSON)
-                set("Authorization", "Bearer $authorization")
+                set("Authorization", "$authorization")
                 set("hprNummer", padHpr(hprNummer)!!)
             }
         val entity = HttpEntity<Any>(headers)
