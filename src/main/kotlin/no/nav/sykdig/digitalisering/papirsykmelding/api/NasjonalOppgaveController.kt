@@ -36,6 +36,7 @@ class NasjonalOppgaveController(
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
+        @RequestHeader("X-Nav-Epostt") navEpost: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<PapirManuellOppgave> {
@@ -46,7 +47,6 @@ class NasjonalOppgaveController(
 
         val avvisningsgrunnRequest = objectMapper.readValue(avvisSykmeldingRequest, AvvisSykmeldingRequest::class.java)
         val avvisningsgrunn = avvisningsgrunnRequest.reason
-        val navEpost = "TBD"
         if (papirManuellOppgave != null) {
             securelog.info("avviser nasjonalOppgave i db $papirManuellOppgave")
             nasjonalOppgaveService.avvisOppgave(papirManuellOppgave, authorization, navEnhet, navEpost, avvisningsgrunn)
