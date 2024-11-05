@@ -36,7 +36,7 @@ class NasjonalOppgaveController(
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
-        @RequestHeader("X-Nav-Epostt") navEpost: String,
+        @RequestHeader("X-Nav-Epost") navEpost: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<PapirManuellOppgave> {
