@@ -1,0 +1,131 @@
+type NasjonalOppgave {
+    fnr: String,
+    sykmeldingId: String!,
+    oppgaveid: Int!,
+    pdfPapirSykmelding: ByteArray!,
+    papirSmRegistering: PapirSmRegistering
+
+}
+
+scalar ByteArray
+
+
+type PapirSmRegistrering {
+    journalpostId: String!,
+    oppgaveId: String,
+    fnr: String,
+    aktorId: String,
+    dokumentInfoId: String,
+    datoOpprettet: DateTime!,
+    sykmeldingId: String!,
+    syketilfelleStartDato: String!,
+    arbeidsgiver: Arbeidsgiver!,
+    medisinskVurdering: MedisinskVurdering!,
+    skjermesForPasient: Boolean!,
+    perioder: [Periode],
+    prognose: Prognose?,
+    utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+    tiltakNAV: String?,
+    tiltakArbeidsplassen: String?,
+    andreTiltak: String?,
+    meldingTilNAV: MeldingTilNAV?,
+    meldingTilArbeidsgiver: String?,
+    kontaktMedPasient: KontaktMedPasient?,
+    behandletTidspunkt: LocalDate?,
+    behandler: Behandler?,
+}
+
+type Arbeidsgiver {
+    harArbeidsgiver: HarArbeidsgiver!,
+    navn: String,
+    yrkesbetegnelse: String,
+    stillingsprosent: Int,
+}
+
+enum HarArbeidsgiver {
+    EN_ARBEIDSGIVER
+    FLERE_ARBEIDSGIVERE
+    INGEN_ARBEIDSGIVER
+}
+
+type MedisinskVurdering {
+    hovedDiagnose: Diagnose,
+    biDiagnoser: [Diagnose]!,
+    svangerskap: Boolean!,
+    yrkesskade: Boolean!,
+    yrkesskadeDato: Date,
+    annenFraversArsak: AnnenFraversArsak,
+}
+type Diagnose {
+    system: String!,
+    kode: String!,
+    tekst: String
+}
+type AnnenFraversArsak {
+    beskrivelse: String,
+    grunn: [AnnenFraversGrunn]!,
+}
+enum AnnenFraversGrunn {
+    GODKJENT_HELSEINSTITUSJON
+    BEHANDLING_FORHINDRER_ARBEID
+    ARBEIDSRETTET_TILTAK
+    MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND
+    NODVENDIG_KONTROLLUNDENRSOKELSE
+    SMITTEFARE
+    ABORT
+    UFOR_GRUNNET_BARNLOSHET
+    DONOR
+    BEHANDLING_STERILISERING
+}
+
+type Periode{
+    fom: Date!,
+    tom: Date!,
+    aktivitetIkkeMulig: AktivitetIkkeMulig,
+    avventendeInnspillTilArbeidsgiver: String,
+    behandlingsdager: Int,
+    gradert: Gradert,
+    reisetilskudd: Boolean,
+}
+type AktivitetIkkeMulig {
+    medisinskArsak: MedisinskArsak,
+    arbeidsrelatertArsak: ArbeidsrelatertArsak,
+
+}
+type MedisinskArsak {
+    beskrivelse: String,
+    arsak: [MedisinskArsakType],
+}
+type ArbeidsrelatertArsak {
+    beskrivelse: String,
+    arsak: [ArbeidsrelatertArsakType],
+}
+enum ArbeidsrelatertArsakType {
+    MANGLENDE_TILRETTELEGGING
+    ANNET
+}
+
+enum MedisinskArsakType {
+    TILSTAND_HINDRER_AKTIVITET
+    AKTIVITET_FORVERRER_TILSTAND
+    AKTIVITET_FORHINDRER_BEDRING
+    ANNET
+}
+
+type Gradert {
+    reisetilskudd: Boolean!,
+    grad: Int!
+}
+
+type Prognose {
+    arbeidsforEtterPeriode: Boolean,
+    hensynArbeidsplassen: String!,
+    erIArbeid: ErIArbeid,
+    erIkkeIArbeid: ErIkkeIArbeid?,
+}
+
+type ErIArbeid {
+
+}
+
+

@@ -9,6 +9,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -92,12 +93,21 @@ class NasjonalOppgaveController(
     }
 
     @PostMapping("/oppgave/{oppgaveId}/send")
-    fun sendOppgave(
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @ResponseBody
+    suspend fun sendOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<String> {
+
+        // TODO:  sjekk when oppgaveId er null: lage en guard og responder med bad request
+        // TODO:  hvis accesstoken er null responder med unauthorized
+
+        if (navEnhet == null) return ResponseEntity(HttpStatus.BAD_REQUEST)
+        val callId = UUID.randomUUID().toString()
+        nasjonalOppgaveService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId)
         log.info("papirsykmelding: sender oppgave med oppgaveId $oppgaveId gjennom syk-dig proxy")
         return smregistreringClient.postSendOppgaveRequest(authorization, oppgaveId, navEnhet, papirSykmelding)
     }

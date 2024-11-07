@@ -83,6 +83,20 @@ class AadRestTemplateConfiguration {
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
 
+
+    @Bean
+    fun norskHelsenettRestTemplate(
+        restTemplateBuilder: RestTemplateBuilder,
+        clientConfigurationProperties: ClientConfigurationProperties,
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+    ): RestTemplate =
+        downstreamRestTemplate(
+            registrationName = "onbehalfof-helsenett",
+            restTemplateBuilder = restTemplateBuilder,
+            clientConfigurationProperties = clientConfigurationProperties,
+            oAuth2AccessTokenService = oAuth2AccessTokenService,
+        )
+
     @Bean
     fun dokarkivRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,

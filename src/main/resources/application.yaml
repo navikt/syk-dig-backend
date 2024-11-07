@@ -81,9 +81,9 @@ no.nav.security.jwt:
                     client-id: ${AZURE_APP_CLIENT_ID}
                     client-secret: ${AZURE_APP_CLIENT_SECRET}
                     client-auth-method: client_secret_basic
-            helsenett-m2m:
+            kodeverk-m2m:
                 token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
-                scope: api://${HELSENETT_CLIENT_ID}/.default
+                scope: api://${KODEVERK_CLIENT_ID}/.default
                 grant-type: client_credentials
                 authentication:
                     client-id: ${AZURE_APP_CLIENT_ID}
