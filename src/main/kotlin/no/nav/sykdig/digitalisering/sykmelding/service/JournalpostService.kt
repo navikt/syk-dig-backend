@@ -63,8 +63,8 @@ class JournalpostService(
                     journalpostId = journalpostId,
                     status = JournalpostStatusEnum.MANGLER_FNR,
                 )
-        val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
-        val aktorId = personService.hentPerson(fnrEllerAktorId, journalpostId).aktorId
+        val fnr = personService.getPerson(fnrEllerAktorId, journalpostId).fnr
+        val aktorId = personService.getPerson(fnrEllerAktorId, journalpostId).aktorId
         val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr, aktorId)
 
         securelog.info(
@@ -96,7 +96,7 @@ class JournalpostService(
                     status = JournalpostStatusEnum.MANGLER_FNR,
                 )
 
-        val fnr = personService.hentPerson(fnrEllerAktorId, journalpostId).fnr
+        val fnr = personService.getPerson(fnrEllerAktorId, journalpostId).fnr
         securelog.info(
             "Henter journalpost {} {} {}",
             kv("journalpostId", journalpostId),

@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
@@ -25,6 +26,7 @@ import java.util.UUID
 class NasjonalOppgaveController(
     private val smregistreringClient: SmregistreringClient,
     private val nasjonalOppgaveService: NasjonalOppgaveService,
+    private val sykmelderService: SykmelderService,
     private val personService: PersonService,
 ) {
     val log = applog()
@@ -75,15 +77,17 @@ class NasjonalOppgaveController(
 
     @GetMapping("/sykmelder/{hprNummer}")
     @ResponseBody
-    fun getSykmelder(
+    suspend fun getSykmelder(
         @PathVariable hprNummer: String,
-        @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
-    ): Behandler {
-        val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
-        val papirManuellOppgave = oppgave.body
-        val sykmelder = nasjonalOppgaveService.hentSykmelder(authorization, papirManuellOppgave.oppgaveid.toString(), hprNummer)
-        return sykmelder
+    ): ResponseEntity<Sykmelder> {
+       /* if (hprNummer.isBlank() || hprNummer.isNullOrEmpty()) {
+            log.info("Ugyldig path parameter: hprNummer")
+            return ResponseEntity.badRequest().body(null)
+        }*/
+        val callId = UUID.randomUUID().toString()
+        val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
+        return ResponseEntity.ok(sykmelder)
     }
 
     @PostMapping("/oppgave/{oppgaveId}/send")

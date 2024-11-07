@@ -29,7 +29,7 @@ class UtenlandskOppgaveService(
     fun getDigitaiseringsoppgave(oppgaveId: String): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt =
-            personService.hentPerson(
+            personService.getPerson(
                 id = oppgave.fnr,
                 callId = oppgave.sykmeldingId.toString(),
             )
@@ -55,7 +55,7 @@ class UtenlandskOppgaveService(
     ) {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt =
-            personService.hentPerson(
+            personService.getPerson(
                 id = oppgave.fnr,
                 callId = oppgave.sykmeldingId.toString(),
             )
@@ -75,7 +75,7 @@ class UtenlandskOppgaveService(
     ): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt =
-            personService.hentPerson(
+            personService.getPerson(
                 id = oppgave.fnr,
                 callId = oppgave.sykmeldingId.toString(),
             )
@@ -99,7 +99,7 @@ class UtenlandskOppgaveService(
     ): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt =
-            personService.hentPerson(
+            personService.getPerson(
                 id = oppgave.fnr,
                 callId = oppgave.sykmeldingId.toString(),
             )

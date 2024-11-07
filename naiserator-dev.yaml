@@ -120,3 +120,7 @@ spec:
       value: http://smregistrering-backend
     - name: SMREGISTRERING_CLIENT_ID
       value: dev-gcp.teamsykmelding.smregistrering-backend
+    - name: HELSENETT_URL
+      value: http://syfohelsenettproxy
+    - name: HELSENETT_CLIENT_ID
+      value: dev-gcp.teamsykmelding.syfohelsenettproxy

@@ -12,14 +12,12 @@ class PersonService(
 ) {
     val log = applog()
 
-    fun hentPerson(
+    fun getPerson(
         id: String,
         callId: String,
     ): Person {
-        val pdlResponse = pdlClient.hentPerson(id, callId)
-
+        val pdlResponse = pdlClient.getPerson(id, callId)
         log.info("Hentet person for callId: $callId")
-
         return mapPdlResponseTilPerson(id, pdlResponse)
     }
 
@@ -129,7 +127,7 @@ class PersonService(
         id: String,
         callId: String,
     ): Navn {
-        val pdlResponse = pdlClient.hentPerson(id, callId)
+        val pdlResponse = pdlClient.getPerson(id, callId)
         return mapPdlResponseTilPersonNavn(id, pdlResponse)
     }
 

@@ -59,7 +59,7 @@ class OppgaveSecurityService(
             return false
         }
 
-        val fnr = personService.hentPerson(id, journalpostId).fnr
+        val fnr = personService.getPerson(id, journalpostId).fnr
 
         securelog.info("Fødselsnummer: $fnr")
         val navEmail = getNavEmail()
