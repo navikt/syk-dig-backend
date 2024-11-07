@@ -1,5 +1,4 @@
 import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
-import org.jlleitschuh.gradle.ktlint.KtlintExtension
 
 plugins {
     id("org.springframework.boot") version "3.3.2"
@@ -7,7 +6,6 @@ plugins {
     kotlin("jvm") version "2.0.10"
     kotlin("plugin.spring") version "2.0.10"
     id("com.netflix.dgs.codegen") version "5.12.4"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -150,17 +148,5 @@ tasks {
     jar {
         enabled = false
     }
-    "compileKotlin" {
-        dependsOn("ktlintFormat")
-    }
+}
 
-    check {
-        dependsOn("ktlintCheck")
-    }
-}
-configure<KtlintExtension> {
-    filter {
-        exclude("**/generated/**")
-        include("**/kotlin/**")
-    }
-}
