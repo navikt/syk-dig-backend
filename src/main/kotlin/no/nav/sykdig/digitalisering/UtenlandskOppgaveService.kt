@@ -124,7 +124,7 @@ class UtenlandskOppgaveService(
 
         val opprinneligBeskrivelse = gosysService.hentOppgave(oppgaveId, oppgave.sykmeldingId.toString()).beskrivelse
 
-        sykDigOppgaveService.ferdigstillAvvistOppgave(oppgave, navEpost, enhetId, sykmeldt, avvisningsgrunn, avvisningsgrunnAnnet)
+        sykDigOppgaveService.ferdigstillUtenlandskAvvistOppgave(oppgave, navEpost, enhetId, sykmeldt, avvisningsgrunn, avvisningsgrunnAnnet)
 
         val oppgaveBeskrivelse =
             lagOppgavebeskrivelse(

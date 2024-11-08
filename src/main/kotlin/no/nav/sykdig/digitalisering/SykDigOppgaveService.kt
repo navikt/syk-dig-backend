@@ -52,6 +52,7 @@ class SykDigOppgaveService(
             }
 
         val oppgaveId = response.id.toString()
+
         val oppgave =
             OppgaveDbModel(
                 oppgaveId = oppgaveId,
@@ -183,7 +184,7 @@ class SykDigOppgaveService(
         oppgaveRepository.ferdigstillOppgaveGosys(oppgave, navEpost, sykmelding)
     }
 
-    fun ferdigstillAvvistOppgave(
+    fun ferdigstillUtenlandskAvvistOppgave(
         oppgave: OppgaveDbModel,
         navEpost: String,
         enhetId: String,
@@ -198,6 +199,22 @@ class SykDigOppgaveService(
             oppgave = oppgave,
             sykmeldt = sykmeldt,
             avvisningsGrunn = mapAvvisningsgrunn(avvisningsgrunn, avvisningsgrunnAnnet),
+        )
+    }
+
+    fun ferdigstillNasjonalAvvistOppgave(
+        oppgave: OppgaveDbModel,
+        navEpost: String,
+        enhetId: String,
+        sykmeldt: Person,
+        avvisningsgrunn: Avvisingsgrunn?,
+        avvisningsgrunnAnnet: String?,
+    ) {
+        ferdigstillingService.ferdigstillAvvistJournalpost(
+            enhet = enhetId,
+            oppgave = oppgave,
+            sykmeldt = sykmeldt,
+            avvisningsGrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
         )
     }
 
