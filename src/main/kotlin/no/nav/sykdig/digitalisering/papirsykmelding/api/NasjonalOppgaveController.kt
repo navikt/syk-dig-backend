@@ -9,8 +9,6 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.objectMapper
-import no.nav.sykdig.digitalisering.pdl.Navn
-import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
