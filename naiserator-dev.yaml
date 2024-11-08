@@ -80,6 +80,9 @@ spec:
         - application: smregistrering-backend
           namespace: teamsykmelding
           cluster: dev-gcp
+        - application: syfohelsenettproxy
+          namespace: teamsykmelding
+          cluster: dev-gcp
       external:
         - host: kodeverk-api.nav.no
         - host: oppgave-q1.dev-fss-pub.nais.io
