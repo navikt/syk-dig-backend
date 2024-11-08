@@ -137,7 +137,6 @@ class JournalpostService(
                 callId = oppgave.sykmeldingId.toString(),
             )
         val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisningsgrunn, ignoreCase = true) }
-        if (avvistGrunn != null) {
             sykDigOppgaveService.ferdigstillNasjonalAvvistOppgave(
                 oppgave = oppgave,
                 navEpost = navEpost,
@@ -146,7 +145,6 @@ class JournalpostService(
                 avvisningsgrunn = avvistGrunn,
                 avvisningsgrunnAnnet = null,
             )
-        }
     }
 
     fun isSykmeldingCreated(id: String): Boolean {
