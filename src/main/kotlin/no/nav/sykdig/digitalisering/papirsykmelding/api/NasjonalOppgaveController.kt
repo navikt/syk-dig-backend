@@ -81,14 +81,12 @@ class NasjonalOppgaveController(
     @ResponseBody
     suspend fun getSykmelder(
         @PathVariable hprNummer: String,
-        @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<Sykmelder> {
        /* if (hprNummer.isBlank() || hprNummer.isNullOrEmpty()) {
             log.info("Ugyldig path parameter: hprNummer")
             return ResponseEntity.badRequest().body(null)
         }*/
-        log.info("oppgaveid: $oppgaveId gjennom syk-dig proxy")
         val callId = UUID.randomUUID().toString()
         val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
         return ResponseEntity.ok(sykmelder)
