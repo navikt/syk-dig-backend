@@ -11,6 +11,7 @@ import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -76,15 +77,18 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/sykmelder/{hprNummer}")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @ResponseBody
     suspend fun getSykmelder(
         @PathVariable hprNummer: String,
+        @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<Sykmelder> {
        /* if (hprNummer.isBlank() || hprNummer.isNullOrEmpty()) {
             log.info("Ugyldig path parameter: hprNummer")
             return ResponseEntity.badRequest().body(null)
         }*/
+        log.info("oppgaveid: $oppgaveId gjennom syk-dig proxy")
         val callId = UUID.randomUUID().toString()
         val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
         return ResponseEntity.ok(sykmelder)
