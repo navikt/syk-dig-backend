@@ -20,6 +20,8 @@ class SykmelderService(
         hprNummer: String,
         callId: String,
     ): Sykmelder {
+
+        // TODO: her er det forbedring
         if (hprNummer.isEmpty()) {
             log.warn("HPR-nummer mangler, kan ikke fortsette")
             throw IllegalStateException("HPR-nummer mangler")

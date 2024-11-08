@@ -81,11 +81,12 @@ class NasjonalOppgaveController(
     suspend fun getSykmelder(
         @PathVariable hprNummer: String,
     ): ResponseEntity<Sykmelder> {
-       /* if (hprNummer.isBlank() || hprNummer.isNullOrEmpty()) {
+        if (hprNummer.isBlank() || !hprNummer.all { it.isDigit() }) {
             log.info("Ugyldig path parameter: hprNummer")
-            return ResponseEntity.badRequest().body(null)
-        }*/
+            return ResponseEntity.badRequest().build()
+        }
         val callId = UUID.randomUUID().toString()
+        log.info("Received request to GET /sykmelder/$hprNummer with callId $callId")
         val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
         return ResponseEntity.ok(sykmelder)
     }

@@ -30,7 +30,7 @@ class HelsenettClient(
 
         val headers = HttpHeaders()
         headers["Nav-CallId"] = callId
-        headers["hprNummer"] = padHpr(hprNummer)
+        headers["hprNummer"] = hprNummer
 
         // antakelse om at exceptions blir plukket opp av global exceptionhandler
         // vi nullchecker hpr tidligere i løpet
@@ -42,22 +42,27 @@ class HelsenettClient(
                 Behandler::class.java,
             )
 
-        when (response.statusCode) {
-            HttpStatus.OK -> true
-            HttpStatus.INTERNAL_SERVER_ERROR -> throw IOException("Syfohelsenettproxy svarte med feilmelding for $callId")
-            HttpStatus.NOT_FOUND -> throw SykmelderNotFoundException("Kunne ikke hente fnr for hpr $hprNummer")
-            HttpStatus.UNAUTHORIZED -> throw UnauthorizedException("Norsk helsenett returnerte Unauthorized ved oppslag av HPR-nummer $hprNummer")
-            else -> throw RuntimeException("En ukjent feil oppsto ved ved henting av behandler $callId")
+        return when (response.statusCode) {
+            HttpStatus.OK -> {
+                log.info("Hentet behandler for callId {}", callId)
+                response.body ?: throw SykmelderNotFoundException("Fant ikke behandler for callId $callId, hprnr $hprNummer")
+            }
+            HttpStatus.INTERNAL_SERVER_ERROR -> {
+                log.error("Syfohelsenettproxy svarte med feilmelding for callId {}", callId)
+                throw IOException("Syfohelsenettproxy svarte med feilmelding for $callId")
+            }
+            HttpStatus.NOT_FOUND -> {
+                log.warn("Fant ikke behandler for HprNummer $hprNummer, callId $callId")
+                throw SykmelderNotFoundException("Kunne ikke hente fnr for hpr $hprNummer")
+            }
+            HttpStatus.UNAUTHORIZED -> {
+                log.warn("Syfohelsenettproxy returnerte Unauthorized for henting av behandler: $hprNummer")
+                throw UnauthorizedException("Norsk helsenett returnerte Unauthorized ved oppslag av HPR-nummer $hprNummer")
+            }
+            else -> {
+                log.error("Noe gikk galt ved henting av behandler fra syfohelsenettproxy $callId")
+                throw RuntimeException("En ukjent feil oppsto ved ved henting av behandler $callId")
+            }
         }
-
-        log.info("Hentet behandler for callId {}", callId)
-        return response.body!!
-    }
-
-    fun padHpr(hprnummer: String): String? {
-        if (hprnummer.length < 9) {
-            return hprnummer.padStart(9, '0')
-        }
-        return hprnummer
     }
 }

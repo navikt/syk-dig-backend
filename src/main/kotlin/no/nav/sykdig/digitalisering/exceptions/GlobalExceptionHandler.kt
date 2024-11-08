@@ -63,5 +63,4 @@ class GlobalExceptionHandler {
     }
 }
 
-class SykmelderNotFoundException(message: String) : RuntimeException(message)
-class UnauthorizedException(message: String) : Exception(message)
+
