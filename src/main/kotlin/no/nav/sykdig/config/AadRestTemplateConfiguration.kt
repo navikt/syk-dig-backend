@@ -117,7 +117,7 @@ class AadRestTemplateConfiguration {
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
 
-    @Bean
+/*    @Bean
     fun helsenettClientRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,
@@ -129,7 +129,7 @@ class AadRestTemplateConfiguration {
             clientConfigurationProperties = clientConfigurationProperties,
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
-    }
+    }*/
 
     @Bean
     fun smregisteringRestTemplate(
