@@ -137,14 +137,16 @@ class JournalpostService(
                 callId = oppgave.sykmeldingId.toString(),
             )
         val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisningsgrunn, ignoreCase = true) }
-        sykDigOppgaveService.ferdigstillNasjonalAvvistOppgave(
-            oppgave = oppgave,
-            navEpost = navEpost,
-            enhetId = navEnhet,
-            sykmeldt = sykmeldt,
-            avvisningsgrunn = avvistGrunn,
-            avvisningsgrunnAnnet = null,
-        )
+        if (avvistGrunn != null) {
+            sykDigOppgaveService.ferdigstillNasjonalAvvistOppgave(
+                oppgave = oppgave,
+                navEpost = navEpost,
+                enhetId = navEnhet,
+                sykmeldt = sykmeldt,
+                avvisningsgrunn = avvistGrunn,
+                avvisningsgrunnAnnet = null,
+            )
+        }
     }
 
     fun isSykmeldingCreated(id: String): Boolean {
