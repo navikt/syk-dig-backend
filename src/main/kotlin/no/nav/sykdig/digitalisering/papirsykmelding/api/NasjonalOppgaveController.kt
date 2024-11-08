@@ -77,11 +77,9 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/sykmelder/{hprNummer}")
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @ResponseBody
     suspend fun getSykmelder(
         @PathVariable hprNummer: String,
-        @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<Sykmelder> {
        /* if (hprNummer.isBlank() || hprNummer.isNullOrEmpty()) {
             log.info("Ugyldig path parameter: hprNummer")

@@ -17,7 +17,7 @@ import java.io.IOException
 @Component
 class HelsenettClient(
     @Value("\$helsenett.url") private val helsenettUrl: String,
-    private val helsenettClientRestTemplate: RestTemplate,
+    private val helsenettM2mRestTemplate: RestTemplate,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -35,7 +35,7 @@ class HelsenettClient(
         // antakelse om at exceptions blir plukket opp av global exceptionhandler
         // vi nullchecker hpr tidligere i løpet
         val response =
-            helsenettClientRestTemplate.exchange(
+            helsenettM2mRestTemplate.exchange(
                 "$helsenettUrl/api/v2/behandlerMedHprNummer",
                 HttpMethod.GET,
                 HttpEntity<Any>(headers),
