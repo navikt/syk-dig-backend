@@ -66,6 +66,35 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             ),
         )
     }
+    fun getOppgaveBySykmeldingId(sykmeldingId: String): OppgaveDbModel? {
+        return namedParameterJdbcTemplate.query(
+            """SELECT o.oppgave_id,
+                           fnr,
+                           journalpost_id,
+                           dokumentinfo_id,
+                           dokumenter,
+                           opprettet,
+                           ferdigstilt,
+                           avvisings_grunn,
+                           tilbake_til_gosys,
+                           sykmelding_id,
+                           type,
+                           s.sykmelding,
+                           endret_av,
+                           timestamp,
+                           source
+                    FROM oppgave AS o
+                             INNER JOIN sykmelding AS s ON o.oppgave_id = s.oppgave_id
+                        AND s.timestamp = (SELECT MAX(timestamp)
+                                           FROM sykmelding
+                                           WHERE oppgave_id = o.oppgave_id)
+                    WHERE o.oppgave_id = :oppgave_id;
+            """,
+            mapOf("sykmelding_id" to sykmeldingId),
+        ) { resultSet, _ ->
+            resultSet.toDigitaliseringsoppgave()
+        }.firstOrNull()
+    }
 
     fun getOppgave(oppgaveId: String): OppgaveDbModel? {
         return namedParameterJdbcTemplate.query(
@@ -117,11 +146,19 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 ),
             )
         }
+        updateSykmelding(oppgave, navEpost, sykmelding)
+    }
+
+    fun updateSykmelding(
+        oppgave: OppgaveDbModel,
+        navEpost: String,
+        sykmelding: SykmeldingUnderArbeid,
+    ) {
         namedParameterJdbcTemplate.update(
             """
-            INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
-            VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
-            """.trimIndent(),
+                INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
+                VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
+                """.trimIndent(),
             mapOf(
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
                 "oppgave_id" to oppgave.oppgaveId,
@@ -237,6 +274,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             ),
         )
     }
+
 }
 
 fun toSykmelding(

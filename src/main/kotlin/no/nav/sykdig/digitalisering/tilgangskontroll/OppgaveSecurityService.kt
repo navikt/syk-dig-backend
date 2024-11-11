@@ -36,6 +36,15 @@ class OppgaveSecurityService(
         return tilgang
     }
 
+    fun hasAccessToSykmelding(sykmeldingId: String): Boolean {
+        securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
+        val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
+        val navEmail = getNavEmail()
+        val tilgang = hasAccess(oppgave.fnr, navEmail)
+        securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId")
+        return tilgang
+    }
+
     fun hasAccessToJournalpost(journalpostResult: JournalpostResult): Boolean {
         return when (journalpostResult) {
             is Journalpost -> return hasAccess(journalpostResult.fnr, getNavEmail())

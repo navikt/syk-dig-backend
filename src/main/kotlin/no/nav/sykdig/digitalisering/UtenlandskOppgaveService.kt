@@ -7,8 +7,15 @@ import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.regelvalidering.RegelvalideringService
+import no.nav.sykdig.digitalisering.sykmelding.Sykmelding
 import no.nav.sykdig.generated.types.Avvisingsgrunn
+import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatus
+import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatusEnum
+import no.nav.sykdig.generated.types.OppdatertSykmeldingStatus
+import no.nav.sykdig.generated.types.OppdatertSykmeldingStatusEnum
+import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
 import no.nav.sykdig.metrics.MetricRegister
+import no.nav.sykdig.model.OppgaveDbModel
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek
@@ -26,15 +33,26 @@ class UtenlandskOppgaveService(
 ) {
     private val log = applog()
 
+    fun getDigitalisertSykmelding(sykmeldingId: String): SykDigOppgave {
+        val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
+        return sykDigOppgave(oppgave)
+    }
+
     fun getDigitaiseringsoppgave(oppgaveId: String): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
+        return sykDigOppgave(oppgave)
+    }
+
+    private fun sykDigOppgave(
+        oppgave: OppgaveDbModel,
+    ): SykDigOppgave {
         val sykmeldt =
             personService.hentPerson(
                 id = oppgave.fnr,
                 callId = oppgave.sykmeldingId.toString(),
             )
 
-        log.info("Hentet oppgave og sykmeldt for oppgave $oppgaveId, lager SykDigOppgave!")
+        log.info("Hentet oppgave og sykmeldt for oppgave ${oppgave.oppgaveId} sykmeldingId ${oppgave.sykmeldingId}, lager SykDigOppgave!")
 
         return SykDigOppgave(oppgave, sykmeldt)
     }
@@ -132,6 +150,51 @@ class UtenlandskOppgaveService(
         val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
         val formattedTimestamp = (timestamp ?: LocalDateTime.now()).format(formatter)
         return "--- $formattedTimestamp $navIdent ---\n$oppdatertBeskrivelse\n\n$opprinneligBeskrivelse"
+    }
+
+    fun checkOppgaveState(oppgave: OppgaveDbModel): OppdatertSykmeldingStatusEnum {
+        if(oppgave.ferdigstilt == null) {
+            return OppdatertSykmeldingStatusEnum.IKKE_FERDIGSTILT
+        }
+
+        if(oppgave.tilbakeTilGosys) {
+            return OppdatertSykmeldingStatusEnum.IKKE_EN_SYKMELDING
+        }
+
+        if(oppgave.avvisingsgrunn != null) {
+            return OppdatertSykmeldingStatusEnum.AVVIST
+        }
+
+        return OppdatertSykmeldingStatusEnum.FERDIGSTILT
+    }
+
+    fun oppdaterDigitalisertSykmelding(sykmeldingId: String, enhetId: String, values: FerdistilltRegisterOppgaveValues, navEmail: String): OppdatertSykmeldingStatus {
+        val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
+
+        val state = checkOppgaveState(oppgave)
+        if(state != OppdatertSykmeldingStatusEnum.OPPDATERT) {
+            return OppdatertSykmeldingStatus(
+                sykmeldingId,
+                state
+            )
+        }
+
+        val sykmeldt =
+            personService.hentPerson(
+                id = oppgave.fnr,
+                callId = oppgave.sykmeldingId.toString(),
+            )
+        val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
+        if (valideringsresultat.isNotEmpty()) {
+            log.warn("Oppdatering av sykmelding med id $sykmeldingId feilet pga regelsjekk")
+            throw ClientException(valideringsresultat.joinToString())
+        }
+        sykDigOppgaveService.oppdaterSykmelding(oppgave, navEmail, values, enhetId, sykmeldt)
+        metricRegister.oppdatertSykmeldingCounter.increment()
+        return OppdatertSykmeldingStatus(
+            sykmeldingId,
+            OppdatertSykmeldingStatusEnum.OPPDATERT
+        )
     }
 }
 

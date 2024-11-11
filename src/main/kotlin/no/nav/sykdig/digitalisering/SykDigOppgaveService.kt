@@ -75,6 +75,16 @@ class SykDigOppgaveService(
         return oppgaveId
     }
 
+    fun getOppgaveFromSykmeldingId(sykmeldingId: String): OppgaveDbModel {
+        val oppgave = oppgaveRepository.getOppgaveBySykmeldingId(sykmeldingId)
+        if (oppgave == null) {
+            log.warn("Fant ikke oppgave med sykmeldingId $sykmeldingId")
+            throw DgsEntityNotFoundException("Fant ikke oppgave")
+        }
+        log.info("Hentet oppgave med sykmelding id $sykmeldingId")
+        return oppgave
+    }
+
     fun getOppgave(oppgaveId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
         if (oppgave == null) {
@@ -208,6 +218,13 @@ class SykDigOppgaveService(
             sykmeldt = sykmeldt,
             validatedValues = values,
         )
+    }
+
+    @Transactional
+    fun oppdaterSykmelding(oppgave: OppgaveDbModel, navEmail: String, values: FerdistilltRegisterOppgaveValues, enhetId: String, sykmeldt: Person) {
+        val sykmelding = toSykmelding(oppgave, values)
+        oppgaveRepository.updateSykmelding(oppgave, navEmail, sykmelding)
+        ferdigstillingService.sendUpdatedSykmelding(oppgave, sykmeldt, navEmail, values)
     }
 
     companion object {

@@ -10,6 +10,7 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.UtenlandskOppgaveService
 import no.nav.sykdig.digitalisering.exceptions.ClientException
 import no.nav.sykdig.digitalisering.mapToDigitaliseringsoppgave
+import no.nav.sykdig.digitalisering.mapToDigitalisertSykmelding
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
@@ -19,6 +20,9 @@ import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.DigitaliseringsoppgaveResult
 import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatus
 import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatusEnum
+import no.nav.sykdig.generated.types.DigitalisertSykmeldingResult
+import no.nav.sykdig.generated.types.OppdatertSykmeldingStatus
+import no.nav.sykdig.generated.types.OppdatertSykmeldingStatusEnum
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
 import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
@@ -33,6 +37,24 @@ class UtenlandskOppgaveDataFetcher(
 ) {
     companion object {
         private val log = applog()
+    }
+
+
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToSykmelding(#sykmeldingId)")
+    @DgsQuery(field = DgsConstants.QUERY.DigitalisertSykmelding)
+    fun getDigitalisertSykmelding(
+        @InputArgument sykmeldingId: String,
+        dfe: DataFetchingEnvironment,
+    ): DigitalisertSykmeldingResult? {
+        val oppgave = utenlandskOppgaveService.getDigitalisertSykmelding(sykmeldingId)
+        val state = utenlandskOppgaveService.checkOppgaveState(oppgave.oppgaveDbModel)
+        if(state != OppdatertSykmeldingStatusEnum.FERDIGSTILT) {
+            return OppdatertSykmeldingStatus(
+                sykmeldingId,
+                state
+            )
+        }
+        return mapToDigitalisertSykmelding(oppgave)
     }
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
@@ -76,6 +98,27 @@ class UtenlandskOppgaveDataFetcher(
                 status = DigitaliseringsoppgaveStatusEnum.FINNES_IKKE,
             )
         }
+    }
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToSykmelding(#sykmeldingId)")
+    @DgsMutation(field = DgsConstants.MUTATION.OppdaterDigitalisertSykmelding)
+    fun oppdaterSykmelding(
+        @InputArgument sykmeldingId: String,
+        @InputArgument enhetId: String,
+        @InputArgument values: SykmeldingUnderArbeidValues,
+        dfe: DataFetchingEnvironment,
+    ): OppdatertSykmeldingStatus {
+        val navEmail: String = dfe.graphQlContext.get("username")
+        val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
+        utenlandskOppgaveService.oppdaterDigitalisertSykmelding(
+            sykmeldingId = sykmeldingId,
+            enhetId = enhetId,
+            values = ferdistilltRegisterOppgaveValues,
+            navEmail = navEmail,
+        )
+        return OppdatertSykmeldingStatus(
+            sykmeldingId = sykmeldingId,
+            status = OppdatertSykmeldingStatusEnum.OPPDATERT
+        )
     }
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
