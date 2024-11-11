@@ -86,7 +86,7 @@ class NasjonalOppgaveController(
             return ResponseEntity.badRequest().build()
         }
         val callId = UUID.randomUUID().toString()
-        log.info("Received request to GET /sykmelder/$hprNummer with callId $callId")
+        securelog.info("Henter person med callId $callId and hprNummer = $hprNummer")
         val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
         return ResponseEntity.ok(sykmelder)
     }

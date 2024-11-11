@@ -7,6 +7,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Godkjenning
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Kode
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.securelog
 import org.springframework.stereotype.Service
 
 @Service
@@ -15,19 +16,15 @@ class SykmelderService(
     private val personService: PersonService,
 ) {
     val log = applog()
+    val securelog = securelog()
 
     suspend fun getSykmelder(
         hprNummer: String,
         callId: String,
     ): Sykmelder {
-
-        // TODO: her er det forbedring
-        if (hprNummer.isEmpty()) {
-            log.warn("HPR-nummer mangler, kan ikke fortsette")
-            throw IllegalStateException("HPR-nummer mangler")
-        }
         val hprPadded = padHpr(hprNummer)
         val behandler = helsenettClient.getBehandler(hprPadded, callId)
+        securelog.info("hentet behandler: ${behandler.fnr} hprNummer: $hprNummer, callId=$callId")
         if (behandler.fnr == null) {
             log.warn("Kunne ikke hente fnr for hpr {}", hprPadded)
             throw SykmelderNotFoundException("Kunne ikke hente fnr for hpr $hprPadded")
@@ -38,8 +35,6 @@ class SykmelderService(
         val godkjenninger = changeHelsepersonellkategoriVerdiFromFAToFA1(behandler.godkjenninger)
 
         val pdlPerson = personService.getPerson(behandler.fnr, callId)
-        // nullchecker ikke pdlPerosn fordi dette er vel gjort tidligere i løpet
-        // men må testes
 
         return Sykmelder(
             hprNummer = hprPadded,
@@ -81,6 +76,7 @@ class SykmelderService(
 
     private fun padHpr(hprnummer: String): String {
         if (hprnummer.length < 9) {
+            securelog.info("padder hpr: $hprnummer")
             return hprnummer.padStart(9, '0')
         }
         return hprnummer

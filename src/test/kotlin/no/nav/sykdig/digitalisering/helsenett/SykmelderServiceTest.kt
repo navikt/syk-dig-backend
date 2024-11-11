@@ -63,40 +63,6 @@ class SykmelderServiceTest {
     }
 
     @Test
-    fun `get sykmelder with empty hpr`() {
-        val hprNummer = ""
-        val fnr = "12345678910"
-        val fornavn = "Ola"
-        val mellomnavn = "Mellomnavn"
-        val etternavn = "Normann"
-
-        val expectedPerson = Person(
-            fnr = fnr,
-            navn = Navn(fornavn, mellomnavn, etternavn),
-            aktorId = fnr,
-            bostedsadresse = null,
-            oppholdsadresse = null,
-            fodselsdato = null
-        )
-
-        val expectedBehandler = Behandler(
-            godkjenninger = listOf(
-                Godkjenning(Kode(true, 1, null), Kode(true, 1, null))
-            ),
-            fnr = fnr,
-            fornavn = fornavn,
-            mellomnavn = mellomnavn,
-            etternavn = etternavn
-        )
-
-        coEvery { pdlService.getPerson(any(), any()) } returns expectedPerson
-        coEvery { helsenettClient.getBehandler(hprNummer, "callid") } returns expectedBehandler
-
-        val exception = runBlocking { assertFailsWith<IllegalStateException> { sykmelderService.getSykmelder(hprNummer, "callid") } }
-        assertEquals("HPR-nummer mangler", exception.message)
-    }
-
-    @Test
     fun `get sykmelder does not exists in hpr`() {
         val hprNummer = "123456789"
         val fnr = "1234567"
