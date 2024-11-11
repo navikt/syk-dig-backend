@@ -83,6 +83,9 @@ spec:
         - application: syfohelsenettproxy
           namespace: teamsykmelding
           cluster: dev-gcp
+        - application: smtss
+          namespace: teamsykmelding
+          cluster: dev-gcp
       external:
         - host: kodeverk-api.nav.no
         - host: oppgave-q1.dev-fss-pub.nais.io
@@ -127,3 +130,7 @@ spec:
       value: http://syfohelsenettproxy
     - name: HELSENETT_CLIENT_ID
       value: dev-gcp.teamsykmelding.syfohelsenettproxy
+    - name: SMTSS_URL
+      value: http://smtss
+    - name: SMTSS_CLIENT_ID
+      value: dev-gcp.teamsykmelding.smtss

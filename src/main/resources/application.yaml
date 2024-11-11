@@ -56,6 +56,7 @@ dokarkiv.url: ${DOKARKIV_URL}
 oppgave.url: ${OPPGAVE_URL}
 smregistrering.url: ${SMREGISTRERING_URL}
 helsenett.url: ${HELSENETT_URL}
+smtss.url: ${SMTSS_URL}
 
 
 no.nav.security.jwt:
@@ -89,7 +90,7 @@ no.nav.security.jwt:
                     client-id: ${AZURE_APP_CLIENT_ID}
                     client-secret: ${AZURE_APP_CLIENT_SECRET}
                     client-auth-method: client_secret_basic
-            kodeverk-m2m:
+            helsenett-m2m:
                 token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
                 scope: api://${HELSENETT_CLIENT_ID}/.default
                 grant-type: client_credentials
@@ -145,8 +146,14 @@ no.nav.security.jwt:
                     client-id: ${AZURE_APP_CLIENT_ID}
                     client-secret: ${AZURE_APP_CLIENT_SECRET}
                     client-auth-method: client_secret_basic
-
-
+            onbehalfof-smtss:
+                token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+                scope: api://${SMTSS_CLIENT_ID}/.default
+                grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+                authentication:
+                    client-id: ${AZURE_APP_CLIENT_ID}
+                    client-secret: ${AZURE_APP_CLIENT_SECRET}
+                    client-auth-method: client_secret_basic
 
 
 logging.config: "classpath:logback.xml"

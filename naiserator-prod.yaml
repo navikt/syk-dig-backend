@@ -83,6 +83,9 @@ spec:
         - application: syfohelsenettproxy
           namespace: teamsykmelding
           cluster: prod-gcp
+        - application: smtss
+          namespace: teamsykmelding
+          cluster: prod-gcp
       external:
         - host: saf.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
@@ -124,3 +127,7 @@ spec:
       value: http://syfohelsenettproxy
     - name: HELSENETT_CLIENT_ID
       value: prod-gcp.teamsykmelding.syfohelsenettproxy
+    - name: SMTSS_URL
+      value: http://smtss
+    - name: SMTSS_CLIENT_ID
+      value: prod-gcp.teamsykmelding.smtss

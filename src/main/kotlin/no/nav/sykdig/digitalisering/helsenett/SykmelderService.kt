@@ -1,8 +1,10 @@
 package no.nav.sykdig.digitalisering.helsenett
 
+import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.digitalisering.helsenett.client.HelsenettClient
+import no.nav.sykdig.digitalisering.helsenett.client.SmtssClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Godkjenning
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Kode
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service
 class SykmelderService(
     private val helsenettClient: HelsenettClient,
     private val personService: PersonService,
+    private val smtssClient: SmtssClient
 ) {
     val log = applog()
     val securelog = securelog()
@@ -45,6 +48,10 @@ class SykmelderService(
             etternavn = pdlPerson.navn.etternavn,
             godkjenninger = godkjenninger,
         )
+    }
+
+    suspend fun getTssIdInfotrygd(samhandlerFnr: String, samhandlerOrgName: String, loggingMeta: LoggingMeta, sykmeldingId: String): String {
+        return smtssClient.findBestTssInfotrygd(samhandlerFnr, samhandlerOrgName, loggingMeta, sykmeldingId)
     }
 
     fun changeHelsepersonellkategoriVerdiFromFAToFA1(

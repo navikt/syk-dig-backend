@@ -3,16 +3,24 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.msgHead.XMLMsgHead
+import no.nav.syfo.service.toSykmelding
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
-import no.nav.sykdig.digitalisering.norskHelsenett.SykmelderService
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
+import no.nav.sykdig.digitalisering.ferdigstilling.mapping.extractHelseOpplysningerArbeidsuforhet
+import no.nav.sykdig.digitalisering.ferdigstilling.mapping.fellesformatMarshaller
+import no.nav.sykdig.digitalisering.ferdigstilling.mapping.get
+import no.nav.sykdig.digitalisering.ferdigstilling.mapping.toString
+import no.nav.sykdig.digitalisering.helsenett.SykmelderService
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.*
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.ReceivedSykmeldingNasjonal
 import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.digitalisering.sykmelding.Merknad
 import no.nav.sykdig.securelog
+import no.nav.sykdig.utils.getLocalDateTime
+import no.nav.sykdig.utils.mapsmRegistreringManuelltTilFellesformat
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -42,11 +50,13 @@ class NasjonalOppgaveService(
         val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
         if (!oppgave.isPresent) return ResponseEntity(HttpStatus.NOT_FOUND) // TODO: bedre error handeling
 
+        val sykmeldingId = oppgave.get().sykmeldingId
+
         val loggingMeta = LoggingMeta(
-            mottakId = oppgave.get().sykmeldingId,
+            mottakId = sykmeldingId,
             dokumentInfoId = oppgave.get().dokumentInfoId,
-            msgId = oppgave.get().sykmeldingId,
-            sykmeldingId = oppgave.get().sykmeldingId,
+            msgId = sykmeldingId,
+            sykmeldingId = sykmeldingId,
             journalpostId = oppgave.get().journalpostId,
         )
 
@@ -57,7 +67,7 @@ class NasjonalOppgaveService(
         }
 
         log.info("Henter sykmelder fra HPR og PDL")
-        val sykmelder = sykmelderService.hentSykmelder(
+        val sykmelder = sykmelderService.getSykmelder(
                 sykmelderHpr,
                 callId,
             )
@@ -69,7 +79,61 @@ class NasjonalOppgaveService(
                 callId = callId,
             )
 
-        val tssId =
+        val tssId = sykmelderService.getTssIdInfotrygd(sykmelder.fnr, "", loggingMeta, sykmeldingId)
+
+        val datoOpprettet = oppgave.get().datoOpprettet
+        val journalpostId = oppgave.get().journalpostId
+        val fellesformat =
+            mapsmRegistreringManuelltTilFellesformat(
+                smRegistreringManuell = smRegistreringManuell,
+                pdlPasient = pasient,
+                sykmelder = sykmelder,
+                sykmeldingId = sykmeldingId,
+                datoOpprettet = datoOpprettet,
+                journalpostId = journalpostId,
+            )
+
+        val healthInformation = extractHelseOpplysningerArbeidsuforhet(fellesformat)
+        val msgHead = fellesformat.get<XMLMsgHead>()
+
+        val sykmelding =
+            healthInformation.toSykmelding(
+                sykmeldingId,
+                pasient.aktorId,
+                sykmelder.aktorId,
+                sykmeldingId,
+                getLocalDateTime(msgHead.msgInfo.genDate)
+            )
+
+        val receivedSykmelding =
+            ReceivedSykmeldingNasjonal(
+                sykmelding = sykmelding,
+                personNrPasient = pasient.fnr,
+                tlfPasient =
+                healthInformation.pasient.kontaktInfo.firstOrNull()?.teleAddress?.v,
+                personNrLege = sykmelder.fnr,
+                navLogId = sykmeldingId,
+                msgId = sykmeldingId,
+                legekontorOrgNr = null,
+                legekontorOrgName = "",
+                legekontorHerId = null,
+                legekontorReshId = null,
+                mottattDato = oppgave.get().datoOpprettet ?: getLocalDateTime(msgHead.msgInfo.genDate),
+                rulesetVersion = healthInformation.regelSettVersjon,
+                fellesformat = fellesformatMarshaller.toString(fellesformat),
+                tssid = tssId ?: "",
+                merknader = createMerknad(sykmelding),
+                partnerreferanse = null,
+                legeHelsepersonellkategori =
+                sykmelder.godkjenninger?.getHelsepersonellKategori(),
+                legeHprNr = sykmelder.hprNummer,
+                vedlegg = null,
+                utenlandskSykmelding = null,
+            )
+
+
+
+
 
 
 
@@ -95,6 +159,32 @@ class NasjonalOppgaveService(
 
 
     }
+
+    private fun createMerknad(sykmelding: Sykmelding): List<Merknad>? {
+        val behandletTidspunkt = sykmelding.behandletTidspunkt.toLocalDate()
+        val terskel = sykmelding.perioder.map { it.fom }.minOrNull()?.plusDays(7)
+        return if (behandletTidspunkt != null && terskel != null && behandletTidspunkt > terskel) {
+            listOf(Merknad("TILBAKEDATERT_PAPIRSYKMELDING", null))
+        } else {
+            null
+        }
+    }
+
+    fun List<Godkjenning>.getHelsepersonellKategori(): String? =
+        when {
+            find { it.helsepersonellkategori?.verdi == "LE" } != null -> "LE"
+            find { it.helsepersonellkategori?.verdi == "TL" } != null -> "TL"
+            find { it.helsepersonellkategori?.verdi == "MT" } != null -> "MT"
+            find { it.helsepersonellkategori?.verdi == "FT" } != null -> "FT"
+            find { it.helsepersonellkategori?.verdi == "KI" } != null -> "KI"
+            else -> {
+                val verdi = firstOrNull()?.helsepersonellkategori?.verdi
+                log.warn(
+                    "Signerende behandler har ikke en helsepersonellkategori($verdi) vi kjenner igjen",
+                )
+                verdi
+            }
+        }
 
     fun mapToDao(
         papirManuellOppgave: PapirManuellOppgave,
