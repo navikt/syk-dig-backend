@@ -28,7 +28,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
     @Test
     fun `mapToDao der id er null`() {
-        val dao = nasjonalOppgaveService.mapToDao(testDataPapirManuellOppgave(), null)
+        val dao = nasjonalOppgaveService.mapToDao(testDataPapirManuellOppgave(), null, null)
 
         assertEquals("123", dao.sykmeldingId)
         assertEquals(null, dao.id)
@@ -37,7 +37,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     @Test
     fun `mapToDao der id ikke er null`() {
         val uuid = UUID.randomUUID()
-        val dao = nasjonalOppgaveService.mapToDao(testDataPapirManuellOppgave(), uuid)
+        val dao = nasjonalOppgaveService.mapToDao(testDataPapirManuellOppgave(), uuid, null)
 
         assertEquals("123", dao.sykmeldingId)
         assertEquals(uuid, dao.id)

@@ -8,6 +8,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -18,14 +19,15 @@ class NasjonalOppgaveService(
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
         if (eksisterendeOppgave.isPresent) {
-            return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id))
+            return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id, null))
         }
-        return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
+        return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null, null))
     }
 
     fun mapToDao(
         papirManuellOppgave: PapirManuellOppgave,
         existingId: UUID?,
+        avvisningsgrunn: String?
     ): NasjonalManuellOppgaveDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
@@ -67,8 +69,8 @@ class NasjonalOppgaveService(
                     ),
                 utfall = null,
                 ferdigstiltAv = null,
-                datoFerdigstilt = null,
-                avvisningsgrunn = null,
+                datoFerdigstilt = LocalDateTime.now(),
+                avvisningsgrunn = avvisningsgrunn,
             )
 
         if (existingId != null) {
@@ -91,6 +93,6 @@ class NasjonalOppgaveService(
         if (eksisterendeOppgave.isPresent) {
             journalpostService.ferdigstillAvvistOppgave(eksisterendeOppgave.get(), authorization, navEnhet, navEpost, avvisningsgrunn)
         }
-        return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id))
+        return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id, avvisningsgrunn))
     }
 }
