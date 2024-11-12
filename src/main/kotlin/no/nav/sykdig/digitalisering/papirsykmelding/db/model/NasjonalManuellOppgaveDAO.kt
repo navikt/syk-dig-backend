@@ -38,11 +38,11 @@ data class NasjonalManuellOppgaveDAO(
     @Column("oppgave_id")
     val oppgaveId: Int? = null,
     @Column("ferdigstilt")
-    val ferdigstilt: Boolean = false,
+    var ferdigstilt: Boolean = false,
     @Column("papir_sm_registrering")
     val papirSmRegistrering: PapirSmRegistering,
     @Column("utfall")
-    var utfall: String? = null,
+    var utfall: Utfall? = null,
     @Column("ferdigstilt_av")
     var ferdigstiltAv: String? = null,
     @Column("dato_ferdigstilt")

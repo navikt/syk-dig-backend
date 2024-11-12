@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 class DocumentMutation(
     private val documentService: DocumentService,
 ) {
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId, '/api/graphql')")
     @DgsMutation(field = DgsConstants.MUTATION.Dokument)
     fun oppdaterDukumentTittel(
         @InputArgument oppgaveId: String,

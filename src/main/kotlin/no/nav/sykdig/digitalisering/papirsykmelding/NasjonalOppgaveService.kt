@@ -2,10 +2,12 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
+import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.mapAvvisningsgrunn
 import no.nav.sykdig.digitalisering.papirsykmelding.api.SmregistreringClient
@@ -20,6 +22,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppg
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.generated.types.Avvisingsgrunn
+import no.nav.sykdig.metrics.MetricRegister
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
@@ -36,12 +39,16 @@ class NasjonalOppgaveService(
     private val ferdigstillingService: FerdigstillingService,
     private val smregistreringClient: SmregistreringClient,
     private val nasjonalCommonService: NasjonalCommonService,
+    private val gosysService: GosysService,
+    private val metricRegister: MetricRegister,
 ) {
     val log = applog()
     val securelog = securelog()
     val mapper = jacksonObjectMapper()
 
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave, ferdigstilt: Boolean = false): NasjonalManuellOppgaveDAO {
+
+    fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
         securelog.info("Forsøkte å hente eksisterende oppgave med sykmeldingId ${papirManuellOppgave.sykmeldingId} , fant følgende: $eksisterendeOppgave")
 
@@ -331,6 +338,45 @@ fun ferdigstillNasjonalAvvistOppgave(
 
     } else {
         log.error("Fant ikke fnr for oppgave med id $oppgave.oppgaveId")
+    }
+
+    fun ferdigstillOgSendOppgaveTilGosys(oppgaveId: String) {
+        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt())
+
+        if (!oppgave.isPresent) {
+            log.warn("Fant ikke oppgave med id $oppgaveId")
+            throw NoOppgaveException("Fant ikke oppgave med id $oppgaveId")
+        }
+
+        val sykmeldingId = oppgave.get().sykmeldingId
+        val journalpostId = oppgave.get().journalpostId
+        val dokumentInfoId = oppgave.get().dokumentInfoId
+
+        val loggingMeta =
+            LoggingMeta(
+                mottakId = sykmeldingId,
+                dokumentInfoId = dokumentInfoId,
+                msgId = sykmeldingId,
+                sykmeldingId = sykmeldingId,
+                journalpostId = journalpostId,
+            )
+
+        log.info(
+            "Sender nasjonal oppgave med id $oppgaveId til Gosys {}",
+            StructuredArguments.fields(loggingMeta)
+        )
+
+        val navIdent = getNavEmail()
+        gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.get().sykmeldingId, navIdent)
+
+        ferdigstillingService.ferdigstillOppgaveGosys(oppgaveId, Utfall.SENDT_TIL_GOSYS, navIdent)
+
+        log.info(
+            "Ferdig å sende oppgave med id $oppgaveId til Gosys {}",
+            StructuredArguments.fields(loggingMeta)
+        )
+
+        metricRegister.sendtTilGosysNasjonal.increment()
     }
 }
 

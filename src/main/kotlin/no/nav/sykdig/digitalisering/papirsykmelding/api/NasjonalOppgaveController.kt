@@ -142,12 +142,17 @@ class NasjonalOppgaveController(
 
 
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId, '/oppgave/{oppgaveId}/tilgosys')")
     fun sendOppgaveTilGosys(
         @PathVariable oppgaveId: String,
-        @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<HttpStatusCode> {
-        log.info("papirsykmelding: Sender oppgave med id $oppgaveId til Gosys gjennom syk-dig proxy")
-        return smregistreringClient.postOppgaveTilGosysRequest(authorization, oppgaveId)
+        if (oppgaveId.isBlank()) {
+            log.info("oppgaveId mangler for å kunne sende oppgave til Gosys")
+            return ResponseEntity.badRequest().build()
+        }
+        log.info("papirsykmelding: Sender oppgave med id $oppgaveId til Gosys")
+        nasjonalOppgaveService.ferdigstillOgSendOppgaveTilGosys(oppgaveId)
+        return ResponseEntity.noContent().build()
     }
 
     @PostMapping("/sykmelding/{sykmeldingId}")

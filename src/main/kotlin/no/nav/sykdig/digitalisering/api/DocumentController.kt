@@ -34,7 +34,7 @@ class DocumentController(
     }
 
     @GetMapping("/api/document/{oppgaveId}/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId, '/api/graphql')")
     @ResponseBody
     fun getOppgaveDocument(
         @PathVariable oppgaveId: String,
