@@ -8,6 +8,9 @@ import no.nav.sykdig.digitalisering.dokument.DocumentService
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
@@ -42,10 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import java.time.LocalDate
-import java.time.Month
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
+import java.time.*
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -72,7 +72,8 @@ class FerdigstillingServiceTest : IntegrationTest() {
     @BeforeEach
     fun setup() {
         ferdigstillingService =
-            FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService)
+            FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService, nasjonalOppgaveRepository)
+        nasjonalOppgaveRepository.deleteAll()
     }
 
     @Test
@@ -411,5 +412,69 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 )
             }
         assertEquals(exception.message, "Gradert sykmelding må ha grad")
+    }
+
+    @Test
+    fun `ferdigstill oppgave gosys`() {
+        val oppgaveId = 444
+        nasjonalOppgaveRepository.save(nasjonalOppgave(null, oppgaveId))
+        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId).get()
+
+        oppgave.utfall = Utfall.SENDT_TIL_GOSYS
+        oppgave.ferdigstilt = true
+        oppgave.ferdigstiltAv = "nav-ident@mail.no"
+
+        val ferdigstiltOppgave = nasjonalOppgaveRepository.save(oppgave)
+
+        assertEquals(ferdigstiltOppgave.oppgaveId, 444)
+        assertEquals(ferdigstiltOppgave.utfall, Utfall.SENDT_TIL_GOSYS)
+        assertEquals(ferdigstiltOppgave.ferdigstilt, true)
+        assertEquals(ferdigstiltOppgave.ferdigstiltAv, "nav-ident@mail.no")
+    }
+
+    fun nasjonalOppgave(
+        id: UUID?,
+        oppgaveId: Int,
+    ): NasjonalManuellOppgaveDAO {
+        return NasjonalManuellOppgaveDAO(
+            id = id,
+            sykmeldingId = "987",
+            journalpostId = "123",
+            fnr = "fnr",
+            aktorId = "aktor",
+            dokumentInfoId = "123",
+            datoOpprettet = LocalDateTime.now(),
+            oppgaveId = oppgaveId,
+            ferdigstilt = false,
+            papirSmRegistrering =
+            PapirSmRegistering(
+                journalpostId = "123",
+                oppgaveId = "123",
+                fnr = "fnr",
+                aktorId = "aktor",
+                dokumentInfoId = "123",
+                datoOpprettet = OffsetDateTime.now(),
+                sykmeldingId = "123",
+                syketilfelleStartDato = LocalDate.now(),
+                arbeidsgiver = null,
+                medisinskVurdering = null,
+                skjermesForPasient = null,
+                perioder = null,
+                prognose = null,
+                utdypendeOpplysninger = null,
+                tiltakNAV = null,
+                tiltakArbeidsplassen = null,
+                andreTiltak = null,
+                meldingTilNAV = null,
+                meldingTilArbeidsgiver = null,
+                kontaktMedPasient = null,
+                behandletTidspunkt = null,
+                behandler = null,
+            ),
+            utfall = null,
+            ferdigstiltAv = null,
+            datoFerdigstilt = null,
+            avvisningsgrunn = null,
+        )
     }
 }

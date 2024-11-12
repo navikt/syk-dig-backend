@@ -27,12 +27,12 @@ class OppgaveSecurityService(
         private val auditlog = auditlog()
     }
 
-    fun hasAccessToOppgave(oppgaveId: String): Boolean {
+    fun hasAccessToOppgave(oppgaveId: String, requestPath: String): Boolean {
         securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val navEmail = getNavEmail()
-        val tilgang = hasAccess(oppgave.fnr, navEmail)
-        securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
+        val tilgang = hasAccess(oppgave.fnr, navEmail, requestPath)
+        securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
         return tilgang
     }
 
@@ -80,6 +80,7 @@ class OppgaveSecurityService(
     private fun hasAccess(
         fnr: String,
         navEmail: String,
+        requestPath: String = "/api/graphql"
     ): Boolean {
         val tilgang = istilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
         auditlog.info(
@@ -87,7 +88,7 @@ class OppgaveSecurityService(
                 fnr = fnr,
                 navEmail = navEmail,
                 operation = AuditLogger.Operation.READ,
-                requestPath = "/api/graphql",
+                requestPath = requestPath,
                 permit =
                     when (tilgang) {
                         true -> AuditLogger.Permit.PERMIT
