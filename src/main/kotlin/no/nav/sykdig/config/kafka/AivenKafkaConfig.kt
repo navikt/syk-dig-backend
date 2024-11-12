@@ -78,7 +78,7 @@ class AivenKafkaConfig(
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                 ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1",
             ) + commonConfig()
-        val consumerFactory = DefaultKafkaConsumerFactory<String, String>(config)
+        val consumerFactory = DefaultKafkaConsumerFactory<String, String>(config, StringDeserializer(), StringDeserializer())
 
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = consumerFactory

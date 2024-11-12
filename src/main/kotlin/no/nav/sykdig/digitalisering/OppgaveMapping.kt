@@ -2,9 +2,12 @@ package no.nav.sykdig.digitalisering
 
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.sykmelding.Periode
+import no.nav.sykdig.generated.DgsConstants.QUERY.DigitalisertSykmelding
 import no.nav.sykdig.generated.types.Bostedsadresse
 import no.nav.sykdig.generated.types.DiagnoseValue
 import no.nav.sykdig.generated.types.Digitaliseringsoppgave
+import no.nav.sykdig.generated.types.DigitalisertSykmelding
+import no.nav.sykdig.generated.types.DigitalisertSykmeldingResult
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Matrikkeladresse
 import no.nav.sykdig.generated.types.OppgaveValues
@@ -19,21 +22,33 @@ import no.nav.sykdig.generated.types.UtenlandskAdresse
 import no.nav.sykdig.generated.types.Vegadresse
 import no.nav.sykdig.model.SykmeldingUnderArbeid
 
+fun mapToDigitalisertSykmelding(oppgave: SykDigOppgave): DigitalisertSykmeldingResult {
+    requireNotNull(oppgave.oppgaveDbModel.sykmelding)
+    return DigitalisertSykmelding(
+        sykmeldingId = oppgave.oppgaveDbModel.sykmeldingId.toString(),
+        documents = oppgave.oppgaveDbModel.dokumenter.map { Document(it.tittel, it.dokumentInfoId) },
+        person = mapPerson(oppgave),
+        type = if (oppgave.oppgaveDbModel.type == "UTLAND") SykmeldingsType.UTENLANDS else SykmeldingsType.INNENLANDS,
+        values = oppgave.oppgaveDbModel.sykmelding.mapToOppgaveValues()
+    )
+}
+
 fun mapToDigitaliseringsoppgave(oppgave: SykDigOppgave) =
     Digitaliseringsoppgave(
         oppgaveId = oppgave.oppgaveDbModel.oppgaveId,
-        person =
-            Person(
-                navn = oppgave.person.navn.toFormattedNameString(),
-                bostedsadresse = mapToBostedsadresse(oppgave.person),
-                oppholdsadresse = mapToOppholdsadresse(oppgave.person),
-            ),
+        person = mapPerson(oppgave),
         type = if (oppgave.oppgaveDbModel.type == "UTLAND") SykmeldingsType.UTENLANDS else SykmeldingsType.INNENLANDS,
         values =
             oppgave.oppgaveDbModel.sykmelding?.mapToOppgaveValues()
                 ?: OppgaveValues(fnrPasient = oppgave.oppgaveDbModel.fnr),
         documents = oppgave.oppgaveDbModel.dokumenter.map { Document(it.tittel, it.dokumentInfoId) },
     )
+
+private fun mapPerson(oppgave: SykDigOppgave) = Person(
+    navn = oppgave.person.navn.toFormattedNameString(),
+    bostedsadresse = mapToBostedsadresse(oppgave.person),
+    oppholdsadresse = mapToOppholdsadresse(oppgave.person),
+)
 
 private fun SykmeldingUnderArbeid.mapToOppgaveValues(): OppgaveValues =
     OppgaveValues(

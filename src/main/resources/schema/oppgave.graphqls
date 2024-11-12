@@ -1,4 +1,13 @@
 union DigitaliseringsoppgaveResult = Digitaliseringsoppgave | DigitaliseringsoppgaveStatus
+union DigitalisertSykmeldingResult = OppdatertSykmeldingStatus | DigitalisertSykmelding
+
+type DigitalisertSykmelding {
+    sykmeldingId: String!
+    documents: [Document!]!
+    person: Person!
+    type: SykmeldingsType!
+    values: OppgaveValues!
+}
 
 type Digitaliseringsoppgave {
     oppgaveId: String!
@@ -13,12 +22,27 @@ type DigitaliseringsoppgaveStatus {
     status: DigitaliseringsoppgaveStatusEnum!
 }
 
+type OppdatertSykmeldingStatus {
+    sykmeldingId: String!
+    status: OppdatertSykmeldingStatusEnum
+}
+
+enum OppdatertSykmeldingStatusEnum {
+    OPPDATERT
+    IKKE_FERDIGSTILT
+    FERDIGSTILT
+    FINNES_IKKE
+    AVVIST
+    IKKE_EN_SYKMELDING
+}
+
 enum DigitaliseringsoppgaveStatusEnum {
     FERDIGSTILT
     IKKE_EN_SYKMELDING
     FINNES_IKKE
     AVVIST
 }
+
 
 enum PeriodeType {
     AKTIVITET_IKKE_MULIG

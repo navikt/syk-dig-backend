@@ -5,9 +5,11 @@ scalar UUID
 type Query {
     oppgave(oppgaveId: String!): DigitaliseringsoppgaveResult
     journalpost(id: String!): JournalpostResult!
+    digitalisertSykmelding(sykmeldingId: String!) : DigitalisertSykmeldingResult
 }
 
 type Mutation {
+
     lagre(
         oppgaveId: String!
         enhetId: String!
@@ -36,4 +38,10 @@ type Mutation {
         journalpostId: String!
         norsk: Boolean!
     ): JournalpostStatus!
+
+    oppdaterDigitalisertSykmelding(
+        sykmeldingId: String!
+        enhetId: String!
+        values: SykmeldingUnderArbeidValues!
+    ): OppdatertSykmeldingStatus
 }

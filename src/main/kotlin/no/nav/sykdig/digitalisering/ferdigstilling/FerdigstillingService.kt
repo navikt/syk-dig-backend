@@ -150,4 +150,18 @@ class FerdigstillingService(
             )
         }
     }
+
+    fun sendUpdatedSykmelding(oppgave: OppgaveDbModel, sykmeldt: Person, navEmail: String, values: FerdistilltRegisterOppgaveValues) {
+        val receivedSykmelding =
+            mapToReceivedSykmelding(
+                ferdigstillteRegisterOppgaveValues = values,
+                sykmeldt = sykmeldt,
+                sykmeldingId = oppgave.sykmeldingId.toString(),
+                journalpostId = oppgave.journalpostId,
+                opprettet = oppgave.opprettet.toLocalDateTime(),
+            )
+        sykmeldingOKProducer.send(
+            ProducerRecord(OK_SYKMLEDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
+        ).get()
+    }
 }

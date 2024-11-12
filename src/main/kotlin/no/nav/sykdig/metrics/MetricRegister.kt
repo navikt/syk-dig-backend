@@ -20,6 +20,8 @@ class MetricRegister(private val registry: MeterRegistry) {
             "${METRICS_NS}_ferdigstilt_oppgave_counter",
         )
 
+    val oppdatertSykmeldingCounter = registry.counter("${METRICS_NS}_oppdatert_utenlandsk_sykmelding_counter")
+
     val sendtTilGosys =
         registry.counter(
             "${METRICS_NS}_sendt_til_gosys_counter",
