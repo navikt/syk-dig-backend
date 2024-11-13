@@ -29,7 +29,8 @@ fun mapToDigitalisertSykmelding(oppgave: SykDigOppgave): DigitalisertSykmeldingR
         documents = oppgave.oppgaveDbModel.dokumenter.map { Document(it.tittel, it.dokumentInfoId) },
         person = mapPerson(oppgave),
         type = if (oppgave.oppgaveDbModel.type == "UTLAND") SykmeldingsType.UTENLANDS else SykmeldingsType.INNENLANDS,
-        values = oppgave.oppgaveDbModel.sykmelding.mapToOppgaveValues()
+        values = oppgave.oppgaveDbModel.sykmelding.mapToOppgaveValues(),
+        oppgaveId = oppgave.oppgaveDbModel.oppgaveId,
     )
 }
 

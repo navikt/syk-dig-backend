@@ -3,6 +3,7 @@ union DigitalisertSykmeldingResult = OppdatertSykmeldingStatus | DigitalisertSyk
 
 type DigitalisertSykmelding {
     sykmeldingId: String!
+    oppgaveId: String!
     documents: [Document!]!
     person: Person!
     type: SykmeldingsType!
