@@ -24,7 +24,7 @@ class NasjonalOppgaveService(
 
     fun hentFerdigstiltOppgave(sykmeldingId: String): PapirManuellOppgave? {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
-        if (eksisterendeOppgave.isPresent) {
+        if (eksisterendeOppgave.isPresent && eksisterendeOppgave.get().ferdigstilt) {
             return mapFromDao(eksisterendeOppgave.get())
         }
         return null
