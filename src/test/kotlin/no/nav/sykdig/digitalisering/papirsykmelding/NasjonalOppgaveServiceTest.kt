@@ -35,6 +35,15 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     }
 
     @Test
+    fun `mapFromDao der id ikke er null`() {
+        val uuid = UUID.randomUUID()
+        val papirSykmelding = nasjonalOppgaveService.mapFromDao(testDataNasjonalManuellOppgaveDAO(uuid, "123"))
+
+        assertEquals("123", papirSykmelding.sykmeldingId)
+        assertEquals("fnr", papirSykmelding.fnr)
+    }
+
+    @Test
     fun `mapToDao der id ikke er null`() {
         val uuid = UUID.randomUUID()
         val dao = nasjonalOppgaveService.mapToDao(testDataPapirManuellOppgave(), uuid)

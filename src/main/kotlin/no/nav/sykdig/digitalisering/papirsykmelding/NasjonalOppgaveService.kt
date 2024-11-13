@@ -25,7 +25,7 @@ class NasjonalOppgaveService(
     fun hentFerdigstiltOppgave(sykmeldingId: String): PapirManuellOppgave? {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
         if (eksisterendeOppgave.isPresent) {
-            return mapFromDAO(eksisterendeOppgave.get())
+            return mapFromDao(eksisterendeOppgave.get())
         }
         return null
     }
@@ -87,7 +87,7 @@ class NasjonalOppgaveService(
         return nasjonalManuellOppgaveDAO
     }
 
-    fun mapFromDAO(nasjonalManuellOppgaveDAO: NasjonalManuellOppgaveDAO): PapirManuellOppgave {
+    fun mapFromDao(nasjonalManuellOppgaveDAO: NasjonalManuellOppgaveDAO): PapirManuellOppgave {
         return PapirManuellOppgave(
             sykmeldingId = nasjonalManuellOppgaveDAO.sykmeldingId,
             papirSmRegistering = PapirSmRegistering(
