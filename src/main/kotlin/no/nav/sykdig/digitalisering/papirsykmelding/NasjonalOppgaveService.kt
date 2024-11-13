@@ -132,6 +132,12 @@ class NasjonalOppgaveService(
             )
 
 
+        log.info(
+            "Papirsykmelding manuell registering mappet til internt format uten feil {}",
+            StructuredArguments.fields(loggingMeta),
+        )
+
+
 
 
 
@@ -146,14 +152,6 @@ class NasjonalOppgaveService(
 
         // val sykmelderHpr
         // val sykmelder = personServise.hentPerson(sykmeldderHpr)   -- callId er en randomUUID - spørre seg om kanskje ha callId som sykmeldingId
-
-
-
-
-
-
-
-
 
 
 

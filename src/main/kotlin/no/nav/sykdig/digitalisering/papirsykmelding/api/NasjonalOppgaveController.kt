@@ -104,8 +104,6 @@ class NasjonalOppgaveController(
 
         // TODO:  sjekk when oppgaveId er null: lage en guard og responder med bad request
         // TODO:  hvis accesstoken er null responder med unauthorized
-
-        if (navEnhet == null) return ResponseEntity(HttpStatus.BAD_REQUEST)
         val callId = UUID.randomUUID().toString()
         nasjonalOppgaveService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId)
         log.info("papirsykmelding: sender oppgave med oppgaveId $oppgaveId gjennom syk-dig proxy")

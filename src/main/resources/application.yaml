@@ -57,6 +57,7 @@ oppgave.url: ${OPPGAVE_URL}
 smregistrering.url: ${SMREGISTRERING_URL}
 helsenett.url: ${HELSENETT_URL}
 smtss.url: ${SMTSS_URL}
+regel.url: ${SYFOSMPAPIRREGLER_URL}
 
 
 no.nav.security.jwt:
