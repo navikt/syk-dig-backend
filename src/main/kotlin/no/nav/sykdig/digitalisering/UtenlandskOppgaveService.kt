@@ -180,7 +180,7 @@ class UtenlandskOppgaveService(
         }
 
         val sykmeldt =
-            personService.hentPerson(
+            personService.getPerson(
                 id = oppgave.fnr,
                 callId = oppgave.sykmeldingId.toString(),
             )
