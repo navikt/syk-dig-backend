@@ -7,7 +7,8 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.time.ZoneOffset
+import java.util.*
 
 @Service
 class NasjonalOppgaveService(
@@ -19,6 +20,14 @@ class NasjonalOppgaveService(
             return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id))
         }
         return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
+    }
+
+    fun hentFerdigstiltOppgave(sykmeldingId: String): PapirManuellOppgave? {
+        val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
+        if (eksisterendeOppgave.isPresent) {
+            return mapFromDAO(eksisterendeOppgave.get())
+        }
+        return null
     }
 
     fun mapToDao(
@@ -77,4 +86,39 @@ class NasjonalOppgaveService(
 
         return nasjonalManuellOppgaveDAO
     }
+
+    fun mapFromDAO(nasjonalManuellOppgaveDAO: NasjonalManuellOppgaveDAO): PapirManuellOppgave {
+        return PapirManuellOppgave(
+            sykmeldingId = nasjonalManuellOppgaveDAO.sykmeldingId,
+            papirSmRegistering = PapirSmRegistering(
+                journalpostId = nasjonalManuellOppgaveDAO.journalpostId,
+                oppgaveId = nasjonalManuellOppgaveDAO.oppgaveId?.toString(),
+                fnr = nasjonalManuellOppgaveDAO.fnr,
+                aktorId = nasjonalManuellOppgaveDAO.aktorId,
+                dokumentInfoId = nasjonalManuellOppgaveDAO.dokumentInfoId,
+                datoOpprettet = nasjonalManuellOppgaveDAO.datoOpprettet?.atOffset(ZoneOffset.UTC),
+                sykmeldingId = nasjonalManuellOppgaveDAO.papirSmRegistrering.sykmeldingId,
+                syketilfelleStartDato = nasjonalManuellOppgaveDAO.papirSmRegistrering.syketilfelleStartDato,
+                arbeidsgiver = nasjonalManuellOppgaveDAO.papirSmRegistrering.arbeidsgiver,
+                medisinskVurdering = nasjonalManuellOppgaveDAO.papirSmRegistrering.medisinskVurdering,
+                skjermesForPasient = nasjonalManuellOppgaveDAO.papirSmRegistrering.skjermesForPasient,
+                perioder = nasjonalManuellOppgaveDAO.papirSmRegistrering.perioder,
+                prognose = nasjonalManuellOppgaveDAO.papirSmRegistrering.prognose,
+                utdypendeOpplysninger = nasjonalManuellOppgaveDAO.papirSmRegistrering.utdypendeOpplysninger,
+                tiltakNAV = nasjonalManuellOppgaveDAO.papirSmRegistrering.tiltakNAV,
+                tiltakArbeidsplassen = nasjonalManuellOppgaveDAO.papirSmRegistrering.tiltakArbeidsplassen,
+                andreTiltak = nasjonalManuellOppgaveDAO.papirSmRegistrering.andreTiltak,
+                meldingTilNAV = nasjonalManuellOppgaveDAO.papirSmRegistrering.meldingTilNAV,
+                meldingTilArbeidsgiver = nasjonalManuellOppgaveDAO.papirSmRegistrering.meldingTilArbeidsgiver,
+                kontaktMedPasient = nasjonalManuellOppgaveDAO.papirSmRegistrering.kontaktMedPasient,
+                behandletTidspunkt = nasjonalManuellOppgaveDAO.papirSmRegistrering.behandletTidspunkt,
+                behandler = nasjonalManuellOppgaveDAO.papirSmRegistrering.behandler,
+            ),
+            fnr = nasjonalManuellOppgaveDAO.fnr,
+            oppgaveid = nasjonalManuellOppgaveDAO.oppgaveId!!,
+            pdfPapirSykmelding = byteArrayOf(),
+            documents = emptyList()
+        )
+    }
+
 }

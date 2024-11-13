@@ -109,7 +109,8 @@ class NasjonalOppgaveController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
         log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
-        return smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
+        val ferdigstiltOppgave = nasjonalOppgaveService.hentFerdigstiltOppgave(sykmeldingId)
+        return ResponseEntity.ok(ferdigstiltOppgave)
     }
 
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
