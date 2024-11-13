@@ -80,6 +80,9 @@ spec:
         - application: smregistrering-backend
           namespace: teamsykmelding
           cluster: prod-gcp
+        - application: syfohelsenettproxy
+          namespace: teamsykmelding
+          cluster: prod-gcp
       external:
         - host: saf.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
@@ -117,3 +120,7 @@ spec:
       value: http://smregistrering-backend
     - name: SMREGISTRERING_CLIENT_ID
       value: prod-gcp.teamsykmelding.smregistrering-backend
+    - name: HELSENETT_URL
+      value: http://syfohelsenettproxy
+    - name: HELSENETT_CLIENT_ID
+      value: prod-gcp.teamsykmelding.syfohelsenettproxy

@@ -80,6 +80,9 @@ spec:
         - application: smregistrering-backend
           namespace: teamsykmelding
           cluster: dev-gcp
+        - application: syfohelsenettproxy
+          namespace: teamsykmelding
+          cluster: dev-gcp
       external:
         - host: kodeverk-api.nav.no
         - host: oppgave-q1.dev-fss-pub.nais.io
@@ -120,3 +123,7 @@ spec:
       value: http://smregistrering-backend
     - name: SMREGISTRERING_CLIENT_ID
       value: dev-gcp.teamsykmelding.smregistrering-backend
+    - name: HELSENETT_URL
+      value: http://syfohelsenettproxy
+    - name: HELSENETT_CLIENT_ID
+      value: dev-gcp.teamsykmelding.syfohelsenettproxy

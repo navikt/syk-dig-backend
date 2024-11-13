@@ -49,4 +49,18 @@ class GlobalExceptionHandler {
         log.error("Unhandled exception: ${e.message}", e)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred")
     }
+
+    @ExceptionHandler(SykmelderNotFoundException::class)
+    fun handleSykmelderNotFoundException(e: SykmelderNotFoundException): ResponseEntity<String> {
+        log.error("Sykmelder not found: ${e.message}", e)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sykmelder not found")
+    }
+
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnAuthorizedException(e: UnauthorizedException): ResponseEntity<String> {
+        log.warn("Caught UnauthorizedException ${e.message}", e)
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UnauthorizedException")
+    }
 }
+
+

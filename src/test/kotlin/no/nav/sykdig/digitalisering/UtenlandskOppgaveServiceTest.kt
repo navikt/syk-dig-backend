@@ -118,7 +118,7 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
         Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
             SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
         }
-        Mockito.`when`(personService.hentPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
+        Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
             Person(
                 fnr = "20086600138",
                 navn = Navn("Fornavn", null, "Etternavn"),
@@ -160,7 +160,7 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
         Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
             SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
         }
-        Mockito.`when`(personService.hentPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
+        Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
             Person(
                 fnr = "20086600138",
                 navn = Navn("Fornavn", null, "Etternavn"),
@@ -216,7 +216,7 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
         Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
             SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
         }
-        Mockito.`when`(personService.hentPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
+        Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
             Person(
                 fnr = "20086600138",
                 navn = Navn("Fornavn", null, "Etternavn"),
@@ -255,7 +255,7 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
         Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
             SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
         }
-        Mockito.`when`(personService.hentPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
+        Mockito.`when`(personService.getPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
             Person(
                 fnr = "20086600138",
                 navn = Navn("Fornavn", null, "Etternavn"),
@@ -295,7 +295,7 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
         Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
             SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
         }
-        Mockito.`when`(personService.hentPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
+        Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
             Person(
                 fnr = "20086600138",
                 navn = Navn("Fornavn", null, "Etternavn"),
@@ -336,7 +336,7 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
         Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
             SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
         }
-        Mockito.`when`(personService.hentPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
+        Mockito.`when`(personService.getPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
             Person(
                 fnr = "20086600138",
                 navn = Navn("Fornavn", null, "Etternavn"),

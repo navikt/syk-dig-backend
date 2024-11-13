@@ -17,7 +17,7 @@ class PdlClient(
     val securelog = securelog()
 
     @Retryable
-    fun hentPerson(
+    fun getPerson(
         id: String,
         callId: String,
     ): PdlResponse {

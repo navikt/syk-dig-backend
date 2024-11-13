@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
@@ -10,6 +11,7 @@ import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -25,6 +27,7 @@ import java.util.UUID
 class NasjonalOppgaveController(
     private val smregistreringClient: SmregistreringClient,
     private val nasjonalOppgaveService: NasjonalOppgaveService,
+    private val sykmelderService: SykmelderService,
     private val personService: PersonService,
 ) {
     val log = applog()
@@ -75,11 +78,17 @@ class NasjonalOppgaveController(
 
     @GetMapping("/sykmelder/{hprNummer}")
     @ResponseBody
-    fun getSykmelder(
+    suspend fun getSykmelder(
         @PathVariable hprNummer: String,
-        @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<Sykmelder> {
-        return smregistreringClient.getSykmelderRequest(authorization, hprNummer)
+        if (hprNummer.isBlank() || !hprNummer.all { it.isDigit() }) {
+            log.info("Ugyldig path parameter: hprNummer")
+            return ResponseEntity.badRequest().build()
+        }
+        val callId = UUID.randomUUID().toString()
+        securelog.info("Henter person med callId $callId and hprNummer = $hprNummer")
+        val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
+        return ResponseEntity.ok(sykmelder)
     }
 
     @PostMapping("/oppgave/{oppgaveId}/send")
