@@ -70,6 +70,7 @@ class FerdigstillingService(
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
+        updateTittel(oppgave, receivedSykmelding)
 
         try {
             sykmeldingOKProducer.send(
@@ -83,6 +84,41 @@ class FerdigstillingService(
         } catch (exception: Exception) {
             log.error("failed to send sykmelding to kafka result for sykmelding {}", receivedSykmelding.sykmelding.id)
             throw exception
+        }
+    }
+
+    private fun updateTittel(
+        oppgave: OppgaveDbModel,
+        receivedSykmelding: ReceivedSykmelding,
+    ) {
+        val dokument = oppgave.dokumenter.firstOrNull()
+        if (dokument != null) {
+            log.info("found document, updating title")
+            val tittel =
+                when (oppgave.source) {
+                    "RINA" ->
+                        createTitleRina(
+                            perioder = receivedSykmelding.sykmelding.perioder,
+                            avvisningsGrunn = oppgave.avvisingsgrunn,
+                        )
+
+                    "NAV_NO" ->
+                        createTitleNavNo(
+                            perioder = receivedSykmelding.sykmelding.perioder,
+                            avvisningsGrunn = oppgave.avvisingsgrunn,
+                        )
+
+                    else ->
+                        createTitle(
+                            perioder = receivedSykmelding.sykmelding.perioder,
+                            avvisningsGrunn = oppgave.avvisingsgrunn,
+                        )
+                }
+            dokumentService.updateDocumentTitle(
+                oppgaveId = oppgave.oppgaveId,
+                dokumentInfoId = dokument.dokumentInfoId,
+                tittel = tittel,
+            )
         }
     }
 
