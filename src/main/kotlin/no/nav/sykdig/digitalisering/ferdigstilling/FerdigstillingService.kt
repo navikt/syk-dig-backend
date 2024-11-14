@@ -52,7 +52,7 @@ class FerdigstillingService(
         securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
-            updateAvvistTittel(oppgave, receivedSykmelding)
+            updateAvvistTitle(oppgave, receivedSykmelding)
         } else {
             val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
@@ -70,7 +70,7 @@ class FerdigstillingService(
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
-        updateTittel(oppgave, receivedSykmelding)
+        updateTitle(oppgave, receivedSykmelding)
 
         try {
             sykmeldingOKProducer.send(
@@ -87,14 +87,14 @@ class FerdigstillingService(
         }
     }
 
-    private fun updateTittel(
+    private fun updateTitle(
         oppgave: OppgaveDbModel,
         receivedSykmelding: ReceivedSykmelding
     ) {
         updateDocumentTitle(oppgave, receivedSykmelding)
     }
 
-    private fun updateAvvistTittel(
+    private fun updateAvvistTitle(
         oppgave: OppgaveDbModel,
         receivedSykmelding: ReceivedSykmelding
     ) {
