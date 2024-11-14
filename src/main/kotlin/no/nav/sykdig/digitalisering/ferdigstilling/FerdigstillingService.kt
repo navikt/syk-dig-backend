@@ -89,66 +89,50 @@ class FerdigstillingService(
 
     private fun updateTittel(
         oppgave: OppgaveDbModel,
-        receivedSykmelding: ReceivedSykmelding,
+        receivedSykmelding: ReceivedSykmelding
     ) {
-        val dokument = oppgave.dokumenter.firstOrNull()
-        if (dokument != null) {
-            log.info("found document, updating title")
-            val tittel =
-                when (oppgave.source) {
-                    "RINA" ->
-                        createTitleRina(
-                            perioder = receivedSykmelding.sykmelding.perioder,
-                            avvisningsGrunn = oppgave.avvisingsgrunn,
-                        )
-
-                    "NAV_NO" ->
-                        createTitleNavNo(
-                            perioder = receivedSykmelding.sykmelding.perioder,
-                            avvisningsGrunn = oppgave.avvisingsgrunn,
-                        )
-
-                    else ->
-                        createTitle(
-                            perioder = receivedSykmelding.sykmelding.perioder,
-                            avvisningsGrunn = oppgave.avvisingsgrunn,
-                        )
-                }
-            dokumentService.updateDocumentTitle(
-                oppgaveId = oppgave.oppgaveId,
-                dokumentInfoId = dokument.dokumentInfoId,
-                tittel = tittel,
-            )
-        }
+        updateDocumentTitle(oppgave, receivedSykmelding)
     }
 
     private fun updateAvvistTittel(
         oppgave: OppgaveDbModel,
-        receivedSykmelding: ReceivedSykmelding,
+        receivedSykmelding: ReceivedSykmelding
     ) {
-        val dokument = oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
+        updateDocumentTitle(oppgave, receivedSykmelding, isAvvist = true)
+    }
+
+    private fun updateDocumentTitle(
+        oppgave: OppgaveDbModel,
+        receivedSykmelding: ReceivedSykmelding,
+        isAvvist: Boolean = false
+    ) {
+        val dokument = if (isAvvist) {
+            oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
+        } else {
+            oppgave.dokumenter.firstOrNull()
+        }
+
         if (dokument != null) {
-            log.info("found avvist document, updating title")
-            val tittel =
-                when (oppgave.source) {
-                    "RINA" ->
-                        createTitleRina(
-                            perioder = receivedSykmelding.sykmelding.perioder,
-                            avvisningsGrunn = oppgave.avvisingsgrunn,
-                        )
+            log.info("found ${if (isAvvist) "avvist " else ""}document, updating title")
+            val tittel = when (oppgave.source) {
+                "RINA" ->
+                    createTitleRina(
+                        perioder = receivedSykmelding.sykmelding.perioder,
+                        avvisningsGrunn = oppgave.avvisingsgrunn,
+                    )
 
-                    "NAV_NO" ->
-                        createTitleNavNo(
-                            perioder = receivedSykmelding.sykmelding.perioder,
-                            avvisningsGrunn = oppgave.avvisingsgrunn,
-                        )
+                "NAV_NO" ->
+                    createTitleNavNo(
+                        perioder = receivedSykmelding.sykmelding.perioder,
+                        avvisningsGrunn = oppgave.avvisingsgrunn,
+                    )
 
-                    else ->
-                        createTitle(
-                            perioder = receivedSykmelding.sykmelding.perioder,
-                            avvisningsGrunn = oppgave.avvisingsgrunn,
-                        )
-                }
+                else ->
+                    createTitle(
+                        perioder = receivedSykmelding.sykmelding.perioder,
+                        avvisningsGrunn = oppgave.avvisingsgrunn,
+                    )
+            }
             dokumentService.updateDocumentTitle(
                 oppgaveId = oppgave.oppgaveId,
                 dokumentInfoId = dokument.dokumentInfoId,
