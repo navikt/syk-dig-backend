@@ -11,7 +11,6 @@ import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -110,6 +109,10 @@ class NasjonalOppgaveController(
     ): ResponseEntity<PapirManuellOppgave> {
         log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
         val ferdigstiltOppgave = nasjonalOppgaveService.hentFerdigstiltOppgave(sykmeldingId)
+        if (ferdigstiltOppgave == null) {
+            log.warn("Ferdigstilt oppgave er null")
+            return ResponseEntity.badRequest().build()
+        }
         return ResponseEntity.ok(ferdigstiltOppgave)
     }
 
