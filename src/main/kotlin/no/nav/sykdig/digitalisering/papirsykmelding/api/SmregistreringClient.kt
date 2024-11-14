@@ -79,28 +79,6 @@ class SmregistreringClient(
     }
 
     @Retryable
-    fun getSykmelderRequest(
-        authorization: String,
-        hprNummer: String,
-    ): ResponseEntity<Sykmelder> {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(removeBearerPrefix(authorization))
-
-        val uri =
-            UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelder/{hprNummer}")
-                .buildAndExpand(hprNummer)
-                .toUri()
-
-        return smregisteringRestTemplate.exchange(
-            uri,
-            HttpMethod.GET,
-            HttpEntity<String>(headers),
-            Sykmelder::class.java,
-        )
-    }
-
-    @Retryable
     fun postSendOppgaveRequest(
         authorization: String,
         oppgaveId: String,
