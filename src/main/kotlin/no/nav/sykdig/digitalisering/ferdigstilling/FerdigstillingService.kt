@@ -52,7 +52,7 @@ class FerdigstillingService(
         securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
-            updateAvvistTittel(oppgave, receivedSykmelding)
+            updateAvvistTitle(oppgave, receivedSykmelding)
         } else {
             val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillJournalpost(
@@ -70,6 +70,7 @@ class FerdigstillingService(
             )
         }
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
+        updateTitle(oppgave, receivedSykmelding)
 
         try {
             sykmeldingOKProducer.send(
@@ -86,33 +87,52 @@ class FerdigstillingService(
         }
     }
 
-    private fun updateAvvistTittel(
+    private fun updateTitle(
+        oppgave: OppgaveDbModel,
+        receivedSykmelding: ReceivedSykmelding
+    ) {
+        updateDocumentTitle(oppgave, receivedSykmelding)
+    }
+
+    private fun updateAvvistTitle(
+        oppgave: OppgaveDbModel,
+        receivedSykmelding: ReceivedSykmelding
+    ) {
+        updateDocumentTitle(oppgave, receivedSykmelding, isAvvist = true)
+    }
+
+    private fun updateDocumentTitle(
         oppgave: OppgaveDbModel,
         receivedSykmelding: ReceivedSykmelding,
+        isAvvist: Boolean = false
     ) {
-        val dokument = oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
+        val dokument = if (isAvvist) {
+            oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
+        } else {
+            oppgave.dokumenter.firstOrNull()
+        }
+
         if (dokument != null) {
-            log.info("found avvist document, updating title")
-            val tittel =
-                when (oppgave.source) {
-                    "RINA" ->
-                        createTitleRina(
-                            perioder = receivedSykmelding.sykmelding.perioder,
-                            avvisningsGrunn = oppgave.avvisingsgrunn,
-                        )
+            log.info("found ${if (isAvvist) "avvist " else ""}document, updating title")
+            val tittel = when (oppgave.source) {
+                "RINA" ->
+                    createTitleRina(
+                        perioder = receivedSykmelding.sykmelding.perioder,
+                        avvisningsGrunn = oppgave.avvisingsgrunn,
+                    )
 
-                    "NAV_NO" ->
-                        createTitleNavNo(
-                            perioder = receivedSykmelding.sykmelding.perioder,
-                            avvisningsGrunn = oppgave.avvisingsgrunn,
-                        )
+                "NAV_NO" ->
+                    createTitleNavNo(
+                        perioder = receivedSykmelding.sykmelding.perioder,
+                        avvisningsGrunn = oppgave.avvisingsgrunn,
+                    )
 
-                    else ->
-                        createTitle(
-                            perioder = receivedSykmelding.sykmelding.perioder,
-                            avvisningsGrunn = oppgave.avvisingsgrunn,
-                        )
-                }
+                else ->
+                    createTitle(
+                        perioder = receivedSykmelding.sykmelding.perioder,
+                        avvisningsGrunn = oppgave.avvisingsgrunn,
+                    )
+            }
             dokumentService.updateDocumentTitle(
                 oppgaveId = oppgave.oppgaveId,
                 dokumentInfoId = dokument.dokumentInfoId,
