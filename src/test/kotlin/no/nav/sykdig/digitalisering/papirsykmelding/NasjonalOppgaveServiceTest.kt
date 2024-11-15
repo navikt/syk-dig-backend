@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
 import no.nav.sykdig.IntegrationTest
+import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
@@ -21,6 +22,9 @@ import java.util.UUID
 class NasjonalOppgaveServiceTest : IntegrationTest() {
     @Autowired
     lateinit var nasjonalOppgaveService: NasjonalOppgaveService
+
+    @Autowired
+    lateinit var sykDigOppgaveService: SykDigOppgaveService
 
     @BeforeEach
     fun setUp() {
@@ -66,6 +70,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     @Test
     fun `hent ferdigstilt oppgave`() {
         val lagretOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
+        sykDigOppgaveService.ferdigstillOppgave()
         val oppgave = nasjonalOppgaveService.hentFerdigstiltOppgave("123")
         assertNotNull(lagretOppgave)
         assertNotNull(oppgave)
