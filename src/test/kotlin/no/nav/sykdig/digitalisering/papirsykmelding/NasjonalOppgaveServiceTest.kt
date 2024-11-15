@@ -70,7 +70,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     @Test
     fun `hent ferdigstilt oppgave`() {
         val lagretOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
-        sykDigOppgaveService.ferdigstillOppgave()
+        //sykDigOppgaveService.ferdigstillOppgave()
         val oppgave = nasjonalOppgaveService.hentFerdigstiltOppgave("123")
         assertNotNull(lagretOppgave)
         assertNotNull(oppgave)

@@ -123,7 +123,7 @@ class SmregistreringClient(
         log.info("registrering av oppgave $oppgaveId fikk følgende responskode ${res.statusCode}")
         return res
     }
-    
+
     @Retryable
     fun postOppgaveTilGosysRequest(
         authorization: String,
