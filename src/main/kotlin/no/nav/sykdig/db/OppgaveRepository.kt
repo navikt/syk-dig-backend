@@ -88,7 +88,7 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                         AND s.timestamp = (SELECT MAX(timestamp)
                                            FROM sykmelding
                                            WHERE oppgave_id = o.oppgave_id)
-                    WHERE o.oppgave_id = :oppgave_id;
+                    WHERE s.sykmelding_id = :sykmelding_id;
             """,
             mapOf("sykmelding_id" to sykmeldingId),
         ) { resultSet, _ ->
