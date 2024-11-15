@@ -107,17 +107,14 @@ class UtenlandskOppgaveDataFetcher(
         @InputArgument values: SykmeldingUnderArbeidValues,
         dfe: DataFetchingEnvironment,
     ): OppdatertSykmeldingStatus {
+        log.info("update sykmelding $sykmeldingId")
         val navEmail: String = dfe.graphQlContext.get("username")
         val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
-        utenlandskOppgaveService.oppdaterDigitalisertSykmelding(
+        return utenlandskOppgaveService.oppdaterDigitalisertSykmelding(
             sykmeldingId = sykmeldingId,
             enhetId = enhetId,
             values = ferdistilltRegisterOppgaveValues,
             navEmail = navEmail,
-        )
-        return OppdatertSykmeldingStatus(
-            sykmeldingId = sykmeldingId,
-            status = OppdatertSykmeldingStatusEnum.OPPDATERT
         )
     }
 

@@ -82,6 +82,7 @@ class UtenlandskOppgaveService(
             log.warn("Ferdigstilling av oppgave med id $oppgaveId feilet pga regelsjekk")
             throw ClientException(valideringsresultat.joinToString())
         }
+
         sykDigOppgaveService.ferdigstillOppgave(oppgave, navEpost, values, enhetId, sykmeldt)
         metricRegister.ferdigstiltOppgave.increment()
     }
@@ -172,7 +173,7 @@ class UtenlandskOppgaveService(
         val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
 
         val state = checkOppgaveState(oppgave)
-        if(state != OppdatertSykmeldingStatusEnum.OPPDATERT) {
+        if(state != OppdatertSykmeldingStatusEnum.FERDIGSTILT) {
             return OppdatertSykmeldingStatus(
                 sykmeldingId,
                 state
@@ -189,6 +190,7 @@ class UtenlandskOppgaveService(
             log.warn("Oppdatering av sykmelding med id $sykmeldingId feilet pga regelsjekk")
             throw ClientException(valideringsresultat.joinToString())
         }
+
         sykDigOppgaveService.oppdaterSykmelding(oppgave, navEmail, values, enhetId, sykmeldt)
         metricRegister.oppdatertSykmeldingCounter.increment()
         return OppdatertSykmeldingStatus(

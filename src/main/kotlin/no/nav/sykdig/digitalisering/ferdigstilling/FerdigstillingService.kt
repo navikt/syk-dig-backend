@@ -183,5 +183,7 @@ class FerdigstillingService(
         sykmeldingOKProducer.send(
             ProducerRecord(OK_SYKMLEDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
         ).get()
+        log.info("sendt oppdatert sykmelding med id ${receivedSykmelding.sykmelding.id}")
+        updateTitle(oppgave, receivedSykmelding)
     }
 }
