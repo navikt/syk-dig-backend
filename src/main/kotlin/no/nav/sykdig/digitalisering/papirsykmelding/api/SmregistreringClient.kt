@@ -25,34 +25,6 @@ class SmregistreringClient(
     val log = applog()
 
     @Retryable
-    fun postAvvisOppgaveRequest(
-        authorization: String,
-        oppgaveId: String,
-        navEnhet: String,
-        avvisSykmeldingReason: String?,
-    ): ResponseEntity<HttpStatusCode> {
-        val headers = HttpHeaders()
-        headers.set("X-Nav-Enhet", navEnhet)
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(removeBearerPrefix(authorization))
-        val uri =
-            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/{oppgaveId}/avvis")
-                .buildAndExpand(oppgaveId)
-                .toUri()
-
-        val res =
-            smregisteringRestTemplate.exchange(
-                uri,
-                HttpMethod.POST,
-                HttpEntity(AvvisSykmeldingRequest(avvisSykmeldingReason), headers),
-                HttpStatusCode::class.java,
-            )
-
-        log.info("Oppgave $oppgaveId avvist med responskode ${res.statusCode}")
-        return res
-    }
-
-    @Retryable
     fun getOppgaveRequest(
         authorization: String,
         oppgaveId: String,
