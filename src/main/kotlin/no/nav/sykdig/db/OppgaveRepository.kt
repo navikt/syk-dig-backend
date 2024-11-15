@@ -69,26 +69,26 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     fun getOppgaveBySykmeldingId(sykmeldingId: String): OppgaveDbModel? {
         return namedParameterJdbcTemplate.query(
             """SELECT o.oppgave_id,
-                           fnr,
-                           journalpost_id,
-                           dokumentinfo_id,
-                           dokumenter,
-                           opprettet,
-                           ferdigstilt,
-                           avvisings_grunn,
-                           tilbake_til_gosys,
-                           sykmelding_id,
-                           type,
-                           s.sykmelding,
-                           endret_av,
-                           timestamp,
-                           source
-                    FROM oppgave AS o
-                             INNER JOIN sykmelding AS s ON o.oppgave_id = s.oppgave_id
-                        AND s.timestamp = (SELECT MAX(timestamp)
-                                           FROM sykmelding
-                                           WHERE oppgave_id = o.oppgave_id)
-                    WHERE s.sykmelding_id = :sykmelding_id;
+               o.fnr,
+               o.journalpost_id,
+               o.dokumentinfo_id,
+               o.dokumenter,
+               o.opprettet,
+               o.ferdigstilt,
+               o.avvisings_grunn,
+               o.tilbake_til_gosys,
+               s.sykmelding_id,
+               s.type,
+               s.sykmelding,
+               s.endret_av,
+               s.timestamp,
+               o.source
+        FROM sykmelding s
+                 INNER JOIN oppgave o ON o.oppgave_id = s.oppgave_id
+        WHERE s.timestamp = (SELECT MAX(timestamp)
+                             FROM sykmelding
+                             WHERE sykmelding_id = s.sykmelding_id)
+        and  s.sykmelding_id = :sykmelding_id;
             """,
             mapOf("sykmelding_id" to sykmeldingId),
         ) { resultSet, _ ->
