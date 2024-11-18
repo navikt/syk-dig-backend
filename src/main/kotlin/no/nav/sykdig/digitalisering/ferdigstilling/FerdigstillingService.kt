@@ -108,9 +108,9 @@ class FerdigstillingService(
         receivedSykmelding: ReceivedSykmelding,
         isAvvist: Boolean = false
     ) {
-        //val isEgenerklæring = safGraphQlClient.getJournalpost(oppgave.journalpostId).journalpost?.dokumenter?.find { it.tittel?.lowercase()?.startsWith("egenerklæring") == true }
+        val isEgenerklæring = safGraphQlClient.getJournalpost(oppgave.journalpostId).journalpost?.dokumenter?.find { it.tittel?.lowercase()?.startsWith("egenerklæring") == true }
 
-        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source}")
+        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source} egenerklæring: $isEgenerklæring")
 
         val dokument = when {
             isAvvist -> oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
