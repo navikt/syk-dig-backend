@@ -106,10 +106,10 @@ class FerdigstillingService(
         receivedSykmelding: ReceivedSykmelding,
         isAvvist: Boolean = false
     ) {
-        val dokument = if (isAvvist) {
-            oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
-        } else {
-            oppgave.dokumenter.firstOrNull()
+        val dokument = when {
+            isAvvist -> oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
+            else -> oppgave.dokumenter.find { it.tittel.lowercase().startsWith("egenerklæring") }
+                ?: oppgave.dokumenter.firstOrNull()
         }
 
         if (dokument != null) {
