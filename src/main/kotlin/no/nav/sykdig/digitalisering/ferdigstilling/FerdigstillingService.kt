@@ -106,6 +106,7 @@ class FerdigstillingService(
         receivedSykmelding: ReceivedSykmelding,
         isAvvist: Boolean = false
     ) {
+        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }}")
         val dokument = when {
             isAvvist -> oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
             else -> oppgave.dokumenter.find { it.tittel.lowercase().startsWith("egenerklæring") }
