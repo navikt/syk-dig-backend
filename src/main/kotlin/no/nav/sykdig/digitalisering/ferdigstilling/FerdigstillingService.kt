@@ -28,6 +28,7 @@ class FerdigstillingService(
     private val oppgaveClient: OppgaveClient,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val dokumentService: DocumentService,
+    private val safGraphQlClient: SafJournalpostGraphQlClient,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -69,6 +70,7 @@ class FerdigstillingService(
                 orginalAvsenderMottaker = hentAvvsenderMottar,
             )
         }
+
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
         updateTitle(oppgave, receivedSykmelding)
 
@@ -106,11 +108,13 @@ class FerdigstillingService(
         receivedSykmelding: ReceivedSykmelding,
         isAvvist: Boolean = false
     ) {
-        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }}")
+        //val isEgenerklæring = safGraphQlClient.getJournalpost(oppgave.journalpostId).journalpost?.dokumenter?.find { it.tittel?.lowercase()?.startsWith("egenerklæring") == true }
+
+        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source}")
+
         val dokument = when {
             isAvvist -> oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
-            else -> oppgave.dokumenter.find { it.tittel.lowercase().startsWith("egenerklæring") }
-                ?: oppgave.dokumenter.firstOrNull()
+            else -> oppgave.dokumenter.firstOrNull()
         }
 
         if (dokument != null) {
