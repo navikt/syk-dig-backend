@@ -6,10 +6,10 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgav
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import okhttp3.internal.EMPTY_BYTE_ARRAY
-import org.junit.Ignore
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -69,7 +69,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     }
 
     @Test
-    @Ignore
+    @Disabled
     fun `hent ferdigstilt oppgave`() {
         val lagretOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
         //sykDigOppgaveService.ferdigstillOppgave()
