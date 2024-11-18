@@ -108,9 +108,7 @@ class FerdigstillingService(
         receivedSykmelding: ReceivedSykmelding,
         isAvvist: Boolean = false
     ) {
-        // val isEgenerklæring = safGraphQlClient.getJournalpost(oppgave.journalpostId).journalpost?.dokumenter?.find { it.tittel?.lowercase()?.startsWith("egenerklæring") == true }
-
-        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source} ")
+        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source} sykmeldignId: ${receivedSykmelding.sykmelding.id} ")
 
         val dokument = when {
             isAvvist -> oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
@@ -125,19 +123,16 @@ class FerdigstillingService(
                         perioder = receivedSykmelding.sykmelding.perioder,
                         avvisningsGrunn = oppgave.avvisingsgrunn,
                     )
-
                 "NAV_NO" ->
                     createTitleNavNo(
                         perioder = receivedSykmelding.sykmelding.perioder,
                         avvisningsGrunn = oppgave.avvisingsgrunn,
                     )
-
                 "navno" ->
                     createTitleNavNo(
                         perioder = receivedSykmelding.sykmelding.perioder,
                         avvisningsGrunn = oppgave.avvisingsgrunn,
                     )
-
                 else ->
                     createTitle(
                         perioder = receivedSykmelding.sykmelding.perioder,
