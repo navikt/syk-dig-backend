@@ -28,7 +28,6 @@ class FerdigstillingService(
     private val oppgaveClient: OppgaveClient,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val dokumentService: DocumentService,
-    private val safGraphQlClient: SafJournalpostGraphQlClient,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -118,13 +117,8 @@ class FerdigstillingService(
         if (dokument != null) {
             log.info("found ${if (isAvvist) "avvist " else ""}document, updating title")
             val tittel = when (oppgave.source) {
-                "RINA" ->
+                "rina" ->
                     createTitleRina(
-                        perioder = receivedSykmelding.sykmelding.perioder,
-                        avvisningsGrunn = oppgave.avvisingsgrunn,
-                    )
-                "NAV_NO" ->
-                    createTitleNavNo(
                         perioder = receivedSykmelding.sykmelding.perioder,
                         avvisningsGrunn = oppgave.avvisingsgrunn,
                     )
