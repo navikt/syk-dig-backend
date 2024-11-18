@@ -12,6 +12,7 @@ import no.nav.sykdig.digitalisering.ferdigstilling.mapping.fellesformatMarshalle
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.get
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.toString
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
+import no.nav.sykdig.digitalisering.papirsykmelding.api.RegelClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.*
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
@@ -31,6 +32,7 @@ class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
     private val personService: PersonService,
     private val sykmelderService: SykmelderService
+    private val regelClient: RegelClient
 
 ) {
     val log = applog()
@@ -46,7 +48,7 @@ class NasjonalOppgaveService(
 
 
     // usikker på hva som skal returneres her
-    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): ResponseEntity<String> {
+    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: Int): ResponseEntity<String> {
         val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
         if (!oppgave.isPresent) return ResponseEntity(HttpStatus.NOT_FOUND) // TODO: bedre error handeling
 
@@ -136,6 +138,43 @@ class NasjonalOppgaveService(
             "Papirsykmelding manuell registering mappet til internt format uten feil {}",
             StructuredArguments.fields(loggingMeta),
         )
+        val validationResult = regelClient.valider(receivedSykmelding, sykmeldingId)
+        log.info(
+            "Resultat: {}, {}, {}",
+            StructuredArguments.keyValue("ruleStatus", validationResult.status.name),
+            StructuredArguments.keyValue(
+                "ruleHits",
+                validationResult.ruleHits.joinToString(", ", "(", ")") { it.ruleName },
+            ),
+            StructuredArguments.fields(loggingMeta),
+        )
+
+        val dokumentInfoId = oppgave.get().dokumentInfoId
+
+        /*val ferdigstillRegistrering =
+            FerdigstillRegistrering(
+                oppgaveId = oppgaveId,
+                journalpostId = journalpostId,
+                dokumentInfoId = dokumentInfoId,
+                pasientFnr = receivedSykmelding.personNrPasient,
+                sykmeldingId = sykmeldingId,
+                sykmelder = sykmelder,
+                navEnhet = navEnhet,
+                veileder = authorizationService.getVeileder(accessToken),
+                avvist = false,
+                oppgave = null,
+            )*/
+        /*auditlogg.info(
+            AuditLogger()
+                .createcCefMessage(
+                    fnr = smRegistreringManuell.pasientFnr,
+                    accessToken = accessToken,
+                    operation = AuditLogger.Operation.WRITE,
+                    requestPath = requestPath,
+                    permit = AuditLogger.Permit.PERMIT,
+                ),
+        )*/
+
 
 
 

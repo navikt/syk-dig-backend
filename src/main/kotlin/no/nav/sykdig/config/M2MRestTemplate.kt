@@ -34,12 +34,19 @@ class M2MRestTemplate(
             .build()
     }
 
-/*    @Bean
+    @Bean
     fun helsenettM2mRestTemplate(): RestTemplate {
         return restTemplateBuilder
             .additionalInterceptors(bearerTokenInterceptor("helsenett-m2m"))
             .build()
-    }*/
+    }
+
+    @Bean
+    fun regeltM2mRestTemplate(): RestTemplate {
+        return restTemplateBuilder
+            .additionalInterceptors(bearerTokenInterceptor("regel-m2m"))
+            .build()
+    }
 
     private fun bearerTokenInterceptor(type: String): ClientHttpRequestInterceptor {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->

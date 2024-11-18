@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.exceptions
 
 import graphql.GraphQLException
+import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
 
 class IkkeTilgangException(override val message: String) : GraphQLException(message)
 
@@ -13,3 +14,5 @@ class NoOppgaveException(override val message: String) : RuntimeException(messag
 class SykmelderNotFoundException(message: String) : RuntimeException(message)
 
 class UnauthorizedException(message: String) : Exception(message)
+
+class ValidationException(val validationResult: ValidationResult) : Exception()

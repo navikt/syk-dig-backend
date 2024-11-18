@@ -139,5 +139,5 @@ spec:
       value: dev-gcp.teamsykmelding.smtss
     - name: SYFOSMPAPIRREGLER_URL
       value: http://syfosmpapirregler
-    - name: SYFOSMPAPIRREGLER_SCOPE
+    - name: SYFOSMPAPIRREGLER_CLIENT_ID
       value: dev-gcp.teamsykmelding.syfosmpapirregler

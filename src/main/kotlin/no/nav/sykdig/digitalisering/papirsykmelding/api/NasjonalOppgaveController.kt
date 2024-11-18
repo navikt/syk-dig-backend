@@ -96,7 +96,7 @@ class NasjonalOppgaveController(
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @ResponseBody
     suspend fun sendOppgave(
-        @PathVariable oppgaveId: String,
+        @PathVariable oppgaveId: Int,
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,

@@ -5,6 +5,7 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.digitalisering.helsenett.client.HelsenettClient
 import no.nav.sykdig.digitalisering.helsenett.client.SmtssClient
+import no.nav.sykdig.digitalisering.papirsykmelding.api.RegelClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Godkjenning
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Kode
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service
 class SykmelderService(
     private val helsenettClient: HelsenettClient,
     private val personService: PersonService,
-    private val smtssClient: SmtssClient
+    private val smtssClient: SmtssClient,
 ) {
     val log = applog()
     val securelog = securelog()
