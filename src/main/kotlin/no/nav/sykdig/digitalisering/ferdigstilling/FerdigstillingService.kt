@@ -69,6 +69,7 @@ class FerdigstillingService(
                 orginalAvsenderMottaker = hentAvvsenderMottar,
             )
         }
+
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
         updateTitle(oppgave, receivedSykmelding)
 
@@ -106,27 +107,26 @@ class FerdigstillingService(
         receivedSykmelding: ReceivedSykmelding,
         isAvvist: Boolean = false
     ) {
-        val dokument = if (isAvvist) {
-            oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
-        } else {
-            oppgave.dokumenter.firstOrNull()
+        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source} sykmeldignId: ${receivedSykmelding.sykmelding.id} ")
+
+        val dokument = when {
+            isAvvist -> oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
+            else -> oppgave.dokumenter.firstOrNull()
         }
 
         if (dokument != null) {
             log.info("found ${if (isAvvist) "avvist " else ""}document, updating title")
             val tittel = when (oppgave.source) {
-                "RINA" ->
+                "rina" ->
                     createTitleRina(
                         perioder = receivedSykmelding.sykmelding.perioder,
                         avvisningsGrunn = oppgave.avvisingsgrunn,
                     )
-
-                "NAV_NO" ->
+                "navno" ->
                     createTitleNavNo(
                         perioder = receivedSykmelding.sykmelding.perioder,
                         avvisningsGrunn = oppgave.avvisingsgrunn,
                     )
-
                 else ->
                     createTitle(
                         perioder = receivedSykmelding.sykmelding.perioder,
