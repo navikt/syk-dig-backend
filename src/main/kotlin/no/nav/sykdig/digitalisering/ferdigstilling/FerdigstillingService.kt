@@ -110,7 +110,7 @@ class FerdigstillingService(
     ) {
         // val isEgenerklæring = safGraphQlClient.getJournalpost(oppgave.journalpostId).journalpost?.dokumenter?.find { it.tittel?.lowercase()?.startsWith("egenerklæring") == true }
 
-        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source} egenerklæring: $isEgenerklæring")
+        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source} ")
 
         val dokument = when {
             isAvvist -> oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
