@@ -7,6 +7,8 @@ import no.nav.helse.msgHead.XMLMsgHead
 import no.nav.syfo.service.toSykmelding
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
+import no.nav.sykdig.auditLogger.AuditLogger
+import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.extractHelseOpplysningerArbeidsuforhet
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.fellesformatMarshaller
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.get
@@ -19,8 +21,12 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppg
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.ReceivedSykmeldingNasjonal
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.sykmelding.Merknad
+import no.nav.sykdig.digitalisering.sykmelding.Status
+import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
+import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.getLocalDateTime
+import no.nav.sykdig.utils.isWhitelisted
 import no.nav.sykdig.utils.mapsmRegistreringManuelltTilFellesformat
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -31,8 +37,9 @@ import java.util.UUID
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
     private val personService: PersonService,
-    private val sykmelderService: SykmelderService
-    private val regelClient: RegelClient
+    private val sykmelderService: SykmelderService,
+    private val regelClient: RegelClient,
+    private val oppgaveSecurityService: OppgaveSecurityService
 
 ) {
     val log = applog()
@@ -47,33 +54,134 @@ class NasjonalOppgaveService(
     }
 
 
+    private fun getLoggingMeta(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): LoggingMeta {
+        return LoggingMeta(
+            mottakId = sykmeldingId,
+            dokumentInfoId = oppgave.dokumentInfoId,
+            msgId = sykmeldingId,
+            sykmeldingId = sykmeldingId,
+            journalpostId = oppgave.journalpostId,
+        )
+    }
+
     // usikker på hva som skal returneres her
     suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: Int): ResponseEntity<String> {
         val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
         if (!oppgave.isPresent) return ResponseEntity(HttpStatus.NOT_FOUND) // TODO: bedre error handeling
-
         val sykmeldingId = oppgave.get().sykmeldingId
 
-        val loggingMeta = LoggingMeta(
-            mottakId = sykmeldingId,
-            dokumentInfoId = oppgave.get().dokumentInfoId,
-            msgId = sykmeldingId,
-            sykmeldingId = sykmeldingId,
-            journalpostId = oppgave.get().journalpostId,
-        )
+        val loggingMeta = getLoggingMeta(sykmeldingId, oppgave.get())
+        val sykmelder = getSykmelder(smRegistreringManuell, loggingMeta, callId)
 
+        val receivedSykmelding = createReceivedSykmelding(sykmeldingId, oppgave.get(), loggingMeta, smRegistreringManuell, callId, sykmelder)
+
+        val validationResult = regelClient.valider(receivedSykmelding, sykmeldingId)
+        log.info(
+            "Resultat: {}, {}, {}",
+            StructuredArguments.keyValue("ruleStatus", validationResult.status.name),
+            StructuredArguments.keyValue(
+                "ruleHits",
+                validationResult.ruleHits.joinToString(", ", "(", ")") { it.ruleName },
+            ),
+            StructuredArguments.fields(loggingMeta),
+        )
+        checkValidState(smRegistreringManuell, sykmelder, validationResult)
+
+        val dokumentInfoId = oppgave.get().dokumentInfoId
+        val journalpostId = oppgave.get().journalpostId
+
+        val ferdigstillRegistrering =
+            FerdigstillRegistrering(
+                oppgaveId = oppgaveId,
+                journalpostId = journalpostId,
+                dokumentInfoId = dokumentInfoId,
+                pasientFnr = receivedSykmelding.personNrPasient,
+                sykmeldingId = sykmeldingId,
+                sykmelder = sykmelder,
+                navEnhet = navEnhet,
+                veileder = oppgaveSecurityService.getNavIdent(),
+                avvist = false,
+                oppgave = null,
+            )
+
+
+
+        // her var det auditlog - dette gjør vi allerede i controlleren når vi sjekker hasaccess.
+
+        if (!validationResult.ruleHits.isWhitelisted()){
+            return handleBrokenRule(validationResult, oppgaveId
+            )
+        }
+
+
+
+
+
+
+        // logging meta sykmeldingId, dokumentInfoId, journalpostId
+
+        // sender med et isUpdate - som sjekker om saksbehandler har superuseraccess. men dette brukes kun i endre, som ikke har blitt brukt
+
+        // sjekker om saksbehandler har tilgang, men jeg tror dette kan gjøres gjennom obo token i controlleren
+
+        // val sykmelderHpr
+        // val sykmelder = personServise.hentPerson(sykmeldderHpr)   -- callId er en randomUUID - spørre seg om kanskje ha callId som sykmeldingId
+
+
+
+
+    }
+    private fun handleBrokenRule(
+        validationResult: ValidationResult,
+        oppgaveId: Int?,
+    ): ResponseEntity<ValidationResult> {
+        when (validationResult.status) {
+            Status.MANUAL_PROCESSING -> {
+                log.info(
+                    "Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
+                    StructuredArguments.keyValue("oppgaveId", oppgaveId),
+                )
+                return ResponseEntity(HttpStatus.BAD_REQUEST, ValidationResult)
+            }
+            Status.OK -> {
+                log.error(
+                    "ValidationResult har status OK, men inneholder ruleHits som ikke er hvitelistet, {}",
+                    StructuredArguments.keyValue("oppgaveId", oppgaveId),
+                )
+                HttpServiceResponse(
+                    HttpStatusCode.InternalServerError,
+                    "Noe gikk galt ved innsending av oppgave",
+                )
+            }
+            else -> {
+                log.error(
+                    "Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING",
+                )
+                return HttpServiceResponse(
+                    HttpStatusCode.InternalServerError,
+                    "En uforutsett feil oppsto ved validering av oppgaven",
+                )
+            }
+        }
+        return HttpServiceResponse(HttpStatusCode.InternalServerError)
+    }
+
+    private suspend fun getSykmelder(smRegistreringManuell: SmRegistreringManuell, loggingMeta: LoggingMeta, callId: String): Sykmelder {
         val sykmelderHpr = smRegistreringManuell.behandler.hpr
         if (sykmelderHpr.isNullOrEmpty()) {
             log.error("HPR-nummer mangler {}", StructuredArguments.fields(loggingMeta))
-            return ResponseEntity(HttpStatus.BAD_REQUEST)
+            throw SykmelderNotFoundException("HPR-nummer mangler") // dobbeltsjekk at det blir rett å throwe, returnerte bad request før
         }
 
         log.info("Henter sykmelder fra HPR og PDL")
         val sykmelder = sykmelderService.getSykmelder(
-                sykmelderHpr,
-                callId,
-            )
+            sykmelderHpr,
+            callId,
+        )
+        return sykmelder
+    }
 
+    private suspend fun createReceivedSykmelding(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO, loggingMeta: LoggingMeta, smRegistreringManuell: SmRegistreringManuell, callId: String, sykmelder: Sykmelder): ReceivedSykmeldingNasjonal {
         log.info("Henter pasient fra PDL {} ", loggingMeta)
         val pasient =
             personService.getPerson(
@@ -83,8 +191,8 @@ class NasjonalOppgaveService(
 
         val tssId = sykmelderService.getTssIdInfotrygd(sykmelder.fnr, "", loggingMeta, sykmeldingId)
 
-        val datoOpprettet = oppgave.get().datoOpprettet
-        val journalpostId = oppgave.get().journalpostId
+        val datoOpprettet = oppgave.datoOpprettet
+        val journalpostId = oppgave.journalpostId
         val fellesformat =
             mapsmRegistreringManuelltTilFellesformat(
                 smRegistreringManuell = smRegistreringManuell,
@@ -107,12 +215,11 @@ class NasjonalOppgaveService(
                 getLocalDateTime(msgHead.msgInfo.genDate)
             )
 
-        val receivedSykmelding =
-            ReceivedSykmeldingNasjonal(
+        return ReceivedSykmeldingNasjonal(
                 sykmelding = sykmelding,
                 personNrPasient = pasient.fnr,
                 tlfPasient =
-                healthInformation.pasient.kontaktInfo.firstOrNull()?.teleAddress?.v,
+                    healthInformation.pasient.kontaktInfo.firstOrNull()?.teleAddress?.v,
                 personNrLege = sykmelder.fnr,
                 navLogId = sykmeldingId,
                 msgId = sykmeldingId,
@@ -120,80 +227,18 @@ class NasjonalOppgaveService(
                 legekontorOrgName = "",
                 legekontorHerId = null,
                 legekontorReshId = null,
-                mottattDato = oppgave.get().datoOpprettet ?: getLocalDateTime(msgHead.msgInfo.genDate),
+                mottattDato = oppgave.datoOpprettet ?: getLocalDateTime(msgHead.msgInfo.genDate),
                 rulesetVersion = healthInformation.regelSettVersjon,
                 fellesformat = fellesformatMarshaller.toString(fellesformat),
                 tssid = tssId ?: "",
                 merknader = createMerknad(sykmelding),
                 partnerreferanse = null,
                 legeHelsepersonellkategori =
-                sykmelder.godkjenninger?.getHelsepersonellKategori(),
+                    sykmelder.godkjenninger?.getHelsepersonellKategori(),
                 legeHprNr = sykmelder.hprNummer,
                 vedlegg = null,
                 utenlandskSykmelding = null,
             )
-
-
-        log.info(
-            "Papirsykmelding manuell registering mappet til internt format uten feil {}",
-            StructuredArguments.fields(loggingMeta),
-        )
-        val validationResult = regelClient.valider(receivedSykmelding, sykmeldingId)
-        log.info(
-            "Resultat: {}, {}, {}",
-            StructuredArguments.keyValue("ruleStatus", validationResult.status.name),
-            StructuredArguments.keyValue(
-                "ruleHits",
-                validationResult.ruleHits.joinToString(", ", "(", ")") { it.ruleName },
-            ),
-            StructuredArguments.fields(loggingMeta),
-        )
-
-        val dokumentInfoId = oppgave.get().dokumentInfoId
-
-        /*val ferdigstillRegistrering =
-            FerdigstillRegistrering(
-                oppgaveId = oppgaveId,
-                journalpostId = journalpostId,
-                dokumentInfoId = dokumentInfoId,
-                pasientFnr = receivedSykmelding.personNrPasient,
-                sykmeldingId = sykmeldingId,
-                sykmelder = sykmelder,
-                navEnhet = navEnhet,
-                veileder = authorizationService.getVeileder(accessToken),
-                avvist = false,
-                oppgave = null,
-            )*/
-        /*auditlogg.info(
-            AuditLogger()
-                .createcCefMessage(
-                    fnr = smRegistreringManuell.pasientFnr,
-                    accessToken = accessToken,
-                    operation = AuditLogger.Operation.WRITE,
-                    requestPath = requestPath,
-                    permit = AuditLogger.Permit.PERMIT,
-                ),
-        )*/
-
-
-
-
-
-
-
-
-
-        // logging meta sykmeldingId, dokumentInfoId, journalpostId
-
-        // sender med et isUpdate - som sjekker om saksbehandler har superuseraccess. men dette brukes kun i endre, som ikke har blitt brukt
-
-        // sjekker om saksbehandler har tilgang, men jeg tror dette kan gjøres gjennom obo token i controlleren
-
-        // val sykmelderHpr
-        // val sykmelder = personServise.hentPerson(sykmeldderHpr)   -- callId er en randomUUID - spørre seg om kanskje ha callId som sykmeldingId
-
-
-
 
     }
 

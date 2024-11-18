@@ -100,7 +100,7 @@ class NasjonalOppgaveController(
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
-    ): ResponseEntity<String> {
+    ): ResponseEntity<Any> {
 
         // TODO:  sjekk when oppgaveId er null: lage en guard og responder med bad request
         // TODO:  hvis accesstoken er null responder med unauthorized

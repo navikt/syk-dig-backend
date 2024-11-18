@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering.tilgangskontroll
 import no.nav.sykdig.auditLogger.AuditLogger
 import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.Type
@@ -98,9 +99,14 @@ class OppgaveSecurityService(
 
         return tilgang
     }
+    fun getNavIdent(): Veileder{
+        val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        return Veileder(authentication.token.claims["NAVident"].toString())
+    }
 }
 
 fun getNavEmail(): String {
     val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
     return authentication.token.claims["preferred_username"].toString()
 }
+
