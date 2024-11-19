@@ -71,15 +71,15 @@ class SykDigOppgaveService(
             )
 
         val oppgaveId = response.id.toString()
-        val dokumentInfoId = getDokumentInfoIdEgenerklaring(journalpost)
-            ?: journalpost.dokumenter.first().dokumentInfoId
+        val dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId
+
         val oppgave = createOppgave(
             oppgaveId = oppgaveId,
             fnr = fnr,
             journalpostId = journalpostId,
             journalpost = journalpost,
             dokumentInfoId = dokumentInfoId,
-            source = if (dokumentInfoId == getDokumentInfoIdEgenerklaring(journalpost)) "navno" else "syk-dig"
+            source = if (journalpost.kanal== "NAV_NO") "navno" else "syk-dig"
         )
         oppgaveRepository.lagreOppgave(oppgave)
         log.info("Oppgave med id $oppgaveId lagret")
