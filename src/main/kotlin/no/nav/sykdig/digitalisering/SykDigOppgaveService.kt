@@ -87,6 +87,7 @@ class SykDigOppgaveService(
     }
 
     private fun getDokumentInfoIdEgenerklaring(journalpost: SafJournalpost): String? {
+        securelog.info("documents in getDokumentInfoIdEgenerklaring: ${journalpost.dokumenter}")
         return journalpost.dokumenter.find { it.tittel?.contains("egenerklæring") == true }?.dokumentInfoId
     }
 
