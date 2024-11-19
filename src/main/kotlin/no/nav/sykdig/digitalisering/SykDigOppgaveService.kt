@@ -86,11 +86,6 @@ class SykDigOppgaveService(
         return oppgaveId
     }
 
-    private fun getDokumentInfoIdEgenerklaring(journalpost: SafJournalpost): String? {
-        securelog.info("documents in getDokumentInfoIdEgenerklaring: ${journalpost.dokumenter}")
-        return journalpost.dokumenter.find { it.tittel?.contains("egenerklæring") == true }?.dokumentInfoId
-    }
-
     fun getOppgaveFromSykmeldingId(sykmeldingId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgaveBySykmeldingId(sykmeldingId)
         if (oppgave == null) {
