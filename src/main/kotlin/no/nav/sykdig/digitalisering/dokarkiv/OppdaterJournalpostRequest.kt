@@ -43,6 +43,6 @@ data class Sak(
 )
 
 data class DokumentInfo(
-    val dokumentInfoId: String,
+    val dokumentInfoId: String?,
     val tittel: String?,
 )

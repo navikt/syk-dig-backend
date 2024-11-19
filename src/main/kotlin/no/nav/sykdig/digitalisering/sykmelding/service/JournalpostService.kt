@@ -1,12 +1,18 @@
 package no.nav.sykdig.digitalisering.sykmelding.service
 
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
+import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.ReceivedSykmeldingNasjonal
 import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.digitalisering.saf.SafJournalpostService
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKEPENGER
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.digitalisering.saf.graphql.Type
+import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.sykmelding.db.JournalpostSykmeldingRepository
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Journalpost
@@ -24,6 +30,8 @@ class JournalpostService(
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val journalpostSykmeldingRepository: JournalpostSykmeldingRepository,
     private val metricRegister: MetricRegister,
+    private val safJournalpostService: SafJournalpostService,
+    private val dokarkivClient: DokarkivClient,
 ) {
     companion object {
         private val securelog = securelog()
@@ -119,6 +127,36 @@ class JournalpostService(
                 },
             fnr = fnr,
         )
+    }
+    suspend fun ferdigstillJournalpost(
+        accessToken: String,
+        ferdigstillRegistrering: FerdigstillRegistrering,
+        receivedSykmelding: ReceivedSykmeldingNasjonal?,
+        loggingMeta: LoggingMeta,
+    ) {
+        if (
+            safJournalpostService.erIkkeJournalfort(journalpostId = ferdigstillRegistrering.journalpostId)
+        ) {
+            dokarkivClient.oppdaterOgFerdigstillJournalpostNasjonal(
+                nasjonal
+                journalpostId = ferdigstillRegistrering.journalpostId,
+                landAlpha3 = null,
+                fnr = ferdigstillRegistrering.pasientFnr,
+                enhet = ferdigstillRegistrering.navEnhet,
+                dokumentinfoId = ferdigstillRegistrering.dokumentInfoId,
+                sykmeldingId = ferdigstillRegistrering.sykmeldingId,
+                perioder = null,
+                source = TODO(),
+                avvisningsGrunn = TODO(),
+                orginalAvsenderMottaker = TODO(),
+                sykmeldtNavn = null,
+            )
+        } else {
+            log.info(
+                "Hopper over oppdaterOgFerdigstillJournalpost, " +
+                        "journalpostId ${ferdigstillRegistrering.journalpostId} er allerede journalført",
+            )
+        }
     }
 
     fun isSykmeldingCreated(id: String): Boolean {

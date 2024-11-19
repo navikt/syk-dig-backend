@@ -1,14 +1,18 @@
 package no.nav.sykdig.digitalisering.dokarkiv
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.ReceivedSykmeldingNasjonal
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
-import no.nav.sykdig.digitalisering.sykmelding.Periode
+import no.nav.sykdig.felles.Periode
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.createTitle
+import no.nav.sykdig.utils.createTitleNasjonal
 import no.nav.sykdig.utils.createTitleNavNo
 import no.nav.sykdig.utils.createTitleRina
 import org.springframework.beans.factory.annotation.Value
@@ -21,6 +25,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Component
@@ -56,7 +62,7 @@ class DokarkivClient(
         landAlpha3: String?,
         fnr: String,
         enhet: String,
-        dokumentinfoId: String,
+        dokumentinfoId: String?,
         journalpostId: String,
         sykmeldingId: String,
         perioder: List<Periode>?,
@@ -88,7 +94,7 @@ class DokarkivClient(
     private fun oppdaterJournalpost(
         landAlpha3: String?,
         fnr: String,
-        dokumentinfoId: String,
+        dokumentinfoId: String?,
         journalpostId: String,
         sykmeldingId: String,
         perioder: List<Periode>?,
@@ -97,11 +103,6 @@ class DokarkivClient(
         orginalAvsenderMottaker: AvsenderMottaker?,
         sykmeldtNavn: String?,
     ) {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.accept = listOf(MediaType.APPLICATION_JSON)
-        headers["Nav-Callid"] = sykmeldingId
-
         val body =
             createOppdaterJournalpostRequest(
                 landAlpha3,
@@ -113,13 +114,26 @@ class DokarkivClient(
                 orginalAvsenderMottaker,
                 sykmeldtNavn,
             )
+        oppdaterJournalpostRequest(body, sykmeldingId, journalpostId)
+    }
+
+    @Retryable
+    private fun oppdaterJournalpostRequest(
+        oppdaterJournalpostRequest: OppdaterJournalpostRequest,
+        sykmeldingId: String,
+        journalpostId: String,
+    ) {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.accept = listOf(MediaType.APPLICATION_JSON)
+        headers["Nav-Callid"] = sykmeldingId
 
         try {
-            securelog.info("createOppdaterJournalpostRequest: ${objectMapper.writeValueAsString(body)}")
+            securelog.info("createOppdaterJournalpostRequest: ${objectMapper.writeValueAsString(oppdaterJournalpostRequest)}")
             dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
                 HttpMethod.PUT,
-                HttpEntity(body, headers),
+                HttpEntity(oppdaterJournalpostRequest, headers),
                 String::class.java,
             )
             log.info("Oppdatert journalpost $journalpostId for sykmelding $sykmeldingId")
@@ -151,7 +165,7 @@ class DokarkivClient(
     private fun createOppdaterJournalpostRequest(
         landAlpha3: String?,
         fnr: String,
-        dokumentinfoId: String,
+        dokumentinfoId: String?,
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
@@ -366,6 +380,81 @@ class DokarkivClient(
             throw e
         }
     }
+
+    fun oppdaterOgFerdigstillNasjonalJournalpost(
+        journalpostId: String,
+        dokumentInfoId: String? = null,
+        pasientFnr: String,
+        sykmeldingId: String,
+        sykmelder: Sykmelder,
+        loggingMeta: LoggingMeta,
+        navEnhet: String,
+        avvist: Boolean,
+        receivedSykmelding: ReceivedSykmeldingNasjonal?,
+    ): String? {
+        val oppdaterJournalpostRequest = createOppdaterJournalpostNasjonalRequest(dokumentInfoId, pasientFnr, sykmelder, avvist, receivedSykmelding)
+        oppdaterJournalpostRequest(oppdaterJournalpostRequest, sykmeldingId, journalpostId)
+
+
+
+    }
+
+    private fun createOppdaterJournalpostNasjonalRequest(
+        dokumentInfoId: String?,
+        pasientFnr: String,
+        sykmelder: Sykmelder,
+        avvist: Boolean,
+        receivedSykmelding: ReceivedSykmeldingNasjonal?,
+    ): OppdaterJournalpostRequest {
+        val oppdaterJournalpostRequest = OppdaterJournalpostRequest(
+            avsenderMottaker = AvsenderMottakerRequest(
+                id = padHpr(sykmelder.hprNummer),
+                navn = finnNavn(sykmelder),
+                land = null,
+                idType = null,
+            ),
+            bruker = DokBruker(id = pasientFnr),
+            sak = Sak(),
+            tittel = createTitleNasjonal(receivedSykmelding?.sykmelding.perioder, avvist),
+            dokumenter = if (dokumentInfoId != null) {
+                listOf(
+                    DokumentInfo(
+                        dokumentInfoId = dokumentInfoId,
+                        tittel = createTitleNasjonal(receivedSykmelding?.sykmelding.perioder, avvist),
+                    ),
+                )
+            } else {
+                null
+            },
+        )
+        return oppdaterJournalpostRequest
+    }
+}
+
+private fun padHpr(hprnummer: String): String {
+    if (hprnummer.length < 9) {
+        securelog.info("padder hpr: $hprnummer")
+        return hprnummer.padStart(9, '0')
+    }
+    return hprnummer
+}
+
+fun finnNavn(sykmelder: Sykmelder): String {
+    return "${sykmelder.fornavn} ${sykmelder.etternavn}"
+}
+
+private fun getFomTomTekst(receivedSykmelding: ReceivedSykmeldingNasjonal) =
+    "${formaterDato(receivedSykmelding.sykmelding.perioder.sortedSykmeldingPeriodeFOMDate().first().fom)} -" +
+            " ${formaterDato(receivedSykmelding.sykmelding.perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
+
+fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> = sortedBy { it.fom }
+
+fun List<Periode>.sortedSykmeldingPeriodeTOMDate(): List<Periode> = sortedBy { it.tom }
+
+fun formaterDato(dato: LocalDate): String {
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    return dato.format(formatter)
+}
 }
 
 data class Country(
@@ -374,3 +463,4 @@ data class Country(
     val alpha3: String,
     val name: String,
 )
+

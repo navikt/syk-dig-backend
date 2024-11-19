@@ -117,4 +117,37 @@ class SafJournalpostServiceTest {
             }
         assertEquals("Journalpost mangler PDF, $sykmeldingId", exception.message)
     }
+
+    @Test
+    fun ``() {
+        val journalpostId = "123"
+        val sykmeldingId = "syk-456"
+        val source = "rina"
+
+        every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
+            SafQueryJournalpost(
+                SafJournalpost(
+                    journalstatus = Journalstatus.MOTTATT,
+                    dokumenter =
+                        listOf(
+                            DokumentInfo(
+                                dokumentInfoId = "dok1",
+                                tittel = "Dokument 1",
+                                dokumentvarianter = listOf(Dokumentvariant(variantformat = "NON-ARKIV")),
+                                brevkode = "1",
+                            ),
+                        ),
+                    kanal = "EESSI",
+                    avsenderMottaker = null,
+                    bruker = null,
+                    tema = null,
+                ),
+            )
+
+        val exception =
+            assertFailsWith<RuntimeException> {
+                safJournalpostService.getDokumenterM2m(journalpostId, sykmeldingId, source)
+            }
+        assertEquals("Journalpost mangler PDF, $sykmeldingId", exception.message)
+    }
 }

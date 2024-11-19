@@ -1,6 +1,6 @@
 package no.nav.sykdig.utils
 
-import no.nav.sykdig.digitalisering.sykmelding.Periode
+import no.nav.sykdig.felles.Periode
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -28,6 +28,15 @@ fun createTitle(
     } else {
         "Digitalisert utenlandsk sykmelding ${getFomTomTekst(perioder)}"
     }
+}
+
+fun createTitleNasjonal(
+    perioder: List<Periode>?,
+    avvist: Boolean,
+): String {
+    if (avvist && perioder != null) return "Avvist papirsykmelding ${getFomTomTekst(perioder)}"
+    if (perioder == null) return "Papirsykmelding"
+    return "Papirsykmelding ${getFomTomTekst(perioder)}"
 }
 
 fun createTitleNavNo(

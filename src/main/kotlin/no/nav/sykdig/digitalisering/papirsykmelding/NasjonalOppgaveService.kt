@@ -8,6 +8,7 @@ import no.nav.syfo.service.toSykmelding
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.auditLogger.AuditLogger
+import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.extractHelseOpplysningerArbeidsuforhet
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.fellesformatMarshaller
@@ -23,12 +24,14 @@ import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.sykmelding.Merknad
 import no.nav.sykdig.digitalisering.sykmelding.Status
 import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
+import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.getLocalDateTime
 import no.nav.sykdig.utils.isWhitelisted
 import no.nav.sykdig.utils.mapsmRegistreringManuelltTilFellesformat
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -39,8 +42,8 @@ class NasjonalOppgaveService(
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
     private val regelClient: RegelClient,
-    private val oppgaveSecurityService: OppgaveSecurityService
-
+    private val oppgaveSecurityService: OppgaveSecurityService,
+    private val journalpostService: JournalpostService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -65,7 +68,7 @@ class NasjonalOppgaveService(
     }
 
     // usikker på hva som skal returneres her
-    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: Int): ResponseEntity<String> {
+    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: Int): ResponseEntity<Any> {
         val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
         if (!oppgave.isPresent) return ResponseEntity(HttpStatus.NOT_FOUND) // TODO: bedre error handeling
         val sykmeldingId = oppgave.get().sykmeldingId
@@ -108,10 +111,12 @@ class NasjonalOppgaveService(
 
         // her var det auditlog - dette gjør vi allerede i controlleren når vi sjekker hasaccess.
 
-        if (!validationResult.ruleHits.isWhitelisted()){
-            return handleBrokenRule(validationResult, oppgaveId
-            )
+        if (validationResult.ruleHits.isWhitelisted()){
+            return handleOK(validationResult, receivedSykmelding, ferdigstillRegistrering, loggingMeta)
         }
+        return handleBrokenRule(validationResult, oppgaveId)
+
+
 
 
 
@@ -131,39 +136,83 @@ class NasjonalOppgaveService(
 
 
     }
-    private fun handleBrokenRule(
+
+    private fun handleOK(
         validationResult: ValidationResult,
-        oppgaveId: Int?,
-    ): ResponseEntity<ValidationResult> {
+        receivedSykmelding: ReceivedSykmeldingNasjonal,
+        ferdigstillRegistrering: FerdigstillRegistrering,
+        loggingMeta: LoggingMeta
+    ): ResponseEntity<Any> {
         when (validationResult.status) {
+            Status.OK,
             Status.MANUAL_PROCESSING -> {
-                log.info(
-                    "Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
-                    StructuredArguments.keyValue("oppgaveId", oppgaveId),
-                )
-                return ResponseEntity(HttpStatus.BAD_REQUEST, ValidationResult)
-            }
-            Status.OK -> {
-                log.error(
-                    "ValidationResult har status OK, men inneholder ruleHits som ikke er hvitelistet, {}",
-                    StructuredArguments.keyValue("oppgaveId", oppgaveId),
-                )
-                HttpServiceResponse(
-                    HttpStatusCode.InternalServerError,
-                    "Noe gikk galt ved innsending av oppgave",
-                )
+                val veileder = oppgaveSecurityService.getNavIdent()
+
+                if (ferdigstillRegistrering.oppgaveId != null) {
+                    journalpostService.ferdigstillJournalpost(
+                        accessToken,
+                        ferdigstillRegistrering,
+                        receivedSykmelding,
+                        loggingMeta,
+                    )
+                    oppgaveService.ferdigstillOppgave(
+                        ferdigstillRegistrering,
+                        null,
+                        loggingMeta,
+                        ferdigstillRegistrering.oppgaveId,
+                    )
+                }
+
+                insertSykmeldingAndCreateJobs(receivedSykmelding, ferdigstillRegistrering, veileder)
+
+                manuellOppgaveDAO
+                    .ferdigstillSmRegistering(
+                        sykmeldingId = ferdigstillRegistrering.sykmeldingId,
+                        utfall = Utfall.OK,
+                        ferdigstiltAv = veileder.veilederIdent,
+                    )
+                    .let {
+                        return if (it > 0) {
+                            ResponseEntity.noContent()
+                        } else {
+                            log.error(
+                                "Ferdigstilling av manuelt registrert papirsykmelding feilet ved databaseoppdatering {}",
+                                StructuredArguments.keyValue(
+                                    "oppgaveId",
+                                    ferdigstillRegistrering.oppgaveId,
+                                ),
+                            )
+                            return ResponseEntity.internalServerError().body("Fant ingen uløst oppgave for oppgaveId ${ferdigstillRegistrering.oppgaveId}")
+
+
+                        }
+                    }
             }
             else -> {
                 log.error(
                     "Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING",
                 )
-                return HttpServiceResponse(
-                    HttpStatusCode.InternalServerError,
-                    "En uforutsett feil oppsto ved validering av oppgaven",
-                )
+                return ResponseEntity.internalServerError()
             }
         }
-        return HttpServiceResponse(HttpStatusCode.InternalServerError)
+    }
+
+    private fun handleBrokenRule(
+        validationResult: ValidationResult,
+        oppgaveId: Int?,
+    ): ResponseEntity<Any> {
+        if (validationResult.status == Status.MANUAL_PROCESSING ){
+            log.info("Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
+                StructuredArguments.keyValue("oppgaveId", oppgaveId),)
+            return ResponseEntity.badRequest().body(validationResult)
+        }
+        if (validationResult.status == Status.OK){
+            log.info("Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
+                StructuredArguments.keyValue("oppgaveId", oppgaveId),)
+            return ResponseEntity.badRequest().body(validationResult)
+        }
+        log.error("Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING",)
+        return ResponseEntity.internalServerError().body("En uforutsett feil oppsto ved validering av oppgaven")
     }
 
     private suspend fun getSykmelder(smRegistreringManuell: SmRegistreringManuell, loggingMeta: LoggingMeta, callId: String): Sykmelder {
