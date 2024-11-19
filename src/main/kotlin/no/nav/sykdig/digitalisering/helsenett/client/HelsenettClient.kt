@@ -33,13 +33,20 @@ class HelsenettClient(
         headers["Nav-CallId"] = callId
         headers["hprNummer"] = hprNummer
 
-        val response = helsenettM2mRestTemplate.exchange(
-            "$helsenettUrl/api/v2/behandlerMedHprNummer",
-            HttpMethod.GET,
-            HttpEntity<Any>(headers),
-            Behandler::class.java,
-        )
-        return response.body ?: throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Behandler ikke funnet for hprNummer $hprNummer")
+        val response = try {
+            helsenettM2mRestTemplate.exchange(
+                "$helsenettUrl/api/v2/behandlerMedHprNummer",
+                HttpMethod.GET,
+                HttpEntity<Any>(headers),
+                Behandler::class.java,
+            )
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                throw SykmelderNotFoundException("Behandler ikke funnet for hprNummer $hprNummer")
+            }
+            throw e
+        }
+        return response.body ?: throw SykmelderNotFoundException("Behandler ikke funnet for hprNummer $hprNummer")
     }
 }
 
