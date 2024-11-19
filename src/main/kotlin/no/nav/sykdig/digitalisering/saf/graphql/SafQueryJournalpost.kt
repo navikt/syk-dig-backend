@@ -41,6 +41,7 @@ data class SafJournalpost(
     val kanal: String?,
 )
 
+
 const val TEMA_SYKMELDING = "SYM"
 const val TEMA_SYKEPENGER = "SYK"
 const val CHANNEL_SCAN_IM = "SKAN_IM"

@@ -34,6 +34,30 @@ class SykDigOppgaveService(
     private val log = applog()
     private val securelog = securelog()
 
+    private fun createOppgave(oppgaveId: String, fnr: String, journalpostId: String, journalpost: SafJournalpost, dokumentInfoId: String, source: String = "syk-dig"): OppgaveDbModel {
+        val dokumenter =
+            journalpost.dokumenter.map {
+                DokumentDbModel(it.dokumentInfoId, it.tittel ?: "Mangler Tittel")
+            }
+        return OppgaveDbModel(
+            oppgaveId = oppgaveId,
+            fnr = fnr,
+            journalpostId = journalpostId,
+            dokumentInfoId = dokumentInfoId,
+            dokumenter = dokumenter,
+            opprettet = OffsetDateTime.now(ZoneOffset.UTC),
+            ferdigstilt = null,
+            tilbakeTilGosys = false,
+            avvisingsgrunn = null,
+            sykmeldingId = UUID.randomUUID(),
+            type = UTLAND,
+            sykmelding = null,
+            endretAv = getNavEmail(),
+            timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+            source = source,
+        )
+    }
+
     fun opprettOgLagreOppgave(
         journalpost: SafJournalpost,
         journalpostId: String,
@@ -46,33 +70,24 @@ class SykDigOppgaveService(
                 aktoerId = aktoerId,
             )
 
-        val dokumenter =
-            journalpost.dokumenter.map {
-                DokumentDbModel(it.dokumentInfoId, it.tittel ?: "Mangler Tittel")
-            }
-
         val oppgaveId = response.id.toString()
-        val oppgave =
-            OppgaveDbModel(
-                oppgaveId = oppgaveId,
-                fnr = fnr,
-                journalpostId = journalpostId,
-                dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId,
-                dokumenter = dokumenter,
-                opprettet = OffsetDateTime.now(ZoneOffset.UTC),
-                ferdigstilt = null,
-                tilbakeTilGosys = false,
-                avvisingsgrunn = null,
-                sykmeldingId = UUID.randomUUID(),
-                type = UTLAND,
-                sykmelding = null,
-                endretAv = getNavEmail(),
-                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-                source = "syk-dig",
-            )
+        val dokumentInfoId = getDokumentInfoIdEgenerklaring(journalpost)
+            ?: journalpost.dokumenter.first().dokumentInfoId
+        val oppgave = createOppgave(
+            oppgaveId = oppgaveId,
+            fnr = fnr,
+            journalpostId = journalpostId,
+            journalpost = journalpost,
+            dokumentInfoId = dokumentInfoId,
+            source = if (dokumentInfoId == getDokumentInfoIdEgenerklaring(journalpost)) "navno" else "syk-dig"
+        )
         oppgaveRepository.lagreOppgave(oppgave)
         log.info("Oppgave med id $oppgaveId lagret")
         return oppgaveId
+    }
+
+    private fun getDokumentInfoIdEgenerklaring(journalpost: SafJournalpost): String? {
+        return journalpost.dokumenter.find { it.tittel?.contains("egenerklæring") == true }?.dokumentInfoId
     }
 
     fun getOppgaveFromSykmeldingId(sykmeldingId: String): OppgaveDbModel {
