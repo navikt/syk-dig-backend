@@ -32,7 +32,7 @@ class OppgaveSecurityService(
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val navEmail = getNavEmail()
         val tilgang = hasAccess(oppgave.fnr, navEmail)
-        securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
+        securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
         return tilgang
     }
 
@@ -41,7 +41,7 @@ class OppgaveSecurityService(
         val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
         val navEmail = getNavEmail()
         val tilgang = hasAccess(oppgave.fnr, navEmail)
-        securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId")
+        securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId")
         return tilgang
     }
 
@@ -73,7 +73,7 @@ class OppgaveSecurityService(
         securelog.info("Fødselsnummer: $fnr")
         val navEmail = getNavEmail()
         val tilgang = hasAccess(fnr, journalpostId)
-        securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} til journalpost med id $journalpostId")
+        securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} til journalpost med id $journalpostId")
         return tilgang
     }
 

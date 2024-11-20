@@ -28,6 +28,7 @@ class SafJournalpostServiceTest {
         every { safJournalpostGraphQlClient.getJournalpostM2m(eq(journalpostId)) } returns
             SafQueryJournalpost(
                 SafJournalpost(
+                    tittel = "tittel",
                     journalstatus = Journalstatus.MOTTATT,
                     dokumenter =
                         listOf(
@@ -62,6 +63,7 @@ class SafJournalpostServiceTest {
         every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
             SafQueryJournalpost(
                 SafJournalpost(
+                    tittel = "tittel",
                     journalstatus = Journalstatus.JOURNALFOERT,
                     dokumenter =
                         listOf(
@@ -91,6 +93,7 @@ class SafJournalpostServiceTest {
         every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
             SafQueryJournalpost(
                 SafJournalpost(
+                    tittel = "tittel",
                     journalstatus = Journalstatus.MOTTATT,
                     dokumenter =
                         listOf(
