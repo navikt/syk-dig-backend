@@ -44,16 +44,6 @@ data class NasjonalOppgaveResponse(
     val mappeId: Int? = null,
 )
 
-data class NasjonalFerdigstillOppgave(
-    val id: Int,
-    val versjon: Int,
-    val status: OppgaveStatus,
-    val tilordnetRessurs: String,
-    val tildeltEnhetsnr: String,
-    val mappeId: Int?,
-    val beskrivelse: String? = null,
-)
-
 data class AllOppgaveResponse(
     val versjon: Int,
     val aktoerId: String,

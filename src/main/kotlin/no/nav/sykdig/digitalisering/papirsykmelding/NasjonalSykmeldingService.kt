@@ -7,8 +7,7 @@ import no.nav.helse.msgHead.XMLMsgHead
 import no.nav.syfo.service.toSykmelding
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
-import no.nav.sykdig.auditLogger.AuditLogger
-import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
+import no.nav.sykdig.config.kafka.OK_SYKMLEDING_TOPIC
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.extractHelseOpplysningerArbeidsuforhet
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.fellesformatMarshaller
@@ -17,9 +16,7 @@ import no.nav.sykdig.digitalisering.ferdigstilling.mapping.toString
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.RegelClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.*
-import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.ReceivedSykmeldingNasjonal
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.sykmelding.Merknad
 import no.nav.sykdig.digitalisering.sykmelding.Status
@@ -27,23 +24,33 @@ import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
 import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.digitalisering.felles.Sykmelding
-import no.nav.sykdig.poststed.client.Beskrivelse
+import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalSykmeldingRepository
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalSykmeldingDAO
+import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.getLocalDateTime
 import no.nav.sykdig.utils.isWhitelisted
 import no.nav.sykdig.utils.mapsmRegistreringManuelltTilFellesformat
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 @Service
 class NasjonalSykmeldingService(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
+    private val nasjonalSykmeldingRepository: NasjonalSykmeldingRepository,
     private val regelClient: RegelClient,
     private val oppgaveSecurityService: OppgaveSecurityService,
     private val journalpostService: JournalpostService,
+    private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
+    private val sykmelderService: SykmelderService,
+    private val personService: PersonService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -100,7 +107,7 @@ class NasjonalSykmeldingService(
             )
 
         if (validationResult.ruleHits.isWhitelisted()){
-            return handleOK(validationResult, receivedSykmelding, ferdigstillRegistrering, loggingMeta)
+            return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta)
         }
         return handleBrokenRule(validationResult, oppgaveId)
 
@@ -121,61 +128,61 @@ class NasjonalSykmeldingService(
 
     private suspend fun handleOK(
         validationResult: ValidationResult,
-        receivedSykmelding: ReceivedSykmeldingNasjonal,
+        receivedSykmelding: ReceivedSykmelding,
         ferdigstillRegistrering: FerdigstillRegistrering,
         loggingMeta: LoggingMeta
     ): ResponseEntity<Any> {
-        when (validationResult.status) {
-            Status.OK,
-            Status.MANUAL_PROCESSING -> {
-                val veileder = oppgaveSecurityService.getNavIdent()
+        if (validationResult.status == Status.OK || validationResult.status == Status.MANUAL_PROCESSING) {
+            val veileder = oppgaveSecurityService.getNavIdent()
 
-                if (ferdigstillRegistrering.oppgaveId != null) {
-                    journalpostService.ferdigstillJournalpost(
-                        ferdigstillRegistrering = ferdigstillRegistrering,
-                        receivedSykmelding = receivedSykmelding,
-                        loggingMeta = loggingMeta,
-                    )
-                    nasjonalOppgaveService.ferdigstillOppgave(
-                        ferdigstillRegistrering,
-                        null,
-                        loggingMeta,
-                        ferdigstillRegistrering.oppgaveId.toString(),
-                    )
-                }
-
-                insertSykmeldingAndCreateJobs(receivedSykmelding, ferdigstillRegistrering, veileder)
-
-                manuellOppgaveDAO
-                    .ferdigstillSmRegistering(
-                        sykmeldingId = ferdigstillRegistrering.sykmeldingId,
-                        utfall = Utfall.OK,
-                        ferdigstiltAv = veileder.veilederIdent,
-                    )
-                    .let {
-                        return if (it > 0) {
-                            ResponseEntity.noContent()
-                        } else {
-                            log.error(
-                                "Ferdigstilling av manuelt registrert papirsykmelding feilet ved databaseoppdatering {}",
-                                StructuredArguments.keyValue(
-                                    "oppgaveId",
-                                    ferdigstillRegistrering.oppgaveId,
-                                ),
-                            )
-                            return ResponseEntity.internalServerError().body("Fant ingen uløst oppgave for oppgaveId ${ferdigstillRegistrering.oppgaveId}")
-
-
-                        }
-                    }
-            }
-            else -> {
-                log.error(
-                    "Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING",
+            if (ferdigstillRegistrering.oppgaveId != null) {
+                journalpostService.ferdigstillJournalpost(
+                    ferdigstillRegistrering = ferdigstillRegistrering,
+                    receivedSykmelding = receivedSykmelding,
+                    loggingMeta = loggingMeta,
                 )
-                return ResponseEntity.internalServerError()
+                nasjonalOppgaveService.ferdigstillOppgave(
+                    ferdigstillRegistrering,
+                    null,
+                    loggingMeta,
+                    ferdigstillRegistrering.oppgaveId.toString(),
+                )
             }
+            insertSykmeldingAndSendToKafka(receivedSykmelding, veileder)
+            nasjonalOppgaveService.lagreOppgave()
+
+            // insert into nasjonal_manuellOppgave - ferdigstill.
+            // sykmeldingId: String,
+            //    utfall: String,
+            //    ferdigstiltAv: String,
+
+            return ResponseEntity(HttpStatus.OK)
         }
+        log.error(
+            "Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING",
+        )
+        return ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    private fun insertSykmeldingAndSendToKafka(
+        receivedSykmelding: ReceivedSykmelding,
+        veileder: Veileder,
+    ) {
+        try {
+            sykmeldingOKProducer.send(
+                ProducerRecord(OK_SYKMLEDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
+            ).get()
+            log.info(
+                "Sykmelding sendt to kafka topic {} sykmelding id {}",
+                OK_SYKMLEDING_TOPIC,
+                receivedSykmelding.sykmelding.id,
+            )
+        } catch (exception: Exception) {
+            log.error("failed to send sykmelding to kafka result for sykmelding {}", receivedSykmelding.sykmelding.id)
+            throw exception
+        }
+        nasjonalSykmeldingRepository.save(mapToDao(receivedSykmelding, veileder))
+        log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
     }
 
     private fun handleBrokenRule(
@@ -211,7 +218,7 @@ class NasjonalSykmeldingService(
         return sykmelder
     }
 
-    private suspend fun createReceivedSykmelding(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO, loggingMeta: LoggingMeta, smRegistreringManuell: SmRegistreringManuell, callId: String, sykmelder: Sykmelder): ReceivedSykmeldingNasjonal {
+    private suspend fun createReceivedSykmelding(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO, loggingMeta: LoggingMeta, smRegistreringManuell: SmRegistreringManuell, callId: String, sykmelder: Sykmelder): ReceivedSykmelding {
         log.info("Henter pasient fra PDL {} ", loggingMeta)
         val pasient =
             personService.getPerson(
@@ -245,7 +252,7 @@ class NasjonalSykmeldingService(
                 getLocalDateTime(msgHead.msgInfo.genDate)
             )
 
-        return ReceivedSykmeldingNasjonal(
+        return ReceivedSykmelding(
                 sykmelding = sykmelding,
                 personNrPasient = pasient.fnr,
                 tlfPasient =
@@ -299,59 +306,19 @@ class NasjonalSykmeldingService(
         }
 
     fun mapToDao(
-        papirManuellOppgave: PapirManuellOppgave,
-        existingId: UUID?,
-    ): NasjonalManuellOppgaveDAO {
+        receivedSykmelding: ReceivedSykmelding,
+        veileder: Veileder
+    ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
-
         val nasjonalManuellOppgaveDAO =
-            NasjonalManuellOppgaveDAO(
-                sykmeldingId = papirManuellOppgave.sykmeldingId,
-                journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
-                fnr = papirManuellOppgave.fnr,
-                aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
-                dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
-                datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet?.toLocalDateTime(),
-                oppgaveId = papirManuellOppgave.oppgaveid,
-                ferdigstilt = false,
-                papirSmRegistrering =
-                    PapirSmRegistering(
-                        journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
-                        oppgaveId = papirManuellOppgave.papirSmRegistering.oppgaveId,
-                        fnr = papirManuellOppgave.papirSmRegistering.fnr,
-                        aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
-                        dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
-                        datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet,
-                        sykmeldingId = papirManuellOppgave.papirSmRegistering.sykmeldingId,
-                        syketilfelleStartDato = papirManuellOppgave.papirSmRegistering.syketilfelleStartDato,
-                        arbeidsgiver = papirManuellOppgave.papirSmRegistering.arbeidsgiver,
-                        medisinskVurdering = papirManuellOppgave.papirSmRegistering.medisinskVurdering,
-                        skjermesForPasient = papirManuellOppgave.papirSmRegistering.skjermesForPasient,
-                        perioder = papirManuellOppgave.papirSmRegistering.perioder,
-                        prognose = papirManuellOppgave.papirSmRegistering.prognose,
-                        utdypendeOpplysninger = papirManuellOppgave.papirSmRegistering.utdypendeOpplysninger,
-                        tiltakNAV = papirManuellOppgave.papirSmRegistering.tiltakNAV,
-                        tiltakArbeidsplassen = papirManuellOppgave.papirSmRegistering.tiltakArbeidsplassen,
-                        andreTiltak = papirManuellOppgave.papirSmRegistering.andreTiltak,
-                        meldingTilNAV = papirManuellOppgave.papirSmRegistering.meldingTilNAV,
-                        meldingTilArbeidsgiver = papirManuellOppgave.papirSmRegistering.meldingTilArbeidsgiver,
-                        kontaktMedPasient = papirManuellOppgave.papirSmRegistering.kontaktMedPasient,
-                        behandletTidspunkt = papirManuellOppgave.papirSmRegistering.behandletTidspunkt,
-                        behandler = papirManuellOppgave.papirSmRegistering.behandler,
-                    ),
-                utfall = null,
-                ferdigstiltAv = null,
-                datoFerdigstilt = null,
-                avvisningsgrunn = null,
+            NasjonalSykmeldingDAO(
+                sykmeldingId = receivedSykmelding.sykmelding.id,
+                sykmelding = receivedSykmelding,
+                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                ferdigstiltAv = veileder.veilederIdent,
+                datoFerdigstilt = LocalDateTime.now(ZoneOffset.UTC)
             )
-
-        if (existingId != null) {
-            nasjonalManuellOppgaveDAO.apply {
-                id = existingId
-            }
-        }
-
         return nasjonalManuellOppgaveDAO
     }
 }

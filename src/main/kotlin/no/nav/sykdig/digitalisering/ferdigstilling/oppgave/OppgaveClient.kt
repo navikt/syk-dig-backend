@@ -1,6 +1,8 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
+import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
@@ -11,10 +13,7 @@ import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
+import org.springframework.http.*
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
@@ -61,23 +60,31 @@ class OppgaveClient(
         oppgaveId: String,
         sykmeldingId: String,
         ferdigstillRegistrering: FerdigstillRegistrering,
+        loggingMeta: LoggingMeta
     ) {
         val oppgave = getNasjonalOppgave(oppgaveId, sykmeldingId)
         if (oppgave.status == OppgaveStatus.FERDIGSTILT.name || oppgave.status == OppgaveStatus.FEILREGISTRERT.name) {
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
-        } else {
-            val ferdigstillOppgave = NasjonalFerdigstillOppgave(
-                id = oppgaveId.toInt(),
-                versjon = oppgave.versjon,
-                status = OppgaveStatus.FERDIGSTILT,
-                tilordnetRessurs = ferdigstillRegistrering.veileder.veilederIdent,
-                tildeltEnhetsnr = ferdigstillRegistrering.navEnhet,
-                mappeId = null,
-                beskrivelse = oppgave.beskrivelse,
-            )
-            ferdigstillNasjonalOppgave(oppgaveId, sykmeldingId, oppgave.versjon)
-            log.info("Ferdigstilt oppgave med id $oppgaveId i Oppgave")
+            return
         }
+        val ferdigstillOppgave = PatchFerdigstillNasjonalOppgaveRequest(
+            id = oppgaveId.toInt(),
+            versjon = oppgave.versjon ?: throw RuntimeException(
+            "Fant ikke versjon for oppgave ${oppgave.id}, sykmeldingId ${ferdigstillRegistrering.sykmeldingId}"
+        ),
+            status = OppgaveStatus.FERDIGSTILT,
+            tilordnetRessurs = ferdigstillRegistrering.veileder.veilederIdent,
+            tildeltEnhetsnr = ferdigstillRegistrering.navEnhet,
+            mappeId = null,
+            beskrivelse = oppgave.beskrivelse,
+        )
+        log.info(
+            "Ferdigstiller oppgave med {}, {}",
+            StructuredArguments.keyValue("oppgaveId", oppgaveId),
+            StructuredArguments.fields(loggingMeta),
+        )
+        ferdigstillNasjonalOppgave(oppgaveId, sykmeldingId, ferdigstillOppgave)
+        log.info("Ferdigstilt oppgave med id $oppgaveId i Oppgave")
     }
 
     @Retryable
@@ -289,26 +296,21 @@ class OppgaveClient(
     private fun ferdigstillNasjonalOppgave(
         oppgaveId: String,
         sykmeldingId: String,
-        oppgaveVersjon: Int,
-    ) {
+        nasjonalFerdigstillOppgave: PatchFerdigstillNasjonalOppgaveRequest
+    ): ResponseEntity<String> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers["X-Correlation-ID"] = sykmeldingId
 
-        val body =
-            PatchFerdigStillOppgaveRequest(
-                versjon = oppgaveVersjon,
-                status = OppgaveStatus.FERDIGSTILT,
-                id = oppgaveId.toInt(),
-            )
         try {
-            oppgaveRestTemplate.exchange(
+            val response = oppgaveRestTemplate.exchange(
                 "$url/$oppgaveId",
                 HttpMethod.PATCH,
-                HttpEntity(body, headers),
+                HttpEntity(nasjonalFerdigstillOppgave, headers),
                 String::class.java,
             )
-            log.info("Ferdigstilt oppgave $oppgaveId for sykmelding $sykmeldingId")
+            log.info("Ferdigstilt nasjonal oppgave $oppgaveId for sykmelding $sykmeldingId")
+            return response
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å ferdigstille oppgaveId $oppgaveId: ${e.message}")

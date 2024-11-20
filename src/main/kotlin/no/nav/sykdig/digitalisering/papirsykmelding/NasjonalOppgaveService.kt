@@ -42,51 +42,7 @@ class NasjonalOppgaveService(
         loggingMeta: LoggingMeta,
         oppgaveId: String,
     ) {
-
-        oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering)
-        val oppgave =
-            when {
-                ferdigstillRegistrering.oppgave != null -> {
-                    ferdigstillRegistrering.oppgave
-                }
-                else -> {
-                    oppgaveClient.getNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId)
-                }
-            }
-
-        if (OppgaveStatus.FERDIGSTILT.name != oppgave.status) {
-            oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId)
-
-            val ferdigstillOppgave =
-                PatchFerdigstillNasjonalOppgaveRequest(
-                    versjon = oppgave.versjon
-                        ?: throw RuntimeException(
-                            "Fant ikke versjon for oppgave ${oppgave.id}, sykmeldingId ${ferdigstillRegistrering.sykmeldingId}"
-                        ),
-                    id = oppgaveId,
-                    status = OppgaveStatus.FERDIGSTILT,
-                    tildeltEnhetsnr = ferdigstillRegistrering.navEnhet,
-                    tilordnetRessurs = ferdigstillRegistrering.veileder.veilederIdent,
-                    mappeId = null,
-                    beskrivelse =
-                        if (beskrivelse?.isNotBlank() == true) beskrivelse else oppgave.beskrivelse,
-                )
-
-            val ferdigStiltOppgave =
-                oppgaveClient.ferdigstillOppgave(
-                    ferdigstillOppgave,
-                    ferdigstillRegistrering.sykmeldingId
-                )
-            log.info(
-                "Ferdigstiller oppgave med {}, {}",
-                StructuredArguments.keyValue("oppgaveId", ferdigStiltOppgave.id),
-                StructuredArguments.fields(loggingMeta),
-            )
-        } else {
-            log.info(
-                "Hopper over ferdigstillOppgave, oppgaveId $oppgaveId er allerede ${oppgave.status}"
-            )
-        }
+        oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
     }
 
     fun mapToDao(

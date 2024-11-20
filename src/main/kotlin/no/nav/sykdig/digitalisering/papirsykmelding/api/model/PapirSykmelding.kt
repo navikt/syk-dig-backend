@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api.model
 
+import no.nav.sykdig.digitalisering.felles.*
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -83,3 +84,4 @@ data class SmRegistreringManuell(
     val navnFastlege: String?,
     val harUtdypendeOpplysninger: Boolean,
 )
+
