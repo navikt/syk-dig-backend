@@ -84,6 +84,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
             SafQueryJournalpost(
                 journalpost =
                     SafJournalpost(
+                        tittel = "tittel",
                         journalstatus = Journalstatus.JOURNALFOERT,
                         avsenderMottaker =
                             AvsenderMottaker(

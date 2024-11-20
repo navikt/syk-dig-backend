@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering.saf.graphql
 const val SAF_QUERY_FIND_JOURNALPOST = """
     query FindJournalpost(${"$"}id: String!) {
         journalpost(journalpostId: ${"$"}id) {
+            tittel
             kanal
             tema
             journalstatus
@@ -33,6 +34,7 @@ data class SafQueryJournalpost(
 )
 
 data class SafJournalpost(
+    val tittel: String,
     val journalstatus: Journalstatus?,
     val avsenderMottaker: AvsenderMottaker?,
     val bruker: Bruker?,
