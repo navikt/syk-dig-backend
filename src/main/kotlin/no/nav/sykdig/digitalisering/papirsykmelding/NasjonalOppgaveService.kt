@@ -26,6 +26,7 @@ import no.nav.sykdig.digitalisering.sykmelding.Status
 import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
 import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
+import no.nav.sykdig.felles.Sykmelding
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.getLocalDateTime
 import no.nav.sykdig.utils.isWhitelisted
@@ -137,7 +138,7 @@ class NasjonalOppgaveService(
 
     }
 
-    private fun handleOK(
+    private suspend fun handleOK(
         validationResult: ValidationResult,
         receivedSykmelding: ReceivedSykmeldingNasjonal,
         ferdigstillRegistrering: FerdigstillRegistrering,
@@ -150,10 +151,10 @@ class NasjonalOppgaveService(
 
                 if (ferdigstillRegistrering.oppgaveId != null) {
                     journalpostService.ferdigstillJournalpost(
-                        accessToken,
-                        ferdigstillRegistrering,
-                        receivedSykmelding,
-                        loggingMeta,
+                        accessToken = accessToken,
+                        ferdigstillRegistrering = ferdigstillRegistrering,
+                        receivedSykmelding = receivedSykmelding,
+                        loggingMeta = loggingMeta,
                     )
                     oppgaveService.ferdigstillOppgave(
                         ferdigstillRegistrering,

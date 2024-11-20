@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering.sykmelding.service
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.LoggingMeta
+import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
@@ -35,6 +36,7 @@ class JournalpostService(
 ) {
     companion object {
         private val securelog = securelog()
+        private val log = applog()
     }
 
     fun createSykmeldingFromJournalpost(
@@ -137,19 +139,16 @@ class JournalpostService(
         if (
             safJournalpostService.erIkkeJournalfort(journalpostId = ferdigstillRegistrering.journalpostId)
         ) {
-            dokarkivClient.oppdaterOgFerdigstillJournalpostNasjonal(
-                nasjonal
+            dokarkivClient.oppdaterOgFerdigstillNasjonalJournalpost(
                 journalpostId = ferdigstillRegistrering.journalpostId,
-                landAlpha3 = null,
-                fnr = ferdigstillRegistrering.pasientFnr,
-                enhet = ferdigstillRegistrering.navEnhet,
-                dokumentinfoId = ferdigstillRegistrering.dokumentInfoId,
+                dokumentInfoId = ferdigstillRegistrering.dokumentInfoId,
+                pasientFnr = ferdigstillRegistrering.pasientFnr,
                 sykmeldingId = ferdigstillRegistrering.sykmeldingId,
-                perioder = null,
-                source = TODO(),
-                avvisningsGrunn = TODO(),
-                orginalAvsenderMottaker = TODO(),
-                sykmeldtNavn = null,
+                sykmelder = ferdigstillRegistrering.sykmelder,
+                loggingMeta = loggingMeta,
+                navEnhet = ferdigstillRegistrering.navEnhet,
+                avvist = ferdigstillRegistrering.avvist,
+                receivedSykmelding = receivedSykmelding
             )
         } else {
             log.info(

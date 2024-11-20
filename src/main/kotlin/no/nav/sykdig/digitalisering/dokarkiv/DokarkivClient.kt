@@ -20,6 +20,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
@@ -338,7 +339,7 @@ class DokarkivClient(
         enhet: String,
         journalpostId: String,
         sykmeldingId: String,
-    ) {
+    ): ResponseEntity<String> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.accept = listOf(MediaType.APPLICATION_JSON)
@@ -349,13 +350,14 @@ class DokarkivClient(
                 journalfoerendeEnhet = enhet,
             )
         try {
-            dokarkivRestTemplate.exchange(
+            val response = dokarkivRestTemplate.exchange(
                 "$url/$journalpostId/ferdigstill",
                 HttpMethod.PATCH,
                 HttpEntity(body, headers),
                 String::class.java,
             )
             log.info("Ferdigstilt journalpost $journalpostId for sykmelding $sykmeldingId")
+            return response
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å ferdigstille journalpostId $journalpostId: ${e.message}")
@@ -395,8 +397,11 @@ class DokarkivClient(
         val oppdaterJournalpostRequest = createOppdaterJournalpostNasjonalRequest(dokumentInfoId, pasientFnr, sykmelder, avvist, receivedSykmelding)
         oppdaterJournalpostRequest(oppdaterJournalpostRequest, sykmeldingId, journalpostId)
 
-
-
+        return ferdigstillJournalpost(
+            enhet = navEnhet,
+            journalpostId = journalpostId,
+            sykmeldingId = sykmeldingId
+        ).body
     }
 
     private fun createOppdaterJournalpostNasjonalRequest(
@@ -429,15 +434,16 @@ class DokarkivClient(
         )
         return oppdaterJournalpostRequest
     }
+
+    private fun padHpr(hprnummer: String): String {
+        if (hprnummer.length < 9) {
+            securelog.info("padder hpr: $hprnummer")
+            return hprnummer.padStart(9, '0')
+        }
+        return hprnummer
+    }
 }
 
-private fun padHpr(hprnummer: String): String {
-    if (hprnummer.length < 9) {
-        securelog.info("padder hpr: $hprnummer")
-        return hprnummer.padStart(9, '0')
-    }
-    return hprnummer
-}
 
 fun finnNavn(sykmelder: Sykmelder): String {
     return "${sykmelder.fornavn} ${sykmelder.etternavn}"
@@ -455,7 +461,7 @@ fun formaterDato(dato: LocalDate): String {
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     return dato.format(formatter)
 }
-}
+
 
 data class Country(
     val id: Int,
