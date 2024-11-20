@@ -131,7 +131,6 @@ class JournalpostService(
         )
     }
     suspend fun ferdigstillJournalpost(
-        accessToken: String,
         ferdigstillRegistrering: FerdigstillRegistrering,
         receivedSykmelding: ReceivedSykmeldingNasjonal?,
         loggingMeta: LoggingMeta,

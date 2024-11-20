@@ -7,7 +7,7 @@ import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.GetOppgaveResponse
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveType
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.Oppgavestatus
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveStatus
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.PersonService
@@ -82,7 +82,7 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
     val oppgaveResponseMock =
         GetOppgaveResponse(
             versjon = 1,
-            status = Oppgavestatus.OPPRETTET,
+            status = OppgaveStatus.OPPRETTET,
             behandlesAvApplikasjon = "SMM",
             id = 1,
             tilordnetRessurs = "A123456",

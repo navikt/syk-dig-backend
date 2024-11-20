@@ -1,4 +1,4 @@
-package no.nav.sykdig.felles
+package no.nav.sykdig.digitalisering.felles
 
 import java.time.LocalDate
 import java.time.LocalDateTime

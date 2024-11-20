@@ -1,13 +1,13 @@
 package no.nav.sykdig.model
 
-import no.nav.sykdig.felles.Arbeidsgiver
-import no.nav.sykdig.felles.Behandler
-import no.nav.sykdig.felles.KontaktMedPasient
-import no.nav.sykdig.felles.MedisinskVurdering
-import no.nav.sykdig.felles.MeldingTilNAV
-import no.nav.sykdig.felles.Periode
-import no.nav.sykdig.felles.Prognose
-import no.nav.sykdig.felles.SporsmalSvar
+import no.nav.sykdig.digitalisering.felles.Arbeidsgiver
+import no.nav.sykdig.digitalisering.felles.Behandler
+import no.nav.sykdig.digitalisering.felles.KontaktMedPasient
+import no.nav.sykdig.digitalisering.felles.MedisinskVurdering
+import no.nav.sykdig.digitalisering.felles.MeldingTilNAV
+import no.nav.sykdig.digitalisering.felles.Periode
+import no.nav.sykdig.digitalisering.felles.Prognose
+import no.nav.sykdig.digitalisering.felles.SporsmalSvar
 import java.time.LocalDate
 import java.time.OffsetDateTime
 

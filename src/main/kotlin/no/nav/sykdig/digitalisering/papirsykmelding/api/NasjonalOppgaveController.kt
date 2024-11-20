@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
+import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalSykmeldingService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
@@ -30,6 +31,7 @@ class NasjonalOppgaveController(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val sykmelderService: SykmelderService,
     private val personService: PersonService,
+    private val nasjonalSykmeldingService: NasjonalSykmeldingService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -105,7 +107,7 @@ class NasjonalOppgaveController(
         // TODO:  sjekk when oppgaveId er null: lage en guard og responder med bad request
         // TODO:  hvis accesstoken er null responder med unauthorized
         val callId = UUID.randomUUID().toString()
-        nasjonalOppgaveService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId)
+        nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId)
         log.info("papirsykmelding: sender oppgave med oppgaveId $oppgaveId gjennom syk-dig proxy")
         return smregistreringClient.postSendOppgaveRequest(authorization, oppgaveId, navEnhet, papirSykmelding)
     }

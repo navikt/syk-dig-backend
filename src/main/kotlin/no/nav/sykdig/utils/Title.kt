@@ -1,6 +1,6 @@
 package no.nav.sykdig.utils
 
-import no.nav.sykdig.felles.Periode
+import no.nav.sykdig.digitalisering.felles.Periode
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

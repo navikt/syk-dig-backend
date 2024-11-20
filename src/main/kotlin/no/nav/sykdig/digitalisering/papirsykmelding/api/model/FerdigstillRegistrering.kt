@@ -1,6 +1,6 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api.model
 
-import no.nav.sykdig.oppgavemottak.Oppgave
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.NasjonalOppgaveResponse
 
 
 data class FerdigstillRegistrering(
@@ -13,7 +13,7 @@ data class FerdigstillRegistrering(
     val navEnhet: String,
     val veileder: Veileder,
     val avvist: Boolean,
-    val oppgave: Oppgave?,
+    val oppgave: NasjonalOppgaveResponse?,
 )
 
 class Veileder(

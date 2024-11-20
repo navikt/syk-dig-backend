@@ -1,7 +1,7 @@
 package no.nav.sykdig.digitalisering
 
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
-import no.nav.sykdig.felles.Periode
+import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.generated.types.Bostedsadresse
 import no.nav.sykdig.generated.types.DiagnoseValue
 import no.nav.sykdig.generated.types.Digitaliseringsoppgave

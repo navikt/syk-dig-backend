@@ -1,7 +1,7 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.Oppgavestatus
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveStatus
 import org.springframework.stereotype.Component
 
 @Component
@@ -39,7 +39,7 @@ class GosysService(
             oppgaveId,
             sykmeldingId,
             oppgave.versjon,
-            Oppgavestatus.FERDIGSTILT,
+            OppgaveStatus.FERDIGSTILT,
             "FS22",
             veilederNavIdent,
             beskrivelse,

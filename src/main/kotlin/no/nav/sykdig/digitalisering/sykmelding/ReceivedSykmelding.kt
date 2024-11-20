@@ -1,6 +1,6 @@
 package no.nav.sykdig.digitalisering.sykmelding
 
-import no.nav.sykdig.felles.Sykmelding
+import no.nav.sykdig.digitalisering.felles.Sykmelding
 import java.time.LocalDateTime
 
 data class ReceivedSykmelding(
