@@ -74,7 +74,7 @@ class SykDigOppgaveService(
         val oppgaveId = response.id.toString()
         val dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId
         val tittel = journalpost.tittel.lowercase().contains("egenerklæring")
-        securelog.info("is egenarklaring? $tittel")
+        securelog.info("is egenarklaring: $tittel journalpostId: $journalpostId")
         val oppgave = createOppgave(
             oppgaveId = oppgaveId,
             fnr = fnr,
