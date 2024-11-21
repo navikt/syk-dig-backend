@@ -86,7 +86,7 @@ class SykDigOppgaveService(
             journalpostId = journalpostId,
             journalpost = journalpost,
             dokumentInfoId = dokumentInfoId,
-            source = if (journalpost.kanal == "NAV_NO" || tittel) "navno" else "syk-dig"
+            source = if (journalpost.kanal == "NAV_NO" || tittel) "navno" else if (journalpost.kanal == "RINA") "rina" else "syk-dig"
         )
         oppgaveRepository.lagreOppgave(oppgave)
         log.info("Oppgave med id $oppgaveId lagret")
