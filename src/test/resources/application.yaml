@@ -41,6 +41,7 @@ oppgave.url: http://oppgave
 smregistrering.url: http://smregistrering
 helsenett.url: http://syfohelsenettproxy
 smtss.url: http://smtss
+regel.url: http://regel
 
 no.nav.security.jwt:
   issuer:
