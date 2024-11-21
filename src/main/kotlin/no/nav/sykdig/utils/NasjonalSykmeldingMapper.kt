@@ -6,6 +6,7 @@ import no.nav.helse.sm2013.ArsakType
 import no.nav.helse.sm2013.CS
 import no.nav.helse.sm2013.CV
 import no.nav.helse.sm2013.HelseOpplysningerArbeidsuforhet
+import no.nav.sykdig.digitalisering.felles.*
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.*
 
 fun HelseOpplysningerArbeidsuforhet.toSykmelding(

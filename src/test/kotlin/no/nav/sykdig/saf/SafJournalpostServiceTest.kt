@@ -2,6 +2,7 @@ package no.nav.sykdig.saf
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.sykdig.digitalisering.exceptions.MissingJournalpostException
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.SafJournalpostService
 import no.nav.sykdig.digitalisering.saf.graphql.DokumentInfo
@@ -9,11 +10,12 @@ import no.nav.sykdig.digitalisering.saf.graphql.Dokumentvariant
 import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
+import org.amshove.kluent.assertionError
 import org.amshove.kluent.internal.assertFailsWith
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class SafJournalpostServiceTest {
     private val safJournalpostGraphQlClient: SafJournalpostGraphQlClient = mockk()
@@ -119,35 +121,61 @@ class SafJournalpostServiceTest {
     }
 
     @Test
-    fun ``() {
+    fun `er ikke journalført fordi status er mottatt`() {
         val journalpostId = "123"
-        val sykmeldingId = "syk-456"
-        val source = "rina"
 
         every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
-            SafQueryJournalpost(
-                SafJournalpost(
-                    journalstatus = Journalstatus.MOTTATT,
-                    dokumenter =
-                        listOf(
-                            DokumentInfo(
-                                dokumentInfoId = "dok1",
-                                tittel = "Dokument 1",
-                                dokumentvarianter = listOf(Dokumentvariant(variantformat = "NON-ARKIV")),
-                                brevkode = "1",
+                SafQueryJournalpost(
+                    SafJournalpost(
+                        journalstatus = Journalstatus.MOTTATT,
+                        dokumenter =
+                            listOf(
+                                DokumentInfo(
+                                    dokumentInfoId = "dok1",
+                                    tittel = "Dokument 1",
+                                    dokumentvarianter = listOf(Dokumentvariant(variantformat = "NON-ARKIV")),
+                                    brevkode = "1",
+                                ),
                             ),
-                        ),
-                    kanal = "EESSI",
-                    avsenderMottaker = null,
-                    bruker = null,
-                    tema = null,
-                ),
-            )
+                        kanal = "EESSI",
+                        avsenderMottaker = null,
+                        bruker = null,
+                        tema = null,
+                    ),
+                )
 
-        val exception =
-            assertFailsWith<RuntimeException> {
-                safJournalpostService.getDokumenterM2m(journalpostId, sykmeldingId, source)
-            }
-        assertEquals("Journalpost mangler PDF, $sykmeldingId", exception.message)
+        val erIkkeJournalfort = safJournalpostService.erIkkeJournalfort(journalpostId)
+        assertTrue(erIkkeJournalfort)
+    }
+    @Test
+    fun `er ikke journalført fordi safjournalpost er null`() {
+        val journalpostId = "123"
+        every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns SafQueryJournalpost(null)
+        assertThrows<MissingJournalpostException>{safJournalpostService.erIkkeJournalfort(journalpostId)}
+    }
+    @Test
+    fun `er journalført fordi status er ukjent`() {
+        val journalpostId = "123"
+        every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
+                SafQueryJournalpost(
+                    SafJournalpost(
+                        journalstatus = Journalstatus.UKJENT,
+                        dokumenter =
+                            listOf(
+                                DokumentInfo(
+                                    dokumentInfoId = "dok1",
+                                    tittel = "Dokument 1",
+                                    dokumentvarianter = listOf(Dokumentvariant(variantformat = "NON-ARKIV")),
+                                    brevkode = "1",
+                                ),
+                            ),
+                        kanal = "EESSI",
+                        avsenderMottaker = null,
+                        bruker = null,
+                        tema = null,
+                    ),
+                )
+        val erIkkeJournalfort = safJournalpostService.erIkkeJournalfort(journalpostId)
+        assertFalse(erIkkeJournalfort)
     }
 }

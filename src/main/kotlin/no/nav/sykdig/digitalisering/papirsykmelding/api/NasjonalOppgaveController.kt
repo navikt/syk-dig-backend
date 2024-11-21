@@ -103,13 +103,10 @@ class NasjonalOppgaveController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<Any> {
-
-        // TODO:  sjekk when oppgaveId er null: lage en guard og responder med bad request
-        // TODO:  hvis accesstoken er null responder med unauthorized
         val callId = UUID.randomUUID().toString()
-        nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId)
-        log.info("papirsykmelding: sender oppgave med oppgaveId $oppgaveId gjennom syk-dig proxy")
-        return smregistreringClient.postSendOppgaveRequest(authorization, oppgaveId, navEnhet, papirSykmelding)
+        return nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId)
+        //log.info("papirsykmelding: sender oppgave med oppgaveId $oppgaveId gjennom syk-dig proxy")
+        //return smregistreringClient.postSendOppgaveRequest(authorization, oppgaveId, navEnhet, papirSykmelding)
     }
 
     @GetMapping("/sykmelding/{sykmeldingId}/ferdigstilt")

@@ -27,6 +27,7 @@ import no.nav.helse.sm2013.NavnType
 import no.nav.helse.sm2013.TeleCom
 import no.nav.helse.sm2013.URL
 import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.felles.*
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.*
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.client.graphql.PdlPerson

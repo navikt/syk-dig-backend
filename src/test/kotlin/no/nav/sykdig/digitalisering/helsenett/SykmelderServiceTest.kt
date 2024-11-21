@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.digitalisering.helsenett.client.HelsenettClient
+import no.nav.sykdig.digitalisering.helsenett.client.SmtssClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Godkjenning
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Kode
 import no.nav.sykdig.digitalisering.pdl.Navn
@@ -18,7 +19,9 @@ import org.junit.jupiter.api.Test
 class SykmelderServiceTest {
     private val pdlService = mockk<PersonService>()
     private val helsenettClient = mockk<HelsenettClient>()
-    private val sykmelderService = SykmelderService(helsenettClient, pdlService)
+    private val personService = mockk<PersonService>()
+    private val smtssClient = mockk<SmtssClient>()
+    private val sykmelderService = SykmelderService(helsenettClient, personService, smtssClient)
 
     @Test
     fun `get sykmelder happy case`() {

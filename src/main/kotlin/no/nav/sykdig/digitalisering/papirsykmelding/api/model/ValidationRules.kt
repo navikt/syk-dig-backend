@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api.model
 
 import java.time.LocalDate
 import no.nav.sykdig.digitalisering.exceptions.ValidationException
+import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.sykmelding.RuleInfo
 import no.nav.sykdig.digitalisering.sykmelding.Status
 import no.nav.sykdig.digitalisering.sykmelding.ValidationResult

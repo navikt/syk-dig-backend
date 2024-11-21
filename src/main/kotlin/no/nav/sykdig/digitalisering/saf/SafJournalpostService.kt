@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering.saf
 
 import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
 import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.exceptions.MissingJournalpostException
 import no.nav.sykdig.digitalisering.saf.graphql.DokumentInfo
 import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
@@ -58,7 +59,7 @@ class SafJournalpostService(
 
     fun erIkkeJournalfort(journalpostId: String): Boolean {
         val journalpost = safJournalpostGraphQlClient.getJournalpostM2m(journalpostId)
-        if (journalpost.journalpost == null) return false
+        if (journalpost.journalpost == null) throw MissingJournalpostException("Journalpost med id $journalpostId finnes ikke i SAF")
         return erIkkeJournalfort(journalpost.journalpost)
     }
 

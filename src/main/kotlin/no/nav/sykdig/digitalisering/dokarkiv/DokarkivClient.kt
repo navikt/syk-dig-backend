@@ -123,7 +123,7 @@ class DokarkivClient(
         oppdaterJournalpostRequest: OppdaterJournalpostRequest,
         sykmeldingId: String,
         journalpostId: String,
-    ) {
+    ): ResponseEntity<String> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.accept = listOf(MediaType.APPLICATION_JSON)
@@ -131,13 +131,14 @@ class DokarkivClient(
 
         try {
             securelog.info("createOppdaterJournalpostRequest: ${objectMapper.writeValueAsString(oppdaterJournalpostRequest)}")
-            dokarkivRestTemplate.exchange(
+            val response = dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
                 HttpMethod.PUT,
                 HttpEntity(oppdaterJournalpostRequest, headers),
                 String::class.java,
             )
             log.info("Oppdatert journalpost $journalpostId for sykmelding $sykmeldingId")
+            return response
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til å oppdatere journalpostId $journalpostId: ${e.message}")
@@ -425,7 +426,7 @@ class DokarkivClient(
                 listOf(
                     DokumentInfo(
                         dokumentInfoId = dokumentInfoId,
-                        tittel = createTitleNasjonal(receivedSykmelding.sykmelding.perioder, avvist), //TODO skal receivedSykmelding være nullable?? why?
+                        tittel = createTitleNasjonal(receivedSykmelding.sykmelding.perioder, avvist),
                     ),
                 )
             } else {

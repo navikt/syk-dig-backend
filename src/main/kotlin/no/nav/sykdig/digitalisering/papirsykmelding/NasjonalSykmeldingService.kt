@@ -73,6 +73,7 @@ class NasjonalSykmeldingService(
     suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: Int): ResponseEntity<Any> {
         val oppgave = nasjonalOppgaveService.findByOppgaveId(oppgaveId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         val sykmeldingId = oppgave.sykmeldingId
+        log.info("Forsøker å ferdigstille papirsykmelding med sykmeldingId $sykmeldingId")
 
         val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
         val sykmelder = getSykmelder(smRegistreringManuell, loggingMeta, callId)
@@ -113,18 +114,6 @@ class NasjonalSykmeldingService(
         }
 
         return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta)
-
-
-        // logging meta sykmeldingId, dokumentInfoId, journalpostId
-
-        // sender med et isUpdate - som sjekker om saksbehandler har superuseraccess. men dette brukes kun i endre, som ikke har blitt brukt
-
-        // sjekker om saksbehandler har tilgang, men jeg tror dette kan gjøres gjennom obo token i controlleren
-
-        // val sykmelderHpr
-        // val sykmelder = personServise.hentPerson(sykmeldderHpr)   -- callId er en randomUUID - spørre seg om kanskje ha callId som sykmeldingId
-
-
     }
 
     private suspend fun handleOK(
@@ -156,7 +145,7 @@ class NasjonalSykmeldingService(
                 ferdigstiltAv = veileder.veilederIdent,
                 avvisningsgrunn = null,
             )
-
+            log.info("Ferdigstilt papirsykmelding med sykmelding id ${receivedSykmelding.sykmelding.id}")
             return ResponseEntity(HttpStatus.OK)
         }
         log.error(
@@ -319,7 +308,7 @@ class NasjonalSykmeldingService(
         val nasjonalManuellOppgaveDAO =
             NasjonalSykmeldingDAO(
                 sykmeldingId = receivedSykmelding.sykmelding.id,
-                sykmelding = receivedSykmelding,
+                sykmelding = receivedSykmelding.sykmelding,
                 timestamp = OffsetDateTime.now(ZoneOffset.UTC),
                 ferdigstiltAv = veileder.veilederIdent,
                 datoFerdigstilt = LocalDateTime.now(ZoneOffset.UTC),

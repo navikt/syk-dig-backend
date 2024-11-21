@@ -114,6 +114,7 @@ dependencies {
             because("overstyrer sårbar dependency fra com.opentable.components:otj-pg-embedded")
         }
     }
+    testImplementation(kotlin("test"))
 }
 
 tasks {

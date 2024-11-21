@@ -2,7 +2,7 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.applog
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.ReceivedSykmeldingNasjonal
+import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
@@ -24,7 +24,7 @@ class RegelClient(
     val log = applog()
     val securelog = securelog()
 
-    fun valider(sykmelding: ReceivedSykmeldingNasjonal, msgId: String): ValidationResult {
+    fun valider(sykmelding: ReceivedSykmelding, msgId: String): ValidationResult {
         log.info("validating against rules {}", kv("sykmeldingId", sykmelding.sykmelding.id))
         val headers = HttpHeaders()
         headers["Nav-CallId"] = msgId
