@@ -4,6 +4,7 @@ import no.nav.sykdig.auditLogger.AuditLogger
 import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
+import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.Type
@@ -22,6 +23,7 @@ class OppgaveSecurityService(
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val safGraphQlClient: SafJournalpostGraphQlClient,
     private val personService: PersonService,
+    private val nasjoalOppgaveRepository: NasjonalOppgaveRepository,
 ) {
     companion object {
         private val securelog = securelog()
@@ -35,6 +37,19 @@ class OppgaveSecurityService(
         val tilgang = hasAccess(oppgave.fnr, navEmail)
         securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
         return tilgang
+    }
+
+    fun hasAccessToNasjonalOppgave(oppgaveId: String): Boolean {
+        securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
+        val oppgave = nasjoalOppgaveRepository.findByOppgaveId(oppgaveId.toInt())
+        val navEmail = getNavEmail()
+        val fnr = oppgave.get().fnr
+        if (oppgave.isPresent && fnr != null ) {
+            val tilgang = hasAccess(fnr, navEmail)
+            securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
+            return tilgang
+        }
+        return false
     }
 
     fun hasAccessToSykmelding(sykmeldingId: String): Boolean {

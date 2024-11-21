@@ -95,7 +95,7 @@ class NasjonalOppgaveController(
     }
 
     @PostMapping("/oppgave/{oppgaveId}/send")
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
     @ResponseBody
     suspend fun sendOppgave(
         @PathVariable oppgaveId: Int,
