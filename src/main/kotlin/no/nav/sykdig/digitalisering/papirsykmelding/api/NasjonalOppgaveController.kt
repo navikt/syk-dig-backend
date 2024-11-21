@@ -58,7 +58,7 @@ class NasjonalOppgaveController(
         val papirManuellOppgave = oppgave.body
         if (papirManuellOppgave != null) {
             securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
-            // nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
+            nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
         }
         return oppgave
     }
@@ -105,8 +105,7 @@ class NasjonalOppgaveController(
     ): ResponseEntity<Any> {
         val callId = UUID.randomUUID().toString()
         return nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId)
-        //log.info("papirsykmelding: sender oppgave med oppgaveId $oppgaveId gjennom syk-dig proxy")
-        //return smregistreringClient.postSendOppgaveRequest(authorization, oppgaveId, navEnhet, papirSykmelding)
+
     }
 
     @GetMapping("/sykmelding/{sykmeldingId}/ferdigstilt")

@@ -12,6 +12,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.securelog
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -60,11 +61,11 @@ class NasjonalOppgaveService(
             dokumentInfoId = existingDao.dokumentInfoId,
             datoOpprettet = existingDao.datoOpprettet,
             oppgaveId = existingDao.oppgaveId,
-            ferdigstilt = existingDao.ferdigstilt,
+            ferdigstilt = true,
             papirSmRegistrering = existingDao.papirSmRegistrering,
             utfall = utfall,
             ferdigstiltAv = ferdigstiltAv,
-            datoFerdigstilt = existingDao.datoFerdigstilt,
+            datoFerdigstilt = LocalDateTime.now(),
             avvisningsgrunn = avvisningsgrunn,
         )
     }
