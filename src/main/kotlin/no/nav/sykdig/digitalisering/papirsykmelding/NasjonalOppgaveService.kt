@@ -2,15 +2,14 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.*
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.PatchFerdigstillNasjonalOppgaveRequest
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveStatus
 import no.nav.sykdig.securelog
 import org.springframework.stereotype.Service
 import java.util.*
@@ -30,6 +29,12 @@ class NasjonalOppgaveService(
         }
         return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
     }
+
+    fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO {
+        return nasjonalOppgaveRepository.save(
+            mapToUpdateDao(sykmeldingId, utfall, ferdigstiltAv, avvisningsgrunn, nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId).get()))
+    }
+
     fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO? {
         val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
         if (!oppgave.isPresent) return null
@@ -44,6 +49,26 @@ class NasjonalOppgaveService(
     ) {
         oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
     }
+
+    fun mapToUpdateDao(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, existingDao: NasjonalManuellOppgaveDAO): NasjonalManuellOppgaveDAO {
+        return NasjonalManuellOppgaveDAO(
+            id = existingDao.id,
+            sykmeldingId = sykmeldingId,
+            journalpostId = existingDao.journalpostId,
+            fnr = existingDao.fnr,
+            aktorId = existingDao.aktorId,
+            dokumentInfoId = existingDao.dokumentInfoId,
+            datoOpprettet = existingDao.datoOpprettet,
+            oppgaveId = existingDao.oppgaveId,
+            ferdigstilt = existingDao.ferdigstilt,
+            papirSmRegistrering = existingDao.papirSmRegistrering,
+            utfall = utfall,
+            ferdigstiltAv = ferdigstiltAv,
+            datoFerdigstilt = existingDao.datoFerdigstilt,
+            avvisningsgrunn = avvisningsgrunn,
+        )
+    }
+
 
     fun mapToDao(
         papirManuellOppgave: PapirManuellOppgave,
@@ -101,6 +126,6 @@ class NasjonalOppgaveService(
 
         return nasjonalManuellOppgaveDAO
     }
-
-
 }
+
+

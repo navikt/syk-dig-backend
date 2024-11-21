@@ -9,24 +9,29 @@ import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
+import no.nav.sykdig.digitalisering.felles.Sykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.extractHelseOpplysningerArbeidsuforhet
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.fellesformatMarshaller
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.get
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.toString
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.RegelClient
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.*
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Godkjenning
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.checkValidState
+import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalSykmeldingRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalSykmeldingDAO
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.sykmelding.Merknad
+import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.sykmelding.Status
 import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
 import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
-import no.nav.sykdig.digitalisering.felles.Sykmelding
-import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalSykmeldingRepository
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalSykmeldingDAO
-import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.getLocalDateTime
 import no.nav.sykdig.utils.isWhitelisted
@@ -145,12 +150,12 @@ class NasjonalSykmeldingService(
                 )
             }
             insertSykmeldingAndSendToKafka(receivedSykmelding, veileder)
-            nasjonalOppgaveService.lagreOppgave()
-
-            // insert into nasjonal_manuellOppgave - ferdigstill.
-            // sykmeldingId: String,
-            //    utfall: String,
-            //    ferdigstiltAv: String,
+            nasjonalOppgaveService.oppdaterOppgave(
+                sykmeldingId = receivedSykmelding.sykmelding.id,
+                utfall = validationResult.status.toString(),
+                ferdigstiltAv = veileder.veilederIdent,
+                avvisningsgrunn = null,
+            )
 
             return ResponseEntity(HttpStatus.OK)
         }
@@ -174,7 +179,7 @@ class NasjonalSykmeldingService(
                 receivedSykmelding.sykmelding.id,
             )
         } catch (exception: Exception) {
-            log.error("failed to send sykmelding to kafka result for sykmelding {}", receivedSykmelding.sykmelding.id)
+            log.error("failed to send sykmelding to kafka result for sykmeldingId: {}", receivedSykmelding.sykmelding.id)
             throw exception
         }
         nasjonalSykmeldingRepository.save(mapToDao(receivedSykmelding, veileder))
