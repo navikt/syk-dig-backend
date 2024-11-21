@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 class SmtssClient(
-    @Value("\$smtss.url") private val smtssUrl: String,
+    @Value("\${smtss.url}") private val smtssUrl: String,
     private val smtssM2mRestTemplate: RestTemplate
     ) {
 
