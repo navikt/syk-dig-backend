@@ -4,7 +4,6 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
-import no.nav.sykdig.digitalisering.helsenett.Behandler
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -16,7 +15,7 @@ import org.springframework.web.client.RestTemplate
 @Component
 class SmtssClient(
     @Value("\$smtss.url") private val smtssUrl: String,
-    private val smtssRestTemplate: RestTemplate
+    private val smtssM2mRestTemplate: RestTemplate
     ) {
 
     val log = applog()
@@ -37,7 +36,7 @@ class SmtssClient(
         // antakelse om at exceptions blir plukket opp av global exceptionhandler
         // vi nullchecker hpr tidligere i løpet
         val response =
-            smtssRestTemplate.exchange(
+            smtssM2mRestTemplate.exchange(
                 "$smtssUrl/api/v1/samhandler/infotrygd",
                 HttpMethod.GET,
                 HttpEntity<Any>(headers),

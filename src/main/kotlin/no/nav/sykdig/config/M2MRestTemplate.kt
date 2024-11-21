@@ -42,6 +42,13 @@ class M2MRestTemplate(
     }
 
     @Bean
+    fun smtssM2mRestTemplate(): RestTemplate {
+        return restTemplateBuilder
+            .additionalInterceptors(bearerTokenInterceptor("smtss-m2m"))
+            .build()
+    }
+
+    @Bean
     fun regeltM2mRestTemplate(): RestTemplate {
         return restTemplateBuilder
             .additionalInterceptors(bearerTokenInterceptor("regel-m2m"))
