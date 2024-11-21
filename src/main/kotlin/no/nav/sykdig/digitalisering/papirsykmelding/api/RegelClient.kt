@@ -18,7 +18,7 @@ import org.springframework.web.client.exchange
 
 @Component
 class RegelClient(
-    @Value("\${regel.url]") private val regelUrl: String,
+    @Value("\${regel.url}") private val regelUrl: String,
     private val regeltM2mRestTemplate: RestTemplate
 ){
     val log = applog()
