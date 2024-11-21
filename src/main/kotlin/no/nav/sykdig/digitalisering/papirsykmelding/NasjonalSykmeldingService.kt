@@ -172,6 +172,7 @@ class NasjonalSykmeldingService(
             log.error("failed to send sykmelding to kafka result for sykmeldingId: {}", receivedSykmelding.sykmelding.id)
             throw exception
         }
+        securelog.info("receivedSykmelding vi prøver å lagre: ${receivedSykmelding}")
         nasjonalSykmeldingRepository.save(mapToDao(receivedSykmelding, veileder))
         log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
     }
