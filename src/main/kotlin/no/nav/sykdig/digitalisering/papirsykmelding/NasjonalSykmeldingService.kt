@@ -113,7 +113,7 @@ class NasjonalSykmeldingService(
             return handleBrokenRule(validationResult, oppgaveId)
         }
 
-        return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta)
+        return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta, null)
     }
 
     private suspend fun handleOK(
@@ -121,6 +121,7 @@ class NasjonalSykmeldingService(
         receivedSykmelding: ReceivedSykmelding,
         ferdigstillRegistrering: FerdigstillRegistrering,
         loggingMeta: LoggingMeta,
+        avvisningsgrunn: String?,
     ): ResponseEntity<Any> {
         if (validationResult.status == Status.OK || validationResult.status == Status.MANUAL_PROCESSING) {
             val veileder = oppgaveSecurityService.getNavIdent()
@@ -143,7 +144,7 @@ class NasjonalSykmeldingService(
                 sykmeldingId = receivedSykmelding.sykmelding.id,
                 utfall = validationResult.status.toString(),
                 ferdigstiltAv = veileder.veilederIdent,
-                avvisningsgrunn = null,
+                avvisningsgrunn = avvisningsgrunn,
             )
             log.info("Ferdigstilt papirsykmelding med sykmelding id ${receivedSykmelding.sykmelding.id}")
             return ResponseEntity(HttpStatus.OK)
