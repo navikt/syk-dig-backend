@@ -35,11 +35,16 @@ class SykDigOppgaveService(
     private val log = applog()
     private val securelog = securelog()
 
-    fun createOppgave(oppgaveId: String, fnr: String, journalpostId: String, journalpost: SafJournalpost, dokumentInfoId: String, source: String = "syk-dig"): OppgaveDbModel {
-        val dokumenter =
-            journalpost.dokumenter.map {
-                DokumentDbModel(it.dokumentInfoId, it.tittel ?: "Mangler Tittel")
+    private fun createOppgave(oppgaveId: String, fnr: String, journalpostId: String, journalpost: SafJournalpost, dokumentInfoId: String, source: String = "syk-dig"): OppgaveDbModel {
+        val dokumenter = journalpost.dokumenter.map {
+            val oppdatertTittel = if (it.tittel == "Utenlandsk sykmelding") {
+                "Digitalisert utenlandsk sykmelding"
+            } else {
+                it.tittel ?: "Mangler Tittel"
             }
+            DokumentDbModel(it.dokumentInfoId, oppdatertTittel)
+        }
+
         return OppgaveDbModel(
             oppgaveId = oppgaveId,
             fnr = fnr,
