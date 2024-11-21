@@ -7,7 +7,7 @@ import no.nav.helse.msgHead.XMLMsgHead
 import no.nav.syfo.service.toSykmelding
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
-import no.nav.sykdig.config.kafka.OK_SYKMLEDING_TOPIC
+import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.extractHelseOpplysningerArbeidsuforhet
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.fellesformatMarshaller
@@ -39,7 +39,6 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.UUID
 
 @Service
 class NasjonalSykmeldingService(
@@ -56,7 +55,6 @@ class NasjonalSykmeldingService(
     val securelog = securelog()
 
 
-
     private fun getLoggingMeta(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): LoggingMeta {
         return LoggingMeta(
             mottakId = sykmeldingId,
@@ -69,7 +67,6 @@ class NasjonalSykmeldingService(
 
     suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: Int): ResponseEntity<Any> {
         val oppgave = nasjonalOppgaveService.findByOppgaveId(oppgaveId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
-        // TODO: bedre error handeling
         val sykmeldingId = oppgave.sykmeldingId
 
         val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
@@ -106,10 +103,11 @@ class NasjonalSykmeldingService(
                 oppgave = null,
             )
 
-        if (validationResult.ruleHits.isWhitelisted()){
-            return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta)
+        if (!validationResult.ruleHits.isWhitelisted()) {
+            return handleBrokenRule(validationResult, oppgaveId)
         }
-        return handleBrokenRule(validationResult, oppgaveId)
+
+        return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta)
 
 
         // logging meta sykmeldingId, dokumentInfoId, journalpostId
@@ -122,15 +120,13 @@ class NasjonalSykmeldingService(
         // val sykmelder = personServise.hentPerson(sykmeldderHpr)   -- callId er en randomUUID - spørre seg om kanskje ha callId som sykmeldingId
 
 
-
-
     }
 
     private suspend fun handleOK(
         validationResult: ValidationResult,
         receivedSykmelding: ReceivedSykmelding,
         ferdigstillRegistrering: FerdigstillRegistrering,
-        loggingMeta: LoggingMeta
+        loggingMeta: LoggingMeta,
     ): ResponseEntity<Any> {
         if (validationResult.status == Status.OK || validationResult.status == Status.MANUAL_PROCESSING) {
             val veileder = oppgaveSecurityService.getNavIdent()
@@ -170,11 +166,11 @@ class NasjonalSykmeldingService(
     ) {
         try {
             sykmeldingOKProducer.send(
-                ProducerRecord(OK_SYKMLEDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
+                ProducerRecord(OK_SYKMELDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
             ).get()
             log.info(
                 "Sykmelding sendt to kafka topic {} sykmelding id {}",
-                OK_SYKMLEDING_TOPIC,
+                OK_SYKMELDING_TOPIC,
                 receivedSykmelding.sykmelding.id,
             )
         } catch (exception: Exception) {
@@ -189,17 +185,21 @@ class NasjonalSykmeldingService(
         validationResult: ValidationResult,
         oppgaveId: Int?,
     ): ResponseEntity<Any> {
-        if (validationResult.status == Status.MANUAL_PROCESSING ){
-            log.info("Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
-                StructuredArguments.keyValue("oppgaveId", oppgaveId),)
+        if (validationResult.status == Status.MANUAL_PROCESSING) {
+            log.info(
+                "Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
+                StructuredArguments.keyValue("oppgaveId", oppgaveId),
+            )
             return ResponseEntity.badRequest().body(validationResult)
         }
-        if (validationResult.status == Status.OK){
-            log.info("Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
-                StructuredArguments.keyValue("oppgaveId", oppgaveId),)
+        if (validationResult.status == Status.OK) {
+            log.info(
+                "Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
+                StructuredArguments.keyValue("oppgaveId", oppgaveId),
+            )
             return ResponseEntity.badRequest().body(validationResult)
         }
-        log.error("Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING",)
+        log.error("Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING")
         return ResponseEntity.internalServerError().body("En uforutsett feil oppsto ved validering av oppgaven")
     }
 
@@ -249,33 +249,33 @@ class NasjonalSykmeldingService(
                 pasient.aktorId,
                 sykmelder.aktorId,
                 sykmeldingId,
-                getLocalDateTime(msgHead.msgInfo.genDate)
+                getLocalDateTime(msgHead.msgInfo.genDate),
             )
 
         return ReceivedSykmelding(
-                sykmelding = sykmelding,
-                personNrPasient = pasient.fnr,
-                tlfPasient =
-                    healthInformation.pasient.kontaktInfo.firstOrNull()?.teleAddress?.v,
-                personNrLege = sykmelder.fnr,
-                navLogId = sykmeldingId,
-                msgId = sykmeldingId,
-                legekontorOrgNr = null,
-                legekontorOrgName = "",
-                legekontorHerId = null,
-                legekontorReshId = null,
-                mottattDato = oppgave.datoOpprettet ?: getLocalDateTime(msgHead.msgInfo.genDate),
-                rulesetVersion = healthInformation.regelSettVersjon,
-                fellesformat = fellesformatMarshaller.toString(fellesformat),
-                tssid = tssId ?: "",
-                merknader = createMerknad(sykmelding),
-                partnerreferanse = null,
-                legeHelsepersonellkategori =
-                    sykmelder.godkjenninger?.getHelsepersonellKategori(),
-                legeHprNr = sykmelder.hprNummer,
-                vedlegg = null,
-                utenlandskSykmelding = null,
-            )
+            sykmelding = sykmelding,
+            personNrPasient = pasient.fnr,
+            tlfPasient =
+                healthInformation.pasient.kontaktInfo.firstOrNull()?.teleAddress?.v,
+            personNrLege = sykmelder.fnr,
+            navLogId = sykmeldingId,
+            msgId = sykmeldingId,
+            legekontorOrgNr = null,
+            legekontorOrgName = "",
+            legekontorHerId = null,
+            legekontorReshId = null,
+            mottattDato = oppgave.datoOpprettet ?: getLocalDateTime(msgHead.msgInfo.genDate),
+            rulesetVersion = healthInformation.regelSettVersjon,
+            fellesformat = fellesformatMarshaller.toString(fellesformat),
+            tssid = tssId ?: "",
+            merknader = createMerknad(sykmelding),
+            partnerreferanse = null,
+            legeHelsepersonellkategori =
+                sykmelder.godkjenninger?.getHelsepersonellKategori(),
+            legeHprNr = sykmelder.hprNummer,
+            vedlegg = null,
+            utenlandskSykmelding = null,
+        )
 
     }
 
@@ -307,7 +307,7 @@ class NasjonalSykmeldingService(
 
     fun mapToDao(
         receivedSykmelding: ReceivedSykmelding,
-        veileder: Veileder
+        veileder: Veileder,
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
@@ -317,7 +317,7 @@ class NasjonalSykmeldingService(
                 sykmelding = receivedSykmelding,
                 timestamp = OffsetDateTime.now(ZoneOffset.UTC),
                 ferdigstiltAv = veileder.veilederIdent,
-                datoFerdigstilt = LocalDateTime.now(ZoneOffset.UTC)
+                datoFerdigstilt = LocalDateTime.now(ZoneOffset.UTC),
             )
         return nasjonalManuellOppgaveDAO
     }

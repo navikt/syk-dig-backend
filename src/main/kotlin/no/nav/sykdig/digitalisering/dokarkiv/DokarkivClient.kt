@@ -5,10 +5,10 @@ import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.ReceivedSykmeldingNasjonal
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
 import no.nav.sykdig.digitalisering.felles.Periode
+import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.createTitle
@@ -392,7 +392,7 @@ class DokarkivClient(
         loggingMeta: LoggingMeta,
         navEnhet: String,
         avvist: Boolean,
-        receivedSykmelding: ReceivedSykmeldingNasjonal?,
+        receivedSykmelding: ReceivedSykmelding,
     ): String? {
         val oppdaterJournalpostRequest = createOppdaterJournalpostNasjonalRequest(dokumentInfoId, pasientFnr, sykmelder, avvist, receivedSykmelding)
         oppdaterJournalpostRequest(oppdaterJournalpostRequest, sykmeldingId, journalpostId)
@@ -409,7 +409,7 @@ class DokarkivClient(
         pasientFnr: String,
         sykmelder: Sykmelder,
         avvist: Boolean,
-        receivedSykmelding: ReceivedSykmeldingNasjonal?,
+        receivedSykmelding: ReceivedSykmelding,
     ): OppdaterJournalpostRequest {
         val oppdaterJournalpostRequest = OppdaterJournalpostRequest(
             avsenderMottaker = AvsenderMottakerRequest(
@@ -420,12 +420,12 @@ class DokarkivClient(
             ),
             bruker = DokBruker(id = pasientFnr),
             sak = Sak(),
-            tittel = createTitleNasjonal(receivedSykmelding?.sykmelding.perioder, avvist),
+            tittel = createTitleNasjonal(receivedSykmelding.sykmelding.perioder, avvist),
             dokumenter = if (dokumentInfoId != null) {
                 listOf(
                     DokumentInfo(
                         dokumentInfoId = dokumentInfoId,
-                        tittel = createTitleNasjonal(receivedSykmelding?.sykmelding.perioder, avvist),
+                        tittel = createTitleNasjonal(receivedSykmelding.sykmelding.perioder, avvist), //TODO skal receivedSykmelding være nullable?? why?
                     ),
                 )
             } else {
@@ -444,24 +444,9 @@ class DokarkivClient(
     }
 }
 
-
 fun finnNavn(sykmelder: Sykmelder): String {
     return "${sykmelder.fornavn} ${sykmelder.etternavn}"
 }
-
-private fun getFomTomTekst(receivedSykmelding: ReceivedSykmeldingNasjonal) =
-    "${formaterDato(receivedSykmelding.sykmelding.perioder.sortedSykmeldingPeriodeFOMDate().first().fom)} -" +
-            " ${formaterDato(receivedSykmelding.sykmelding.perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
-
-fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> = sortedBy { it.fom }
-
-fun List<Periode>.sortedSykmeldingPeriodeTOMDate(): List<Periode> = sortedBy { it.tom }
-
-fun formaterDato(dato: LocalDate): String {
-    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-    return dato.format(formatter)
-}
-
 
 data class Country(
     val id: Int,

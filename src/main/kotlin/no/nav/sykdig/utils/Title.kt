@@ -54,7 +54,7 @@ fun createTitleNavNo(
 
 private fun getFomTomTekst(perioder: List<Periode>) =
     "${formaterDato(perioder.sortedSykmeldingPeriodeFOMDate().first().fom)} -" +
-        " ${formaterDato(perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
+            " ${formaterDato(perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
 
 fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> = sortedBy { it.fom }
 

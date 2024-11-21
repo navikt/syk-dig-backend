@@ -1,7 +1,7 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
 import no.nav.sykdig.applog
-import no.nav.sykdig.config.kafka.OK_SYKMLEDING_TOPIC
+import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.dokument.DocumentService
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
@@ -75,11 +75,11 @@ class FerdigstillingService(
 
         try {
             sykmeldingOKProducer.send(
-                ProducerRecord(OK_SYKMLEDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
+                ProducerRecord(OK_SYKMELDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
             ).get()
             log.info(
                 "Sykmelding sendt to kafka topic {} sykmelding id {}",
-                OK_SYKMLEDING_TOPIC,
+                OK_SYKMELDING_TOPIC,
                 receivedSykmelding.sykmelding.id,
             )
         } catch (exception: Exception) {
@@ -181,7 +181,7 @@ class FerdigstillingService(
                 opprettet = oppgave.opprettet.toLocalDateTime(),
             )
         sykmeldingOKProducer.send(
-            ProducerRecord(OK_SYKMLEDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
+            ProducerRecord(OK_SYKMELDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
         ).get()
         log.info("sendt oppdatert sykmelding med id ${receivedSykmelding.sykmelding.id}")
         updateTitle(oppgave, receivedSykmelding)
