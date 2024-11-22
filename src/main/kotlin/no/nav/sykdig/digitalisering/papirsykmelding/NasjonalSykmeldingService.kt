@@ -173,7 +173,9 @@ class NasjonalSykmeldingService(
             throw exception
         }
         securelog.info("receivedSykmelding vi prøver å lagre: ${receivedSykmelding}")
-        nasjonalSykmeldingRepository.save(mapToDao(receivedSykmelding, veileder))
+        val dao = mapToDao(receivedSykmelding, veileder)
+        securelog.info("mapped receivedSykmeldingToDao $dao")
+        nasjonalSykmeldingRepository.save(dao)
         log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
     }
 
