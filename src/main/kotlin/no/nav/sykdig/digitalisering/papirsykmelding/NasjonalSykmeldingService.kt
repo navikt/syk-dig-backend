@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
@@ -178,6 +179,7 @@ class NasjonalSykmeldingService(
         val dao = mapToDao(receivedSykmelding, veileder)
         val objectMapper = jacksonObjectMapper()
         objectMapper.registerModules(JavaTimeModule())
+        objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         securelog.info("mapped receivedSykmeldingToDao ${objectMapper.writeValueAsString(dao)}")
         nasjonalSykmeldingRepository.save(dao)
         log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
