@@ -51,18 +51,18 @@ class NasjonalOppgaveService(
         oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
     }
 
-    fun mapToUpdateDao(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, existingDao: NasjonalManuellOppgaveDAO): NasjonalManuellOppgaveDAO {
+    fun mapToUpdateDao(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, existingEntry: NasjonalManuellOppgaveDAO): NasjonalManuellOppgaveDAO {
         return NasjonalManuellOppgaveDAO(
-            id = existingDao.id,
+            id = existingEntry.id,
             sykmeldingId = sykmeldingId,
-            journalpostId = existingDao.journalpostId,
-            fnr = existingDao.fnr,
-            aktorId = existingDao.aktorId,
-            dokumentInfoId = existingDao.dokumentInfoId,
-            datoOpprettet = existingDao.datoOpprettet,
-            oppgaveId = existingDao.oppgaveId,
+            journalpostId = existingEntry.journalpostId,
+            fnr = existingEntry.fnr,
+            aktorId = existingEntry.aktorId,
+            dokumentInfoId = existingEntry.dokumentInfoId,
+            datoOpprettet = existingEntry.datoOpprettet,
+            oppgaveId = existingEntry.oppgaveId,
             ferdigstilt = true,
-            papirSmRegistrering = existingDao.papirSmRegistrering,
+            papirSmRegistrering = existingEntry.papirSmRegistrering,
             utfall = utfall,
             ferdigstiltAv = ferdigstiltAv,
             datoFerdigstilt = LocalDateTime.now(),
