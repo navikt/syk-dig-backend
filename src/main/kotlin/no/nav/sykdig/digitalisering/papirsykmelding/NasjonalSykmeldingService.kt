@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
@@ -36,6 +37,7 @@ import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.getLocalDateTime
 import no.nav.sykdig.utils.isWhitelisted
 import no.nav.sykdig.utils.mapsmRegistreringManuelltTilFellesformat
+import okio.Utf8
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.http.HttpStatus
@@ -174,7 +176,9 @@ class NasjonalSykmeldingService(
         }
         securelog.info("receivedSykmelding vi prøver å lagre: ${receivedSykmelding}")
         val dao = mapToDao(receivedSykmelding, veileder)
-        securelog.info("mapped receivedSykmeldingToDao ${dao.sykmelding}")
+        val objectMapper = jacksonObjectMapper()
+        objectMapper.registerModules(JavaTimeModule())
+        securelog.info("mapped receivedSykmeldingToDao ${objectMapper.writeValueAsString(dao)}")
         nasjonalSykmeldingRepository.save(dao)
         log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
     }
