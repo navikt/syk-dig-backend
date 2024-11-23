@@ -51,36 +51,4 @@ open class NasjonalManuellOppgaveDAO(
     var avvisningsgrunn: String? = null,
 )
 
-@WritingConverter
-class PapirSmRegistreringWritingConverter : Converter<PapirSmRegistering, PGobject> {
-    override fun convert(source: PapirSmRegistering): PGobject {
-        val jsonObject = PGobject()
-        jsonObject.type = "jsonb"
-        objectMapper.registerModule(JavaTimeModule())
-        jsonObject.value = objectMapper.writeValueAsString(source)
-        return jsonObject
-    }
-}
 
-@ReadingConverter
-class PapirSmRegistreringReadingConverter : Converter<PGobject, PapirSmRegistering> {
-    private val objectMapper = jacksonObjectMapper()
-
-    override fun convert(source: PGobject): PapirSmRegistering {
-        objectMapper.registerModule(JavaTimeModule())
-        return objectMapper.readValue(source.value!!, PapirSmRegistering::class.java) // bedre håndtering enn !!
-    }
-}
-
-@Configuration
-class JdbcConfiguration {
-    @Bean
-    fun jdbcCustomConversions(): JdbcCustomConversions {
-        return JdbcCustomConversions(
-            listOf(
-                PapirSmRegistreringWritingConverter(),
-                PapirSmRegistreringReadingConverter(),
-            ),
-        )
-    }
-}

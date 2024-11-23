@@ -16,6 +16,7 @@ import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.felles.Sykmelding
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalSykmeldingDAO
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,10 +25,10 @@ import java.util.*
 
 class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
 
-//    @AfterEach
-//    fun setup() {
-//        nasjonalSykmeldingRepository.deleteAll()
-//    }
+    @BeforeEach
+    fun setup() {
+        nasjonalSykmeldingRepository.deleteAll()
+    }
 
     @Test
     fun `legg til og hent ny sykmelding`() {
