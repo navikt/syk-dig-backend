@@ -220,7 +220,7 @@ class SykDigOppgaveService(
     }
 
     @Transactional
-    fun ferdigstillOppgave(
+    fun ferdigstillUtenlandskAvvistOppgave(
         oppgave: OppgaveDbModel,
         navEpost: String,
         values: FerdistilltRegisterOppgaveValues,
@@ -235,6 +235,22 @@ class SykDigOppgaveService(
             oppgave = oppgave,
             sykmeldt = sykmeldt,
             validatedValues = values,
+        )
+    }
+
+    fun ferdigstillNasjonalAvvistOppgave(
+        oppgave: OppgaveDbModel,
+        navEpost: String,
+        enhetId: String,
+        sykmeldt: Person,
+        avvisningsgrunn: Avvisingsgrunn?,
+        avvisningsgrunnAnnet: String?,
+    ) {
+        ferdigstillingService.ferdigstillAvvistJournalpost(
+            enhet = enhetId,
+            oppgave = oppgave,
+            sykmeldt = sykmeldt,
+            avvisningsGrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
         )
     }
 

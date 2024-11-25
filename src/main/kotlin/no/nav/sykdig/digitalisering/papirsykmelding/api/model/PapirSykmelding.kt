@@ -84,4 +84,3 @@ data class SmRegistreringManuell(
     val navnFastlege: String?,
     val harUtdypendeOpplysninger: Boolean,
 )
-

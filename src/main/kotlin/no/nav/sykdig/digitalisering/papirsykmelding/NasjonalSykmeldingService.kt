@@ -1,7 +1,5 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
@@ -38,7 +36,6 @@ import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.getLocalDateTime
 import no.nav.sykdig.utils.isWhitelisted
 import no.nav.sykdig.utils.mapsmRegistreringManuelltTilFellesformat
-import okio.Utf8
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.http.HttpStatus
@@ -53,11 +50,11 @@ class NasjonalSykmeldingService(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val nasjonalSykmeldingRepository: NasjonalSykmeldingRepository,
     private val regelClient: RegelClient,
-    private val oppgaveSecurityService: OppgaveSecurityService,
     private val journalpostService: JournalpostService,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val sykmelderService: SykmelderService,
     private val personService: PersonService,
+    private val oppgaveSecurityService: OppgaveSecurityService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -80,7 +77,6 @@ class NasjonalSykmeldingService(
 
         val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
         val sykmelder = getSykmelder(smRegistreringManuell, loggingMeta, callId)
-
         val receivedSykmelding = createReceivedSykmelding(sykmeldingId, oppgave, loggingMeta, smRegistreringManuell, callId, sykmelder)
 
         val validationResult = regelClient.valider(receivedSykmelding, sykmeldingId)
@@ -175,12 +171,8 @@ class NasjonalSykmeldingService(
             log.error("failed to send sykmelding to kafka result for sykmeldingId: {}", receivedSykmelding.sykmelding.id)
             throw exception
         }
-        securelog.info("receivedSykmelding vi prøver å lagre: ${receivedSykmelding}")
+        securelog.info("receivedSykmelding som skal lagres: ${receivedSykmelding}")
         val dao = mapToDao(receivedSykmelding, veileder)
-        val objectMapper = jacksonObjectMapper()
-        objectMapper.registerModules(JavaTimeModule())
-        objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        securelog.info("mapped receivedSykmeldingToDao ${objectMapper.writeValueAsString(dao)}")
         nasjonalSykmeldingRepository.save(dao)
         log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
     }

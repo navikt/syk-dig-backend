@@ -6,6 +6,7 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostService
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
@@ -14,6 +15,7 @@ import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.sykmelding.db.JournalpostSykmeldingRepository
+import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
@@ -154,6 +156,30 @@ class JournalpostService(
                         "journalpostId ${ferdigstillRegistrering.journalpostId} er allerede journalført",
             )
         }
+    }
+
+    fun ferdigstillAvvistOppgave(
+        oppgaveId: Int,
+        bruker: String,
+        navEnhet: String,
+        navEpost: String,
+        avvisningsgrunn: String?,
+    ) {
+        val oppgave = sykDigOppgaveService.getOppgave(oppgaveId.toString())
+        val sykmeldt =
+            personService.getPerson(
+                id = oppgave.fnr,
+                callId = oppgave.sykmeldingId.toString(),
+            )
+        val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisningsgrunn, ignoreCase = true) }
+        sykDigOppgaveService.ferdigstillNasjonalAvvistOppgave(
+            oppgave = oppgave,
+            navEpost = navEpost,
+            enhetId = navEnhet,
+            sykmeldt = sykmeldt,
+            avvisningsgrunn = avvistGrunn,
+            avvisningsgrunnAnnet = null,
+        )
     }
 
     fun isSykmeldingCreated(id: String): Boolean {

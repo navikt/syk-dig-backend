@@ -75,7 +75,6 @@ class JdbcConfiguration {
     fun jdbcCustomConversions(): JdbcCustomConversions {
         return JdbcCustomConversions(
             listOf(
-//                OffsetDateTimeWritingConverter(),
                 OffsetDateTimeReadingConverter(),
                 PapirSmRegistreringWritingConverter(),
                 PapirSmRegistreringReadingConverter(),

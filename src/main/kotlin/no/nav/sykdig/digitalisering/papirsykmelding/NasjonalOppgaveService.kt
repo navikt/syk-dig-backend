@@ -5,12 +5,18 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
+import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
+import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.securelog
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.*
@@ -19,9 +25,12 @@ import java.util.*
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
     private val oppgaveClient: OppgaveClient,
+    private val journalpostService: JournalpostService,
+    private val oppgaveSecurityService: OppgaveSecurityService
 ) {
     val log = applog()
     val securelog = securelog()
+    val mapper = jacksonObjectMapper()
 
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
@@ -33,7 +42,8 @@ class NasjonalOppgaveService(
 
     fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO {
         return nasjonalOppgaveRepository.save(
-            mapToUpdateDao(sykmeldingId, utfall, ferdigstiltAv, avvisningsgrunn, nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId).get()))
+            mapToUpdateDao(sykmeldingId, utfall, ferdigstiltAv, avvisningsgrunn, nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId).get()),
+        )
     }
 
     fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO? {
@@ -50,6 +60,36 @@ class NasjonalOppgaveService(
     ) {
         oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
     }
+
+    fun avvisOppgave(
+        oppgaveId: Int,
+        request: String,
+        authorization: String,
+        navEnhet: String,
+        navEpost: String,
+    ): ResponseEntity<NasjonalManuellOppgaveDAO> {
+        val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
+        val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
+
+        if (eksisterendeOppgave.isPresent) {
+            journalpostService.ferdigstillAvvistOppgave(oppgaveId, authorization, navEnhet, navEpost, avvisningsgrunn)
+            val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
+            val res = oppdaterOppgave(
+                eksisterendeOppgave.get().sykmeldingId,
+                utfall = Utfall.AVVIST.toString(),
+                ferdigstiltAv = veilederIdent,
+                avvisningsgrunn = avvisningsgrunn,
+            )
+
+            log.info("Har avvist oppgave med oppgaveId $oppgaveId")
+            return ResponseEntity(res, HttpStatus.OK)
+        }
+        else {
+            log.info("fant ikke oppgave som skulle avvises")
+            return ResponseEntity(HttpStatus.NOT_FOUND)
+        }
+    }
+
 
     fun mapToUpdateDao(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, existingEntry: NasjonalManuellOppgaveDAO): NasjonalManuellOppgaveDAO {
         return NasjonalManuellOppgaveDAO(
@@ -75,7 +115,6 @@ class NasjonalOppgaveService(
         papirManuellOppgave: PapirManuellOppgave,
         existingId: UUID?,
     ): NasjonalManuellOppgaveDAO {
-        val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
 
         val nasjonalManuellOppgaveDAO =
@@ -128,5 +167,3 @@ class NasjonalOppgaveService(
         return nasjonalManuellOppgaveDAO
     }
 }
-
-

@@ -145,7 +145,7 @@ class FerdigstillingService(
         enhet: String,
         oppgave: OppgaveDbModel,
         sykmeldt: Person,
-        avvisningsGrunn: String,
+        avvisningsGrunn: String?,
     ) {
         requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
         val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)

@@ -7,6 +7,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalSykmeldingService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
@@ -37,14 +38,16 @@ class NasjonalOppgaveController(
     val securelog = securelog()
 
     @PostMapping("/oppgave/{oppgaveId}/avvis")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
+        @RequestHeader("X-Nav-Epost") navEpost: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
-    ): ResponseEntity<HttpStatusCode> {
-        log.info("papirsykmelding: avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
-        return smregistreringClient.postAvvisOppgaveRequest(authorization, oppgaveId, navEnhet, avvisSykmeldingRequest)
+    ): ResponseEntity<NasjonalManuellOppgaveDAO> {
+        log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
+        return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, authorization, navEpost, navEnhet)
     }
 
     @GetMapping("/oppgave/{oppgaveid}")

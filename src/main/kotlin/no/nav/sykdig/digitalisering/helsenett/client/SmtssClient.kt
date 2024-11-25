@@ -33,8 +33,6 @@ class SmtssClient(
         headers["samhandlerOrgName"] = samhandlerOrgName
         headers["requestId"] = sykmeldingId
 
-        // antakelse om at exceptions blir plukket opp av global exceptionhandler
-        // vi nullchecker hpr tidligere i løpet
         val response =
             smtssM2mRestTemplate.exchange(
                 "$smtssUrl/api/v1/samhandler/infotrygd",

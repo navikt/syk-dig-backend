@@ -79,7 +79,7 @@ class UtenlandskOppgaveService(
             throw ClientException(valideringsresultat.joinToString())
         }
 
-        sykDigOppgaveService.ferdigstillOppgave(oppgave, navEpost, values, enhetId, sykmeldt)
+        sykDigOppgaveService.ferdigstillUtenlandskAvvistOppgave(oppgave, navEpost, values, enhetId, sykmeldt)
         metricRegister.ferdigstiltOppgave.increment()
     }
 
