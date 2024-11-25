@@ -141,6 +141,7 @@ class SafJournalpostServiceTest {
                         avsenderMottaker = null,
                         bruker = null,
                         tema = null,
+                        tittel = "Journalpost 1"
                     ),
                 )
 
@@ -173,6 +174,7 @@ class SafJournalpostServiceTest {
                         avsenderMottaker = null,
                         bruker = null,
                         tema = null,
+                        tittel = "Journalpost 2"
                     ),
                 )
         val erIkkeJournalfort = safJournalpostService.erIkkeJournalfort(journalpostId)

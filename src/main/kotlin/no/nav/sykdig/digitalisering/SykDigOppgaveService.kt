@@ -15,7 +15,6 @@ import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
-import no.nav.sykdig.digitalisering.tilgangskontroll.getNavEmail
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
@@ -31,38 +30,10 @@ class SykDigOppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val ferdigstillingService: FerdigstillingService,
     private val oppgaveClient: OppgaveClient,
+    private val oppgaveSecurityService: OppgaveSecurityService,
 ) {
     private val log = applog()
     private val securelog = securelog()
-
-    private fun createOppgave(oppgaveId: String, fnr: String, journalpostId: String, journalpost: SafJournalpost, dokumentInfoId: String, source: String = "syk-dig"): OppgaveDbModel {
-        val dokumenter = journalpost.dokumenter.map {
-            val oppdatertTittel = if (it.tittel == "Utenlandsk sykmelding") {
-                "Digitalisert utenlandsk sykmelding"
-            } else {
-                it.tittel ?: "Mangler Tittel"
-            }
-            DokumentDbModel(it.dokumentInfoId, oppdatertTittel)
-        }
-
-        return OppgaveDbModel(
-            oppgaveId = oppgaveId,
-            fnr = fnr,
-            journalpostId = journalpostId,
-            dokumentInfoId = dokumentInfoId,
-            dokumenter = dokumenter,
-            opprettet = OffsetDateTime.now(ZoneOffset.UTC),
-            ferdigstilt = null,
-            tilbakeTilGosys = false,
-            avvisingsgrunn = null,
-            sykmeldingId = UUID.randomUUID(),
-            type = UTLAND,
-            sykmelding = null,
-            endretAv = getNavEmail(),
-            timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-            source = source,
-        )
-    }
 
     fun opprettOgLagreOppgave(
         journalpost: SafJournalpost,
@@ -76,18 +47,30 @@ class SykDigOppgaveService(
                 aktoerId = aktoerId,
             )
 
+        val dokumenter =
+            journalpost.dokumenter.map {
+                DokumentDbModel(it.dokumentInfoId, it.tittel ?: "Mangler Tittel")
+            }
+
         val oppgaveId = response.id.toString()
-        val dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId
-        val tittel = journalpost.tittel.lowercase().contains("egenerklæring")
-        securelog.info("is egenarklaring: $tittel journalpostId: $journalpostId")
-        val oppgave = createOppgave(
-            oppgaveId = oppgaveId,
-            fnr = fnr,
-            journalpostId = journalpostId,
-            journalpost = journalpost,
-            dokumentInfoId = dokumentInfoId,
-            source = if (journalpost.kanal == "NAV_NO" || tittel) "navno" else if (journalpost.kanal == "RINA") "rina" else "syk-dig"
-        )
+        val oppgave =
+            OppgaveDbModel(
+                oppgaveId = oppgaveId,
+                fnr = fnr,
+                journalpostId = journalpostId,
+                dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId,
+                dokumenter = dokumenter,
+                opprettet = OffsetDateTime.now(ZoneOffset.UTC),
+                ferdigstilt = null,
+                tilbakeTilGosys = false,
+                avvisingsgrunn = null,
+                sykmeldingId = UUID.randomUUID(),
+                type = UTLAND,
+                sykmelding = null,
+                endretAv = oppgaveSecurityService.getNavEmail(),
+                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                source = "syk-dig",
+            )
         oppgaveRepository.lagreOppgave(oppgave)
         log.info("Oppgave med id $oppgaveId lagret")
         return oppgaveId

@@ -42,12 +42,11 @@ class NasjonalOppgaveController(
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
-        @RequestHeader("X-Nav-Epost") navEpost: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<NasjonalManuellOppgaveDAO> {
         log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
-        return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, authorization, navEpost, navEnhet)
+        return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, authorization, navEnhet)
     }
 
     @GetMapping("/oppgave/{oppgaveid}")

@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.helsenett.client
 
 import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.digitalisering.helsenett.Behandler
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value

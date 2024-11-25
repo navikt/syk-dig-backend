@@ -66,13 +66,11 @@ class NasjonalOppgaveService(
         request: String,
         authorization: String,
         navEnhet: String,
-        navEpost: String,
     ): ResponseEntity<NasjonalManuellOppgaveDAO> {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
         val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
-
         if (eksisterendeOppgave.isPresent) {
-            journalpostService.ferdigstillAvvistOppgave(oppgaveId, authorization, navEnhet, navEpost, avvisningsgrunn)
+            journalpostService.ferdigstillAvvistOppgave(oppgaveId, authorization, navEnhet, oppgaveSecurityService.getNavEmail(), avvisningsgrunn)
             val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
             val res = oppdaterOppgave(
                 eksisterendeOppgave.get().sykmeldingId,
