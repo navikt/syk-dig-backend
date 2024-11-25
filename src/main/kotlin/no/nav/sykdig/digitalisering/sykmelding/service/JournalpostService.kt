@@ -6,7 +6,6 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostService
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
@@ -15,6 +14,7 @@ import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.sykmelding.db.JournalpostSykmeldingRepository
+import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Journalpost
@@ -34,6 +34,7 @@ class JournalpostService(
     private val metricRegister: MetricRegister,
     private val safJournalpostService: SafJournalpostService,
     private val dokarkivClient: DokarkivClient,
+    private val oppgaveSecurityService: OppgaveSecurityService,
 ) {
     companion object {
         private val securelog = securelog()
@@ -76,7 +77,7 @@ class JournalpostService(
                 )
         val fnr = personService.getPerson(fnrEllerAktorId, journalpostId).fnr
         val aktorId = personService.getPerson(fnrEllerAktorId, journalpostId).aktorId
-        val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr, aktorId)
+        val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr, aktorId, oppgaveSecurityService.getNavEmail())
 
         securelog.info(
             "oppretter sykmelding fra journalpost {} {} {} {}",

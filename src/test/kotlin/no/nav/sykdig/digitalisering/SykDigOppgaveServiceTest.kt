@@ -40,12 +40,9 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
     @MockBean
     lateinit var oppgaveClient: OppgaveClient
 
-    @MockBean
-    lateinit var oppgaveSecurityService: OppgaveSecurityService
-
     @BeforeEach
     fun setup() {
-        sykDigOppgaveService = SykDigOppgaveService(oppgaveRepository, ferdigstillingService, oppgaveClient, oppgaveSecurityService)
+        sykDigOppgaveService = SykDigOppgaveService(oppgaveRepository, ferdigstillingService, oppgaveClient)
         oppgaveRepository.lagreOppgave(createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"))
     }
 

@@ -30,7 +30,6 @@ class SykDigOppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val ferdigstillingService: FerdigstillingService,
     private val oppgaveClient: OppgaveClient,
-    private val oppgaveSecurityService: OppgaveSecurityService,
 ) {
     private val log = applog()
     private val securelog = securelog()
@@ -40,6 +39,7 @@ class SykDigOppgaveService(
         journalpostId: String,
         fnr: String,
         aktoerId: String,
+        navEpost: String,
     ): String {
         val response =
             oppgaveClient.opprettOppgave(
@@ -67,7 +67,7 @@ class SykDigOppgaveService(
                 sykmeldingId = UUID.randomUUID(),
                 type = UTLAND,
                 sykmelding = null,
-                endretAv = oppgaveSecurityService.getNavEmail(),
+                endretAv = navEpost,
                 timestamp = OffsetDateTime.now(ZoneOffset.UTC),
                 source = "syk-dig",
             )
