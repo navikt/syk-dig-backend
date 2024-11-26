@@ -26,8 +26,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Component
@@ -59,7 +57,7 @@ class DokarkivClient(
         )
     }
 
-    fun oppdaterOgFerdigstillJournalpost(
+    fun oppdaterOgFerdigstillUtenlandskJournalpost(
         landAlpha3: String?,
         fnr: String,
         enhet: String,
@@ -72,7 +70,7 @@ class DokarkivClient(
         orginalAvsenderMottaker: AvsenderMottaker?,
         sykmeldtNavn: String?,
     ) {
-        oppdaterJournalpost(
+        oppdaterUtenlandskJournalpost(
             landAlpha3 = landAlpha3,
             fnr = fnr,
             dokumentinfoId = dokumentinfoId,
@@ -92,7 +90,7 @@ class DokarkivClient(
     }
 
     @Retryable
-    private fun oppdaterJournalpost(
+    private fun oppdaterUtenlandskJournalpost(
         landAlpha3: String?,
         fnr: String,
         dokumentinfoId: String?,
@@ -105,7 +103,7 @@ class DokarkivClient(
         sykmeldtNavn: String?,
     ) {
         val body =
-            createOppdaterJournalpostRequest(
+            createOppdaterUtenlandskJournalpostRequest(
                 landAlpha3,
                 fnr,
                 dokumentinfoId,
@@ -164,7 +162,7 @@ class DokarkivClient(
         }
     }
 
-    private fun createOppdaterJournalpostRequest(
+    private fun createOppdaterUtenlandskJournalpostRequest(
         landAlpha3: String?,
         fnr: String,
         dokumentinfoId: String?,
@@ -436,6 +434,57 @@ class DokarkivClient(
         return oppdaterJournalpostRequest
     }
 
+    fun oppdaterOgFerdigstillNasjonalJournalpost(
+        journalpostId: String,
+        dokumentInfoId: String? = null,
+        pasientFnr: String,
+        sykmeldingId: String,
+        sykmelder: Sykmelder,
+        loggingMeta: LoggingMeta,
+        navEnhet: String,
+        avvist: Boolean,
+        perioder: List<Periode>,
+    ): String? {
+        val oppdaterJournalpostRequest = createOppdaterJournalpostNasjonalRequest(dokumentInfoId, pasientFnr, sykmelder, avvist, perioder)
+        oppdaterJournalpostRequest(oppdaterJournalpostRequest, sykmeldingId, journalpostId)
+
+        return ferdigstillJournalpost(
+            enhet = navEnhet,
+            journalpostId = journalpostId,
+            sykmeldingId = sykmeldingId
+        ).body
+    }
+
+    private fun createOppdaterJournalpostNasjonalRequest(
+        dokumentInfoId: String?,
+        pasientFnr: String,
+        sykmelder: Sykmelder,
+        avvist: Boolean,
+        perioder: List<Periode>,
+    ): OppdaterJournalpostRequest {
+        val oppdaterJournalpostRequest = OppdaterJournalpostRequest(
+            avsenderMottaker = AvsenderMottakerRequest(
+                id = padHpr(sykmelder.hprNummer),
+                navn = finnNavn(sykmelder),
+                land = null,
+                idType = null,
+            ),
+            bruker = DokBruker(id = pasientFnr),
+            sak = Sak(),
+            tittel = createTitleNasjonal(perioder, avvist),
+            dokumenter = if (dokumentInfoId != null) {
+                listOf(
+                    DokumentInfo(
+                        dokumentInfoId = dokumentInfoId,
+                        tittel = createTitleNasjonal(perioder, avvist),
+                    ),
+                )
+            } else {
+                null
+            },
+        )
+        return oppdaterJournalpostRequest
+    }
     private fun padHpr(hprnummer: String): String {
         if (hprnummer.length < 9) {
             securelog.info("padder hpr: $hprnummer")

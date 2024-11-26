@@ -2,9 +2,14 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
+import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.mapAvvisningsgrunn
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
@@ -12,12 +17,15 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
-import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
+import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
+import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
 
@@ -25,8 +33,9 @@ import java.util.*
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
     private val oppgaveClient: OppgaveClient,
-    private val journalpostService: JournalpostService,
-    private val oppgaveSecurityService: OppgaveSecurityService
+    private val oppgaveSecurityService: OppgaveSecurityService,
+    private val personService: PersonService,
+    private val ferdigstillingService: FerdigstillingService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -52,6 +61,16 @@ class NasjonalOppgaveService(
         return oppgave.get()
     }
 
+    fun getNasjonalOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO {
+        val oppgave = findByOppgaveId(oppgaveId.toInt())
+        if (oppgave == null) {
+            log.warn("Fant ikke oppgave med id $oppgaveId")
+            throw NoOppgaveException("Fant ikke oppgave")
+        }
+        log.info("Hentet oppgave med id $oppgaveId")
+        return oppgave
+    }
+
     suspend fun ferdigstillOppgave(
         ferdigstillRegistrering: FerdigstillRegistrering,
         beskrivelse: String?,
@@ -61,17 +80,19 @@ class NasjonalOppgaveService(
         oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
     }
 
-    fun avvisOppgave(
+    suspend fun avvisOppgave(
         oppgaveId: Int,
         request: String,
         authorization: String,
         navEnhet: String,
     ): ResponseEntity<NasjonalManuellOppgaveDAO> {
-        val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
+        val eksisterendeOppgave = withContext(Dispatchers.IO) {
+            nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
+        }
         val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
         if (eksisterendeOppgave.isPresent) {
-            journalpostService.ferdigstillAvvistOppgave(oppgaveId, authorization, navEnhet, oppgaveSecurityService.getNavEmail(), avvisningsgrunn)
             val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
+            ferdigstillNasjonalAvvistOppgave(oppgaveId, authorization, navEnhet, oppgaveSecurityService.getNavEmail(), avvisningsgrunn, veilederIdent)
             val res = oppdaterOppgave(
                 eksisterendeOppgave.get().sykmeldingId,
                 utfall = Utfall.AVVIST.toString(),
@@ -163,5 +184,74 @@ class NasjonalOppgaveService(
         }
 
         return nasjonalManuellOppgaveDAO
+    }
+
+
+    // kom frå jpservice
+    @Transactional
+    suspend fun ferdigstillNasjonalAvvistOppgave(
+        oppgaveId: Int,
+        authorization: String, // skal dette eigentleg brukes til noke?
+        navEnhet: String,
+        navEpost: String,
+        avvisningsgrunn: String?,
+        veilederIdent: String,
+    ) {
+        val oppgave = getNasjonalOppgave(oppgaveId.toString())
+        if(oppgave.fnr != null) {
+            val sykmeldt =
+                personService.getPerson(
+                    id = oppgave.fnr,
+                    callId = oppgave.sykmeldingId,
+                )
+            val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisningsgrunn, ignoreCase = true) }
+            ferdigstillAvvistJpOgOppgave(
+                oppgave = oppgave,
+                navEpost = navEpost,
+                enhetId = navEnhet,
+                sykmeldt = sykmeldt,
+                avvisningsgrunn = avvistGrunn,
+                avvisningsgrunnAnnet = null,
+                veilederIdent = veilederIdent,
+            )
+
+        } else {
+            log.error("Fant ikke fnr for oppgave med id $oppgaveId")
+        }
+    }
+
+// kom fra sykdig
+    suspend fun ferdigstillAvvistJpOgOppgave(
+        oppgave: NasjonalManuellOppgaveDAO,
+        navEpost: String,
+        enhetId: String,
+        sykmeldt: Person,
+        avvisningsgrunn: Avvisingsgrunn?,
+        avvisningsgrunnAnnet: String?,
+        veilederIdent: String,
+    ) {
+        oppdaterOppgave(
+            sykmeldingId = oppgave.sykmeldingId,
+            utfall = Utfall.AVVIST.toString(),
+            ferdigstiltAv = veilederIdent,
+            avvisningsgrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
+        )
+        ferdigstillingService.ferdigstillNasjonalAvvistJournalpost(
+            enhet = enhetId,
+            oppgave = oppgave,
+            sykmeldt = sykmeldt,
+            avvisningsGrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
+            loggingMeta = getLoggingMeta(oppgave.sykmeldingId, oppgave),
+        )
+    }
+
+    private fun getLoggingMeta(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): LoggingMeta {
+        return LoggingMeta(
+            mottakId = sykmeldingId,
+            dokumentInfoId = oppgave.dokumentInfoId,
+            msgId = sykmeldingId,
+            sykmeldingId = sykmeldingId,
+            journalpostId = oppgave.journalpostId,
+        )
     }
 }

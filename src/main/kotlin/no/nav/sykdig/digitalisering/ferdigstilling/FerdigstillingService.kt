@@ -1,12 +1,15 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
+import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.dokument.DocumentService
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
@@ -28,11 +31,12 @@ class FerdigstillingService(
     private val oppgaveClient: OppgaveClient,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val dokumentService: DocumentService,
+    private val sykmelderService: SykmelderService,
 ) {
     val log = applog()
     val securelog = securelog()
 
-    fun ferdigstill(
+    fun ferdigstillUtenlandskOppgave(
         enhet: String,
         oppgave: OppgaveDbModel,
         sykmeldt: Person,
@@ -55,7 +59,7 @@ class FerdigstillingService(
             updateAvvistTitle(oppgave, receivedSykmelding)
         } else {
             val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
-            dokarkivClient.oppdaterOgFerdigstillJournalpost(
+            dokarkivClient.oppdaterOgFerdigstillUtenlandskJournalpost(
                 landAlpha3 = validatedValues.skrevetLand,
                 fnr = sykmeldt.fnr,
                 enhet = enhet,
@@ -141,7 +145,7 @@ class FerdigstillingService(
         }
     }
 
-    fun ferdigstillAvvistJournalpost(
+    fun ferdigstillUtenlandskAvvistJournalpost(
         enhet: String,
         oppgave: OppgaveDbModel,
         sykmeldt: Person,
@@ -155,7 +159,7 @@ class FerdigstillingService(
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
             val hentAvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
-            dokarkivClient.oppdaterOgFerdigstillJournalpost(
+            dokarkivClient.oppdaterOgFerdigstillUtenlandskJournalpost(
                 landAlpha3 = null,
                 fnr = sykmeldt.fnr,
                 enhet = enhet,
@@ -167,6 +171,37 @@ class FerdigstillingService(
                 avvisningsGrunn = avvisningsGrunn,
                 sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
                 orginalAvsenderMottaker = hentAvsenderMottar,
+            )
+        }
+    }
+
+    //TODO() implement this - lage eigen service?
+    suspend fun ferdigstillNasjonalAvvistJournalpost(
+        enhet: String,
+        oppgave: NasjonalManuellOppgaveDAO,
+        sykmeldt: Person,
+        avvisningsGrunn: String?,
+        loggingMeta: LoggingMeta,
+    ) {
+        requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
+        val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
+        securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
+
+        if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
+            log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
+        }
+        else {
+            log.info("Ferdigstiller journalpost med id ${oppgave.journalpostId},  dokumentInfoId ${oppgave.dokumentInfoId}, sykmeldingId ${oppgave.sykmeldingId} og oppgaveId ${oppgave.oppgaveId}")
+            dokarkivClient.oppdaterOgFerdigstillNasjonalJournalpost(
+                journalpostId = oppgave.journalpostId,
+                dokumentInfoId = oppgave.dokumentInfoId,
+                pasientFnr = oppgave.fnr!!,
+                sykmeldingId = oppgave.sykmeldingId,
+                sykmelder = sykmelderService.getSykmelder(oppgave.papirSmRegistrering.behandler?.hpr!!, "callId"),
+                loggingMeta = loggingMeta,
+                navEnhet = enhet,
+                avvist = true,
+                perioder = oppgave.papirSmRegistrering.perioder ?: emptyList(),
             )
         }
     }

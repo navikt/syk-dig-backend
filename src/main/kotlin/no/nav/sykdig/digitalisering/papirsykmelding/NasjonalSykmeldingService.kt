@@ -3,21 +3,14 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.msgHead.XMLMsgHead
-import no.nav.syfo.service.toSykmelding
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.digitalisering.felles.Sykmelding
-import no.nav.sykdig.digitalisering.ferdigstilling.mapping.extractHelseOpplysningerArbeidsuforhet
-import no.nav.sykdig.digitalisering.ferdigstilling.mapping.fellesformatMarshaller
-import no.nav.sykdig.digitalisering.ferdigstilling.mapping.get
-import no.nav.sykdig.digitalisering.ferdigstilling.mapping.toString
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.RegelClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Godkjenning
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
@@ -25,17 +18,13 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.checkValidState
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalSykmeldingRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalSykmeldingDAO
-import no.nav.sykdig.digitalisering.pdl.PersonService
-import no.nav.sykdig.digitalisering.sykmelding.Merknad
 import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.sykmelding.Status
 import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
 import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.securelog
-import no.nav.sykdig.utils.getLocalDateTime
 import no.nav.sykdig.utils.isWhitelisted
-import no.nav.sykdig.utils.mapsmRegistreringManuelltTilFellesformat
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.http.HttpStatus
@@ -53,8 +42,8 @@ class NasjonalSykmeldingService(
     private val journalpostService: JournalpostService,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val sykmelderService: SykmelderService,
-    private val personService: PersonService,
     private val oppgaveSecurityService: OppgaveSecurityService,
+    private val nasjonalCommon: NasjonalCommon,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -77,7 +66,7 @@ class NasjonalSykmeldingService(
 
         val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
         val sykmelder = getSykmelder(smRegistreringManuell, loggingMeta, callId)
-        val receivedSykmelding = createReceivedSykmelding(sykmeldingId, oppgave, loggingMeta, smRegistreringManuell, callId, sykmelder)
+        val receivedSykmelding = nasjonalCommon.createReceivedSykmelding(sykmeldingId, oppgave, loggingMeta, smRegistreringManuell, callId, sykmelder)
 
         val validationResult = regelClient.valider(receivedSykmelding, sykmeldingId)
         log.info(
@@ -126,7 +115,7 @@ class NasjonalSykmeldingService(
             val veileder = oppgaveSecurityService.getNavIdent()
 
             if (ferdigstillRegistrering.oppgaveId != null) {
-                journalpostService.ferdigstillJournalpost(
+                journalpostService.ferdigstillNasjonalJournalpost(
                     ferdigstillRegistrering = ferdigstillRegistrering,
                     receivedSykmelding = receivedSykmelding,
                     loggingMeta = loggingMeta,
@@ -214,92 +203,6 @@ class NasjonalSykmeldingService(
         return sykmelder
     }
 
-    private suspend fun createReceivedSykmelding(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO, loggingMeta: LoggingMeta, smRegistreringManuell: SmRegistreringManuell, callId: String, sykmelder: Sykmelder): ReceivedSykmelding {
-        log.info("Henter pasient fra PDL {} ", loggingMeta)
-        val pasient =
-            personService.getPerson(
-                id = smRegistreringManuell.pasientFnr,
-                callId = callId,
-            )
-
-        val tssId = sykmelderService.getTssIdInfotrygd(sykmelder.fnr, "", loggingMeta, sykmeldingId)
-
-        val datoOpprettet = oppgave.datoOpprettet
-        val journalpostId = oppgave.journalpostId
-        val fellesformat =
-            mapsmRegistreringManuelltTilFellesformat(
-                smRegistreringManuell = smRegistreringManuell,
-                pdlPasient = pasient,
-                sykmelder = sykmelder,
-                sykmeldingId = sykmeldingId,
-                datoOpprettet = datoOpprettet,
-                journalpostId = journalpostId,
-            )
-
-        val healthInformation = extractHelseOpplysningerArbeidsuforhet(fellesformat)
-        val msgHead = fellesformat.get<XMLMsgHead>()
-
-        val sykmelding =
-            healthInformation.toSykmelding(
-                sykmeldingId,
-                pasient.aktorId,
-                sykmelder.aktorId,
-                sykmeldingId,
-                getLocalDateTime(msgHead.msgInfo.genDate),
-            )
-
-        return ReceivedSykmelding(
-            sykmelding = sykmelding,
-            personNrPasient = pasient.fnr,
-            tlfPasient =
-                healthInformation.pasient.kontaktInfo.firstOrNull()?.teleAddress?.v,
-            personNrLege = sykmelder.fnr,
-            navLogId = sykmeldingId,
-            msgId = sykmeldingId,
-            legekontorOrgNr = null,
-            legekontorOrgName = "",
-            legekontorHerId = null,
-            legekontorReshId = null,
-            mottattDato = oppgave.datoOpprettet ?: getLocalDateTime(msgHead.msgInfo.genDate),
-            rulesetVersion = healthInformation.regelSettVersjon,
-            fellesformat = fellesformatMarshaller.toString(fellesformat),
-            tssid = tssId ?: "",
-            merknader = createMerknad(sykmelding),
-            partnerreferanse = null,
-            legeHelsepersonellkategori =
-                sykmelder.godkjenninger?.getHelsepersonellKategori(),
-            legeHprNr = sykmelder.hprNummer,
-            vedlegg = null,
-            utenlandskSykmelding = null,
-        )
-
-    }
-
-    private fun createMerknad(sykmelding: Sykmelding): List<Merknad>? {
-        val behandletTidspunkt = sykmelding.behandletTidspunkt.toLocalDate()
-        val terskel = sykmelding.perioder.map { it.fom }.minOrNull()?.plusDays(7)
-        return if (behandletTidspunkt != null && terskel != null && behandletTidspunkt > terskel) {
-            listOf(Merknad("TILBAKEDATERT_PAPIRSYKMELDING", null))
-        } else {
-            null
-        }
-    }
-
-    fun List<Godkjenning>.getHelsepersonellKategori(): String? =
-        when {
-            find { it.helsepersonellkategori?.verdi == "LE" } != null -> "LE"
-            find { it.helsepersonellkategori?.verdi == "TL" } != null -> "TL"
-            find { it.helsepersonellkategori?.verdi == "MT" } != null -> "MT"
-            find { it.helsepersonellkategori?.verdi == "FT" } != null -> "FT"
-            find { it.helsepersonellkategori?.verdi == "KI" } != null -> "KI"
-            else -> {
-                val verdi = firstOrNull()?.helsepersonellkategori?.verdi
-                log.warn(
-                    "Signerende behandler har ikke en helsepersonellkategori($verdi) vi kjenner igjen",
-                )
-                verdi
-            }
-        }
 
     fun mapToDao(
         receivedSykmelding: ReceivedSykmelding,

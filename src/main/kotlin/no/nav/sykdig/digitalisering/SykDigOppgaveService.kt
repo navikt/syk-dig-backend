@@ -14,7 +14,6 @@ import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
-import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
@@ -194,7 +193,7 @@ class SykDigOppgaveService(
     ) {
         val sykmelding = oppgaveRepository.getLastSykmelding(oppgave.oppgaveId)
         oppgaveRepository.ferdigstillAvvistOppgave(oppgave, navEpost, sykmelding, avvisningsgrunn)
-        ferdigstillingService.ferdigstillAvvistJournalpost(
+        ferdigstillingService.ferdigstillUtenlandskAvvistJournalpost(
             enhet = enhetId,
             oppgave = oppgave,
             sykmeldt = sykmeldt,
@@ -213,27 +212,11 @@ class SykDigOppgaveService(
         val sykmelding = toSykmelding(oppgave, values)
 
         oppgaveRepository.updateOppgave(oppgave, sykmelding, navEpost, true)
-        ferdigstillingService.ferdigstill(
+        ferdigstillingService.ferdigstillUtenlandskOppgave(
             enhet = enhetId,
             oppgave = oppgave,
             sykmeldt = sykmeldt,
             validatedValues = values,
-        )
-    }
-
-    fun ferdigstillNasjonalAvvistOppgave(
-        oppgave: OppgaveDbModel,
-        navEpost: String,
-        enhetId: String,
-        sykmeldt: Person,
-        avvisningsgrunn: Avvisingsgrunn?,
-        avvisningsgrunnAnnet: String?,
-    ) {
-        ferdigstillingService.ferdigstillAvvistJournalpost(
-            enhet = enhetId,
-            oppgave = oppgave,
-            sykmeldt = sykmeldt,
-            avvisningsGrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
         )
     }
 

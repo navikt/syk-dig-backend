@@ -39,7 +39,7 @@ class NasjonalOppgaveController(
 
     @PostMapping("/oppgave/{oppgaveId}/avvis")
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
-    fun avvisOppgave(
+    suspend fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,

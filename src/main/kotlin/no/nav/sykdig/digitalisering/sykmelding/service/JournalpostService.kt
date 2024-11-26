@@ -15,7 +15,6 @@ import no.nav.sykdig.digitalisering.saf.graphql.Type
 import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.sykmelding.db.JournalpostSykmeldingRepository
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
-import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
@@ -132,7 +131,7 @@ class JournalpostService(
             fnr = fnr,
         )
     }
-    suspend fun ferdigstillJournalpost(
+    suspend fun ferdigstillNasjonalJournalpost(
         ferdigstillRegistrering: FerdigstillRegistrering,
         receivedSykmelding: ReceivedSykmelding,
         loggingMeta: LoggingMeta,
@@ -159,29 +158,6 @@ class JournalpostService(
         }
     }
 
-    fun ferdigstillAvvistOppgave(
-        oppgaveId: Int,
-        bruker: String,
-        navEnhet: String,
-        navEpost: String,
-        avvisningsgrunn: String?,
-    ) {
-        val oppgave = sykDigOppgaveService.getOppgave(oppgaveId.toString())
-        val sykmeldt =
-            personService.getPerson(
-                id = oppgave.fnr,
-                callId = oppgave.sykmeldingId.toString(),
-            )
-        val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisningsgrunn, ignoreCase = true) }
-        sykDigOppgaveService.ferdigstillNasjonalAvvistOppgave(
-            oppgave = oppgave,
-            navEpost = navEpost,
-            enhetId = navEnhet,
-            sykmeldt = sykmeldt,
-            avvisningsgrunn = avvistGrunn,
-            avvisningsgrunnAnnet = null,
-        )
-    }
 
     fun isSykmeldingCreated(id: String): Boolean {
         return journalpostSykmeldingRepository.getJournalpostSykmelding(id) != null

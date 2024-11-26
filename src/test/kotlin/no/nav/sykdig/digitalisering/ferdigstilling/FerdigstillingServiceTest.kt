@@ -26,6 +26,7 @@ import no.nav.sykdig.digitalisering.felles.KontaktMedPasient
 import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.felles.SporsmalSvar
+import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
@@ -61,6 +62,9 @@ class FerdigstillingServiceTest : IntegrationTest() {
     @MockBean
     lateinit var oppgaveClient: OppgaveClient
 
+    @MockBean
+    lateinit var sykmelderService: SykmelderService
+
     @Autowired
     lateinit var sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>
 
@@ -72,11 +76,11 @@ class FerdigstillingServiceTest : IntegrationTest() {
     @BeforeEach
     fun setup() {
         ferdigstillingService =
-            FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService)
+            FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService, sykmelderService)
     }
 
     @Test
-    fun ferdigstillOppdatererDokarkivOppgaveOgTopic() {
+    fun ferdigstillUtenlandskOppgaveOppdatererDokarkivOppgaveOgTopic() {
         val sykmeldingId = UUID.randomUUID()
         val journalpostId = "9898"
         val dokumentInfoId = "111"
@@ -153,7 +157,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 fodselsdato = LocalDate.of(1970, 1, 1),
             )
 
-        ferdigstillingService.ferdigstill(
+        ferdigstillingService.ferdigstillUtenlandskOppgave(
             enhet = "2990",
             oppgave =
                 createDigitalseringsoppgaveDbModel(
@@ -167,7 +171,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
             validatedValues = validatedValues,
         )
 
-        verify(dokarkivClient).oppdaterOgFerdigstillJournalpost(
+        verify(dokarkivClient).oppdaterOgFerdigstillUtenlandskJournalpost(
             "SWE",
             "12345678910",
             "2990",
