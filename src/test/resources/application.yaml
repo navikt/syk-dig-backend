@@ -48,7 +48,7 @@ smtss.url: http://smtss
 regel.url: http://regel
 
 mock-oauth2-server:
-  port: 8080
+  port: 8081
 
 no.nav.security.jwt:
   issuer:
