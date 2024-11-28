@@ -47,6 +47,9 @@ helsenett.url: http://syfohelsenettproxy
 smtss.url: http://smtss
 regel.url: http://regel
 
+mock-oauth2-server:
+  port: 8080
+
 no.nav.security.jwt:
   issuer:
     azureator:
