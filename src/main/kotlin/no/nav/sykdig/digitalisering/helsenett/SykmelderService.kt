@@ -47,7 +47,7 @@ class SykmelderService(
         )
     }
 
-    fun changeHelsepersonellkategoriVerdiFromFAToFA1(
+    private fun changeHelsepersonellkategoriVerdiFromFAToFA1(
         godkjenninger: List<Godkjenning>,
     ): List<Godkjenning> {
         return if (godkjenninger.isNotEmpty()) {

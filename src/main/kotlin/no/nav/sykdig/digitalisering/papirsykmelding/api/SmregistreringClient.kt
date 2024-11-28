@@ -125,27 +125,6 @@ class SmregistreringClient(
     }
 
     @Retryable
-    fun getFerdigstiltSykmeldingRequest(
-        authorization: String,
-        sykmeldingId: String,
-    ): ResponseEntity<PapirManuellOppgave> {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(removeBearerPrefix(authorization))
-        val uri =
-            UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelding/{sykmeldingId}/ferdigstilt")
-                .buildAndExpand(sykmeldingId)
-                .toUri()
-
-        return smregisteringRestTemplate.exchange(
-            uri,
-            HttpMethod.GET,
-            HttpEntity<String>(headers),
-            PapirManuellOppgave::class.java,
-        )
-    }
-
-    @Retryable
     fun postOppgaveTilGosysRequest(
         authorization: String,
         oppgaveId: String,
