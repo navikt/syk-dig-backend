@@ -227,6 +227,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         val jwt = Jwt.withTokenValue("dummy-token")
             .header("alg", "none")
             .claim("sub", "test-user")
+            .claim("NAVident", "test-ident")
             .claim("scope", "test-scope")
             .build()
         val authentication = JwtAuthenticationToken(jwt)
