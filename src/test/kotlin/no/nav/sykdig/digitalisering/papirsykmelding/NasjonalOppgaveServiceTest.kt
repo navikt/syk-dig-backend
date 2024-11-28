@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -75,15 +77,8 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         val oppgaveId = 123
         val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
         val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
-        Mockito.`when`(sykdigOppgaveService.getOppgave(oppgaveId.toString())).thenReturn(testDataOppgaveDbModel(oppgaveId))
-//        Mockito.doNothing().`when`(journalpostService).ferdigstillNasjonalAvvistOppgave(
-//            oppgaveId,
-//            "authorization",
-//            "navEnhet",
-//            "navEpost",
-//            "avvisningsgrunn",
-//            "veilederIdent"
-//        )
+        Mockito.`when`(sykdigOppgaveService.getOppgave(anyString())).thenReturn(testDataOppgaveDbModel(oppgaveId))
+
         Mockito.`when`(oppgaveSecurityService.getNavIdent()).thenReturn(Veileder("veilederIdent"))
         assertTrue(originalOppgave.avvisningsgrunn == null)
         val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request, "auth streng", "enhet")
