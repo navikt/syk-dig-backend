@@ -84,8 +84,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 //            "avvisningsgrunn",
 //            "veilederIdent"
 //        )
-//        Mockito.`when`(oppgaveSecurityService.getNavIdent()).thenReturn(Veileder("veilederIdent"))
-        Mockito.`when`(oppgaveSecurityService.getNavEmail()).thenReturn("veilederIdent")
+        Mockito.`when`(oppgaveSecurityService.getNavIdent()).thenReturn(Veileder("veilederIdent"))
         assertTrue(originalOppgave.avvisningsgrunn == null)
         val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request, "auth streng", "enhet")
         assertEquals(testDataNasjonalManuellOppgaveDAO(null, "456", oppgaveId).oppgaveId, avvistOppgave.body?.oppgaveId ?: 123 )
