@@ -13,6 +13,7 @@ import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.digitalisering.saf.graphql.DokumentInfo
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.model.DokumentDbModel
@@ -34,7 +35,6 @@ class SykDigOppgaveService(
     private val securelog = securelog()
 
 
-
     fun opprettOgLagreOppgave(
         journalpost: SafJournalpost,
         journalpostId: String,
@@ -42,23 +42,20 @@ class SykDigOppgaveService(
         aktoerId: String,
         navEpost: String,
     ): String {
-        val response =
-            oppgaveClient.opprettOppgave(
-                journalpostId = journalpostId,
-                aktoerId = aktoerId,
-            )
-        val tittel = journalpost.tittel.lowercase().contains("egenerklæring")
-        val dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId
-        val oppgaveId = response.id.toString()
-        val oppgave = createOppgave(
-            oppgaveId = oppgaveId,
-            fnr = fnr,
+        val opprettetOppgave = oppgaveClient.opprettOppgave(
             journalpostId = journalpostId,
-            journalpost = journalpost,
-            dokumentInfoId = dokumentInfoId,
-            navEpost = navEpost,
-            source = if (journalpost.kanal == "NAV_NO" || tittel) "navno" else if (journalpost.kanal == "RINA") "rina" else "syk-dig",
+            aktoerId = aktoerId,
         )
+        val oppgaveId = opprettetOppgave.id.toString()
+
+        val oppgave = buildOppgaveModel(
+            oppgaveId = oppgaveId,
+            journalpost = journalpost,
+            journalpostId = journalpostId,
+            fnr = fnr,
+            navEpost = navEpost,
+        )
+
         oppgaveRepository.lagreOppgave(oppgave)
         log.info("Oppgave med id $oppgaveId lagret")
         return oppgaveId
@@ -218,15 +215,16 @@ class SykDigOppgaveService(
         ferdigstillingService.sendUpdatedSykmelding(oppgave, sykmeldt, navEmail, values)
     }
 
-    private fun createOppgave(oppgaveId: String, fnr: String, journalpostId: String, journalpost: SafJournalpost, dokumentInfoId: String, navEpost: String, source: String = "syk-dig"): OppgaveDbModel {
-        val dokumenter = journalpost.dokumenter.map {
-            val oppdatertTittel = if (it.tittel == "Utenlandsk sykmelding") {
-                "Digitalisert utenlandsk sykmelding"
-            } else {
-                it.tittel ?: "Mangler Tittel"
-            }
-            DokumentDbModel(it.dokumentInfoId, oppdatertTittel)
-        }
+    private fun buildOppgaveModel(
+        oppgaveId: String,
+        journalpost: SafJournalpost,
+        journalpostId: String,
+        fnr: String,
+        navEpost: String,
+    ): OppgaveDbModel {
+        val dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId
+        val dokumenter = buildDokumenter(journalpost.dokumenter)
+        val source = determineSource(journalpost)
 
         return OppgaveDbModel(
             oppgaveId = oppgaveId,
@@ -245,6 +243,26 @@ class SykDigOppgaveService(
             timestamp = OffsetDateTime.now(ZoneOffset.UTC),
             source = source,
         )
+    }
+
+    private fun buildDokumenter(dokumenter: List<DokumentInfo>): List<DokumentDbModel> {
+        return dokumenter.map {
+            val oppdatertTittel = if (it.tittel == "Utenlandsk sykmelding") {
+                "Digitalisert utenlandsk sykmelding"
+            } else {
+                it.tittel ?: "Mangler Tittel"
+            }
+            DokumentDbModel(it.dokumentInfoId, oppdatertTittel)
+        }
+    }
+
+    private fun determineSource(journalpost: SafJournalpost): String {
+        val isEgenerklaering = journalpost.tittel.lowercase().contains("egenerklæring")
+        return when {
+            journalpost.kanal == "NAV_NO" || isEgenerklaering -> "navno"
+            journalpost.kanal == "RINA" -> "rina"
+            else -> "syk-dig"
+        }
     }
 
     companion object {
