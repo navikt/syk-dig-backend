@@ -130,7 +130,7 @@ class OppgaveSecurityService(
             return authentication.token.claims["preferred_username"].toString()
         }
 
-                suspend fun getNavEmailAsync(): String {
+        suspend fun getNavEmailAsync(): String {
             return ReactiveSecurityContextHolder.getContext().map { context ->
                 val auth = context.authentication as JwtAuthenticationToken
                 auth.token.claims["preferred_username"].toString()

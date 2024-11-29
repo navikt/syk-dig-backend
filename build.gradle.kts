@@ -51,7 +51,7 @@ val coroutinesVersion = "1.8.1"
 val coroutineReactorVersion = "1.9.0"
 val hibernateVersion = "6.2.6.Final"
 val jacksonDatatypeJsr310Version = "2.18.0"
-
+val mockitoKotlinVersion = "5.4.0"
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
@@ -111,6 +111,7 @@ dependencies {
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
     constraints {
         testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion") {
             because("overstyrer sårbar dependency fra com.opentable.components:otj-pg-embedded")

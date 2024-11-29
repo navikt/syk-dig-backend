@@ -18,6 +18,7 @@ import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
@@ -29,7 +30,7 @@ class SykDigTokenResolver : JwtBearerTokenResolver {
     val log = applog()
 
     override fun token(): String? {
-        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        val autentication = ReactiveSecurityContextHolder.getContext().block()?.authentication as JwtAuthenticationToken
         return autentication.token.tokenValue
     }
 }
