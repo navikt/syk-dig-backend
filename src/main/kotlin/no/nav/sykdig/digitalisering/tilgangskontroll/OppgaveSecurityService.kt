@@ -43,100 +43,99 @@ class OppgaveSecurityService(
         return tilgang
     }
 
-    suspend fun hasAccessToNasjonalOppgave(oppgaveId: String): Boolean {
-        securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
-        val oppgave = withContext(Dispatchers.IO) {
-            nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt())
+    suspend fun hasAccessToNasjonalOppgave(oppgaveId: String): Boolean = withContext(
+        Dispatchers.IO) {
+            securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
+            val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt())
+            val navEmail = getNavEmailAsync()
+            val fnr = oppgave?.fnr
+            if (oppgave != null && fnr != null) {
+                val tilgang = hasAccess(fnr, navEmail)
+                securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
+                tilgang
+            }
+            false
         }
-        val navEmail = getNavEmailAsync()
-        val fnr = oppgave.get().fnr
-        if (oppgave.isPresent && fnr != null) {
-            val tilgang = hasAccess(fnr, navEmail)
-            securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
+
+        fun hasAccessToSykmelding(sykmeldingId: String): Boolean {
+            securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
+            val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
+            val navEmail = getNavEmail()
+            val tilgang = hasAccess(oppgave.fnr, navEmail)
+            securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId")
             return tilgang
         }
-        return false
-    }
 
-    fun hasAccessToSykmelding(sykmeldingId: String): Boolean {
-        securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
-        val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
-        val navEmail = getNavEmail()
-        val tilgang = hasAccess(oppgave.fnr, navEmail)
-        securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId")
-        return tilgang
-    }
-
-    fun hasAccessToJournalpost(journalpostResult: JournalpostResult): Boolean {
-        return when (journalpostResult) {
-            is Journalpost -> return hasAccess(journalpostResult.fnr, getNavEmail())
-            is JournalpostStatus -> return true
-            else -> false
+        fun hasAccessToJournalpost(journalpostResult: JournalpostResult): Boolean {
+            return when (journalpostResult) {
+                is Journalpost -> return hasAccess(journalpostResult.fnr, getNavEmail())
+                is JournalpostStatus -> return true
+                else -> false
+            }
         }
-    }
 
-    fun hasAccessToJournalpostId(journalpostId: String): Boolean {
-        val journalpost = safGraphQlClient.getJournalpost(journalpostId)
-        securelog.info("journalpostid $journalpostId ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
+        fun hasAccessToJournalpostId(journalpostId: String): Boolean {
+            val journalpost = safGraphQlClient.getJournalpost(journalpostId)
+            securelog.info("journalpostid $journalpostId ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
 
-        val id =
-            when (journalpost.journalpost?.bruker?.type) {
-                Type.ORGNR -> null
-                else -> journalpost.journalpost?.bruker?.id
+            val id =
+                when (journalpost.journalpost?.bruker?.type) {
+                    Type.ORGNR -> null
+                    else -> journalpost.journalpost?.bruker?.id
+                }
+
+            if (id == null) {
+                securelog.info("Fant ikke id i journalpost: $journalpostId")
+                return false
             }
 
-        if (id == null) {
-            securelog.info("Fant ikke id i journalpost: $journalpostId")
-            return false
+            val fnr = personService.getPerson(id, journalpostId).fnr
+
+            securelog.info("Fødselsnummer: $fnr")
+            val navEmail = getNavEmail()
+            val tilgang = hasAccess(fnr, journalpostId)
+            securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} til journalpost med id $journalpostId")
+            return tilgang
         }
 
-        val fnr = personService.getPerson(id, journalpostId).fnr
+                private fun hasAccess(
+            fnr: String,
+            navEmail: String,
+        ): Boolean {
+            val tilgang = istilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
+            auditlog.info(
+                AuditLogger().createcCefMessage(
+                    fnr = fnr,
+                    navEmail = navEmail,
+                    operation = AuditLogger.Operation.READ,
+                    requestPath = "/api/graphql",
+                    permit =
+                        when (tilgang) {
+                            true -> AuditLogger.Permit.PERMIT
+                            false -> AuditLogger.Permit.DENY
+                        },
+                ),
+            )
 
-        securelog.info("Fødselsnummer: $fnr")
-        val navEmail = getNavEmail()
-        val tilgang = hasAccess(fnr, journalpostId)
-        securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} til journalpost med id $journalpostId")
-        return tilgang
-    }
+            return tilgang
+        }
 
-    private fun hasAccess(
-        fnr: String,
-        navEmail: String,
-    ): Boolean {
-        val tilgang = istilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
-        auditlog.info(
-            AuditLogger().createcCefMessage(
-                fnr = fnr,
-                navEmail = navEmail,
-                operation = AuditLogger.Operation.READ,
-                requestPath = "/api/graphql",
-                permit =
-                    when (tilgang) {
-                        true -> AuditLogger.Permit.PERMIT
-                        false -> AuditLogger.Permit.DENY
-                    },
-            ),
-        )
+        fun getNavIdent(): Veileder {
+            val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+            return Veileder(authentication.token.claims["NAVident"].toString())
+        }
 
-        return tilgang
-    }
+        fun getNavEmail(): String {
+            val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+            return authentication.token.claims["preferred_username"].toString()
+        }
 
-    fun getNavIdent(): Veileder {
-        val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
-        return Veileder(authentication.token.claims["NAVident"].toString())
-    }
-
-    fun getNavEmail(): String {
-        val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
-        return authentication.token.claims["preferred_username"].toString()
-    }
-
-    suspend fun getNavEmailAsync(): String {
-        return ReactiveSecurityContextHolder.getContext().map { context ->
-            val auth = context.authentication as JwtAuthenticationToken
-            auth.token.claims["preferred_username"].toString()
-        }.awaitSingle()
-    }
+                suspend fun getNavEmailAsync(): String {
+            return ReactiveSecurityContextHolder.getContext().map { context ->
+                val auth = context.authentication as JwtAuthenticationToken
+                auth.token.claims["preferred_username"].toString()
+            }.awaitSingle()
+        }
 }
 
 

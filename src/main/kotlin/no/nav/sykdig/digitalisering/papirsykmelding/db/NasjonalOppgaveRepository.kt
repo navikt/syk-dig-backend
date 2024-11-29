@@ -11,6 +11,6 @@ import java.util.UUID
 @Transactional
 @Repository
 interface NasjonalOppgaveRepository : CrudRepository<NasjonalManuellOppgaveDAO, UUID> {
-    fun findBySykmeldingId(sykmeldingId: String): Optional<NasjonalManuellOppgaveDAO>
-    fun findByOppgaveId(oppgaveId: Int): Optional<NasjonalManuellOppgaveDAO>
+    fun findBySykmeldingId(sykmeldingId: String): NasjonalManuellOppgaveDAO?
+    fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO?
 }

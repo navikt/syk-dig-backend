@@ -44,27 +44,36 @@ class NasjonalOppgaveService(
     suspend fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO = withContext(Dispatchers.IO) {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
 
-        if (eksisterendeOppgave.isPresent) {
-            log.info("Fant eksisterende oppgave med sykmeldingId ${papirManuellOppgave.sykmeldingId} , oppdaterer oppgave med database id ${eksisterendeOppgave.get().id}")
-            nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id))
+        if (eksisterendeOppgave != null) {
+            log.info("Fant eksisterende oppgave med sykmeldingId ${papirManuellOppgave.sykmeldingId} , oppdaterer oppgave med database id ${eksisterendeOppgave.id}")
+            nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.id))
         }
         val res = nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
-        log.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave.get().id}")
+        log.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id}")
         res
     }
 
-    suspend fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO = withContext(Dispatchers.IO){
-            nasjonalOppgaveRepository.save(
-                mapToUpdateDao(sykmeldingId, utfall, ferdigstiltAv, avvisningsgrunn, nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId).get()),
-            )
+    suspend fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO? = withContext(Dispatchers.IO){
+        val updated = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)?.copy(
+            utfall = utfall,
+            ferdigstiltAv = ferdigstiltAv,
+            avvisningsgrunn = avvisningsgrunn,
+            datoFerdigstilt = LocalDateTime.now(),
+            ferdigstilt = true,
+        )
+        when (updated) {
+            null -> log.info("Sykmelding $sykmeldingId not found ")
+            else -> nasjonalOppgaveRepository.save(updated)
+        }
+        updated
     }
 
     suspend fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO? {
         val oppgave = withContext(Dispatchers.IO) {
             nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
         }
-        if (!oppgave.isPresent) return null
-        return oppgave.get()
+        if (oppgave == null) return null
+        return oppgave
     }
 
     suspend fun getNasjonalOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO {
@@ -96,14 +105,14 @@ class NasjonalOppgaveService(
             val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
 
             val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
-            if (eksisterendeOppgave.isPresent) {
+            if (eksisterendeOppgave != null) {
                 val navEmail = oppgaveSecurityService.getNavEmailAsync()
                 log.info("navEmail: $navEmail")
 //            val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
                 val veilederIdent = navEmail
                 ferdigstillNasjonalAvvistOppgave(oppgaveId, authorization, navEnhet, navEmail, avvisningsgrunn, veilederIdent)
                 val res = oppdaterOppgave(
-                    eksisterendeOppgave.get().sykmeldingId,
+                    eksisterendeOppgave.sykmeldingId,
                     utfall = Utfall.AVVIST.toString(),
                     ferdigstiltAv = veilederIdent,
                     avvisningsgrunn = avvisningsgrunn,

@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Table(name = "nasjonal_manuelloppgave")
-open class NasjonalManuellOppgaveDAO(
+data class NasjonalManuellOppgaveDAO(
     @Id
     @GeneratedValue(generator = "UUID")
     var id: UUID? = null,

@@ -19,15 +19,15 @@ class NasjonalOppgaveRepositoryTest : IntegrationTest() {
     fun `given New NasjonalOppgave opprett og hent`() = runBlocking {
         val savedOppgave = nasjonalOppgaveRepository.save(testData(null, "123"))
         val retrievedOppgave = nasjonalOppgaveRepository.findBySykmeldingId(savedOppgave.sykmeldingId)
-        Assertions.assertTrue(retrievedOppgave.isPresent)
-        assertEquals(savedOppgave.sykmeldingId, retrievedOppgave.get().sykmeldingId)
+        Assertions.assertNotNull(retrievedOppgave)
+        assertEquals(savedOppgave.sykmeldingId, retrievedOppgave?.sykmeldingId)
     }
 
     @Test
     fun `insert two instances with same sykmeldingId`() = runBlocking {
         nasjonalOppgaveRepository.save(testData(null, "1"))
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId("1")
-        nasjonalOppgaveRepository.save(testData(eksisterendeOppgave.get().id, "1"))
+        nasjonalOppgaveRepository.save(testData(eksisterendeOppgave?.id, "1"))
         val retrievedOppgave = nasjonalOppgaveRepository.findAll()
         assertEquals(1, retrievedOppgave.count())
     }
