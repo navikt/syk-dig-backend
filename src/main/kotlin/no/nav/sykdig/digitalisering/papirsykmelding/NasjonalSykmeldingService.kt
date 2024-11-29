@@ -93,7 +93,7 @@ class NasjonalSykmeldingService(
                 sykmelder = sykmelder,
                 navEnhet = navEnhet,
 //                veileder = oppgaveSecurityService.getNavIdent(),
-                veileder = Veileder(oppgaveSecurityService.getNavEmail()),
+                veileder = Veileder(oppgaveSecurityService.getNavEmailAsync()),
                 avvist = false,
                 oppgave = null,
             )
@@ -114,7 +114,7 @@ class NasjonalSykmeldingService(
     ): ResponseEntity<Any> {
         if (validationResult.status == Status.OK || validationResult.status == Status.MANUAL_PROCESSING) {
 //            val veileder = oppgaveSecurityService.getNavIdent()
-            val veileder = Veileder(oppgaveSecurityService.getNavEmail())
+            val veileder = Veileder(oppgaveSecurityService.getNavEmailAsync())
             if (ferdigstillRegistrering.oppgaveId != null) {
                 journalpostService.ferdigstillNasjonalJournalpost(
                     ferdigstillRegistrering = ferdigstillRegistrering,

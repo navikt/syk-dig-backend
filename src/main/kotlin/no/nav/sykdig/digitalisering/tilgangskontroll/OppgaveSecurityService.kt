@@ -1,5 +1,8 @@
 package no.nav.sykdig.digitalisering.tilgangskontroll
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.withContext
 import no.nav.sykdig.auditLogger.AuditLogger
 import no.nav.sykdig.auditlog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
@@ -13,6 +16,7 @@ import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
@@ -39,14 +43,16 @@ class OppgaveSecurityService(
         return tilgang
     }
 
-    fun hasAccessToNasjonalOppgave(oppgaveId: String): Boolean {
+    suspend fun hasAccessToNasjonalOppgave(oppgaveId: String): Boolean {
         securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
-        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt())
-        val navEmail = getNavEmail()
+        val oppgave = withContext(Dispatchers.IO) {
+            nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt())
+        }
+        val navEmail = getNavEmailAsync()
         val fnr = oppgave.get().fnr
-        if (oppgave.isPresent && fnr != null ) {
+        if (oppgave.isPresent && fnr != null) {
             val tilgang = hasAccess(fnr, navEmail)
-            securelog.info("Innlogget bruker: $navEmail har${ if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
+            securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
             return tilgang
         }
         return false
@@ -115,7 +121,7 @@ class OppgaveSecurityService(
         return tilgang
     }
 
-    fun getNavIdent(): Veileder{
+    fun getNavIdent(): Veileder {
         val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         return Veileder(authentication.token.claims["NAVident"].toString())
     }
@@ -123,6 +129,13 @@ class OppgaveSecurityService(
     fun getNavEmail(): String {
         val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         return authentication.token.claims["preferred_username"].toString()
+    }
+
+    suspend fun getNavEmailAsync(): String {
+        return ReactiveSecurityContextHolder.getContext().map { context ->
+            val auth = context.authentication as JwtAuthenticationToken
+            auth.token.claims["preferred_username"].toString()
+        }.awaitSingle()
     }
 }
 

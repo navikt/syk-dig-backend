@@ -22,7 +22,7 @@ class SykmelderService(
     val log = applog()
     val securelog = securelog()
 
-    suspend fun getSykmelder(
+    fun getSykmelder(
         hprNummer: String,
         callId: String,
     ): Sykmelder {

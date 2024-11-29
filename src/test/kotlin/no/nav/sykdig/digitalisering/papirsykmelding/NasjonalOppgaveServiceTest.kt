@@ -60,7 +60,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     private lateinit var restTemplate: RestTemplate
 
     @BeforeEach
-    fun setUp() {
+    fun setUp() = runBlocking {
         mockJwtAuthentication()
         val mockServer = MockRestServiceServer.createServer(restTemplate)
 
@@ -107,7 +107,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     }
 
     @Test
-    fun `oppgave isPresent`() {
+    fun `oppgave isPresent`() = runBlocking {
         val uuid = UUID.randomUUID()
         val dao = testDataNasjonalManuellOppgaveDAO(uuid, "123", 123)
         val oppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())

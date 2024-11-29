@@ -41,27 +41,32 @@ class NasjonalOppgaveService(
     val securelog = securelog()
     val mapper = jacksonObjectMapper()
 
-    fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
+    suspend fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO = withContext(Dispatchers.IO) {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
+
         if (eksisterendeOppgave.isPresent) {
-            return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id))
+            nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id))
         }
-        return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
+         nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
     }
 
-    fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO {
-        return nasjonalOppgaveRepository.save(
-            mapToUpdateDao(sykmeldingId, utfall, ferdigstiltAv, avvisningsgrunn, nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId).get()),
-        )
+    suspend fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO {
+        return withContext(Dispatchers.IO) {
+            nasjonalOppgaveRepository.save(
+                mapToUpdateDao(sykmeldingId, utfall, ferdigstiltAv, avvisningsgrunn, nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId).get()),
+            )
+        }
     }
 
-    fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO? {
-        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
+    suspend fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO? {
+        val oppgave = withContext(Dispatchers.IO) {
+            nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
+        }
         if (!oppgave.isPresent) return null
         return oppgave.get()
     }
 
-    fun getNasjonalOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO {
+    suspend fun getNasjonalOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO {
         val oppgave = findByOppgaveId(oppgaveId.toInt())
         if (oppgave == null) {
             log.warn("Fant ikke oppgave med id $oppgaveId")
@@ -91,10 +96,11 @@ class NasjonalOppgaveService(
         }
         val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
         if (eksisterendeOppgave.isPresent) {
-            log.info("navEmail: ${oppgaveSecurityService.getNavEmail()}")
+            val navEmail = oppgaveSecurityService.getNavEmailAsync()
+            log.info("navEmail: $navEmail")
 //            val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
-            val veilederIdent = oppgaveSecurityService.getNavEmail()
-            ferdigstillNasjonalAvvistOppgave(oppgaveId, authorization, navEnhet, oppgaveSecurityService.getNavEmail(), avvisningsgrunn, veilederIdent)
+            val veilederIdent = navEmail
+            ferdigstillNasjonalAvvistOppgave(oppgaveId, authorization, navEnhet, navEmail, avvisningsgrunn, veilederIdent)
             val res = oppdaterOppgave(
                 eksisterendeOppgave.get().sykmeldingId,
                 utfall = Utfall.AVVIST.toString(),

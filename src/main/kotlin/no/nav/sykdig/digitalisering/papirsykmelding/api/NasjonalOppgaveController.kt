@@ -51,7 +51,7 @@ class NasjonalOppgaveController(
 
     @GetMapping("/oppgave/{oppgaveid}")
     @ResponseBody
-    fun getPapirsykmeldingManuellOppgave(
+    suspend fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveid: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {

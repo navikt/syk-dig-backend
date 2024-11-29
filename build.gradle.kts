@@ -48,6 +48,7 @@ val prometheusVersion = "0.16.0"
 val mockkVersion = "1.13.10"
 val kluentVersion = "1.73"
 val coroutinesVersion = "1.8.1"
+val coroutineReactorVersion = "1.9.0"
 val hibernateVersion = "6.2.6.Final"
 val jacksonDatatypeJsr310Version = "2.18.0"
 
@@ -57,6 +58,7 @@ dependencies {
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutineReactorVersion")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations")
