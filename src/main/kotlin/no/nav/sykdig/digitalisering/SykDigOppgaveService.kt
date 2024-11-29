@@ -33,34 +33,7 @@ class SykDigOppgaveService(
     private val log = applog()
     private val securelog = securelog()
 
-    private fun createOppgave(oppgaveId: String, fnr: String, journalpostId: String, journalpost: SafJournalpost, dokumentInfoId: String, navEpost: String, source: String = "syk-dig"): OppgaveDbModel {
-        val dokumenter = journalpost.dokumenter.map {
-            val oppdatertTittel = if (it.tittel == "Utenlandsk sykmelding") {
-                "Digitalisert utenlandsk sykmelding"
-            } else {
-                it.tittel ?: "Mangler Tittel"
-            }
-            DokumentDbModel(it.dokumentInfoId, oppdatertTittel)
-        }
 
-        return OppgaveDbModel(
-            oppgaveId = oppgaveId,
-            fnr = fnr,
-            journalpostId = journalpostId,
-            dokumentInfoId = dokumentInfoId,
-            dokumenter = dokumenter,
-            opprettet = OffsetDateTime.now(ZoneOffset.UTC),
-            ferdigstilt = null,
-            tilbakeTilGosys = false,
-            avvisingsgrunn = null,
-            sykmeldingId = UUID.randomUUID(),
-            type = UTLAND,
-            sykmelding = null,
-            endretAv = navEpost,
-            timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-            source = source,
-        )
-    }
 
     fun opprettOgLagreOppgave(
         journalpost: SafJournalpost,
@@ -243,6 +216,35 @@ class SykDigOppgaveService(
         log.info("updated sykmelding in db")
 
         ferdigstillingService.sendUpdatedSykmelding(oppgave, sykmeldt, navEmail, values)
+    }
+
+    private fun createOppgave(oppgaveId: String, fnr: String, journalpostId: String, journalpost: SafJournalpost, dokumentInfoId: String, navEpost: String, source: String = "syk-dig"): OppgaveDbModel {
+        val dokumenter = journalpost.dokumenter.map {
+            val oppdatertTittel = if (it.tittel == "Utenlandsk sykmelding") {
+                "Digitalisert utenlandsk sykmelding"
+            } else {
+                it.tittel ?: "Mangler Tittel"
+            }
+            DokumentDbModel(it.dokumentInfoId, oppdatertTittel)
+        }
+
+        return OppgaveDbModel(
+            oppgaveId = oppgaveId,
+            fnr = fnr,
+            journalpostId = journalpostId,
+            dokumentInfoId = dokumentInfoId,
+            dokumenter = dokumenter,
+            opprettet = OffsetDateTime.now(ZoneOffset.UTC),
+            ferdigstilt = null,
+            tilbakeTilGosys = false,
+            avvisingsgrunn = null,
+            sykmeldingId = UUID.randomUUID(),
+            type = UTLAND,
+            sykmelding = null,
+            endretAv = navEpost,
+            timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+            source = source,
+        )
     }
 
     companion object {
