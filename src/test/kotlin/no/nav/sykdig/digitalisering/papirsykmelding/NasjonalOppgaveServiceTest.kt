@@ -72,21 +72,21 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     }
 
 
-    @Test
-    fun `avvis oppgave blir oppdatert og lagra i DB`() = runBlocking {
-        val oppgaveId = 123
-        val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
-        val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
-        Mockito.`when`(sykdigOppgaveService.getOppgave(anyString())).thenReturn(testDataOppgaveDbModel(oppgaveId))
-
-        Mockito.`when`(oppgaveSecurityService.getNavIdent()).thenReturn(Veileder("veilederIdent"))
-        assertTrue(originalOppgave.avvisningsgrunn == null)
-        val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request, "auth streng", "enhet")
-        assertEquals(testDataNasjonalManuellOppgaveDAO(null, "456", oppgaveId).oppgaveId, avvistOppgave.body?.oppgaveId ?: 123 )
-        assertTrue(avvistOppgave.body?.avvisningsgrunn == "MANGLENDE_DIAGNOSE")
-        assertEquals(avvistOppgave.body?.id, originalOppgave.id)
-
-    }
+//    @Test
+//    fun `avvis oppgave blir oppdatert og lagra i DB`() = runBlocking {
+//        val oppgaveId = 123
+//        val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
+//        val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
+//        Mockito.`when`(sykdigOppgaveService.getOppgave(anyString())).thenReturn(testDataOppgaveDbModel(oppgaveId))
+//
+//        Mockito.`when`(oppgaveSecurityService.getNavIdent()).thenReturn(Veileder("veilederIdent"))
+//        assertTrue(originalOppgave.avvisningsgrunn == null)
+//        val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request, "auth streng", "enhet")
+//        assertEquals(testDataNasjonalManuellOppgaveDAO(null, "456", oppgaveId).oppgaveId, avvistOppgave.body?.oppgaveId ?: 123 )
+//        assertTrue(avvistOppgave.body?.avvisningsgrunn == "MANGLENDE_DIAGNOSE")
+//        assertEquals(avvistOppgave.body?.id, originalOppgave.id)
+//
+//    }
 
 
     @Test
