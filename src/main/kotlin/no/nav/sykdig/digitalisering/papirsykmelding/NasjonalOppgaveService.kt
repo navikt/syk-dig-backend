@@ -45,17 +45,18 @@ class NasjonalOppgaveService(
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
 
         if (eksisterendeOppgave.isPresent) {
+            log.info("Fant eksisterende oppgave med sykmeldingId ${papirManuellOppgave.sykmeldingId} , oppdaterer oppgave med database id ${eksisterendeOppgave.get().id}")
             nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.get().id))
         }
-         nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
+        val res = nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
+        log.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave.get().id}")
+        res
     }
 
-    suspend fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO {
-        return withContext(Dispatchers.IO) {
+    suspend fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO = withContext(Dispatchers.IO){
             nasjonalOppgaveRepository.save(
                 mapToUpdateDao(sykmeldingId, utfall, ferdigstiltAv, avvisningsgrunn, nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId).get()),
             )
-        }
     }
 
     suspend fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO? {
@@ -90,176 +91,175 @@ class NasjonalOppgaveService(
         request: String,
         authorization: String,
         navEnhet: String,
-    ): ResponseEntity<NasjonalManuellOppgaveDAO> {
-        val eksisterendeOppgave = withContext(Dispatchers.IO) {
-            nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
-        }
-        val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
-        if (eksisterendeOppgave.isPresent) {
-            val navEmail = oppgaveSecurityService.getNavEmailAsync()
-            log.info("navEmail: $navEmail")
+    ): ResponseEntity<NasjonalManuellOppgaveDAO> = withContext(
+        Dispatchers.IO) {
+            val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
+
+            val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
+            if (eksisterendeOppgave.isPresent) {
+                val navEmail = oppgaveSecurityService.getNavEmailAsync()
+                log.info("navEmail: $navEmail")
 //            val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
-            val veilederIdent = navEmail
-            ferdigstillNasjonalAvvistOppgave(oppgaveId, authorization, navEnhet, navEmail, avvisningsgrunn, veilederIdent)
-            val res = oppdaterOppgave(
-                eksisterendeOppgave.get().sykmeldingId,
-                utfall = Utfall.AVVIST.toString(),
-                ferdigstiltAv = veilederIdent,
-                avvisningsgrunn = avvisningsgrunn,
-            )
+                val veilederIdent = navEmail
+                ferdigstillNasjonalAvvistOppgave(oppgaveId, authorization, navEnhet, navEmail, avvisningsgrunn, veilederIdent)
+                val res = oppdaterOppgave(
+                    eksisterendeOppgave.get().sykmeldingId,
+                    utfall = Utfall.AVVIST.toString(),
+                    ferdigstiltAv = veilederIdent,
+                    avvisningsgrunn = avvisningsgrunn,
+                )
 
-            log.info("Har avvist oppgave med oppgaveId $oppgaveId")
-            return ResponseEntity(res, HttpStatus.OK)
-        }
-        else {
-            log.info("fant ikke oppgave som skulle avvises")
-            return ResponseEntity(HttpStatus.NOT_FOUND)
-        }
-    }
-
-
-    fun mapToUpdateDao(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, existingEntry: NasjonalManuellOppgaveDAO): NasjonalManuellOppgaveDAO {
-        return NasjonalManuellOppgaveDAO(
-            id = existingEntry.id,
-            sykmeldingId = sykmeldingId,
-            journalpostId = existingEntry.journalpostId,
-            fnr = existingEntry.fnr,
-            aktorId = existingEntry.aktorId,
-            dokumentInfoId = existingEntry.dokumentInfoId,
-            datoOpprettet = existingEntry.datoOpprettet,
-            oppgaveId = existingEntry.oppgaveId,
-            ferdigstilt = true,
-            papirSmRegistrering = existingEntry.papirSmRegistrering,
-            utfall = utfall,
-            ferdigstiltAv = ferdigstiltAv,
-            datoFerdigstilt = LocalDateTime.now(),
-            avvisningsgrunn = avvisningsgrunn,
-        )
-    }
-
-
-    fun mapToDao(
-        papirManuellOppgave: PapirManuellOppgave,
-        existingId: UUID?,
-    ): NasjonalManuellOppgaveDAO {
-        mapper.registerModules(JavaTimeModule())
-
-        val nasjonalManuellOppgaveDAO =
-            NasjonalManuellOppgaveDAO(
-                sykmeldingId = papirManuellOppgave.sykmeldingId,
-                journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
-                fnr = papirManuellOppgave.fnr,
-                aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
-                dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
-                datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet?.toLocalDateTime(),
-                oppgaveId = papirManuellOppgave.oppgaveid,
-                ferdigstilt = false,
-                papirSmRegistrering =
-                    PapirSmRegistering(
-                        journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
-                        oppgaveId = papirManuellOppgave.papirSmRegistering.oppgaveId,
-                        fnr = papirManuellOppgave.papirSmRegistering.fnr,
-                        aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
-                        dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
-                        datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet,
-                        sykmeldingId = papirManuellOppgave.papirSmRegistering.sykmeldingId,
-                        syketilfelleStartDato = papirManuellOppgave.papirSmRegistering.syketilfelleStartDato,
-                        arbeidsgiver = papirManuellOppgave.papirSmRegistering.arbeidsgiver,
-                        medisinskVurdering = papirManuellOppgave.papirSmRegistering.medisinskVurdering,
-                        skjermesForPasient = papirManuellOppgave.papirSmRegistering.skjermesForPasient,
-                        perioder = papirManuellOppgave.papirSmRegistering.perioder,
-                        prognose = papirManuellOppgave.papirSmRegistering.prognose,
-                        utdypendeOpplysninger = papirManuellOppgave.papirSmRegistering.utdypendeOpplysninger,
-                        tiltakNAV = papirManuellOppgave.papirSmRegistering.tiltakNAV,
-                        tiltakArbeidsplassen = papirManuellOppgave.papirSmRegistering.tiltakArbeidsplassen,
-                        andreTiltak = papirManuellOppgave.papirSmRegistering.andreTiltak,
-                        meldingTilNAV = papirManuellOppgave.papirSmRegistering.meldingTilNAV,
-                        meldingTilArbeidsgiver = papirManuellOppgave.papirSmRegistering.meldingTilArbeidsgiver,
-                        kontaktMedPasient = papirManuellOppgave.papirSmRegistering.kontaktMedPasient,
-                        behandletTidspunkt = papirManuellOppgave.papirSmRegistering.behandletTidspunkt,
-                        behandler = papirManuellOppgave.papirSmRegistering.behandler,
-                    ),
-                utfall = null,
-                ferdigstiltAv = null,
-                datoFerdigstilt = null,
-                avvisningsgrunn = null,
-            )
-
-        if (existingId != null) {
-            nasjonalManuellOppgaveDAO.apply {
-                id = existingId
+                log.info("Har avvist oppgave med oppgaveId $oppgaveId")
+                ResponseEntity(res, HttpStatus.OK)
+            } else {
+                log.info("fant ikke oppgave som skulle avvises")
+                ResponseEntity(HttpStatus.NOT_FOUND)
             }
         }
 
-        return nasjonalManuellOppgaveDAO
-    }
+
+fun mapToUpdateDao(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, existingEntry: NasjonalManuellOppgaveDAO): NasjonalManuellOppgaveDAO {
+    return NasjonalManuellOppgaveDAO(
+        id = existingEntry.id,
+        sykmeldingId = sykmeldingId,
+        journalpostId = existingEntry.journalpostId,
+        fnr = existingEntry.fnr,
+        aktorId = existingEntry.aktorId,
+        dokumentInfoId = existingEntry.dokumentInfoId,
+        datoOpprettet = existingEntry.datoOpprettet,
+        oppgaveId = existingEntry.oppgaveId,
+        ferdigstilt = true,
+        papirSmRegistrering = existingEntry.papirSmRegistrering,
+        utfall = utfall,
+        ferdigstiltAv = ferdigstiltAv,
+        datoFerdigstilt = LocalDateTime.now(),
+        avvisningsgrunn = avvisningsgrunn,
+    )
+}
 
 
-    // kom frå jpservice
-    @Transactional
-    suspend fun ferdigstillNasjonalAvvistOppgave(
-        oppgaveId: Int,
-        authorization: String, // skal dette eigentleg brukes til noke?
-        navEnhet: String,
-        navEpost: String,
-        avvisningsgrunn: String?,
-        veilederIdent: String,
-    ) {
-        val oppgave = getNasjonalOppgave(oppgaveId.toString())
-        if(oppgave.fnr != null) {
-            val sykmeldt =
-                personService.getPerson(
-                    id = oppgave.fnr,
-                    callId = oppgave.sykmeldingId,
-                )
-            val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisningsgrunn, ignoreCase = true) }
-            ferdigstillAvvistJpOgOppgave(
-                oppgave = oppgave,
-                navEpost = navEpost,
-                enhetId = navEnhet,
-                sykmeldt = sykmeldt,
-                avvisningsgrunn = avvistGrunn,
-                avvisningsgrunnAnnet = null,
-                veilederIdent = veilederIdent,
-            )
+fun mapToDao(
+    papirManuellOppgave: PapirManuellOppgave,
+    existingId: UUID?,
+): NasjonalManuellOppgaveDAO {
+    mapper.registerModules(JavaTimeModule())
 
-        } else {
-            log.error("Fant ikke fnr for oppgave med id $oppgaveId")
+    val nasjonalManuellOppgaveDAO =
+        NasjonalManuellOppgaveDAO(
+            sykmeldingId = papirManuellOppgave.sykmeldingId,
+            journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
+            fnr = papirManuellOppgave.fnr,
+            aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
+            dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
+            datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet?.toLocalDateTime(),
+            oppgaveId = papirManuellOppgave.oppgaveid,
+            ferdigstilt = false,
+            papirSmRegistrering =
+                PapirSmRegistering(
+                    journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
+                    oppgaveId = papirManuellOppgave.papirSmRegistering.oppgaveId,
+                    fnr = papirManuellOppgave.papirSmRegistering.fnr,
+                    aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
+                    dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
+                    datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet,
+                    sykmeldingId = papirManuellOppgave.papirSmRegistering.sykmeldingId,
+                    syketilfelleStartDato = papirManuellOppgave.papirSmRegistering.syketilfelleStartDato,
+                    arbeidsgiver = papirManuellOppgave.papirSmRegistering.arbeidsgiver,
+                    medisinskVurdering = papirManuellOppgave.papirSmRegistering.medisinskVurdering,
+                    skjermesForPasient = papirManuellOppgave.papirSmRegistering.skjermesForPasient,
+                    perioder = papirManuellOppgave.papirSmRegistering.perioder,
+                    prognose = papirManuellOppgave.papirSmRegistering.prognose,
+                    utdypendeOpplysninger = papirManuellOppgave.papirSmRegistering.utdypendeOpplysninger,
+                    tiltakNAV = papirManuellOppgave.papirSmRegistering.tiltakNAV,
+                    tiltakArbeidsplassen = papirManuellOppgave.papirSmRegistering.tiltakArbeidsplassen,
+                    andreTiltak = papirManuellOppgave.papirSmRegistering.andreTiltak,
+                    meldingTilNAV = papirManuellOppgave.papirSmRegistering.meldingTilNAV,
+                    meldingTilArbeidsgiver = papirManuellOppgave.papirSmRegistering.meldingTilArbeidsgiver,
+                    kontaktMedPasient = papirManuellOppgave.papirSmRegistering.kontaktMedPasient,
+                    behandletTidspunkt = papirManuellOppgave.papirSmRegistering.behandletTidspunkt,
+                    behandler = papirManuellOppgave.papirSmRegistering.behandler,
+                ),
+            utfall = null,
+            ferdigstiltAv = null,
+            datoFerdigstilt = null,
+            avvisningsgrunn = null,
+        )
+
+    if (existingId != null) {
+        nasjonalManuellOppgaveDAO.apply {
+            id = existingId
         }
     }
 
-// kom fra sykdig
-    suspend fun ferdigstillAvvistJpOgOppgave(
-        oppgave: NasjonalManuellOppgaveDAO,
-        navEpost: String,
-        enhetId: String,
-        sykmeldt: Person,
-        avvisningsgrunn: Avvisingsgrunn?,
-        avvisningsgrunnAnnet: String?,
-        veilederIdent: String,
-    ) {
-        oppdaterOppgave(
-            sykmeldingId = oppgave.sykmeldingId,
-            utfall = Utfall.AVVIST.toString(),
-            ferdigstiltAv = veilederIdent,
-            avvisningsgrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
-        )
-        ferdigstillingService.ferdigstillNasjonalAvvistJournalpost(
-            enhet = enhetId,
-            oppgave = oppgave,
-            sykmeldt = sykmeldt,
-            avvisningsGrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
-            loggingMeta = getLoggingMeta(oppgave.sykmeldingId, oppgave),
-        )
-    }
+    return nasjonalManuellOppgaveDAO
+}
 
-    private fun getLoggingMeta(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): LoggingMeta {
-        return LoggingMeta(
-            mottakId = sykmeldingId,
-            dokumentInfoId = oppgave.dokumentInfoId,
-            msgId = sykmeldingId,
-            sykmeldingId = sykmeldingId,
-            journalpostId = oppgave.journalpostId,
+
+// kom frå jpservice
+@Transactional
+suspend fun ferdigstillNasjonalAvvistOppgave(
+    oppgaveId: Int,
+    authorization: String, // skal dette eigentleg brukes til noke?
+    navEnhet: String,
+    navEpost: String,
+    avvisningsgrunn: String?,
+    veilederIdent: String,
+) {
+    val oppgave = getNasjonalOppgave(oppgaveId.toString())
+    if (oppgave.fnr != null) {
+        val sykmeldt =
+            personService.getPerson(
+                id = oppgave.fnr,
+                callId = oppgave.sykmeldingId,
+            )
+        val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisningsgrunn, ignoreCase = true) }
+        ferdigstillAvvistJpOgOppgave(
+            oppgave = oppgave,
+            navEpost = navEpost,
+            enhetId = navEnhet,
+            sykmeldt = sykmeldt,
+            avvisningsgrunn = avvistGrunn,
+            avvisningsgrunnAnnet = null,
+            veilederIdent = veilederIdent,
         )
+
+    } else {
+        log.error("Fant ikke fnr for oppgave med id $oppgaveId")
     }
+}
+
+// kom fra sykdig
+suspend fun ferdigstillAvvistJpOgOppgave(
+    oppgave: NasjonalManuellOppgaveDAO,
+    navEpost: String,
+    enhetId: String,
+    sykmeldt: Person,
+    avvisningsgrunn: Avvisingsgrunn?,
+    avvisningsgrunnAnnet: String?,
+    veilederIdent: String,
+) {
+    oppdaterOppgave(
+        sykmeldingId = oppgave.sykmeldingId,
+        utfall = Utfall.AVVIST.toString(),
+        ferdigstiltAv = veilederIdent,
+        avvisningsgrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
+    )
+    ferdigstillingService.ferdigstillNasjonalAvvistJournalpost(
+        enhet = enhetId,
+        oppgave = oppgave,
+        sykmeldt = sykmeldt,
+        avvisningsGrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
+        loggingMeta = getLoggingMeta(oppgave.sykmeldingId, oppgave),
+    )
+}
+
+private fun getLoggingMeta(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): LoggingMeta {
+    return LoggingMeta(
+        mottakId = sykmeldingId,
+        dokumentInfoId = oppgave.dokumentInfoId,
+        msgId = sykmeldingId,
+        sykmeldingId = sykmeldingId,
+        journalpostId = oppgave.journalpostId,
+    )
+}
 }
