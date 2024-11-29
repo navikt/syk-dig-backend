@@ -51,6 +51,7 @@ class SykDigOppgaveService(
                 DokumentDbModel(it.dokumentInfoId, it.tittel ?: "Mangler Tittel")
             }
 
+        val tittel = journalpost.tittel.lowercase().contains("egenerklæring")
         val oppgaveId = response.id.toString()
         val oppgave =
             OppgaveDbModel(
@@ -68,7 +69,7 @@ class SykDigOppgaveService(
                 sykmelding = null,
                 endretAv = navEpost,
                 timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-                source = "syk-dig",
+                source =  if (journalpost.kanal == "NAV_NO" || tittel) "navno" else if (journalpost.kanal == "RINA") "rina" else "syk-dig",
             )
         oppgaveRepository.lagreOppgave(oppgave)
         log.info("Oppgave med id $oppgaveId lagret")
