@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.reactive.function.client.WebClientResponseException.BadRequest
 import java.util.UUID
+import javax.net.ssl.SSLEngineResult
 
 @RestController
 @RequestMapping("/api/v1/proxy")
@@ -45,7 +47,6 @@ class NasjonalOppgaveController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<NasjonalManuellOppgaveDAO> {
-        log.info("Current thread: ${Thread.currentThread().name}")
         log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
         return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, authorization, navEnhet)
     }
@@ -57,7 +58,11 @@ class NasjonalOppgaveController(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-        log.info("Current thread: ${Thread.currentThread().name}")
+        val nasjonalOppgave = nasjonalOppgaveService.getNasjonalOppgave(oppgaveId)
+        if (nasjonalOppgave != null) {
+            log.info("papirsykmelding: henter oppgave med id $oppgaveId fra syk-dig-db")
+            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(nasjonalOppgave))
+        }
         log.info("papirsykmelding: henter oppgave med id $oppgaveId gjennom syk-dig proxy")
         val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
         val papirManuellOppgave = oppgave.body

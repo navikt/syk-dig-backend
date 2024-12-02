@@ -51,7 +51,7 @@ class NasjonalOppgaveService(
         val res = nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
         log.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id}")
         return res
-    }
+    }me
 
     fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO? {
         val updated = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)?.copy(
@@ -181,8 +181,47 @@ fun mapToDao(
     return nasjonalManuellOppgaveDAO
 }
 
+    fun mapFromDao(
+        nasjonalManuellOppgaveDAO: NasjonalManuellOppgaveDAO
+    ): PapirManuellOppgave {
+        val papirSmRegistering = nasjonalManuellOppgaveDAO.papirSmRegistrering
 
-// kom frå jpservice
+        requireNotNull(nasjonalManuellOppgaveDAO.oppgaveId)
+        return PapirManuellOppgave(
+            sykmeldingId = nasjonalManuellOppgaveDAO.sykmeldingId,
+            fnr = nasjonalManuellOppgaveDAO.fnr,
+            oppgaveid = nasjonalManuellOppgaveDAO.oppgaveId,
+            papirSmRegistering = PapirSmRegistering(
+                journalpostId = papirSmRegistering.journalpostId,
+                oppgaveId = papirSmRegistering.oppgaveId,
+                fnr = papirSmRegistering.fnr,
+                aktorId = papirSmRegistering.aktorId,
+                dokumentInfoId = papirSmRegistering.dokumentInfoId,
+                datoOpprettet = papirSmRegistering.datoOpprettet,
+                sykmeldingId = papirSmRegistering.sykmeldingId,
+                syketilfelleStartDato = papirSmRegistering.syketilfelleStartDato,
+                arbeidsgiver = papirSmRegistering.arbeidsgiver,
+                medisinskVurdering = papirSmRegistering.medisinskVurdering,
+                skjermesForPasient = papirSmRegistering.skjermesForPasient,
+                perioder = papirSmRegistering.perioder,
+                prognose = papirSmRegistering.prognose,
+                utdypendeOpplysninger = papirSmRegistering.utdypendeOpplysninger,
+                tiltakNAV = papirSmRegistering.tiltakNAV,
+                tiltakArbeidsplassen = papirSmRegistering.tiltakArbeidsplassen,
+                andreTiltak = papirSmRegistering.andreTiltak,
+                meldingTilNAV = papirSmRegistering.meldingTilNAV,
+                meldingTilArbeidsgiver = papirSmRegistering.meldingTilArbeidsgiver,
+                kontaktMedPasient = papirSmRegistering.kontaktMedPasient,
+                behandletTidspunkt = papirSmRegistering.behandletTidspunkt,
+                behandler = papirSmRegistering.behandler,
+            ),
+            pdfPapirSykmelding = byteArrayOf(),
+            documents = emptyList()
+        )
+    }
+
+
+    // kom frå jpservice
 @Transactional
 fun ferdigstillNasjonalAvvistOppgave(
     oppgaveId: Int,
