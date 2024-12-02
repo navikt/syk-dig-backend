@@ -1,5 +1,7 @@
 package no.nav.sykdig.config
 
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.runBlocking
 import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.context.JwtBearerTokenResolver
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
@@ -29,9 +31,12 @@ class SykDigTokenResolver : JwtBearerTokenResolver {
     val log = applog()
 
     override fun token(): String? {
-        val authentication = ReactiveSecurityContextHolder.getContext().block()?.authentication as JwtAuthenticationToken
-        log.info("Token: ${authentication.token.tokenValue}")
-        return authentication.token.tokenValue
+        return runBlocking {
+            log.info("sec context ${ReactiveSecurityContextHolder.getContext().awaitFirstOrNull()}")
+            val authentication = ReactiveSecurityContextHolder.getContext().awaitFirstOrNull()?.authentication as? JwtAuthenticationToken
+            log.info("Token: ${authentication?.token?.tokenValue}")
+            authentication?.token?.tokenValue
+        }
     }
 }
 
