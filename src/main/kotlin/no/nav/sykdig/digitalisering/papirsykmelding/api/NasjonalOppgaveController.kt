@@ -45,6 +45,7 @@ class NasjonalOppgaveController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<NasjonalManuellOppgaveDAO> {
+        log.info("Current thread: ${Thread.currentThread().name}")
         log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
         return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, authorization, navEnhet)
     }
@@ -55,6 +56,7 @@ class NasjonalOppgaveController(
         @PathVariable oppgaveid: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
+        log.info("Current thread: ${Thread.currentThread().name}")
         log.info("papirsykmelding: henter oppgave med id $oppgaveid gjennom syk-dig proxy")
         val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
         val papirManuellOppgave = oppgave.body
