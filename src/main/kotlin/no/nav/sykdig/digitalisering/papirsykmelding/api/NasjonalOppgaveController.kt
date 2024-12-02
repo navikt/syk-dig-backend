@@ -50,6 +50,7 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/oppgave/{oppgaveid}")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
     @ResponseBody
     suspend fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveid: String,
