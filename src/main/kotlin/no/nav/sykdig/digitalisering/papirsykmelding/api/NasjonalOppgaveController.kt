@@ -13,6 +13,7 @@ import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -50,7 +51,7 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/oppgave/{oppgaveId}")
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
     @ResponseBody
     fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveId: String,
