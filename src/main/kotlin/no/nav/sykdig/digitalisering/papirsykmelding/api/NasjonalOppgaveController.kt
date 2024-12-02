@@ -11,7 +11,6 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppg
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -50,16 +49,16 @@ class NasjonalOppgaveController(
         return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, authorization, navEnhet)
     }
 
-    @GetMapping("/oppgave/{oppgaveid}")
+    @GetMapping("/oppgave/{oppgaveId}")
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
     @ResponseBody
     fun getPapirsykmeldingManuellOppgave(
-        @PathVariable oppgaveid: String,
+        @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
         log.info("Current thread: ${Thread.currentThread().name}")
-        log.info("papirsykmelding: henter oppgave med id $oppgaveid gjennom syk-dig proxy")
-        val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
+        log.info("papirsykmelding: henter oppgave med id $oppgaveId gjennom syk-dig proxy")
+        val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
         val papirManuellOppgave = oppgave.body
         if (papirManuellOppgave != null) {
             securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
@@ -103,13 +102,13 @@ class NasjonalOppgaveController(
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
     @ResponseBody
     suspend fun sendOppgave(
-        @PathVariable oppgaveId: Int,
+        @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<Any> {
         val callId = UUID.randomUUID().toString()
-        return nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId)
+        return nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId.toInt())
 
     }
 

@@ -43,18 +43,17 @@ class OppgaveSecurityService(
         return tilgang
     }
 
-    suspend fun hasAccessToNasjonalOppgave(oppgaveId: String): Boolean = withContext(
-        Dispatchers.IO) {
+    fun hasAccessToNasjonalOppgave(oppgaveId: String): Boolean {
             securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
             val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt())
-            val navEmail = getNavEmailAsync()
+            val navEmail = getNavEmail()
             val fnr = oppgave?.fnr
             if (oppgave != null && fnr != null) {
                 val tilgang = hasAccess(fnr, navEmail)
                 securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
-                tilgang
+                return tilgang
             }
-            false
+            return false
         }
 
         fun hasAccessToSykmelding(sykmeldingId: String): Boolean {
@@ -128,13 +127,6 @@ class OppgaveSecurityService(
         fun getNavEmail(): String {
             val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
             return authentication.token.claims["preferred_username"].toString()
-        }
-
-        suspend fun getNavEmailAsync(): String {
-            return ReactiveSecurityContextHolder.getContext().map { context ->
-                val auth = context.authentication as JwtAuthenticationToken
-                auth.token.claims["preferred_username"].toString()
-            }.awaitSingle()
         }
 }
 
