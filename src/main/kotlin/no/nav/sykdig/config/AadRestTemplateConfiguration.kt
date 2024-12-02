@@ -30,6 +30,7 @@ class SykDigTokenResolver : JwtBearerTokenResolver {
 
     override fun token(): String? {
         val authentication = ReactiveSecurityContextHolder.getContext().block()?.authentication as JwtAuthenticationToken
+        log.info("Token: ${authentication.token.tokenValue}")
         return authentication.token.tokenValue
     }
 }
