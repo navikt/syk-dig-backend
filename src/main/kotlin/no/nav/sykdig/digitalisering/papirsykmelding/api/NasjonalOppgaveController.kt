@@ -39,7 +39,7 @@ class NasjonalOppgaveController(
 
     @PostMapping("/oppgave/{oppgaveId}/avvis")
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
-    suspend fun avvisOppgave(
+    fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
@@ -51,8 +51,9 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/oppgave/{oppgaveid}")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
     @ResponseBody
-    suspend fun getPapirsykmeldingManuellOppgave(
+    fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveid: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {

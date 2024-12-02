@@ -93,7 +93,7 @@ class NasjonalSykmeldingService(
                 sykmelder = sykmelder,
                 navEnhet = navEnhet,
 //                veileder = oppgaveSecurityService.getNavIdent(),
-                veileder = Veileder(oppgaveSecurityService.getNavEmailAsync()),
+                veileder = Veileder(oppgaveSecurityService.getNavEmail()),
                 avvist = false,
                 oppgave = null,
             )

@@ -1,7 +1,5 @@
 package no.nav.sykdig.config
 
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.runBlocking
 import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.context.JwtBearerTokenResolver
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
@@ -20,7 +18,7 @@ import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
@@ -31,13 +29,8 @@ class SykDigTokenResolver : JwtBearerTokenResolver {
     val log = applog()
 
     override fun token(): String? {
-        return runBlocking {
-            log.info("Current thread: ${Thread.currentThread().name}")
-            log.info("sec context ${ReactiveSecurityContextHolder.getContext().awaitFirstOrNull()}")
-            val authentication = ReactiveSecurityContextHolder.getContext().awaitFirstOrNull()?.authentication as? JwtAuthenticationToken
-            log.info("Token: ${authentication?.token?.tokenValue}")
-            authentication?.token?.tokenValue
-        }
+        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        return autentication.token.tokenValue
     }
 }
 

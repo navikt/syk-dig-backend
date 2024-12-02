@@ -41,19 +41,19 @@ class NasjonalOppgaveService(
     val securelog = securelog()
     val mapper = jacksonObjectMapper()
 
-    suspend fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO = withContext(Dispatchers.IO) {
+    fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
 
         if (eksisterendeOppgave != null) {
             log.info("Fant eksisterende oppgave med sykmeldingId ${papirManuellOppgave.sykmeldingId} , oppdaterer oppgave med database id ${eksisterendeOppgave.id}")
-            nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.id))
+            return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.id))
         }
         val res = nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
         log.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id}")
-        res
+        return res
     }
 
-    suspend fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO? = withContext(Dispatchers.IO){
+    fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO? {
         val updated = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)?.copy(
             utfall = utfall,
             ferdigstiltAv = ferdigstiltAv,
@@ -65,18 +65,17 @@ class NasjonalOppgaveService(
             null -> log.info("Sykmelding $sykmeldingId not found ")
             else -> nasjonalOppgaveRepository.save(updated)
         }
-        updated
+        return updated
     }
 
-    suspend fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO? {
-        val oppgave = withContext(Dispatchers.IO) {
-            nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
-        }
+    fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO? {
+        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
+
         if (oppgave == null) return null
         return oppgave
     }
 
-    suspend fun getNasjonalOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO {
+    fun getNasjonalOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO {
         val oppgave = findByOppgaveId(oppgaveId.toInt())
         if (oppgave == null) {
             log.warn("Fant ikke oppgave med id $oppgaveId")
@@ -95,21 +94,20 @@ class NasjonalOppgaveService(
         oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
     }
 
-    suspend fun avvisOppgave(
+    fun avvisOppgave(
         oppgaveId: Int,
         request: String,
         authorization: String,
         navEnhet: String,
-    ): ResponseEntity<NasjonalManuellOppgaveDAO> = withContext(
-        Dispatchers.IO) {
+    ): ResponseEntity<NasjonalManuellOppgaveDAO>  {
             val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
 
             val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
             if (eksisterendeOppgave != null) {
-                val navEmail = oppgaveSecurityService.getNavEmailAsync()
+                val navEmail = oppgaveSecurityService.getNavEmail()
                 log.info("navEmail: $navEmail")
-//            val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
-                val veilederIdent = navEmail
+                val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
+//                val veilederIdent = navEmail
                 ferdigstillNasjonalAvvistOppgave(oppgaveId, authorization, navEnhet, navEmail, avvisningsgrunn, veilederIdent)
                 val res = oppdaterOppgave(
                     eksisterendeOppgave.sykmeldingId,
@@ -119,32 +117,12 @@ class NasjonalOppgaveService(
                 )
 
                 log.info("Har avvist oppgave med oppgaveId $oppgaveId")
-                ResponseEntity(res, HttpStatus.OK)
+                return ResponseEntity(res, HttpStatus.OK)
             } else {
                 log.info("fant ikke oppgave som skulle avvises")
-                ResponseEntity(HttpStatus.NOT_FOUND)
+                return ResponseEntity(HttpStatus.NOT_FOUND)
             }
         }
-
-
-fun mapToUpdateDao(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, existingEntry: NasjonalManuellOppgaveDAO): NasjonalManuellOppgaveDAO {
-    return NasjonalManuellOppgaveDAO(
-        id = existingEntry.id,
-        sykmeldingId = sykmeldingId,
-        journalpostId = existingEntry.journalpostId,
-        fnr = existingEntry.fnr,
-        aktorId = existingEntry.aktorId,
-        dokumentInfoId = existingEntry.dokumentInfoId,
-        datoOpprettet = existingEntry.datoOpprettet,
-        oppgaveId = existingEntry.oppgaveId,
-        ferdigstilt = true,
-        papirSmRegistrering = existingEntry.papirSmRegistrering,
-        utfall = utfall,
-        ferdigstiltAv = ferdigstiltAv,
-        datoFerdigstilt = LocalDateTime.now(),
-        avvisningsgrunn = avvisningsgrunn,
-    )
-}
 
 
 fun mapToDao(
@@ -206,7 +184,7 @@ fun mapToDao(
 
 // kom frå jpservice
 @Transactional
-suspend fun ferdigstillNasjonalAvvistOppgave(
+fun ferdigstillNasjonalAvvistOppgave(
     oppgaveId: Int,
     authorization: String, // skal dette eigentleg brukes til noke?
     navEnhet: String,
@@ -238,7 +216,7 @@ suspend fun ferdigstillNasjonalAvvistOppgave(
 }
 
 // kom fra sykdig
-suspend fun ferdigstillAvvistJpOgOppgave(
+fun ferdigstillAvvistJpOgOppgave(
     oppgave: NasjonalManuellOppgaveDAO,
     navEpost: String,
     enhetId: String,

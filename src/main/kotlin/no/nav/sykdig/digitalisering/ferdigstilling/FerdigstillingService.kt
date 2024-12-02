@@ -176,7 +176,7 @@ class FerdigstillingService(
     }
 
     //TODO() implement this - lage eigen service?
-    suspend fun ferdigstillNasjonalAvvistJournalpost(
+    fun ferdigstillNasjonalAvvistJournalpost(
         enhet: String,
         oppgave: NasjonalManuellOppgaveDAO,
         sykmeldt: Person,

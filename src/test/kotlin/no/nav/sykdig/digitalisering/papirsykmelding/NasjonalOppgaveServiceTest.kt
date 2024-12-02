@@ -101,6 +101,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
         Mockito.`when`(sykdigOppgaveService.getOppgave(anyString())).thenReturn(testDataOppgaveDbModel(oppgaveId))
         Mockito.`when`(oppgaveSecurityService.getNavIdent()).thenReturn(Veileder("veilederIdent"))
+        Mockito.`when`(oppgaveSecurityService.getNavEmail()).thenReturn("NavEmail")
         Mockito.`when`(personService.getPerson(anyString(), anyString())).thenReturn(testDataPerson())
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(anyString())).thenReturn(SafQueryJournalpost(null))
 
