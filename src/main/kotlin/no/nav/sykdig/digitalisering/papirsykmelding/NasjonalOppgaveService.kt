@@ -11,6 +11,7 @@ import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.mapAvvisningsgrunn
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Document
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
@@ -51,7 +52,7 @@ class NasjonalOppgaveService(
         val res = nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
         log.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id}")
         return res
-    }me
+    }
 
     fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO? {
         val updated = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)?.copy(
@@ -187,6 +188,7 @@ fun mapToDao(
         val papirSmRegistering = nasjonalManuellOppgaveDAO.papirSmRegistrering
 
         requireNotNull(nasjonalManuellOppgaveDAO.oppgaveId)
+        requireNotNull(nasjonalManuellOppgaveDAO.dokumentInfoId)
         return PapirManuellOppgave(
             sykmeldingId = nasjonalManuellOppgaveDAO.sykmeldingId,
             fnr = nasjonalManuellOppgaveDAO.fnr,
@@ -216,7 +218,7 @@ fun mapToDao(
                 behandler = papirSmRegistering.behandler,
             ),
             pdfPapirSykmelding = byteArrayOf(),
-            documents = emptyList()
+            documents = listOf(Document(dokumentInfoId = nasjonalManuellOppgaveDAO.dokumentInfoId, tittel = "papirsykmelding")),
         )
     }
 
