@@ -52,17 +52,17 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/oppgave/{oppgaveId}")
-    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
+//    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
     @ResponseBody
     fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-//        val nasjonalOppgave = nasjonalOppgaveService.getNasjonalOppgave(oppgaveId)
-//        if (nasjonalOppgave != null) {
-//            log.info("papirsykmelding: henter oppgave med id $oppgaveId fra syk-dig-db")
-//            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(nasjonalOppgave))
-//        }
+        val nasjonalOppgave = nasjonalOppgaveService.findByOppgaveId(oppgaveId.toInt())
+        if (nasjonalOppgave != null) {
+            log.info("papirsykmelding: henter oppgave med id $oppgaveId fra syk-dig-db")
+            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(nasjonalOppgave))
+        }
         log.info("papirsykmelding: henter oppgave med id $oppgaveId gjennom syk-dig proxy")
         val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
         val papirManuellOppgave = oppgave.body
