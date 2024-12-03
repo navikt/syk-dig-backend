@@ -95,7 +95,6 @@ class NasjonalOppgaveService(
     fun avvisOppgave(
         oppgaveId: Int,
         request: String,
-        authorization: String,
         navEnhet: String,
     ): ResponseEntity<NasjonalManuellOppgaveDAO>  {
             val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
@@ -104,7 +103,7 @@ class NasjonalOppgaveService(
             if (eksisterendeOppgave != null) {
                 val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
 
-                ferdigstillNasjonalAvvistOppgave(oppgaveId, authorization, navEnhet, avvisningsgrunn, veilederIdent)
+                ferdigstillNasjonalAvvistOppgave(oppgaveId, navEnhet, avvisningsgrunn, veilederIdent)
                 val res = oppdaterOppgave(
                     eksisterendeOppgave.sykmeldingId,
                     utfall = Utfall.AVVIST.toString(),
@@ -222,7 +221,6 @@ fun mapToDao(
 @Transactional
 fun ferdigstillNasjonalAvvistOppgave(
     oppgaveId: Int,
-    authorization: String, // skal dette eigentleg brukes til noke?
     navEnhet: String,
     avvisningsgrunn: String?,
     veilederIdent: String,

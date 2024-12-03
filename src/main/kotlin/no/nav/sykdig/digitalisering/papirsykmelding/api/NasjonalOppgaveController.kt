@@ -23,9 +23,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.reactive.function.client.WebClientResponseException.BadRequest
 import java.util.UUID
-import javax.net.ssl.SSLEngineResult
 
 @RestController
 @RequestMapping("/api/v1/proxy")
@@ -43,12 +41,11 @@ class NasjonalOppgaveController(
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
-        @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<NasjonalManuellOppgaveDAO> {
         log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
-        return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, authorization, navEnhet)
+        return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, navEnhet)
     }
 
     @GetMapping("/oppgave/{oppgaveId}")
