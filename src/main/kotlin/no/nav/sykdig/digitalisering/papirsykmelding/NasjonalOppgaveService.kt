@@ -16,7 +16,6 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
-import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.generated.types.Avvisingsgrunn
@@ -98,7 +97,7 @@ class NasjonalOppgaveService(
         request: String,
         authorization: String,
         navEnhet: String,
-    ): ResponseEntity<NasjonalManuellOppgaveDAO>  {
+    ): ResponseEntity<PapirManuellOppgave>  {
             val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
 
             val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
@@ -116,7 +115,8 @@ class NasjonalOppgaveService(
                 )
 
                 log.info("Har avvist oppgave med oppgaveId $oppgaveId")
-                return ResponseEntity(res, HttpStatus.OK)
+                requireNotNull(res)
+                return ResponseEntity(mapFromDao(res), HttpStatus.OK)
             } else {
                 log.info("fant ikke oppgave som skulle avvises")
                 return ResponseEntity(HttpStatus.NOT_FOUND)
@@ -138,7 +138,7 @@ fun mapToDao(
             aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
             dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
             datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet?.toLocalDateTime(),
-            oppgaveId = papirManuellOppgave.oppgaveid,
+            oppgaveId = papirManuellOppgave.oppgaveId,
             ferdigstilt = false,
             papirSmRegistrering =
                 PapirSmRegistering(
@@ -190,7 +190,7 @@ fun mapToDao(
         return PapirManuellOppgave(
             sykmeldingId = nasjonalManuellOppgaveDAO.sykmeldingId,
             fnr = nasjonalManuellOppgaveDAO.fnr,
-            oppgaveid = nasjonalManuellOppgaveDAO.oppgaveId,
+            oppgaveId = nasjonalManuellOppgaveDAO.oppgaveId,
             papirSmRegistering = PapirSmRegistering(
                 journalpostId = papirSmRegistering.journalpostId,
                 oppgaveId = papirSmRegistering.oppgaveId,

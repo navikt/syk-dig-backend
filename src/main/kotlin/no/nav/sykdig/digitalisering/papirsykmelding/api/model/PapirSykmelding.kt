@@ -7,7 +7,7 @@ import java.time.OffsetDateTime
 data class PapirManuellOppgave(
     val fnr: String?,
     val sykmeldingId: String,
-    val oppgaveid: Int,
+    val oppgaveId: Int,
     var pdfPapirSykmelding: ByteArray,
     val papirSmRegistering: PapirSmRegistering,
     val documents: List<Document>,
