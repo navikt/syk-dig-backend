@@ -52,7 +52,7 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/oppgave/{oppgaveId}")
-//    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
     @ResponseBody
     fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveId: String,
