@@ -5,6 +5,7 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.dokument.DocumentService
+import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
@@ -18,6 +19,7 @@ import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.createTitle
+import no.nav.sykdig.utils.createTitleNasjonal
 import no.nav.sykdig.utils.createTitleNavNo
 import no.nav.sykdig.utils.createTitleRina
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -56,7 +58,7 @@ class FerdigstillingService(
         securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
-            updateAvvistTitle(oppgave, receivedSykmelding)
+            updateUtenlandskDocumentTitle(oppgave, receivedSykmelding, isAvvist = true)
         } else {
             val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillUtenlandskJournalpost(
@@ -75,7 +77,7 @@ class FerdigstillingService(
         }
 
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
-        updateTitle(oppgave, receivedSykmelding)
+        updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
 
         try {
             sykmeldingOKProducer.send(
@@ -92,26 +94,12 @@ class FerdigstillingService(
         }
     }
 
-    private fun updateTitle(
-        oppgave: OppgaveDbModel,
-        receivedSykmelding: ReceivedSykmelding
-    ) {
-        updateDocumentTitle(oppgave, receivedSykmelding)
-    }
-
-    private fun updateAvvistTitle(
-        oppgave: OppgaveDbModel,
-        receivedSykmelding: ReceivedSykmelding
-    ) {
-        updateDocumentTitle(oppgave, receivedSykmelding, isAvvist = true)
-    }
-
-    private fun updateDocumentTitle(
+    private fun updateUtenlandskDocumentTitle(
         oppgave: OppgaveDbModel,
         receivedSykmelding: ReceivedSykmelding,
         isAvvist: Boolean = false
     ) {
-        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source} sykmeldignId: ${receivedSykmelding.sykmelding.id} ")
+        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source} sykmeldingId: ${receivedSykmelding.sykmelding.id} ")
 
         val dokument = when {
             isAvvist -> oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
@@ -202,6 +190,14 @@ class FerdigstillingService(
                 avvist = true,
                 perioder = oppgave.papirSmRegistrering.perioder ?: emptyList(),
             )
+
+            oppgaveClient.ferdigstillOppgave(oppgave.oppgaveId.toString(), oppgave.sykmeldingId)
+
+            dokumentService.updateDocumentTitle(
+                oppgaveId = oppgave.oppgaveId.toString(),
+                dokumentInfoId = oppgave.dokumentInfoId,
+                tittel = createTitleNasjonal(oppgave.papirSmRegistrering.perioder, true),
+            )
         }
     }
 
@@ -218,6 +214,6 @@ class FerdigstillingService(
             ProducerRecord(OK_SYKMELDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
         ).get()
         log.info("sendt oppdatert sykmelding med id ${receivedSykmelding.sykmelding.id}")
-        updateTitle(oppgave, receivedSykmelding)
+        updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
     }
 }

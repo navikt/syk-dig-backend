@@ -102,11 +102,9 @@ class NasjonalOppgaveService(
 
             val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
             if (eksisterendeOppgave != null) {
-                val navEmail = oppgaveSecurityService.getNavEmail()
-                log.info("navEmail: $navEmail")
                 val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
-//                val veilederIdent = navEmail
-                ferdigstillNasjonalAvvistOppgave(oppgaveId, authorization, navEnhet, navEmail, avvisningsgrunn, veilederIdent)
+
+                ferdigstillNasjonalAvvistOppgave(oppgaveId, authorization, navEnhet, avvisningsgrunn, veilederIdent)
                 val res = oppdaterOppgave(
                     eksisterendeOppgave.sykmeldingId,
                     utfall = Utfall.AVVIST.toString(),
@@ -226,7 +224,6 @@ fun ferdigstillNasjonalAvvistOppgave(
     oppgaveId: Int,
     authorization: String, // skal dette eigentleg brukes til noke?
     navEnhet: String,
-    navEpost: String,
     avvisningsgrunn: String?,
     veilederIdent: String,
 ) {

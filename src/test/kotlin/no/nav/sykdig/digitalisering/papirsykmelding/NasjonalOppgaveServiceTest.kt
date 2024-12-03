@@ -5,8 +5,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.dokument.DocumentService
 import no.nav.sykdig.digitalisering.felles.Adresse
 import no.nav.sykdig.digitalisering.felles.Behandler
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
@@ -21,6 +23,7 @@ import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.model.OppgaveDbModel
+import no.nav.sykdig.utils.createTitleNasjonal
 import okhttp3.internal.EMPTY_BYTE_ARRAY
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -60,7 +63,6 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     @MockBean
     lateinit var sykdigOppgaveService: SykDigOppgaveService
 
-
     @MockBean
     lateinit var oppgaveSecurityService: OppgaveSecurityService
 
@@ -75,6 +77,12 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
     @MockBean
     lateinit var sykmelderService: SykmelderService
+
+    @MockBean
+    lateinit var oppgaveClient: OppgaveClient
+
+    @MockBean
+    lateinit var documentService: DocumentService
 
     @Autowired
     @Qualifier("smregisteringRestTemplate")
@@ -94,7 +102,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
 
     @Test
-    fun `avvis oppgave blir oppdatert og lagra i DB`() = runBlocking {
+    fun `avvis oppgave blir oppdatert og lagra i DB`() {
         val oppgaveId = 123
         val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
         val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
@@ -119,6 +127,8 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         )).thenReturn(null)
 
         Mockito.`when`(sykmelderService.getSykmelder(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(testDataSykmelder())
+        Mockito.doNothing().`when`(oppgaveClient).ferdigstillOppgave(org.mockito.kotlin.any(), org.mockito.kotlin.any())
+        Mockito.doNothing().`when`(documentService).updateDocumentTitle(org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.any())
 
         assertTrue(originalOppgave.avvisningsgrunn == null)
         val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request, "auth streng", "enhet")
