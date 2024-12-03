@@ -122,9 +122,9 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
         assertTrue(originalOppgave.avvisningsgrunn == null)
         val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request, "auth streng", "enhet")
-        assertEquals(testDataNasjonalManuellOppgaveDAO(null, "456", oppgaveId).oppgaveId, avvistOppgave.body.oppgaveId)
-//        assertTrue(avvistOppgave.body?.avvisningsgrunn == "MANGLENDE_DIAGNOSE")
-//        assertEquals(avvistOppgave.body?.id, originalOppgave.id)
+        assertEquals(testDataNasjonalManuellOppgaveDAO(null, "456", oppgaveId).oppgaveId, avvistOppgave.body?.oppgaveId ?: 123)
+        assertTrue(avvistOppgave.body?.avvisningsgrunn == "MANGLENDE_DIAGNOSE")
+        assertEquals(avvistOppgave.body?.id, originalOppgave.id)
 
     }
 
@@ -147,12 +147,14 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     }
 
     @Test
-    fun `oppgave isPresent`() = runBlocking {
+    fun `oppgave blir lagret`() = runBlocking {
         val uuid = UUID.randomUUID()
         val dao = testDataNasjonalManuellOppgaveDAO(uuid, "123", 123)
         val oppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
 
         assertEquals(oppgave.sykmeldingId, dao.sykmeldingId)
+        val res = nasjonalOppgaveRepository.findBySykmeldingId(oppgave.sykmeldingId)
+        println(res)
     }
 
     fun testDataPapirManuellOppgave(): PapirManuellOppgave {

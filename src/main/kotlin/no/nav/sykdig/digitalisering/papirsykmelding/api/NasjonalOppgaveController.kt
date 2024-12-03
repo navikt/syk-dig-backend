@@ -46,7 +46,7 @@ class NasjonalOppgaveController(
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
-    ): ResponseEntity<PapirManuellOppgave> {
+    ): ResponseEntity<NasjonalManuellOppgaveDAO> {
         log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
         return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, authorization, navEnhet)
     }
@@ -58,11 +58,11 @@ class NasjonalOppgaveController(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-        val nasjonalOppgave = nasjonalOppgaveService.getNasjonalOppgave(oppgaveId)
-        if (nasjonalOppgave != null) {
-            log.info("papirsykmelding: henter oppgave med id $oppgaveId fra syk-dig-db")
-            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(nasjonalOppgave))
-        }
+//        val nasjonalOppgave = nasjonalOppgaveService.getNasjonalOppgave(oppgaveId)
+//        if (nasjonalOppgave != null) {
+//            log.info("papirsykmelding: henter oppgave med id $oppgaveId fra syk-dig-db")
+//            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(nasjonalOppgave))
+//        }
         log.info("papirsykmelding: henter oppgave med id $oppgaveId gjennom syk-dig proxy")
         val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
         val papirManuellOppgave = oppgave.body

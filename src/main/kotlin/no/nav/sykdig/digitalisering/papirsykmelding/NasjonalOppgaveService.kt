@@ -97,7 +97,7 @@ class NasjonalOppgaveService(
         request: String,
         authorization: String,
         navEnhet: String,
-    ): ResponseEntity<PapirManuellOppgave>  {
+    ): ResponseEntity<NasjonalManuellOppgaveDAO>  {
             val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
 
             val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
@@ -115,8 +115,7 @@ class NasjonalOppgaveService(
                 )
 
                 log.info("Har avvist oppgave med oppgaveId $oppgaveId")
-                requireNotNull(res)
-                return ResponseEntity(mapFromDao(res), HttpStatus.OK)
+                return ResponseEntity(res, HttpStatus.NO_CONTENT)
             } else {
                 log.info("fant ikke oppgave som skulle avvises")
                 return ResponseEntity(HttpStatus.NOT_FOUND)
