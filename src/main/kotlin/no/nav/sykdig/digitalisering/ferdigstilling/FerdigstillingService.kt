@@ -175,7 +175,6 @@ class FerdigstillingService(
         }
     }
 
-    //TODO() implement this - lage eigen service?
     fun ferdigstillNasjonalAvvistJournalpost(
         enhet: String,
         oppgave: NasjonalManuellOppgaveDAO,

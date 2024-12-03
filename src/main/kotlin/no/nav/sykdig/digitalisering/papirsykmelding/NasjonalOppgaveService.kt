@@ -2,8 +2,6 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
@@ -241,44 +239,17 @@ fun ferdigstillNasjonalAvvistOppgave(
                 callId = oppgave.sykmeldingId,
             )
         val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisningsgrunn, ignoreCase = true) }
-        ferdigstillAvvistJpOgOppgave(
+        ferdigstillingService.ferdigstillNasjonalAvvistJournalpost(
+            enhet = navEnhet,
             oppgave = oppgave,
-            navEpost = navEpost,
-            enhetId = navEnhet,
             sykmeldt = sykmeldt,
-            avvisningsgrunn = avvistGrunn,
-            avvisningsgrunnAnnet = null,
-            veilederIdent = veilederIdent,
+            avvisningsGrunn = avvistGrunn?.let { mapAvvisningsgrunn(it, null) },
+            loggingMeta = getLoggingMeta(oppgave.sykmeldingId, oppgave),
         )
 
     } else {
         log.error("Fant ikke fnr for oppgave med id $oppgaveId")
     }
-}
-
-// kom fra sykdig
-fun ferdigstillAvvistJpOgOppgave(
-    oppgave: NasjonalManuellOppgaveDAO,
-    navEpost: String,
-    enhetId: String,
-    sykmeldt: Person,
-    avvisningsgrunn: Avvisingsgrunn?,
-    avvisningsgrunnAnnet: String?,
-    veilederIdent: String,
-) {
-    oppdaterOppgave(
-        sykmeldingId = oppgave.sykmeldingId,
-        utfall = Utfall.AVVIST.toString(),
-        ferdigstiltAv = veilederIdent,
-        avvisningsgrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
-    )
-    ferdigstillingService.ferdigstillNasjonalAvvistJournalpost(
-        enhet = enhetId,
-        oppgave = oppgave,
-        sykmeldt = sykmeldt,
-        avvisningsGrunn = avvisningsgrunn?.let { mapAvvisningsgrunn(it, avvisningsgrunnAnnet) },
-        loggingMeta = getLoggingMeta(oppgave.sykmeldingId, oppgave),
-    )
 }
 
 private fun getLoggingMeta(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): LoggingMeta {
