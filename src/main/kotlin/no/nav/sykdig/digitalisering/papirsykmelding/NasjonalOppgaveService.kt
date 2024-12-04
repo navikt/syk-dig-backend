@@ -41,6 +41,7 @@ class NasjonalOppgaveService(
 
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
+        securelog.info("Forsøkte å hente eksisterende oppgave med sykmeldingId ${papirManuellOppgave.sykmeldingId} , fant følgende: $eksisterendeOppgave")
 
         if (eksisterendeOppgave != null) {
             log.info("Fant eksisterende oppgave med sykmeldingId ${papirManuellOppgave.sykmeldingId} , oppdaterer oppgave med database id ${eksisterendeOppgave.id}")
@@ -141,7 +142,7 @@ fun mapToDao(
             aktorId = papirManuellOppgave.papirSmRegistering.aktorId,
             dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
             datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet?.toLocalDateTime(),
-            oppgaveId = papirManuellOppgave.oppgaveId,
+            oppgaveId = papirManuellOppgave.oppgaveid,
             ferdigstilt = false,
             papirSmRegistrering =
                 PapirSmRegistering(
@@ -193,7 +194,7 @@ fun mapToDao(
         return PapirManuellOppgave(
             sykmeldingId = nasjonalManuellOppgaveDAO.sykmeldingId,
             fnr = nasjonalManuellOppgaveDAO.fnr,
-            oppgaveId = nasjonalManuellOppgaveDAO.oppgaveId,
+            oppgaveid = nasjonalManuellOppgaveDAO.oppgaveId,
             papirSmRegistering = PapirSmRegistering(
                 journalpostId = papirSmRegistering.journalpostId,
                 oppgaveId = papirSmRegistering.oppgaveId,

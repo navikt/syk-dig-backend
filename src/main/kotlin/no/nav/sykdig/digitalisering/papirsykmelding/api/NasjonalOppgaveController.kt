@@ -63,8 +63,11 @@ class NasjonalOppgaveController(
         }
         log.info("papirsykmelding: henter oppgave med id $oppgaveId gjennom syk-dig proxy")
         val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
+        log.info("har hentet papirManuellOppgave via syk-dig proxy")
+
         val papirManuellOppgave = oppgave.body
         if (papirManuellOppgave != null) {
+            log.info("har hentet papirManuellOppgave via syk-dig proxy og oppgaven er ikke null")
             securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
             nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
             return oppgave

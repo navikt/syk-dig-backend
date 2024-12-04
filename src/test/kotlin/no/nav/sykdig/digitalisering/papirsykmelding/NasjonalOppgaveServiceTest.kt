@@ -23,7 +23,6 @@ import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.model.OppgaveDbModel
-import no.nav.sykdig.utils.createTitleNasjonal
 import okhttp3.internal.EMPTY_BYTE_ARRAY
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -170,7 +169,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         return PapirManuellOppgave(
             sykmeldingId = "123",
             fnr = "fnr",
-            oppgaveId = 123,
+            oppgaveid = 123,
             pdfPapirSykmelding = EMPTY_BYTE_ARRAY,
             papirSmRegistering =
                 PapirSmRegistering(
