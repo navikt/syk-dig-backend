@@ -18,3 +18,11 @@ inline fun <reified T> T.securelog(): Logger {
 inline fun <reified T> T.auditlog(): Logger {
     return LoggerFactory.getLogger("auditLogger")
 }
+
+data class LoggingMeta(
+    val mottakId: String,
+    val journalpostId: String?,
+    val dokumentInfoId: String?,
+    val msgId: String,
+    val sykmeldingId: String,
+)

@@ -2,17 +2,32 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import net.logstash.logback.argument.StructuredArguments
+import no.nav.sykdig.LoggingMeta
+import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
+import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
+import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
+import no.nav.sykdig.digitalisering.papirsykmelding.api.SmregistreringClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
+import no.nav.sykdig.digitalisering.tilgangskontroll.getNavEmail
+import no.nav.sykdig.metrics.MetricRegister
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
+    private val gosysService: GosysService,
+    private val metricRegister: MetricRegister,
+    private val ferdigstillingService: FerdigstillingService,
 ) {
+    val log = applog()
+
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
         if (eksisterendeOppgave.isPresent) {
@@ -76,5 +91,44 @@ class NasjonalOppgaveService(
         }
 
         return nasjonalManuellOppgaveDAO
+    }
+
+    fun ferdigstillOgSendOppgaveTilGosys(oppgaveId: String) {
+        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt())
+
+        if (!oppgave.isPresent) {
+            log.warn("Fant ikke oppgave med id $oppgaveId")
+            throw NoOppgaveException("Fant ikke oppgave med id $oppgaveId")
+        }
+
+        val sykmeldingId = oppgave.get().sykmeldingId
+        val journalpostId = oppgave.get().journalpostId
+        val dokumentInfoId = oppgave.get().dokumentInfoId
+
+        val loggingMeta =
+            LoggingMeta(
+                mottakId = sykmeldingId,
+                dokumentInfoId = dokumentInfoId,
+                msgId = sykmeldingId,
+                sykmeldingId = sykmeldingId,
+                journalpostId = journalpostId,
+            )
+
+        log.info(
+            "Sender nasjonal oppgave med id $oppgaveId til Gosys {}",
+            StructuredArguments.fields(loggingMeta)
+        )
+
+        val navIdent = getNavEmail()
+        gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.get().sykmeldingId, navIdent)
+
+        ferdigstillingService.ferdigstillOppgaveGosys(oppgaveId, Utfall.SENDT_TIL_GOSYS, navIdent)
+
+        log.info(
+            "Ferdig å sende oppgave med id $oppgaveId til Gosys {}",
+            StructuredArguments.fields(loggingMeta)
+        )
+
+        metricRegister.sendtTilGosysNasjonal.increment()
     }
 }
