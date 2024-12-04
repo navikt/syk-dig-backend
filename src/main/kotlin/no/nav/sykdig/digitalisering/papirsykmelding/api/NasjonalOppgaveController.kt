@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
+import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
@@ -66,8 +67,13 @@ class NasjonalOppgaveController(
         if (papirManuellOppgave != null) {
             securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
             nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
+            return oppgave
         }
-        return oppgave
+        log.info(
+            "Fant ingen uløste manuelle oppgaver med oppgaveid {}",
+            StructuredArguments.keyValue("oppgaveId", oppgaveId)
+        )
+        return ResponseEntity.notFound().build()
     }
 
     @GetMapping("/pasient")
