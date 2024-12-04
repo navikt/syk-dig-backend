@@ -73,6 +73,13 @@ class NasjonalOppgaveService(
         return oppgave
     }
 
+    fun findBySykmeldingId(sykmeldingId: String): NasjonalManuellOppgaveDAO? {
+        val oppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
+
+        if (oppgave == null) return null
+        return oppgave
+    }
+
     fun getNasjonalOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO {
         val oppgave = findByOppgaveId(oppgaveId.toInt())
         if (oppgave == null) {
