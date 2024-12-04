@@ -7,6 +7,8 @@ import no.nav.sykdig.digitalisering.sykmelding.RuleInfo
 import no.nav.sykdig.digitalisering.sykmelding.Status
 import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
 
+const val HPR_GODKJENNING_KODE = 7704
+
 fun checkValidState(
     smRegistreringManuell: SmRegistreringManuell,
     sykmelder: Sykmelder,
@@ -139,7 +141,7 @@ fun studentBehandlerUtenAutorisasjon(
     val erStudent =
         sykmelder.godkjenninger?.any {
             it.autorisasjon?.aktiv == true &&
-                it.autorisasjon.oid == 7704 &&
+                it.autorisasjon.oid == HPR_GODKJENNING_KODE &&
                 it.autorisasjon.verdi == "3"
         }
 

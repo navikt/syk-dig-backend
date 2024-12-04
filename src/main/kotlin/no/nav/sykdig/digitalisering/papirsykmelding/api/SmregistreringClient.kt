@@ -86,7 +86,8 @@ class SmregistreringClient(
 
         val uri =
             UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelder/{hprNummer}")
-                .buildAndExpand(hprNummer)
+                .pathSegment(hprNummer)
+                .build()
                 .toUri()
 
         return smregisteringRestTemplate.exchange(
