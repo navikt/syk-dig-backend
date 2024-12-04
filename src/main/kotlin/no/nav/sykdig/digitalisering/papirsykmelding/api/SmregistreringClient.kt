@@ -62,7 +62,8 @@ class SmregistreringClient(
         headers.setBearerAuth(removeBearerPrefix(authorization))
         val uri =
             UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/{oppgaveId}")
-                .buildAndExpand(oppgaveId)
+                .pathSegment(oppgaveId)
+                .build()
                 .toUri()
 
         val res =
