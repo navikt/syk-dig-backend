@@ -130,22 +130,14 @@ class NasjonalOppgaveController(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-
-        val sykmelding = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
-        if (sykmelding != null) {
-            log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
-            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(sykmelding))
-        }
         log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
         val ferdigstiltSykmeldingRequest = smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
         val papirManuellOppgave = ferdigstiltSykmeldingRequest.body
         if (papirManuellOppgave != null) {
             securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
             nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
-            return ferdigstiltSykmeldingRequest
         }
-        log.info("Fant ingen ferdigstilte sykmeldinger med sykmeldingId {}", sykmeldingId)
-        return ResponseEntity.notFound().build()
+        return ferdigstiltSykmeldingRequest
     }
 
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
@@ -164,10 +156,18 @@ class NasjonalOppgaveController(
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<String> {
-        //TODO  lagre i lokal DB -- mappe papirSykmelding -> papirManuellOppgave
-//        nasjonalOppgaveService.lagreOppgave(papirSykmelding)
         log.info("papirsykmelding: Korrrigerer sykmelding med id $sykmeldingId gjennom syk-dig proxy")
-        return smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
+        val res =  smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
+
+        // Temporary fix to ensure local DB is updated and in sync. When korrigerSykmelding is moved to syk-dig this should be removed.
+        log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
+        val ferdigstiltSykmeldingRequest = smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
+        val papirManuellOppgave = ferdigstiltSykmeldingRequest.body
+        if (papirManuellOppgave != null) {
+            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
+            nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
+        }
+        return res
     }
 
     @GetMapping("/pdf/{oppgaveId}/{dokumentInfoId}")

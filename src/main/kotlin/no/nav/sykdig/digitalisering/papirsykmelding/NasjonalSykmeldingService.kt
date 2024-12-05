@@ -113,7 +113,6 @@ class NasjonalSykmeldingService(
         avvisningsgrunn: String?,
     ): ResponseEntity<Any> {
         if (validationResult.status == Status.OK || validationResult.status == Status.MANUAL_PROCESSING) {
-//            val veileder = oppgaveSecurityService.getNavIdent()
             val veileder = Veileder(oppgaveSecurityService.getNavEmail())
             if (ferdigstillRegistrering.oppgaveId != null) {
                 journalpostService.ferdigstillNasjonalJournalpost(
