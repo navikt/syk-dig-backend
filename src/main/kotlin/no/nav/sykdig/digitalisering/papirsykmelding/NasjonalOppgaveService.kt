@@ -21,9 +21,9 @@ import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
 
@@ -111,7 +111,7 @@ class NasjonalOppgaveService(
         oppgaveId: Int,
         request: String,
         navEnhet: String,
-    ): ResponseEntity<NasjonalManuellOppgaveDAO>  {
+    ): ResponseEntity<HttpStatusCode>  {
             val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
 
             val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
@@ -119,7 +119,7 @@ class NasjonalOppgaveService(
                 val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
 
                 ferdigstillNasjonalAvvistOppgave(oppgaveId, navEnhet, avvisningsgrunn, veilederIdent)
-                val res = oppdaterOppgave(
+                oppdaterOppgave(
                     eksisterendeOppgave.sykmeldingId,
                     utfall = Utfall.AVVIST.toString(),
                     ferdigstiltAv = veilederIdent,
@@ -127,7 +127,7 @@ class NasjonalOppgaveService(
                 )
 
                 log.info("Har avvist oppgave med oppgaveId $oppgaveId")
-                return ResponseEntity(res, HttpStatus.NO_CONTENT)
+                return ResponseEntity(HttpStatus.NO_CONTENT)
             } else {
                 log.info("fant ikke oppgave som skulle avvises")
                 return ResponseEntity(HttpStatus.NOT_FOUND)
@@ -232,8 +232,6 @@ fun mapToDao(
     }
 
 
-    // kom frå jpservice
-@Transactional
 fun ferdigstillNasjonalAvvistOppgave(
     oppgaveId: Int,
     navEnhet: String,

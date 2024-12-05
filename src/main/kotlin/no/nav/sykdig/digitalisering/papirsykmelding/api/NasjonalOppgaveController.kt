@@ -44,7 +44,7 @@ class NasjonalOppgaveController(
         @PathVariable oppgaveId: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody avvisSykmeldingRequest: String,
-    ): ResponseEntity<NasjonalManuellOppgaveDAO> {
+    ): ResponseEntity<HttpStatusCode> {
         log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
         return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, navEnhet)
     }
