@@ -92,7 +92,7 @@ class NasjonalSykmeldingService(
                 sykmeldingId = sykmeldingId,
                 sykmelder = sykmelder,
                 navEnhet = navEnhet,
-                veileder = Veileder(oppgaveSecurityService.getNavEmail()),
+                veileder = oppgaveSecurityService.getNavIdent(),
                 avvist = false,
                 oppgave = null,
             )
@@ -112,7 +112,7 @@ class NasjonalSykmeldingService(
         avvisningsgrunn: String?,
     ): ResponseEntity<Any> {
         if (validationResult.status == Status.OK || validationResult.status == Status.MANUAL_PROCESSING) {
-            val veileder = Veileder(oppgaveSecurityService.getNavEmail())
+            val veileder = oppgaveSecurityService.getNavIdent()
             if (ferdigstillRegistrering.oppgaveId != null) {
                 journalpostService.ferdigstillNasjonalJournalpost(
                     ferdigstillRegistrering = ferdigstillRegistrering,
