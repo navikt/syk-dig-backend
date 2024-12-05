@@ -67,10 +67,6 @@ class NasjonalOppgaveService(
         return updated
     }
 
-    fun isValidOppgaveId(oppgaveId: String): Boolean {
-        val regex = Regex("^\\d{9}$|^[a-zA-Z0-9]{1,20}$")
-        return oppgaveId.matches(regex)
-    }
 
     fun findByOppgaveId(oppgaveId: String): NasjonalManuellOppgaveDAO? {
         if(!isValidOppgaveId(oppgaveId))
@@ -268,4 +264,9 @@ private fun getLoggingMeta(sykmeldingId: String, oppgave: NasjonalManuellOppgave
         journalpostId = oppgave.journalpostId,
     )
 }
+}
+
+fun isValidOppgaveId(oppgaveId: String): Boolean {
+    val regex = Regex("^\\d{9}$|^[a-zA-Z0-9]{1,20}$")
+    return oppgaveId.matches(regex)
 }
