@@ -67,8 +67,15 @@ class NasjonalOppgaveService(
         return updated
     }
 
-    fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO? {
-        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
+    fun isValidOppgaveId(oppgaveId: String): Boolean {
+        val regex = Regex("^\\d{9}$|^[a-zA-Z0-9]{1,20}$")
+        return oppgaveId.matches(regex)
+    }
+
+    fun findByOppgaveId(oppgaveId: String): NasjonalManuellOppgaveDAO? {
+        if(!isValidOppgaveId(oppgaveId))
+            throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
+        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt())
 
         if (oppgave == null) return null
         return oppgave
@@ -82,7 +89,7 @@ class NasjonalOppgaveService(
     }
 
     fun getNasjonalOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO {
-        val oppgave = findByOppgaveId(oppgaveId.toInt())
+        val oppgave = findByOppgaveId(oppgaveId)
         if (oppgave == null) {
             log.warn("Fant ikke oppgave med id $oppgaveId")
             throw NoOppgaveException("Fant ikke oppgave")

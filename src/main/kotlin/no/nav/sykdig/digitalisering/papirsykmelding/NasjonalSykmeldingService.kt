@@ -59,7 +59,7 @@ class NasjonalSykmeldingService(
         )
     }
 
-    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: Int): ResponseEntity<Any> {
+    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): ResponseEntity<Any> {
         val oppgave = nasjonalOppgaveService.findByOppgaveId(oppgaveId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         val sykmeldingId = oppgave.sykmeldingId
         log.info("Forsøker å ferdigstille papirsykmelding med sykmeldingId $sykmeldingId")
@@ -85,21 +85,20 @@ class NasjonalSykmeldingService(
 
         val ferdigstillRegistrering =
             FerdigstillRegistrering(
-                oppgaveId = oppgaveId,
+                oppgaveId = oppgaveId.toInt(),
                 journalpostId = journalpostId,
                 dokumentInfoId = dokumentInfoId,
                 pasientFnr = receivedSykmelding.personNrPasient,
                 sykmeldingId = sykmeldingId,
                 sykmelder = sykmelder,
                 navEnhet = navEnhet,
-//                veileder = oppgaveSecurityService.getNavIdent(),
                 veileder = Veileder(oppgaveSecurityService.getNavEmail()),
                 avvist = false,
                 oppgave = null,
             )
 
         if (!validationResult.ruleHits.isWhitelisted()) {
-            return handleBrokenRule(validationResult, oppgaveId)
+            return handleBrokenRule(validationResult, oppgaveId.toInt())
         }
 
         return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta, null)

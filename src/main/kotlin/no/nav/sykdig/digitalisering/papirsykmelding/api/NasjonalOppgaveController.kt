@@ -56,7 +56,8 @@ class NasjonalOppgaveController(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-        val nasjonalOppgave = nasjonalOppgaveService.findByOppgaveId(oppgaveId.toInt())
+
+        val nasjonalOppgave = nasjonalOppgaveService.findByOppgaveId(oppgaveId)
         if (nasjonalOppgave != null) {
             log.info("papirsykmelding: henter oppgave med id $oppgaveId fra syk-dig-db")
             return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(nasjonalOppgave))
@@ -120,7 +121,7 @@ class NasjonalOppgaveController(
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<Any> {
         val callId = UUID.randomUUID().toString()
-        return nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId.toInt())
+        return nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId)
 
     }
 
