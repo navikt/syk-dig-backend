@@ -9,6 +9,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgav
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
@@ -75,7 +76,7 @@ class NasjonalOppgaveController(
         }
         log.info(
             "Fant ingen uløste manuelle oppgaver med oppgaveid {}",
-            StructuredArguments.keyValue("oppgaveId", oppgaveId)
+            StructuredArguments.keyValue("oppgaveId", oppgaveId),
         )
         return ResponseEntity.notFound().build()
     }
@@ -147,11 +148,10 @@ class NasjonalOppgaveController(
         }
         log.info(
             "Fant ingen ferdigstilte sykmeldinger med sykmeldingId {}",
-            StructuredArguments.keyValue("sykmeldingId", sykmeldingId)
+            StructuredArguments.keyValue("sykmeldingId", sykmeldingId),
         )
         return ResponseEntity.notFound().build()
     }
-
 
 
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
@@ -171,16 +171,16 @@ class NasjonalOppgaveController(
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<String> {
         log.info("papirsykmelding: Korrrigerer sykmelding med id $sykmeldingId gjennom syk-dig proxy")
-        val res =  smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
+        val res = smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
 
-        // Temporary fix to ensure local DB is updated and in sync. When korrigerSykmelding is moved to syk-dig this should be removed.
-        log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
-        val ferdigstiltSykmeldingRequest = smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
-        val papirManuellOppgave = ferdigstiltSykmeldingRequest.body
-        if (papirManuellOppgave != null) {
-            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
-            nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
-        }
+        securelog.info("Oppdaterer korrigert oppgave i syk-dig-backend db $papirSykmelding")
+        nasjonalOppgaveService.oppdaterOppgave(
+            sykmeldingId = sykmeldingId,
+            utfall = Utfall.OK.toString(),
+            ferdigstiltAv = nasjonalOppgaveService.getVeilederIdent(),
+            avvisningsgrunn = null,
+            smRegistreringManuell = papirSykmelding,
+        )
         return res
     }
 

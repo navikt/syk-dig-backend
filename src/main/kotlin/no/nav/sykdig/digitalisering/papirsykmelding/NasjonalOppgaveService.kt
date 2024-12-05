@@ -148,6 +148,10 @@ class NasjonalOppgaveService(
         oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
     }
 
+    fun getVeilederIdent(): String {
+        return oppgaveSecurityService.getNavIdent().veilederIdent
+    }
+
     fun avvisOppgave(
         oppgaveId: Int,
         request: String,
