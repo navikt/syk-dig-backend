@@ -60,13 +60,13 @@ class SmregistreringClient(
     ): ResponseEntity<PapirManuellOppgave> {
         if(!isValidOppgaveId(oppgaveId))
             throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
+        log.info("OppgveId is valid: $oppgaveId")
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(removeBearerPrefix(authorization))
         val uri =
             UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/{oppgaveId}")
-                .pathSegment(oppgaveId)
-                .build()
+                .buildAndExpand(oppgaveId)
                 .toUri()
 
         val res =
@@ -76,6 +76,7 @@ class SmregistreringClient(
                 HttpEntity<String>(headers),
                 PapirManuellOppgave::class.java,
             )
+        log.info("papirsykmelding: Body from proxy call to smreg ${res.body} ")
         return res
     }
 
@@ -90,8 +91,7 @@ class SmregistreringClient(
 
         val uri =
             UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelder/{hprNummer}")
-                .pathSegment(hprNummer)
-                .build()
+                .buildAndExpand(hprNummer)
                 .toUri()
 
         return smregisteringRestTemplate.exchange(
