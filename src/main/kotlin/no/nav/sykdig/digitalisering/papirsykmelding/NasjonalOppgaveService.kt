@@ -49,6 +49,7 @@ class NasjonalOppgaveService(
         }
         val res = nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
         log.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id}")
+        securelog.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id} og som dette objetket: $res")
         return res
     }
 
@@ -136,6 +137,7 @@ fun mapToDao(
     existingId: UUID?,
 ): NasjonalManuellOppgaveDAO {
     mapper.registerModules(JavaTimeModule())
+    securelog.info("Mapper til DAO: $papirManuellOppgave")
 
     val nasjonalManuellOppgaveDAO =
         NasjonalManuellOppgaveDAO(
