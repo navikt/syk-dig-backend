@@ -178,7 +178,7 @@ class SmregistreringClient(
         sykmeldingId: String,
         navEnhet: String,
         papirSykmelding: SmRegistreringManuell,
-    ): ResponseEntity<String> {
+    ): ResponseEntity<Any> {
         val headers = HttpHeaders()
         headers.set("X-Nav-Enhet", navEnhet)
         headers.contentType = MediaType.APPLICATION_JSON
@@ -192,7 +192,7 @@ class SmregistreringClient(
                 uri,
                 HttpMethod.POST,
                 HttpEntity(papirSykmelding, headers),
-                String::class.java,
+                Any::class.java,
             )
         log.info("Korrigering av sykmelding $sykmeldingId fikk følgende responskode ${res.statusCode}")
         return res
