@@ -131,15 +131,27 @@ class NasjonalOppgaveController(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
+        val sykmelding = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
+        if (sykmelding != null) {
+            log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
+            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(sykmelding))
+        }
         log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
         val ferdigstiltSykmeldingRequest = smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
         val papirManuellOppgave = ferdigstiltSykmeldingRequest.body
         if (papirManuellOppgave != null) {
             securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
             nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
+            return ferdigstiltSykmeldingRequest
         }
-        return ferdigstiltSykmeldingRequest
+        log.info(
+            "Fant ingen ferdigstilte sykmeldinger med sykmeldingId {}",
+            StructuredArguments.keyValue("sykmeldingId", sykmeldingId)
+        )
+        return ResponseEntity.notFound().build()
     }
+
+
 
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
     fun sendOppgaveTilGosys(
