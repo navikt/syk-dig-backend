@@ -13,6 +13,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Document
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
@@ -49,23 +50,66 @@ class NasjonalOppgaveService(
         }
         val res = nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
         log.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id}")
-        securelog.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id} og som dette objetket: $res")
+        securelog.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id} og som dette objektet: $res")
         return res
     }
 
-    fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?): NasjonalManuellOppgaveDAO? {
-        val updated = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)?.copy(
+    fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, smRegistreringManuell: SmRegistreringManuell?): NasjonalManuellOppgaveDAO? {
+//        val updated = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)?.copy(
+//            utfall = utfall,
+//            ferdigstiltAv = ferdigstiltAv,
+//            avvisningsgrunn = avvisningsgrunn,
+//            datoFerdigstilt = LocalDateTime.now(),
+//            ferdigstilt = true,
+//
+//
+//        )
+//        when (updated) {
+//            null -> log.info("Sykmelding $sykmeldingId not found ")
+//            else -> {
+//                securelog.info("Lagret oppgave med sykmeldingId ${updated.sykmeldingId} og med database id ${updated?.id} og som dette objektet: $updated")
+//                nasjonalOppgaveRepository.save(updated)
+//            }
+//        }
+//        return updated
+
+        val existingOppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
+
+        if (existingOppgave == null) {
+            log.info("Sykmelding $sykmeldingId not found")
+            return null
+        }
+
+        val updatedOppgave = existingOppgave.copy(
             utfall = utfall,
             ferdigstiltAv = ferdigstiltAv,
             avvisningsgrunn = avvisningsgrunn,
             datoFerdigstilt = LocalDateTime.now(),
             ferdigstilt = true,
+            papirSmRegistrering = mapToUpdatedPapirSmRegistrering(existingOppgave, smRegistreringManuell)
         )
-        when (updated) {
-            null -> log.info("Sykmelding $sykmeldingId not found ")
-            else -> nasjonalOppgaveRepository.save(updated)
-        }
-        return updated
+
+        securelog.info("Lagret oppgave med sykmeldingId ${updatedOppgave.sykmeldingId} og med database id ${updatedOppgave.id} som dette objektet: $updatedOppgave")
+        return nasjonalOppgaveRepository.save(updatedOppgave)
+    }
+
+    private fun mapToUpdatedPapirSmRegistrering(existingOppgave: NasjonalManuellOppgaveDAO, smRegistreringManuell: SmRegistreringManuell?): PapirSmRegistering {
+        val updatedPapirSmRegistrering = existingOppgave.papirSmRegistrering.copy(
+            meldingTilArbeidsgiver = smRegistreringManuell?.meldingTilArbeidsgiver
+                ?: existingOppgave.papirSmRegistrering.meldingTilArbeidsgiver,
+            medisinskVurdering = smRegistreringManuell?.medisinskVurdering ?: existingOppgave.papirSmRegistrering.medisinskVurdering,
+            meldingTilNAV = smRegistreringManuell?.meldingTilNAV ?: existingOppgave.papirSmRegistrering.meldingTilNAV,
+            arbeidsgiver = smRegistreringManuell?.arbeidsgiver ?: existingOppgave.papirSmRegistrering.arbeidsgiver,
+            kontaktMedPasient = smRegistreringManuell?.kontaktMedPasient ?: existingOppgave.papirSmRegistrering.kontaktMedPasient,
+            perioder = smRegistreringManuell?.perioder ?: existingOppgave.papirSmRegistrering.perioder,
+            behandletTidspunkt = smRegistreringManuell?.behandletDato ?: existingOppgave.papirSmRegistrering.behandletTidspunkt,
+            syketilfelleStartDato = smRegistreringManuell?.syketilfelleStartDato ?: existingOppgave.papirSmRegistrering.syketilfelleStartDato,
+            behandler = smRegistreringManuell?.behandler ?: existingOppgave.papirSmRegistrering.behandler,
+            skjermesForPasient = smRegistreringManuell?.skjermesForPasient ?: existingOppgave.papirSmRegistrering.skjermesForPasient,
+        )
+
+        securelog.info("Updated papirSmRegistrering: $updatedPapirSmRegistrering to be saved in syk-dig-backend db nasjonal_manuellOppgave")
+        return updatedPapirSmRegistrering
     }
 
 
@@ -121,6 +165,7 @@ class NasjonalOppgaveService(
                     utfall = Utfall.AVVIST.toString(),
                     ferdigstiltAv = veilederIdent,
                     avvisningsgrunn = avvisningsgrunn,
+                    null
                 )
 
                 log.info("Har avvist oppgave med oppgaveId $oppgaveId")
