@@ -169,7 +169,7 @@ class NasjonalOppgaveController(
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<String> {
         log.info("papirsykmelding: Korrrigerer sykmelding med id $sykmeldingId gjennom syk-dig proxy")
         val res = smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
 
