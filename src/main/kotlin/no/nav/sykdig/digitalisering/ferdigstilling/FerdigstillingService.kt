@@ -193,9 +193,9 @@ class FerdigstillingService(
 
             oppgaveClient.ferdigstillOppgave(oppgave.oppgaveId.toString(), oppgave.sykmeldingId)
 
-            dokumentService.updateDocumentTitle(
-                oppgaveId = oppgave.oppgaveId.toString(),
-                dokumentInfoId = oppgave.dokumentInfoId,
+            dokarkivClient.updateDocument(
+                journalpostid = oppgave.journalpostId,
+                documentId = oppgave.dokumentInfoId,
                 tittel = createTitleNasjonal(oppgave.papirSmRegistrering.perioder, true),
             )
         }
