@@ -57,13 +57,13 @@ class NasjonalOppgaveController(
     fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
-    ): ResponseEntity<Any> { // return type i body må være noko anna då? ?????????????????????????????????????????????????????
+    ): ResponseEntity<Any> {
         val papirManuellOppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization)
 
         if (papirManuellOppgave != null) {
             if(papirManuellOppgave.ferdigstilt) {
                 log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
-                return ResponseEntity.status(HttpStatus.GONE).body("Oppgave med id $oppgaveId er allerede ferdigstilt")
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Oppgave med id $oppgaveId er allerede ferdigstilt")
             }
             return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(papirManuellOppgave))
         }
