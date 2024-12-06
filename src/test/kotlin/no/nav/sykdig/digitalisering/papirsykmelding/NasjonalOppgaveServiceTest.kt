@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolder
@@ -104,7 +103,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
     @Test
     fun `avvis oppgave blir oppdatert og lagra i DB`() {
-        val oppgaveId = 123
+        val oppgaveId = "123"
         val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
         val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
 
@@ -132,7 +131,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         Mockito.doNothing().`when`(documentService).updateDocumentTitle(org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.any())
 
         assertTrue(originalOppgave.avvisningsgrunn == null)
-        val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request,  "enhet")
+        val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request,  "enhet", "auth")
         assertEquals(avvistOppgave.statusCode, HttpStatus.NO_CONTENT)
     }
 
@@ -200,7 +199,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         )
     }
 
-    private fun testDataOppgaveDbModel(oppgaveId: Int): OppgaveDbModel {
+    private fun testDataOppgaveDbModel(oppgaveId: String): OppgaveDbModel {
         return OppgaveDbModel(
             oppgaveId = oppgaveId.toString(),
             fnr = "fnr",
