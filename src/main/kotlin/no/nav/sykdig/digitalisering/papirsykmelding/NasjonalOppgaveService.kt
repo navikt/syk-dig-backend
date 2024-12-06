@@ -19,7 +19,6 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.PersonService
-import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatus

@@ -58,7 +58,12 @@ class NasjonalOppgaveController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
         val papirManuellOppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization)
+
         if (papirManuellOppgave != null) {
+            if(papirManuellOppgave.ferdigstilt) {
+                log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
+                return ResponseEntity.noContent().build()
+            }
             return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(papirManuellOppgave))
         }
 
