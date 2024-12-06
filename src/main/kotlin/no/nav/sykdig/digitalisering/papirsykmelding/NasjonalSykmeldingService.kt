@@ -59,9 +59,10 @@ class NasjonalSykmeldingService(
         )
     }
 
-    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): ResponseEntity<Any> {
-        val oppgave = nasjonalOppgaveService.findByOppgaveId(oppgaveId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String, authorization: String): ResponseEntity<Any> {
+        val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         if (oppgave.ferdigstilt) {
+            log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
         val sykmeldingId = oppgave.sykmeldingId

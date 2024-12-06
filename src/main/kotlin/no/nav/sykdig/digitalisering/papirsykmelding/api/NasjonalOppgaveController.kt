@@ -44,10 +44,11 @@ class NasjonalOppgaveController(
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
+        @RequestHeader("Authorization") authorization: String,
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<HttpStatusCode> {
         log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
-        return nasjonalOppgaveService.avvisOppgave(oppgaveId.toInt(), avvisSykmeldingRequest, navEnhet)
+        return nasjonalOppgaveService.avvisOppgave(oppgaveId, avvisSykmeldingRequest, navEnhet, authorization)
     }
 
     @GetMapping("/oppgave/{oppgaveId}")
@@ -57,27 +58,11 @@ class NasjonalOppgaveController(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-
-        val nasjonalOppgave = nasjonalOppgaveService.findByOppgaveId(oppgaveId)
-        if (nasjonalOppgave != null) {
-            log.info("papirsykmelding: henter oppgave med id $oppgaveId fra syk-dig-db")
-            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(nasjonalOppgave))
-        }
-        log.info("papirsykmelding: henter oppgave med id $oppgaveId gjennom syk-dig proxy")
-        val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
-        log.info("har hentet papirManuellOppgave via syk-dig proxy")
-
-        val papirManuellOppgave = oppgave.body
+        val papirManuellOppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization)
         if (papirManuellOppgave != null) {
-            log.info("har hentet papirManuellOppgave via syk-dig proxy og oppgaven er ikke null")
-            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
-            nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
-            return oppgave
+            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(papirManuellOppgave))
         }
-        log.info(
-            "Fant ingen uløste manuelle oppgaver med oppgaveid {}",
-            StructuredArguments.keyValue("oppgaveId", oppgaveId),
-        )
+
         return ResponseEntity.notFound().build()
     }
 
@@ -122,7 +107,7 @@ class NasjonalOppgaveController(
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<Any> {
         val callId = UUID.randomUUID().toString()
-        return nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId)
+        return nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId, authorization)
 
     }
 

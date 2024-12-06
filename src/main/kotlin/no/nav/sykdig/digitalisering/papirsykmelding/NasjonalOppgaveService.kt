@@ -8,6 +8,7 @@ import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.mapAvvisningsgrunn
+import no.nav.sykdig.digitalisering.papirsykmelding.api.SmregistreringClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Document
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
@@ -35,6 +36,7 @@ class NasjonalOppgaveService(
     private val oppgaveSecurityService: OppgaveSecurityService,
     private val personService: PersonService,
     private val ferdigstillingService: FerdigstillingService,
+    private val smregistreringClient: SmregistreringClient,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -113,12 +115,11 @@ class NasjonalOppgaveService(
     }
 
 
-    fun findByOppgaveId(oppgaveId: String): NasjonalManuellOppgaveDAO? {
+    private fun findByOppgaveId(oppgaveId: String): NasjonalManuellOppgaveDAO? {
         if(!isValidOppgaveId(oppgaveId))
             throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
-        val oppgave = nasjonalOppgaveRepository.findByOppgaveIdAndFerdigstiltIsFalse(oppgaveId.toInt())
+        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt()) ?: return null
 
-        if (oppgave == null) return null
         return oppgave
     }
 
@@ -132,7 +133,7 @@ class NasjonalOppgaveService(
     fun getNasjonalOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO {
         val oppgave = findByOppgaveId(oppgaveId)
         if (oppgave == null) {
-            log.warn("Fant ikke oppgave med id $oppgaveId")
+            log.warn("Fant ikke oppgave med id $oppgaveId Den kan kanskje være ferdigstilt fra før")
             throw NoOppgaveException("Fant ikke oppgave")
         }
         log.info("Hentet oppgave med id $oppgaveId")
@@ -152,21 +153,48 @@ class NasjonalOppgaveService(
         return oppgaveSecurityService.getNavIdent().veilederIdent
     }
 
+    fun getOppgave(oppgaveId: String, authorization: String): NasjonalManuellOppgaveDAO? {
+        val nasjonalOppgave = findByOppgaveId(oppgaveId)
+        if (nasjonalOppgave != null) {
+            log.info("papirsykmelding: henter oppgave med id $oppgaveId fra syk-dig-db")
+            return nasjonalOppgave
+        }
+        log.info("papirsykmelding: henter oppgave med id $oppgaveId gjennom syk-dig proxy")
+        val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
+        log.info("har hentet papirManuellOppgave via syk-dig proxy")
+
+        val papirManuellOppgave = oppgave.body
+        if (papirManuellOppgave != null) {
+            log.info("har hentet papirManuellOppgave via syk-dig proxy og oppgaven er ikke null")
+            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
+            val lagretOppgave = lagreOppgave(papirManuellOppgave)
+            return lagretOppgave
+        }
+        log.info("Finner ikke uløst oppgave med id $oppgaveId")
+        return null
+    }
     fun avvisOppgave(
-        oppgaveId: Int,
+        oppgaveId: String,
         request: String,
         navEnhet: String,
+        authorization: String
     ): ResponseEntity<HttpStatusCode>  {
-            val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveIdAndFerdigstiltIsFalse(oppgaveId)
+        val eksisterendeOppgave = getOppgave(oppgaveId, authorization)
+
             if(eksisterendeOppgave == null) {
                 log.info("Fant ikke oppgave som skulle avvises: $oppgaveId")
                 return ResponseEntity(HttpStatus.NOT_FOUND)
             }
 
+            if(eksisterendeOppgave.ferdigstilt) {
+                log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
+                return ResponseEntity(HttpStatus.NO_CONTENT)
+            }
+
             val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
             val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
 
-            ferdigstillNasjonalAvvistOppgave(oppgaveId, navEnhet, avvisningsgrunn, veilederIdent)
+            ferdigstillNasjonalAvvistOppgave(eksisterendeOppgave, navEnhet, avvisningsgrunn, veilederIdent)
             oppdaterOppgave(
                 eksisterendeOppgave.sykmeldingId,
                 utfall = Utfall.AVVIST.toString(),
@@ -280,12 +308,11 @@ fun mapToDao(
 
 
 fun ferdigstillNasjonalAvvistOppgave(
-    oppgaveId: Int,
+    oppgave: NasjonalManuellOppgaveDAO,
     navEnhet: String,
     avvisningsgrunn: String?,
     veilederIdent: String,
 ) {
-    val oppgave = getNasjonalOppgave(oppgaveId.toString())
     if (oppgave.fnr != null) {
         val sykmeldt =
             personService.getPerson(
@@ -302,7 +329,7 @@ fun ferdigstillNasjonalAvvistOppgave(
         )
 
     } else {
-        log.error("Fant ikke fnr for oppgave med id $oppgaveId")
+        log.error("Fant ikke fnr for oppgave med id $oppgave.oppgaveId")
     }
 }
 
