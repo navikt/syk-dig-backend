@@ -130,8 +130,26 @@ class NasjonalOppgaveService(
         oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
     }
 
-    fun getVeilederIdent(): String {
-        return nasjonalCommonService.getNavIdent().veilederIdent
+    fun getOppgaveBySykmeldingId(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {
+        val sykmelding = findBySykmeldingId(sykmeldingId)
+
+        if (sykmelding != null) {
+            log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
+            securelog.info("hentet nasjonalOppgave fra db $sykmelding")
+            return sykmelding
+        }
+        log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
+        val ferdigstiltSykmeldingRequest = smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
+        val papirManuellOppgave = ferdigstiltSykmeldingRequest.body
+        if (papirManuellOppgave != null) {
+            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
+            val lagretOppgave = lagreOppgave(papirManuellOppgave, ferdigstilt = true)
+            return lagretOppgave
+        }
+        log.info(
+            "Fant ingen ferdigstilte sykmeldinger med sykmeldingId $sykmeldingId",
+        )
+        return null
     }
 
     fun getOppgave(oppgaveId: String, authorization: String): NasjonalManuellOppgaveDAO? {

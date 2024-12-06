@@ -51,6 +51,19 @@ class OppgaveSecurityService(
             return false
         }
 
+    //TODO fix this
+        fun hasAccessToSykmelding(sykmeldingId: String, authorization: String): Boolean {
+            securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
+            val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
+            val navEmail = nasjonalCommonService.getNavEmail()
+            val fnr = oppgave?.fnr
+            if (oppgave != null && fnr != null) {
+                val tilgang = hasAccess(fnr, navEmail)
+                securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId")
+                return tilgang
+            }
+            return false
+    }
         fun hasAccessToSykmelding(sykmeldingId: String): Boolean {
             securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
             val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)

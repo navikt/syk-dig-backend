@@ -1,8 +1,8 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
+import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalCommonService
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalSykmeldingService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
@@ -35,6 +35,7 @@ class NasjonalOppgaveController(
     private val sykmelderService: SykmelderService,
     private val personService: PersonService,
     private val nasjonalSykmeldingService: NasjonalSykmeldingService,
+    private val nasjonalCommonService: NasjonalCommonService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -123,25 +124,14 @@ class NasjonalOppgaveController(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-        val sykmelding = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
-
-        if (sykmelding != null) {
-            log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
-            securelog.info("hentert nasjonalOppgave fra db $sykmelding")
-            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(sykmelding))
+        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(sykmeldingId, authorization)
+        if (oppgave != null) {
+            if(!oppgave.ferdigstilt) {
+                log.info("Oppgave med id $sykmeldingId er ikke ferdigstilt")
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+            }
+            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(oppgave))
         }
-        log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
-        val ferdigstiltSykmeldingRequest = smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
-        val papirManuellOppgave = ferdigstiltSykmeldingRequest.body
-        if (papirManuellOppgave != null) {
-            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
-            nasjonalOppgaveService.lagreOppgave(papirManuellOppgave, ferdigstilt = true)
-            return ferdigstiltSykmeldingRequest
-        }
-        log.info(
-            "Fant ingen ferdigstilte sykmeldinger med sykmeldingId {}",
-            StructuredArguments.keyValue("sykmeldingId", sykmeldingId),
-        )
         return ResponseEntity.notFound().build()
     }
 
@@ -170,7 +160,7 @@ class NasjonalOppgaveController(
         nasjonalOppgaveService.oppdaterOppgave(
             sykmeldingId = sykmeldingId,
             utfall = Utfall.OK.toString(),
-            ferdigstiltAv = nasjonalOppgaveService.getVeilederIdent(),
+            ferdigstiltAv = nasjonalCommonService.getNavIdent().veilederIdent,
             avvisningsgrunn = null,
             smRegistreringManuell = papirSykmelding,
         )
