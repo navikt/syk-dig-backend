@@ -123,6 +123,7 @@ class NasjonalOppgaveController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
         val sykmelding = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
+
         if (sykmelding != null) {
             log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
             securelog.info("hentert nasjonalOppgave fra db $sykmelding")
@@ -133,7 +134,7 @@ class NasjonalOppgaveController(
         val papirManuellOppgave = ferdigstiltSykmeldingRequest.body
         if (papirManuellOppgave != null) {
             securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
-            nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
+            nasjonalOppgaveService.lagreOppgave(papirManuellOppgave, ferdigstilt = true)
             return ferdigstiltSykmeldingRequest
         }
         log.info(

@@ -41,15 +41,15 @@ class NasjonalOppgaveService(
     val securelog = securelog()
     val mapper = jacksonObjectMapper()
 
-    fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave): NasjonalManuellOppgaveDAO {
+    fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave, ferdigstilt: Boolean = false): NasjonalManuellOppgaveDAO {
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
         securelog.info("Forsøkte å hente eksisterende oppgave med sykmeldingId ${papirManuellOppgave.sykmeldingId} , fant følgende: $eksisterendeOppgave")
 
         if (eksisterendeOppgave != null) {
             log.info("Fant eksisterende oppgave med sykmeldingId ${papirManuellOppgave.sykmeldingId} , oppdaterer oppgave med database id ${eksisterendeOppgave.id}")
-            return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.id))
+            return nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, eksisterendeOppgave.id, ferdigstilt))
         }
-        val res = nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null))
+        val res = nasjonalOppgaveRepository.save(mapToDao(papirManuellOppgave, null, ferdigstilt))
         log.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id}")
         securelog.info("Lagret oppgave med sykmeldingId ${res.sykmeldingId} og med database id ${eksisterendeOppgave?.id} og som dette objektet: $res")
         return res
@@ -193,6 +193,7 @@ class NasjonalOppgaveService(
 fun mapToDao(
     papirManuellOppgave: PapirManuellOppgave,
     existingId: UUID?,
+    ferdigstilt: Boolean = false
 ): NasjonalManuellOppgaveDAO {
     mapper.registerModules(JavaTimeModule())
     securelog.info("Mapper til DAO: $papirManuellOppgave")
@@ -206,7 +207,7 @@ fun mapToDao(
             dokumentInfoId = papirManuellOppgave.papirSmRegistering.dokumentInfoId,
             datoOpprettet = papirManuellOppgave.papirSmRegistering.datoOpprettet?.toLocalDateTime(),
             oppgaveId = papirManuellOppgave.oppgaveid,
-            ferdigstilt = false,
+            ferdigstilt = ferdigstilt,
             papirSmRegistrering =
                 PapirSmRegistering(
                     journalpostId = papirManuellOppgave.papirSmRegistering.journalpostId,
