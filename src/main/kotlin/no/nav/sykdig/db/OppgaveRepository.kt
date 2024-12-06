@@ -3,11 +3,11 @@ package no.nav.sykdig.db
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
-import no.nav.sykdig.digitalisering.sykmelding.AktivitetIkkeMulig
-import no.nav.sykdig.digitalisering.sykmelding.Diagnose
-import no.nav.sykdig.digitalisering.sykmelding.Gradert
-import no.nav.sykdig.digitalisering.sykmelding.MedisinskVurdering
-import no.nav.sykdig.digitalisering.sykmelding.Periode
+import no.nav.sykdig.digitalisering.felles.AktivitetIkkeMulig
+import no.nav.sykdig.digitalisering.felles.Diagnose
+import no.nav.sykdig.digitalisering.felles.Gradert
+import no.nav.sykdig.digitalisering.felles.MedisinskVurdering
+import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.sykmelding.UtenlandskSykmelding
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.PeriodeInput

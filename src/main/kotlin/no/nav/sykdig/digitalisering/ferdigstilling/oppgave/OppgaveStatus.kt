@@ -1,6 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
-enum class Oppgavestatus {
+enum class OppgaveStatus {
     OPPRETTET,
     AAPNET,
     UNDER_BEHANDLING,

@@ -1,12 +1,19 @@
 package no.nav.sykdig.digitalisering.sykmelding.service
 
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.sykdig.LoggingMeta
+import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
+import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalCommonService
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
 import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.digitalisering.saf.SafJournalpostService
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKEPENGER
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.digitalisering.saf.graphql.Type
+import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.sykmelding.db.JournalpostSykmeldingRepository
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Journalpost
@@ -24,9 +31,13 @@ class JournalpostService(
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val journalpostSykmeldingRepository: JournalpostSykmeldingRepository,
     private val metricRegister: MetricRegister,
+    private val safJournalpostService: SafJournalpostService,
+    private val dokarkivClient: DokarkivClient,
+    private val nasjonalCommonService: NasjonalCommonService,
 ) {
     companion object {
         private val securelog = securelog()
+        private val log = applog()
     }
 
     fun createSykmeldingFromJournalpost(
@@ -65,7 +76,7 @@ class JournalpostService(
                 )
         val fnr = personService.getPerson(fnrEllerAktorId, journalpostId).fnr
         val aktorId = personService.getPerson(fnrEllerAktorId, journalpostId).aktorId
-        val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr, aktorId)
+        val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr, aktorId, nasjonalCommonService.getNavEmail())
 
         securelog.info(
             "oppretter sykmelding fra journalpost {} {} {} {}",
@@ -120,6 +131,33 @@ class JournalpostService(
             fnr = fnr,
         )
     }
+    suspend fun ferdigstillNasjonalJournalpost(
+        ferdigstillRegistrering: FerdigstillRegistrering,
+        receivedSykmelding: ReceivedSykmelding,
+        loggingMeta: LoggingMeta,
+    ) {
+        if (
+            safJournalpostService.erIkkeJournalfort(journalpostId = ferdigstillRegistrering.journalpostId)
+        ) {
+            dokarkivClient.oppdaterOgFerdigstillNasjonalJournalpost(
+                journalpostId = ferdigstillRegistrering.journalpostId,
+                dokumentInfoId = ferdigstillRegistrering.dokumentInfoId,
+                pasientFnr = ferdigstillRegistrering.pasientFnr,
+                sykmeldingId = ferdigstillRegistrering.sykmeldingId,
+                sykmelder = ferdigstillRegistrering.sykmelder,
+                loggingMeta = loggingMeta,
+                navEnhet = ferdigstillRegistrering.navEnhet,
+                avvist = ferdigstillRegistrering.avvist,
+                receivedSykmelding = receivedSykmelding
+            )
+        } else {
+            log.info(
+                "Hopper over oppdaterOgFerdigstillJournalpost, " +
+                        "journalpostId ${ferdigstillRegistrering.journalpostId} er allerede journalført",
+            )
+        }
+    }
+
 
     fun isSykmeldingCreated(id: String): Boolean {
         return journalpostSykmeldingRepository.getJournalpostSykmelding(id) != null

@@ -7,13 +7,9 @@ import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.regelvalidering.RegelvalideringService
-import no.nav.sykdig.digitalisering.sykmelding.Sykmelding
 import no.nav.sykdig.generated.types.Avvisingsgrunn
-import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatus
-import no.nav.sykdig.generated.types.DigitaliseringsoppgaveStatusEnum
 import no.nav.sykdig.generated.types.OppdatertSykmeldingStatus
 import no.nav.sykdig.generated.types.OppdatertSykmeldingStatusEnum
-import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
 import no.nav.sykdig.metrics.MetricRegister
 import no.nav.sykdig.model.OppgaveDbModel
 import org.springframework.stereotype.Service
@@ -83,7 +79,7 @@ class UtenlandskOppgaveService(
             throw ClientException(valideringsresultat.joinToString())
         }
 
-        sykDigOppgaveService.ferdigstillOppgave(oppgave, navEpost, values, enhetId, sykmeldt)
+        sykDigOppgaveService.ferdigstillUtenlandskAvvistOppgave(oppgave, navEpost, values, enhetId, sykmeldt)
         metricRegister.ferdigstiltOppgave.increment()
     }
 

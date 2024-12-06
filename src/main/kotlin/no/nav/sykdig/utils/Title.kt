@@ -1,6 +1,6 @@
 package no.nav.sykdig.utils
 
-import no.nav.sykdig.digitalisering.sykmelding.Periode
+import no.nav.sykdig.digitalisering.felles.Periode
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -30,6 +30,15 @@ fun createTitle(
     }
 }
 
+fun createTitleNasjonal(
+    perioder: List<Periode>?,
+    avvist: Boolean,
+): String {
+    if (avvist && perioder != null) return "Avvist papirsykmelding ${getFomTomTekst(perioder)}"
+    if (perioder == null) return "Papirsykmelding"
+    return "Papirsykmelding ${getFomTomTekst(perioder)}"
+}
+
 fun createTitleNavNo(
     perioder: List<Periode>?,
     avvisningsGrunn: String?,
@@ -45,7 +54,7 @@ fun createTitleNavNo(
 
 private fun getFomTomTekst(perioder: List<Periode>) =
     "${formaterDato(perioder.sortedSykmeldingPeriodeFOMDate().first().fom)} -" +
-        " ${formaterDato(perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
+            " ${formaterDato(perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
 
 fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> = sortedBy { it.fom }
 

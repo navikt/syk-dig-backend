@@ -1,5 +1,7 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
@@ -14,24 +16,24 @@ import java.util.UUID
 
 class NasjonalOppgaveRepositoryTest : IntegrationTest() {
     @Test
-    fun `given New NasjonalOppgave opprett og hent`() {
+    fun `given New NasjonalOppgave opprett og hent`() = runBlocking {
         val savedOppgave = nasjonalOppgaveRepository.save(testData(null, "123"))
         val retrievedOppgave = nasjonalOppgaveRepository.findBySykmeldingId(savedOppgave.sykmeldingId)
-        Assertions.assertTrue(retrievedOppgave.isPresent)
-        assertEquals(savedOppgave.sykmeldingId, retrievedOppgave.get().sykmeldingId)
+        Assertions.assertNotNull(retrievedOppgave)
+        assertEquals(savedOppgave.sykmeldingId, retrievedOppgave?.sykmeldingId)
     }
 
     @Test
-    fun `insert two instances with same sykmeldingId`() {
+    fun `insert two instances with same sykmeldingId`() = runBlocking {
         nasjonalOppgaveRepository.save(testData(null, "1"))
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId("1")
-        nasjonalOppgaveRepository.save(testData(eksisterendeOppgave.get().id, "1"))
+        nasjonalOppgaveRepository.save(testData(eksisterendeOppgave?.id, "1"))
         val retrievedOppgave = nasjonalOppgaveRepository.findAll()
         assertEquals(1, retrievedOppgave.count())
     }
 
     @Test
-    fun `insert two instances with unique id`() {
+    fun `insert two instances with unique id`() = runBlocking {
         nasjonalOppgaveRepository.save(testData(null, "3"))
         nasjonalOppgaveRepository.save(testData(null, "4"))
         val retrievedOppgave = nasjonalOppgaveRepository.findAll()
@@ -39,7 +41,7 @@ class NasjonalOppgaveRepositoryTest : IntegrationTest() {
     }
 
     @BeforeEach
-    fun setup() {
+    fun setup() = runBlocking {
         nasjonalOppgaveRepository.deleteAll()
     }
 

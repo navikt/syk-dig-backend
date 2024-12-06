@@ -1,61 +1,46 @@
-package no.nav.sykdig.digitalisering.ferdigstilling.mapping
+package no.nav.syfo.service
 
+import java.time.LocalDateTime
 import no.nav.helse.sm2013.Address
 import no.nav.helse.sm2013.ArsakType
 import no.nav.helse.sm2013.CS
 import no.nav.helse.sm2013.CV
 import no.nav.helse.sm2013.HelseOpplysningerArbeidsuforhet
-import no.nav.sykdig.digitalisering.felles.Adresse
-import no.nav.sykdig.digitalisering.felles.AktivitetIkkeMulig
-import no.nav.sykdig.digitalisering.felles.AnnenFraverGrunn
-import no.nav.sykdig.digitalisering.felles.AnnenFraversArsak
-import no.nav.sykdig.digitalisering.felles.Arbeidsgiver
-import no.nav.sykdig.digitalisering.felles.ArbeidsrelatertArsak
-import no.nav.sykdig.digitalisering.felles.ArbeidsrelatertArsakType
-import no.nav.sykdig.digitalisering.felles.AvsenderSystem
-import no.nav.sykdig.digitalisering.felles.Behandler
-import no.nav.sykdig.digitalisering.felles.Diagnose
-import no.nav.sykdig.digitalisering.felles.Gradert
-import no.nav.sykdig.digitalisering.felles.HarArbeidsgiver
-import no.nav.sykdig.digitalisering.felles.KontaktMedPasient
-import no.nav.sykdig.digitalisering.felles.MedisinskArsak
-import no.nav.sykdig.digitalisering.felles.MedisinskArsakType
-import no.nav.sykdig.digitalisering.felles.MedisinskVurdering
-import no.nav.sykdig.digitalisering.felles.MeldingTilNAV
-import no.nav.sykdig.digitalisering.felles.Periode
-import no.nav.sykdig.digitalisering.felles.SporsmalSvar
-import no.nav.sykdig.digitalisering.felles.SvarRestriksjon
-import no.nav.sykdig.digitalisering.felles.Sykmelding
-import java.time.LocalDateTime
+import no.nav.sykdig.digitalisering.felles.*
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.*
 
 fun HelseOpplysningerArbeidsuforhet.toSykmelding(
     sykmeldingId: String,
     pasientAktoerId: String,
+    legeAktoerId: String,
     msgId: String,
     signaturDato: LocalDateTime,
-) = Sykmelding(
-    id = sykmeldingId,
-    msgId = msgId,
-    pasientAktoerId = pasientAktoerId,
-    medisinskVurdering = medisinskVurdering.toMedisinskVurdering(),
-    skjermesForPasient = medisinskVurdering?.isSkjermesForPasient ?: false,
-    arbeidsgiver = arbeidsgiver.toArbeidsgiver(),
-    perioder = aktivitet.periode.map(HelseOpplysningerArbeidsuforhet.Aktivitet.Periode::toPeriode),
-    prognose = null,
-    utdypendeOpplysninger = if (utdypendeOpplysninger != null) utdypendeOpplysninger.toMap() else emptyMap(),
-    tiltakArbeidsplassen = null,
-    tiltakNAV = null,
-    andreTiltak = null,
-    meldingTilNAV = meldingTilNav?.toMeldingTilNAV(),
-    meldingTilArbeidsgiver = meldingTilArbeidsgiver,
-    kontaktMedPasient = kontaktMedPasient.toKontaktMedPasient(),
-    behandletTidspunkt = kontaktMedPasient.behandletDato,
-    behandler = behandler.toBehandler(),
-    avsenderSystem = avsenderSystem.toAvsenderSystem(),
-    syketilfelleStartDato = syketilfelleStartDato,
-    signaturDato = signaturDato,
-    navnFastlege = pasient?.navnFastlege,
-)
+) =
+    Sykmelding(
+        id = sykmeldingId,
+        msgId = msgId,
+        pasientAktoerId = pasientAktoerId,
+        medisinskVurdering = medisinskVurdering.toMedisinskVurdering(),
+        skjermesForPasient = medisinskVurdering?.isSkjermesForPasient ?: false,
+        arbeidsgiver = arbeidsgiver.toArbeidsgiver(),
+        perioder =
+            aktivitet.periode.map(HelseOpplysningerArbeidsuforhet.Aktivitet.Periode::toPeriode),
+        prognose = null,
+        utdypendeOpplysninger =
+            if (utdypendeOpplysninger != null) utdypendeOpplysninger.toMap() else emptyMap(),
+        tiltakArbeidsplassen = null,
+        tiltakNAV = null,
+        andreTiltak = null,
+        meldingTilNAV = meldingTilNav?.toMeldingTilNAV(),
+        meldingTilArbeidsgiver = meldingTilArbeidsgiver,
+        kontaktMedPasient = kontaktMedPasient.toKontaktMedPasient(),
+        behandletTidspunkt = kontaktMedPasient.behandletDato,
+        behandler = behandler.toBehandler(legeAktoerId),
+        avsenderSystem = avsenderSystem.toAvsenderSystem(),
+        syketilfelleStartDato = syketilfelleStartDato,
+        signaturDato = signaturDato,
+        navnFastlege = pasient?.navnFastlege,
+    )
 
 fun HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.toPeriode() =
     Periode(
@@ -103,6 +88,7 @@ fun CV.toDiagnose() = Diagnose(s, v, dn)
 fun ArsakType.toAnnenFraversArsak() =
     AnnenFraversArsak(
         beskrivelse = beskriv,
+        // TODO: Remove if-wrapping whenever the EPJ systems stops sending garbage data
         grunn =
             arsakskode.mapNotNull { code ->
                 if (code.v == null || code.v == "0") {
@@ -113,6 +99,7 @@ fun ArsakType.toAnnenFraversArsak() =
             },
     )
 
+// TODO: Remove if-wrapping whenever the EPJ systems stops sending garbage data
 fun CS.toMedisinskArsakType() =
     if (v == null || v == "0") {
         null
@@ -120,6 +107,7 @@ fun CS.toMedisinskArsakType() =
         MedisinskArsakType.entries.first { it.codeValue == v.trim() }
     }
 
+// TODO: Remove if-wrapping whenever the EPJ systems stops sending garbage data
 fun CS.toArbeidsrelatertArsakType() =
     if (v == null || v == "0") {
         null
@@ -127,19 +115,29 @@ fun CS.toArbeidsrelatertArsakType() =
         ArbeidsrelatertArsakType.entries.first { it.codeValue == v }
     }
 
+// TODO: Remove mapNotNull whenever the EPJ systems stops sending garbage data
 fun HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.toMap() =
-    spmGruppe.associate { spmGruppe ->
-        spmGruppe.spmGruppeId to
-            spmGruppe.spmSvar.associate { svar ->
-                svar.spmId to
-                    SporsmalSvar(
-                        sporsmal = svar.spmTekst,
-                        svar = svar.svarTekst,
-                        restriksjoner = svar.restriksjon?.restriksjonskode?.mapNotNull(CS::toSvarRestriksjon) ?: listOf(),
-                    )
-            }
-    }
+    spmGruppe
+        .map { spmGruppe ->
+            spmGruppe.spmGruppeId to
+                spmGruppe.spmSvar
+                    .map { svar ->
+                        svar.spmId to
+                            SporsmalSvar(
+                                sporsmal = svar.spmTekst,
+                                svar = svar.svarTekst,
+                                restriksjoner =
+                                    svar.restriksjon
+                                        ?.restriksjonskode
+                                        ?.mapNotNull(CS::toSvarRestriksjon)
+                                        ?: listOf()
+                            )
+                    }
+                    .toMap()
+        }
+        .toMap()
 
+// TODO: Remove if-wrapping whenever the EPJ systems stops sending garbage data
 fun CS.toSvarRestriksjon() =
     if (v.isNullOrBlank()) {
         null
@@ -156,12 +154,14 @@ fun Address.toAdresse() =
         land = country?.v,
     )
 
+// TODO: Remove mapNotNull whenever the EPJ systems stops sending garbage data
 fun ArsakType.toArbeidsrelatertArsak() =
     ArbeidsrelatertArsak(
         beskrivelse = beskriv,
         arsak = arsakskode.mapNotNull(CS::toArbeidsrelatertArsakType),
     )
 
+// TODO: Remove mapNotNull whenever the EPJ systems stops sending garbage data
 fun ArsakType.toMedisinskArsak() =
     MedisinskArsak(
         beskrivelse = beskriv,
@@ -180,13 +180,13 @@ fun HelseOpplysningerArbeidsuforhet.KontaktMedPasient.toKontaktMedPasient() =
         begrunnelseIkkeKontakt = begrunnIkkeKontakt,
     )
 
-fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler() =
+fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler(aktoerId: String) =
     Behandler(
-        fornavn = navn.fornavn ?: "",
+        fornavn = navn.fornavn,
         mellomnavn = navn.mellomnavn,
-        etternavn = navn.etternavn ?: "",
-        aktoerId = "",
-        fnr = id.find { it.typeId.v == "FNR" }?.id ?: id.find { it.typeId.v == "DNR" }?.id ?: "",
+        etternavn = navn.etternavn,
+        aktoerId = aktoerId,
+        fnr = id.find { it.typeId.v == "FNR" }?.id ?: id.find { it.typeId.v == "DNR" }?.id!!,
         hpr = id.find { it.typeId.v == "HPR" }?.id,
         her = id.find { it.typeId.v == "HER" }?.id,
         adresse = adresse.toAdresse(),

@@ -1,13 +1,13 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.db.model
 
 import jakarta.persistence.GeneratedValue
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelding
+import no.nav.sykdig.digitalisering.felles.Sykmelding
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 
 @Table(name = "nasjonal_sykmelding")
 open class NasjonalSykmeldingDAO(

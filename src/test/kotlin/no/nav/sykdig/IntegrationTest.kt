@@ -2,6 +2,7 @@ package no.nav.sykdig
 
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
+import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalSykmeldingRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,6 +27,9 @@ abstract class IntegrationTest {
 
     @Autowired
     lateinit var nasjonalOppgaveRepository: NasjonalOppgaveRepository
+
+    @Autowired
+    lateinit var nasjonalSykmeldingRepository: NasjonalSykmeldingRepository
 
     @Autowired
     lateinit var oppgaveRepository: OppgaveRepository

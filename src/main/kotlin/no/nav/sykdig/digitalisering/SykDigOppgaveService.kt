@@ -13,9 +13,8 @@ import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
 import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.digitalisering.saf.graphql.DokumentInfo
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
-import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
-import no.nav.sykdig.digitalisering.tilgangskontroll.getNavEmail
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.model.DokumentDbModel
 import no.nav.sykdig.model.OppgaveDbModel
@@ -35,59 +34,28 @@ class SykDigOppgaveService(
     private val log = applog()
     private val securelog = securelog()
 
-    private fun createOppgave(oppgaveId: String, fnr: String, journalpostId: String, journalpost: SafJournalpost, dokumentInfoId: String, source: String = "syk-dig"): OppgaveDbModel {
-        val dokumenter = journalpost.dokumenter.map {
-            val oppdatertTittel = if (it.tittel == "Utenlandsk sykmelding") {
-                "Digitalisert utenlandsk sykmelding"
-            } else {
-                it.tittel ?: "Mangler Tittel"
-            }
-            DokumentDbModel(it.dokumentInfoId, oppdatertTittel)
-        }
-
-        return OppgaveDbModel(
-            oppgaveId = oppgaveId,
-            fnr = fnr,
-            journalpostId = journalpostId,
-            dokumentInfoId = dokumentInfoId,
-            dokumenter = dokumenter,
-            opprettet = OffsetDateTime.now(ZoneOffset.UTC),
-            ferdigstilt = null,
-            tilbakeTilGosys = false,
-            avvisingsgrunn = null,
-            sykmeldingId = UUID.randomUUID(),
-            type = UTLAND,
-            sykmelding = null,
-            endretAv = getNavEmail(),
-            timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-            source = source,
-        )
-    }
 
     fun opprettOgLagreOppgave(
         journalpost: SafJournalpost,
         journalpostId: String,
         fnr: String,
         aktoerId: String,
+        navEpost: String,
     ): String {
-        val response =
-            oppgaveClient.opprettOppgave(
-                journalpostId = journalpostId,
-                aktoerId = aktoerId,
-            )
-
-        val oppgaveId = response.id.toString()
-        val dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId
-        val tittel = journalpost.tittel.lowercase().contains("egenerklæring")
-        securelog.info("is egenarklaring: $tittel journalpostId: $journalpostId")
-        val oppgave = createOppgave(
-            oppgaveId = oppgaveId,
-            fnr = fnr,
+        val opprettetOppgave = oppgaveClient.opprettOppgave(
             journalpostId = journalpostId,
-            journalpost = journalpost,
-            dokumentInfoId = dokumentInfoId,
-            source = if (journalpost.kanal == "NAV_NO" || tittel) "navno" else if (journalpost.kanal == "RINA") "rina" else "syk-dig"
+            aktoerId = aktoerId,
         )
+        val oppgaveId = opprettetOppgave.id.toString()
+
+        val oppgave = buildOppgaveModel(
+            oppgaveId = oppgaveId,
+            journalpost = journalpost,
+            journalpostId = journalpostId,
+            fnr = fnr,
+            navEpost = navEpost,
+        )
+
         oppgaveRepository.lagreOppgave(oppgave)
         log.info("Oppgave med id $oppgaveId lagret")
         return oppgaveId
@@ -211,7 +179,7 @@ class SykDigOppgaveService(
     ) {
         val sykmelding = oppgaveRepository.getLastSykmelding(oppgave.oppgaveId)
         oppgaveRepository.ferdigstillAvvistOppgave(oppgave, navEpost, sykmelding, avvisningsgrunn)
-        ferdigstillingService.ferdigstillAvvistJournalpost(
+        ferdigstillingService.ferdigstillUtenlandskAvvistJournalpost(
             enhet = enhetId,
             oppgave = oppgave,
             sykmeldt = sykmeldt,
@@ -220,7 +188,7 @@ class SykDigOppgaveService(
     }
 
     @Transactional
-    fun ferdigstillOppgave(
+    fun ferdigstillUtenlandskAvvistOppgave(
         oppgave: OppgaveDbModel,
         navEpost: String,
         values: FerdistilltRegisterOppgaveValues,
@@ -230,7 +198,7 @@ class SykDigOppgaveService(
         val sykmelding = toSykmelding(oppgave, values)
 
         oppgaveRepository.updateOppgave(oppgave, sykmelding, navEpost, true)
-        ferdigstillingService.ferdigstill(
+        ferdigstillingService.ferdigstillUtenlandskOppgave(
             enhet = enhetId,
             oppgave = oppgave,
             sykmeldt = sykmeldt,
@@ -245,6 +213,56 @@ class SykDigOppgaveService(
         log.info("updated sykmelding in db")
 
         ferdigstillingService.sendUpdatedSykmelding(oppgave, sykmeldt, navEmail, values)
+    }
+
+    private fun buildOppgaveModel(
+        oppgaveId: String,
+        journalpost: SafJournalpost,
+        journalpostId: String,
+        fnr: String,
+        navEpost: String,
+    ): OppgaveDbModel {
+        val dokumentInfoId = journalpost.dokumenter.first().dokumentInfoId
+        val dokumenter = buildDokumenter(journalpost.dokumenter)
+        val source = determineSource(journalpost)
+
+        return OppgaveDbModel(
+            oppgaveId = oppgaveId,
+            fnr = fnr,
+            journalpostId = journalpostId,
+            dokumentInfoId = dokumentInfoId,
+            dokumenter = dokumenter,
+            opprettet = OffsetDateTime.now(ZoneOffset.UTC),
+            ferdigstilt = null,
+            tilbakeTilGosys = false,
+            avvisingsgrunn = null,
+            sykmeldingId = UUID.randomUUID(),
+            type = UTLAND,
+            sykmelding = null,
+            endretAv = navEpost,
+            timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+            source = source,
+        )
+    }
+
+    private fun buildDokumenter(dokumenter: List<DokumentInfo>): List<DokumentDbModel> {
+        return dokumenter.map {
+            val oppdatertTittel = if (it.tittel == "Utenlandsk sykmelding") {
+                "Digitalisert utenlandsk sykmelding"
+            } else {
+                it.tittel ?: "Mangler Tittel"
+            }
+            DokumentDbModel(it.dokumentInfoId, oppdatertTittel)
+        }
+    }
+
+    private fun determineSource(journalpost: SafJournalpost): String {
+        val isEgenerklaering = journalpost.tittel.lowercase().contains("egenerklæring")
+        return when {
+            journalpost.kanal == "NAV_NO" || isEgenerklaering -> "navno"
+            journalpost.kanal == "RINA" -> "rina"
+            else -> "syk-dig"
+        }
     }
 
     companion object {

@@ -56,6 +56,12 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sykmelder not found")
     }
 
+    @ExceptionHandler(MissingJournalpostException::class)
+    fun handleMissingJournalpostException(e: MissingJournalpostException): ResponseEntity<String> {
+        log.error("Journalpost is missing: ${e.message}", e)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Journalpost is missing")
+    }
+
     @ExceptionHandler(UnauthorizedException::class)
     fun handleUnAuthorizedException(e: UnauthorizedException): ResponseEntity<String> {
         log.warn("Caught UnauthorizedException ${e.message}", e)

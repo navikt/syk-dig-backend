@@ -6,19 +6,22 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.digitalisering.helsenett.client.HelsenettClient
+import no.nav.sykdig.digitalisering.helsenett.client.SmtssClient
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Godkjenning
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Kode
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.digitalisering.pdl.client.PdlClient
 import org.amshove.kluent.internal.assertFailsWith
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class SykmelderServiceTest {
-    private val pdlService = mockk<PersonService>()
     private val helsenettClient = mockk<HelsenettClient>()
-    private val sykmelderService = SykmelderService(helsenettClient, pdlService)
+    private val personService = mockk<PersonService>()
+    private val smtssClient = mockk<SmtssClient>()
+    private val sykmelderService = SykmelderService(helsenettClient, personService, smtssClient)
 
     @Test
     fun `get sykmelder happy case`() {
@@ -47,7 +50,7 @@ class SykmelderServiceTest {
             etternavn = etternavn
         )
 
-        coEvery { pdlService.getPerson(any(), any()) } returns expectedPerson
+        coEvery { personService.getPerson(any(), any()) } returns expectedPerson
         coEvery { helsenettClient.getBehandler(hprNummer, "callid") } returns expectedBehandler
 
         val sykmelder = runBlocking { sykmelderService.getSykmelder(hprNummer, "callid") }
@@ -58,7 +61,7 @@ class SykmelderServiceTest {
         assertEquals(mellomnavn, sykmelder.mellomnavn)
         assertEquals(etternavn, sykmelder.etternavn)
 
-        coVerify { pdlService.getPerson(any(), any()) }
+        coVerify { personService.getPerson(any(), any()) }
         coVerify { helsenettClient.getBehandler(hprNummer, "callid") }
     }
 
@@ -79,7 +82,7 @@ class SykmelderServiceTest {
             fodselsdato = null
         )
 
-        coEvery { pdlService.getPerson(any(), any()) } returns expectedPerson
+        coEvery { personService.getPerson(any(), any()) } returns expectedPerson
         coEvery { helsenettClient.getBehandler(hprNummer, "callid") } throws SykmelderNotFoundException("Kunne ikke hente fnr for hpr $hprNummer")
 
         val exception = runBlocking { assertFailsWith<SykmelderNotFoundException> { sykmelderService.getSykmelder(hprNummer, "callid") } }

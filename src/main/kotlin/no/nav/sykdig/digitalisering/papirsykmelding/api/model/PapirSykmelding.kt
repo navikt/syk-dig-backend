@@ -1,12 +1,20 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api.model
 
+import no.nav.sykdig.digitalisering.felles.Arbeidsgiver
+import no.nav.sykdig.digitalisering.felles.Behandler
+import no.nav.sykdig.digitalisering.felles.KontaktMedPasient
+import no.nav.sykdig.digitalisering.felles.MedisinskVurdering
+import no.nav.sykdig.digitalisering.felles.MeldingTilNAV
+import no.nav.sykdig.digitalisering.felles.Periode
+import no.nav.sykdig.digitalisering.felles.Prognose
+import no.nav.sykdig.digitalisering.felles.SporsmalSvar
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
 data class PapirManuellOppgave(
     val fnr: String?,
     val sykmeldingId: String,
-    val oppgaveid: Int,
+    val oppgaveid: Int?,
     var pdfPapirSykmelding: ByteArray,
     val papirSmRegistering: PapirSmRegistering,
     val documents: List<Document>,
@@ -47,9 +55,9 @@ data class AvvisSykmeldingRequest(
 )
 
 data class Sykmelder(
-    val hprNummer: String?,
-    val fnr: String?,
-    val aktorId: String?,
+    val hprNummer: String,
+    val fnr: String,
+    val aktorId: String,
     val fornavn: String?,
     val mellomnavn: String?,
     val etternavn: String?,
