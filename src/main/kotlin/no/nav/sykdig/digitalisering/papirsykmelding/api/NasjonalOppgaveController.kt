@@ -12,6 +12,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PostAuthorize
@@ -56,13 +57,13 @@ class NasjonalOppgaveController(
     fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
-    ): ResponseEntity<PapirManuellOppgave> {
+    ): ResponseEntity<Any> { // return type i body må være noko anna då? ?????????????????????????????????????????????????????
         val papirManuellOppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization)
 
         if (papirManuellOppgave != null) {
             if(papirManuellOppgave.ferdigstilt) {
                 log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
-                return ResponseEntity.noContent().build()
+                return ResponseEntity.status(HttpStatus.GONE).body("Oppgave med id $oppgaveId er allerede ferdigstilt")
             }
             return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(papirManuellOppgave))
         }
