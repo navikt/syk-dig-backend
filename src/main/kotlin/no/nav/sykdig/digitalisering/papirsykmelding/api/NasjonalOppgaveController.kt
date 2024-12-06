@@ -117,6 +117,7 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/sykmelding/{sykmeldingId}/ferdigstilt")
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
     @ResponseBody
     fun getFerdigstiltSykmelding(
         @PathVariable sykmeldingId: String,
@@ -155,6 +156,7 @@ class NasjonalOppgaveController(
     }
 
     @PostMapping("/sykmelding/{sykmeldingId}")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
     fun korrigerSykmelding(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
