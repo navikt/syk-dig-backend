@@ -61,6 +61,9 @@ class NasjonalSykmeldingService(
 
     suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): ResponseEntity<Any> {
         val oppgave = nasjonalOppgaveService.findByOppgaveId(oppgaveId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        if (oppgave.ferdigstilt) {
+            return ResponseEntity(HttpStatus.NO_CONTENT)
+        }
         val sykmeldingId = oppgave.sykmeldingId
         log.info("Forsøker å ferdigstille papirsykmelding med sykmeldingId $sykmeldingId")
 

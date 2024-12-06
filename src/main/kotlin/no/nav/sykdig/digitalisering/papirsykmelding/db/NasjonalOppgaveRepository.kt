@@ -13,4 +13,5 @@ import java.util.UUID
 interface NasjonalOppgaveRepository : CrudRepository<NasjonalManuellOppgaveDAO, UUID> {
     fun findBySykmeldingId(sykmeldingId: String): NasjonalManuellOppgaveDAO?
     fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO?
+    fun findByOppgaveIdAndFerdigstiltIsFalse(oppgaveId: Int): NasjonalManuellOppgaveDAO?
 }

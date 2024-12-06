@@ -116,7 +116,7 @@ class NasjonalOppgaveService(
     fun findByOppgaveId(oppgaveId: String): NasjonalManuellOppgaveDAO? {
         if(!isValidOppgaveId(oppgaveId))
             throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
-        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt())
+        val oppgave = nasjonalOppgaveRepository.findByOppgaveIdAndFerdigstiltIsFalse(oppgaveId.toInt())
 
         if (oppgave == null) return null
         return oppgave
@@ -157,27 +157,27 @@ class NasjonalOppgaveService(
         request: String,
         navEnhet: String,
     ): ResponseEntity<HttpStatusCode>  {
-            val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
-
-            val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
-            if (eksisterendeOppgave != null) {
-                val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
-
-                ferdigstillNasjonalAvvistOppgave(oppgaveId, navEnhet, avvisningsgrunn, veilederIdent)
-                oppdaterOppgave(
-                    eksisterendeOppgave.sykmeldingId,
-                    utfall = Utfall.AVVIST.toString(),
-                    ferdigstiltAv = veilederIdent,
-                    avvisningsgrunn = avvisningsgrunn,
-                    null
-                )
-
-                log.info("Har avvist oppgave med oppgaveId $oppgaveId")
-                return ResponseEntity(HttpStatus.NO_CONTENT)
-            } else {
-                log.info("fant ikke oppgave som skulle avvises")
+            val eksisterendeOppgave = nasjonalOppgaveRepository.findByOppgaveIdAndFerdigstiltIsFalse(oppgaveId)
+            if(eksisterendeOppgave == null) {
+                log.info("Fant ikke oppgave som skulle avvises: $oppgaveId")
                 return ResponseEntity(HttpStatus.NOT_FOUND)
             }
+
+            val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
+            val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
+
+            ferdigstillNasjonalAvvistOppgave(oppgaveId, navEnhet, avvisningsgrunn, veilederIdent)
+            oppdaterOppgave(
+                eksisterendeOppgave.sykmeldingId,
+                utfall = Utfall.AVVIST.toString(),
+                ferdigstiltAv = veilederIdent,
+                avvisningsgrunn = avvisningsgrunn,
+                null
+            )
+
+            log.info("Har avvist oppgave med oppgaveId $oppgaveId")
+            return ResponseEntity(HttpStatus.NO_CONTENT)
+
         }
 
 
