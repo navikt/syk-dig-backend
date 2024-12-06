@@ -33,10 +33,10 @@ import java.util.*
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
     private val oppgaveClient: OppgaveClient,
-    private val oppgaveSecurityService: OppgaveSecurityService,
     private val personService: PersonService,
     private val ferdigstillingService: FerdigstillingService,
     private val smregistreringClient: SmregistreringClient,
+    private val nasjonalCommonService: NasjonalCommonService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -57,24 +57,6 @@ class NasjonalOppgaveService(
     }
 
     fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, smRegistreringManuell: SmRegistreringManuell?): NasjonalManuellOppgaveDAO? {
-//        val updated = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)?.copy(
-//            utfall = utfall,
-//            ferdigstiltAv = ferdigstiltAv,
-//            avvisningsgrunn = avvisningsgrunn,
-//            datoFerdigstilt = LocalDateTime.now(),
-//            ferdigstilt = true,
-//
-//
-//        )
-//        when (updated) {
-//            null -> log.info("Sykmelding $sykmeldingId not found ")
-//            else -> {
-//                securelog.info("Lagret oppgave med sykmeldingId ${updated.sykmeldingId} og med database id ${updated?.id} og som dette objektet: $updated")
-//                nasjonalOppgaveRepository.save(updated)
-//            }
-//        }
-//        return updated
-
         val existingOppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
 
         if (existingOppgave == null) {
@@ -150,7 +132,7 @@ class NasjonalOppgaveService(
     }
 
     fun getVeilederIdent(): String {
-        return oppgaveSecurityService.getNavIdent().veilederIdent
+        return nasjonalCommonService.getNavIdent().veilederIdent
     }
 
     fun getOppgave(oppgaveId: String, authorization: String): NasjonalManuellOppgaveDAO? {
@@ -192,7 +174,7 @@ class NasjonalOppgaveService(
             }
 
             val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
-            val veilederIdent = oppgaveSecurityService.getNavIdent().veilederIdent
+            val veilederIdent = nasjonalCommonService.getNavIdent().veilederIdent
 
             ferdigstillNasjonalAvvistOppgave(eksisterendeOppgave, navEnhet, avvisningsgrunn, veilederIdent)
             oppdaterOppgave(
@@ -313,6 +295,7 @@ fun ferdigstillNasjonalAvvistOppgave(
     avvisningsgrunn: String?,
     veilederIdent: String,
 ) {
+
     if (oppgave.fnr != null) {
         val sykmeldt =
             personService.getPerson(

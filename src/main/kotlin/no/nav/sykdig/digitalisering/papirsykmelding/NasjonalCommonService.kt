@@ -5,7 +5,6 @@ import no.nav.syfo.service.toSykmelding
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.felles.AvsenderSystem
-import no.nav.sykdig.digitalisering.felles.Behandler
 import no.nav.sykdig.digitalisering.felles.KontaktMedPasient
 import no.nav.sykdig.digitalisering.felles.Sykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.extractHelseOpplysningerArbeidsuforhet
@@ -16,6 +15,7 @@ import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Godkjenning
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.sykmelding.Merknad
@@ -23,17 +23,20 @@ import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.getLocalDateTime
 import no.nav.sykdig.utils.mapsmRegistreringManuelltTilFellesformat
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class NasjonalCommon(
+class NasjonalCommonService(
     private val sykmelderService: SykmelderService,
     private val personService: PersonService,
 ) {
 
     val log = applog()
     val securelog = securelog()
+
 
     suspend fun createReceivedSykmelding(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO, loggingMeta: LoggingMeta, smRegistreringManuell: SmRegistreringManuell, callId: String, sykmelder: Sykmelder): ReceivedSykmelding {
         log.info("Henter pasient fra PDL {} ", loggingMeta)
@@ -122,7 +125,15 @@ class NasjonalCommon(
                 verdi
             }
         }
+    fun getNavIdent(): Veileder {
+        val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        return Veileder(authentication.token.claims["NAVident"].toString())
+    }
 
+    fun getNavEmail(): String {
+        val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        return authentication.token.claims["preferred_username"].toString()
+    }
     private fun toSykmelding(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): Sykmelding {
         requireNotNull(oppgave.papirSmRegistrering.aktorId) { "PapirSmRegistrering.aktorId er null" }
         requireNotNull(oppgave.papirSmRegistrering.medisinskVurdering) { "PapirSmRegistrering.medisinskVurdering er null" }

@@ -8,7 +8,6 @@ import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalSykmeldingService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PersonService
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
+import java.util.*
 
 @RestController
 @RequestMapping("/api/v1/proxy")
@@ -40,7 +39,7 @@ class NasjonalOppgaveController(
     val securelog = securelog()
 
     @PostMapping("/oppgave/{oppgaveId}/avvis")
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
@@ -52,7 +51,7 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/oppgave/{oppgaveId}")
-    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
     @ResponseBody
     fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveId: String,
@@ -98,7 +97,7 @@ class NasjonalOppgaveController(
     }
 
     @PostMapping("/oppgave/{oppgaveId}/send")
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
     @ResponseBody
     suspend fun sendOppgave(
         @PathVariable oppgaveId: String,

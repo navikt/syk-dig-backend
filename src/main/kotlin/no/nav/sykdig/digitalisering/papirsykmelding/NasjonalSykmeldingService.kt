@@ -22,7 +22,6 @@ import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.digitalisering.sykmelding.Status
 import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
 import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
-import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.isWhitelisted
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -42,8 +41,7 @@ class NasjonalSykmeldingService(
     private val journalpostService: JournalpostService,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val sykmelderService: SykmelderService,
-    private val oppgaveSecurityService: OppgaveSecurityService,
-    private val nasjonalCommon: NasjonalCommon,
+    private val nasjonalCommonService: NasjonalCommonService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -70,7 +68,7 @@ class NasjonalSykmeldingService(
 
         val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
         val sykmelder = getSykmelder(smRegistreringManuell, loggingMeta, callId)
-        val receivedSykmelding = nasjonalCommon.createReceivedSykmelding(sykmeldingId, oppgave, loggingMeta, smRegistreringManuell, callId, sykmelder)
+        val receivedSykmelding = nasjonalCommonService.createReceivedSykmelding(sykmeldingId, oppgave, loggingMeta, smRegistreringManuell, callId, sykmelder)
 
         val validationResult = regelClient.valider(receivedSykmelding, sykmeldingId)
         log.info(
@@ -96,7 +94,7 @@ class NasjonalSykmeldingService(
                 sykmeldingId = sykmeldingId,
                 sykmelder = sykmelder,
                 navEnhet = navEnhet,
-                veileder = oppgaveSecurityService.getNavIdent(),
+                veileder = nasjonalCommonService.getNavIdent(),
                 avvist = false,
                 oppgave = null,
             )
@@ -117,7 +115,7 @@ class NasjonalSykmeldingService(
         smRegistreringManuell: SmRegistreringManuell,
     ): ResponseEntity<Any> {
         if (validationResult.status == Status.OK || validationResult.status == Status.MANUAL_PROCESSING) {
-            val veileder = oppgaveSecurityService.getNavIdent()
+            val veileder = nasjonalCommonService.getNavIdent()
             if (ferdigstillRegistrering.oppgaveId != null) {
                 journalpostService.ferdigstillNasjonalJournalpost(
                     ferdigstillRegistrering = ferdigstillRegistrering,

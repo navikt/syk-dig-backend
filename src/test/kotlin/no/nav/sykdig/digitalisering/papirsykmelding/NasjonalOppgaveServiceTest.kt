@@ -21,7 +21,6 @@ import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
-import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.model.OppgaveDbModel
 import okhttp3.internal.EMPTY_BYTE_ARRAY
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -64,9 +63,6 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     lateinit var sykdigOppgaveService: SykDigOppgaveService
 
     @MockBean
-    lateinit var oppgaveSecurityService: OppgaveSecurityService
-
-    @MockBean
     lateinit var personService: PersonService
 
     @MockBean
@@ -83,6 +79,9 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
     @MockBean
     lateinit var documentService: DocumentService
+
+    @MockBean
+    lateinit var nasjonaCommonService: NasjonalCommonService
 
     @Autowired
     @Qualifier("smregisteringRestTemplate")
@@ -108,8 +107,10 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
 
         Mockito.`when`(sykdigOppgaveService.getOppgave(anyString())).thenReturn(testDataOppgaveDbModel(oppgaveId))
-        Mockito.`when`(oppgaveSecurityService.getNavIdent()).thenReturn(Veileder("veilederIdent"))
-        Mockito.`when`(oppgaveSecurityService.getNavEmail()).thenReturn("NavEmail")
+
+        Mockito.`when`(nasjonaCommonService.getNavEmail()).thenReturn("navEmail")
+        Mockito.`when`(nasjonaCommonService.getNavIdent()).thenReturn(Veileder("navIdent"))
+
         Mockito.`when`(personService.getPerson(anyString(), anyString())).thenReturn(testDataPerson())
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(anyString())).thenReturn(SafQueryJournalpost(null))
 
