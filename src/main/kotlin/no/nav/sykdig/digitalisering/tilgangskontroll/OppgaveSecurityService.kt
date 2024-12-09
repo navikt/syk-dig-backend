@@ -51,8 +51,7 @@ class OppgaveSecurityService(
             return false
         }
 
-    //TODO fix this
-        fun hasAccessToSykmelding(sykmeldingId: String, authorization: String): Boolean {
+        fun hasAccessToNasjonalSykmelding(sykmeldingId: String, authorization: String): Boolean {
             securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
             val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
             val navEmail = nasjonalCommonService.getNavEmail()
