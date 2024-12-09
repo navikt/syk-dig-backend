@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalCommonService
@@ -42,6 +43,7 @@ class NasjonalOppgaveController(
 
     @PostMapping("/oppgave/{oppgaveId}/avvis")
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
+    @WithSpan
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
@@ -55,6 +57,7 @@ class NasjonalOppgaveController(
     @GetMapping("/oppgave/{oppgaveId}")
     @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
     @ResponseBody
+    @WithSpan
     fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
@@ -106,6 +109,7 @@ class NasjonalOppgaveController(
     @PostMapping("/oppgave/{oppgaveId}/send")
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
     @ResponseBody
+    @WithSpan
     suspend fun sendOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
@@ -120,6 +124,7 @@ class NasjonalOppgaveController(
     @GetMapping("/sykmelding/{sykmeldingId}/ferdigstilt")
     @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization)")
     @ResponseBody
+    @WithSpan
     fun getFerdigstiltSykmelding(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
@@ -147,6 +152,7 @@ class NasjonalOppgaveController(
 
     @PostMapping("/sykmelding/{sykmeldingId}")
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization)")
+    @WithSpan
     fun korrigerSykmelding(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
