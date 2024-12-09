@@ -1,16 +1,22 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.api
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
+import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalCommonService
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
+import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalSykmeldingService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -20,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
+import java.util.*
 
 @RestController
 @RequestMapping("/api/v1/proxy")
@@ -29,35 +35,44 @@ class NasjonalOppgaveController(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val sykmelderService: SykmelderService,
     private val personService: PersonService,
+    private val nasjonalSykmeldingService: NasjonalSykmeldingService,
+    private val nasjonalCommonService: NasjonalCommonService,
 ) {
     val log = applog()
     val securelog = securelog()
 
     @PostMapping("/oppgave/{oppgaveId}/avvis")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
+    @WithSpan
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
-        @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
+        @RequestHeader("Authorization") authorization: String,
         @RequestBody avvisSykmeldingRequest: String,
     ): ResponseEntity<HttpStatusCode> {
-        log.info("papirsykmelding: avviser oppgave med id $oppgaveId gjennom syk-dig proxy")
-        return smregistreringClient.postAvvisOppgaveRequest(authorization, oppgaveId, navEnhet, avvisSykmeldingRequest)
+        log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
+        return nasjonalOppgaveService.avvisOppgave(oppgaveId, avvisSykmeldingRequest, navEnhet, authorization)
     }
 
-    @GetMapping("/oppgave/{oppgaveid}")
+    @GetMapping("/oppgave/{oppgaveId}")
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
     @ResponseBody
+    @WithSpan
     fun getPapirsykmeldingManuellOppgave(
-        @PathVariable oppgaveid: String,
+        @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
-    ): ResponseEntity<PapirManuellOppgave> {
-        log.info("papirsykmelding: henter oppgave med id $oppgaveid gjennom syk-dig proxy")
-        val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveid)
-        val papirManuellOppgave = oppgave.body
+    ): ResponseEntity<Any> {
+        val papirManuellOppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization)
+
         if (papirManuellOppgave != null) {
-            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
-            // nasjonalOppgaveService.lagreOppgave(papirManuellOppgave)
+            if(papirManuellOppgave.ferdigstilt) {
+                log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Oppgave med id $oppgaveId er allerede ferdigstilt")
+            }
+            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(papirManuellOppgave))
         }
-        return oppgave
+
+        return ResponseEntity.notFound().build()
     }
 
     @GetMapping("/pasient")
@@ -92,25 +107,39 @@ class NasjonalOppgaveController(
     }
 
     @PostMapping("/oppgave/{oppgaveId}/send")
-    fun sendOppgave(
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
+    @ResponseBody
+    @WithSpan
+    suspend fun sendOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
-    ): ResponseEntity<String> {
-        log.info("papirsykmelding: sender oppgave med oppgaveId $oppgaveId gjennom syk-dig proxy")
-        return smregistreringClient.postSendOppgaveRequest(authorization, oppgaveId, navEnhet, papirSykmelding)
+    ): ResponseEntity<Any> {
+        val callId = UUID.randomUUID().toString()
+        return nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId, authorization)
+
     }
 
     @GetMapping("/sykmelding/{sykmeldingId}/ferdigstilt")
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization)")
     @ResponseBody
+    @WithSpan
     fun getFerdigstiltSykmelding(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-        log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
-        return smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
+        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(sykmeldingId, authorization)
+        if (oppgave != null) {
+            if(!oppgave.ferdigstilt) {
+                log.info("Oppgave med id $sykmeldingId er ikke ferdigstilt")
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+            }
+            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(oppgave))
+        }
+        return ResponseEntity.notFound().build()
     }
+
 
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
     fun sendOppgaveTilGosys(
@@ -122,6 +151,8 @@ class NasjonalOppgaveController(
     }
 
     @PostMapping("/sykmelding/{sykmeldingId}")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization)")
+    @WithSpan
     fun korrigerSykmelding(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
@@ -129,7 +160,17 @@ class NasjonalOppgaveController(
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<String> {
         log.info("papirsykmelding: Korrrigerer sykmelding med id $sykmeldingId gjennom syk-dig proxy")
-        return smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
+        val res = smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
+
+        securelog.info("Oppdaterer korrigert oppgave i syk-dig-backend db $papirSykmelding")
+        nasjonalOppgaveService.oppdaterOppgave(
+            sykmeldingId = sykmeldingId,
+            utfall = Utfall.OK.toString(),
+            ferdigstiltAv = nasjonalCommonService.getNavIdent().veilederIdent,
+            avvisningsgrunn = null,
+            smRegistreringManuell = papirSykmelding,
+        )
+        return res
     }
 
     @GetMapping("/pdf/{oppgaveId}/{dokumentInfoId}")

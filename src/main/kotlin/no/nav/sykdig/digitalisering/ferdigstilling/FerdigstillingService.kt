@@ -1,12 +1,16 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
+import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
-import no.nav.sykdig.config.kafka.OK_SYKMLEDING_TOPIC
+import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.dokument.DocumentService
+import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
@@ -15,6 +19,7 @@ import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.createTitle
+import no.nav.sykdig.utils.createTitleNasjonal
 import no.nav.sykdig.utils.createTitleNavNo
 import no.nav.sykdig.utils.createTitleRina
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -28,11 +33,12 @@ class FerdigstillingService(
     private val oppgaveClient: OppgaveClient,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val dokumentService: DocumentService,
+    private val sykmelderService: SykmelderService,
 ) {
     val log = applog()
     val securelog = securelog()
 
-    fun ferdigstill(
+    fun ferdigstillUtenlandskOppgave(
         enhet: String,
         oppgave: OppgaveDbModel,
         sykmeldt: Person,
@@ -52,10 +58,10 @@ class FerdigstillingService(
         securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
-            updateAvvistTitle(oppgave, receivedSykmelding)
+            updateUtenlandskDocumentTitle(oppgave, receivedSykmelding, isAvvist = true)
         } else {
             val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
-            dokarkivClient.oppdaterOgFerdigstillJournalpost(
+            dokarkivClient.oppdaterOgFerdigstillUtenlandskJournalpost(
                 landAlpha3 = validatedValues.skrevetLand,
                 fnr = sykmeldt.fnr,
                 enhet = enhet,
@@ -71,15 +77,15 @@ class FerdigstillingService(
         }
 
         oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
-        updateTitle(oppgave, receivedSykmelding)
+        updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
 
         try {
             sykmeldingOKProducer.send(
-                ProducerRecord(OK_SYKMLEDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
+                ProducerRecord(OK_SYKMELDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
             ).get()
             log.info(
                 "Sykmelding sendt to kafka topic {} sykmelding id {}",
-                OK_SYKMLEDING_TOPIC,
+                OK_SYKMELDING_TOPIC,
                 receivedSykmelding.sykmelding.id,
             )
         } catch (exception: Exception) {
@@ -88,26 +94,12 @@ class FerdigstillingService(
         }
     }
 
-    private fun updateTitle(
-        oppgave: OppgaveDbModel,
-        receivedSykmelding: ReceivedSykmelding
-    ) {
-        updateDocumentTitle(oppgave, receivedSykmelding)
-    }
-
-    private fun updateAvvistTitle(
-        oppgave: OppgaveDbModel,
-        receivedSykmelding: ReceivedSykmelding
-    ) {
-        updateDocumentTitle(oppgave, receivedSykmelding, isAvvist = true)
-    }
-
-    private fun updateDocumentTitle(
+    private fun updateUtenlandskDocumentTitle(
         oppgave: OppgaveDbModel,
         receivedSykmelding: ReceivedSykmelding,
         isAvvist: Boolean = false
     ) {
-        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source} sykmeldignId: ${receivedSykmelding.sykmelding.id} ")
+        securelog.info("documents: ${oppgave.dokumenter.map { it.tittel }} source: ${oppgave.source} sykmeldingId: ${receivedSykmelding.sykmelding.id} ")
 
         val dokument = when {
             isAvvist -> oppgave.dokumenter.firstOrNull { it.tittel.lowercase().startsWith("avvist") }
@@ -141,11 +133,11 @@ class FerdigstillingService(
         }
     }
 
-    fun ferdigstillAvvistJournalpost(
+    fun ferdigstillUtenlandskAvvistJournalpost(
         enhet: String,
         oppgave: OppgaveDbModel,
         sykmeldt: Person,
-        avvisningsGrunn: String,
+        avvisningsGrunn: String?,
     ) {
         requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
         val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
@@ -155,7 +147,7 @@ class FerdigstillingService(
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
             val hentAvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
-            dokarkivClient.oppdaterOgFerdigstillJournalpost(
+            dokarkivClient.oppdaterOgFerdigstillUtenlandskJournalpost(
                 landAlpha3 = null,
                 fnr = sykmeldt.fnr,
                 enhet = enhet,
@@ -171,6 +163,44 @@ class FerdigstillingService(
         }
     }
 
+    fun ferdigstillNasjonalAvvistJournalpost(
+        enhet: String,
+        oppgave: NasjonalManuellOppgaveDAO,
+        sykmeldt: Person,
+        avvisningsGrunn: String?,
+        loggingMeta: LoggingMeta,
+    ) {
+        requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
+        val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
+        securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
+
+        if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
+            log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
+        }
+        else {
+            log.info("Ferdigstiller journalpost med id ${oppgave.journalpostId},  dokumentInfoId ${oppgave.dokumentInfoId}, sykmeldingId ${oppgave.sykmeldingId} og oppgaveId ${oppgave.oppgaveId}")
+            dokarkivClient.oppdaterOgFerdigstillNasjonalJournalpost(
+                journalpostId = oppgave.journalpostId,
+                dokumentInfoId = oppgave.dokumentInfoId,
+                pasientFnr = oppgave.fnr!!,
+                sykmeldingId = oppgave.sykmeldingId,
+                sykmelder = sykmelderService.getSykmelder(oppgave.papirSmRegistrering.behandler?.hpr!!, "callId"),
+                loggingMeta = loggingMeta,
+                navEnhet = enhet,
+                avvist = true,
+                perioder = oppgave.papirSmRegistrering.perioder ?: emptyList(),
+            )
+
+            oppgaveClient.ferdigstillOppgave(oppgave.oppgaveId.toString(), oppgave.sykmeldingId)
+
+            dokarkivClient.updateDocument(
+                journalpostid = oppgave.journalpostId,
+                documentId = oppgave.dokumentInfoId,
+                tittel = createTitleNasjonal(oppgave.papirSmRegistrering.perioder, true),
+            )
+        }
+    }
+
     fun sendUpdatedSykmelding(oppgave: OppgaveDbModel, sykmeldt: Person, navEmail: String, values: FerdistilltRegisterOppgaveValues) {
         val receivedSykmelding =
             mapToReceivedSykmelding(
@@ -181,9 +211,9 @@ class FerdigstillingService(
                 opprettet = oppgave.opprettet.toLocalDateTime(),
             )
         sykmeldingOKProducer.send(
-            ProducerRecord(OK_SYKMLEDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
+            ProducerRecord(OK_SYKMELDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
         ).get()
         log.info("sendt oppdatert sykmelding med id ${receivedSykmelding.sykmelding.id}")
-        updateTitle(oppgave, receivedSykmelding)
+        updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
     }
 }

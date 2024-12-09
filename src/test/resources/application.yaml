@@ -16,7 +16,11 @@ spring:
       maximum-pool-size: 3
   main:
     allow-bean-definition-overriding: true
-
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
 KAFKA_TRUSTSTORE_PATH: ""
 KAFKA_CREDSTORE_PASSWORD: ""
 KAFKA_SECURITY_PROTOCOL: "PLAINTEXT"
@@ -40,6 +44,11 @@ dokarkiv.url: http://dokarkiv
 oppgave.url: http://oppgave
 smregistrering.url: http://smregistrering
 helsenett.url: http://syfohelsenettproxy
+smtss.url: http://smtss
+regel.url: http://regel
+
+mock-oauth2-server:
+  port: 8081
 
 no.nav.security.jwt:
   issuer:
@@ -97,10 +106,16 @@ no.nav.security.jwt:
           client-secret: secretzz
           client-auth-method: client_secret_basic
 
+
 AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:teamsykmelding:syk-dig\",\"clientId\":\"syk-dig-client-id\"}]"
 
 logging.config: "classpath:logback-test.xml"
 elector.path: dont_look_for_leader
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 dgs:
   graphql:

@@ -2,14 +2,24 @@ package no.nav.sykdig.digitalisering.ferdigstilling.oppgave
 
 data class PatchFerdigStillOppgaveRequest(
     val versjon: Int,
-    val status: Oppgavestatus,
+    val status: OppgaveStatus,
     val id: Int,
     val mappeId: Int? = null,
 )
 
+data class PatchFerdigstillNasjonalOppgaveRequest(
+    val id: Int,
+    val versjon: Int,
+    val status: OppgaveStatus,
+    val tilordnetRessurs: String,
+    val tildeltEnhetsnr: String,
+    val mappeId: Int?,
+    val beskrivelse: String? = null,
+)
+
 data class PatchToGosysOppgaveRequest(
     val versjon: Int,
-    val status: Oppgavestatus,
+    val status: OppgaveStatus,
     val id: Int,
     val mappeId: Int? = null,
     val behandlesAvApplikasjon: String?,
