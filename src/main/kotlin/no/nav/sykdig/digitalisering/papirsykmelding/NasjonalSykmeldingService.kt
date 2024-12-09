@@ -122,12 +122,16 @@ class NasjonalSykmeldingService(
                     receivedSykmelding = receivedSykmelding,
                     loggingMeta = loggingMeta,
                 )
-                nasjonalOppgaveService.ferdigstillOppgave(
+                val res = nasjonalOppgaveService.ferdigstillOppgave(
                     ferdigstillRegistrering,
                     null,
                     loggingMeta,
                     ferdigstillRegistrering.oppgaveId.toString(),
                 )
+                if (res.statusCode == HttpStatus.UNAUTHORIZED || res.statusCode == HttpStatus.FORBIDDEN) {
+                    log.info("Brukeren har ikke tilgang til å ferdigstille oppgaven med id ${ferdigstillRegistrering.oppgaveId}")
+                    return ResponseEntity(res.statusCode)
+                }
             }
             insertSykmeldingAndSendToKafka(receivedSykmelding, veileder)
             nasjonalOppgaveService.oppdaterOppgave(

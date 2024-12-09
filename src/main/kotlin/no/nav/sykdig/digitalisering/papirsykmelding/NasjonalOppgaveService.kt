@@ -126,8 +126,8 @@ class NasjonalOppgaveService(
         beskrivelse: String?,
         loggingMeta: LoggingMeta,
         oppgaveId: String,
-    ) {
-        oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
+    ): ResponseEntity<Any> {
+        return oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
     }
 
     fun getOppgaveBySykmeldingId(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {

@@ -13,14 +13,18 @@ import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 private const val OPPGAVETYPE = "JFR"
 
@@ -61,22 +65,25 @@ class OppgaveClient(
         sykmeldingId: String,
         ferdigstillRegistrering: FerdigstillRegistrering,
         loggingMeta: LoggingMeta
-    ) {
+    ): ResponseEntity<Any> {
         val oppgave = getNasjonalOppgave(oppgaveId, sykmeldingId)
-        if (oppgave.status == OppgaveStatus.FERDIGSTILT.name || oppgave.status == OppgaveStatus.FEILREGISTRERT.name) {
+        if(oppgave.body == null ) {
+            return ResponseEntity.status(oppgave.statusCode).build()
+        }
+        if (oppgave.body.status == OppgaveStatus.FERDIGSTILT.name || oppgave.body.status == OppgaveStatus.FEILREGISTRERT.name) {
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
-            return
+            return ResponseEntity.notFound().build()
         }
         val ferdigstillOppgave = PatchFerdigstillNasjonalOppgaveRequest(
             id = oppgaveId.toInt(),
-            versjon = oppgave.versjon ?: throw RuntimeException(
-            "Fant ikke versjon for oppgave ${oppgave.id}, sykmeldingId ${ferdigstillRegistrering.sykmeldingId}"
+            versjon = oppgave.body.versjon ?: throw RuntimeException(
+            "Fant ikke versjon for oppgave ${oppgave.body.id}, sykmeldingId ${ferdigstillRegistrering.sykmeldingId}"
         ),
             status = OppgaveStatus.FERDIGSTILT,
             tilordnetRessurs = ferdigstillRegistrering.veileder.veilederIdent,
             tildeltEnhetsnr = ferdigstillRegistrering.navEnhet,
             mappeId = null,
-            beskrivelse = oppgave.beskrivelse,
+            beskrivelse = oppgave.body.beskrivelse,
         )
         log.info(
             "Ferdigstiller oppgave med {}, {}",
@@ -85,6 +92,7 @@ class OppgaveClient(
         )
         ferdigstillNasjonalOppgave(oppgaveId, sykmeldingId, ferdigstillOppgave)
         log.info("Ferdigstilt oppgave med id $oppgaveId i Oppgave")
+        return ResponseEntity.ok().build()
     }
 
     @Retryable
@@ -166,37 +174,17 @@ class OppgaveClient(
     fun getNasjonalOppgave(
         oppgaveId: String,
         sykmeldingId: String,
-    ): NasjonalOppgaveResponse {
+    ): ResponseEntity<NasjonalOppgaveResponse> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers["X-Correlation-ID"] = sykmeldingId
-        try {
-            val response =
-                oppgaveRestTemplate.exchange(
-                    "$url/$oppgaveId",
-                    HttpMethod.GET,
-                    HttpEntity<Any>(headers),
-                    NasjonalOppgaveResponse::class.java,
-                )
-            return response.body ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $oppgaveId")
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
-            } else {
-                log.error(
-                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
-                    e,
-                )
-                throw e
-            }
-        } catch (e: HttpServerErrorException) {
-            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
-            throw e
-        } catch (e: Exception) {
-            log.error("Other Exception fra Oppgave: ${e.message}", e)
-            throw e
-        }
+
+        return oppgaveRestTemplate.exchange(
+                "$url/$oppgaveId",
+                HttpMethod.GET,
+                HttpEntity<Any>(headers),
+                NasjonalOppgaveResponse::class.java,
+            )
     }
 
     @Retryable
