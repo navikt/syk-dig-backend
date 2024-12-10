@@ -125,6 +125,7 @@ class NasjonalCommonService(
                 verdi
             }
         }
+
     fun getNavIdent(): Veileder {
         val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         return Veileder(authentication.token.claims["NAVident"].toString())
@@ -134,6 +135,7 @@ class NasjonalCommonService(
         val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         return authentication.token.claims["preferred_username"].toString()
     }
+
     private fun toSykmelding(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): Sykmelding {
         requireNotNull(oppgave.papirSmRegistrering.aktorId) { "PapirSmRegistrering.aktorId er null" }
         requireNotNull(oppgave.papirSmRegistrering.medisinskVurdering) { "PapirSmRegistrering.medisinskVurdering er null" }
@@ -156,17 +158,33 @@ class NasjonalCommonService(
             meldingTilArbeidsgiver = oppgave.papirSmRegistrering.meldingTilArbeidsgiver,
             kontaktMedPasient = KontaktMedPasient(
                 kontaktDato = oppgave.papirSmRegistrering.kontaktMedPasient?.kontaktDato,
-                begrunnelseIkkeKontakt = oppgave.papirSmRegistrering.kontaktMedPasient?.begrunnelseIkkeKontakt
+                begrunnelseIkkeKontakt = oppgave.papirSmRegistrering.kontaktMedPasient?.begrunnelseIkkeKontakt,
             ),
             behandletTidspunkt = LocalDateTime.from(oppgave.papirSmRegistrering.behandletTidspunkt),
             behandler = oppgave.papirSmRegistrering.behandler,
-            avsenderSystem = AvsenderSystem( //TODO
+            avsenderSystem = AvsenderSystem(
+                //TODO
                 navn = "Navn avsendersystem",
-                versjon = "0.0"
+                versjon = "0.0",
             ),
             syketilfelleStartDato = oppgave.papirSmRegistrering.syketilfelleStartDato,
             signaturDato = LocalDateTime.from(oppgave.papirSmRegistrering.behandletTidspunkt),
             navnFastlege = "Fastlege navn", //TODO
         )
     }
+
+    fun getLoggingMeta(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): LoggingMeta {
+        return LoggingMeta(
+            mottakId = sykmeldingId,
+            dokumentInfoId = oppgave.dokumentInfoId,
+            msgId = sykmeldingId,
+            sykmeldingId = sykmeldingId,
+            journalpostId = oppgave.journalpostId,
+        )
+    }
+}
+
+fun isValidOppgaveId(oppgaveId: String): Boolean {
+    val regex = Regex("^\\d{9}$|^[a-zA-Z0-9]{1,20}$")
+    return oppgaveId.matches(regex)
 }

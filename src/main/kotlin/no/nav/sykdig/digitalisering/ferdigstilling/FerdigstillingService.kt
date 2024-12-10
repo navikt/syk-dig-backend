@@ -5,7 +5,6 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.dokument.DocumentService
-import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService

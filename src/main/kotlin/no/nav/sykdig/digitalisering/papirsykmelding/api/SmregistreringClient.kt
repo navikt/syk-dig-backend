@@ -4,7 +4,6 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import no.nav.sykdig.digitalisering.papirsykmelding.isValidOppgaveId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -79,28 +78,6 @@ class SmregistreringClient(
     }
 
     @Retryable
-    fun getSykmelderRequest(
-        authorization: String,
-        hprNummer: String,
-    ): ResponseEntity<Sykmelder> {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(removeBearerPrefix(authorization))
-
-        val uri =
-            UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelder/{hprNummer}")
-                .buildAndExpand(hprNummer)
-                .toUri()
-
-        return smregisteringRestTemplate.exchange(
-            uri,
-            HttpMethod.GET,
-            HttpEntity<String>(headers),
-            Sykmelder::class.java,
-        )
-    }
-
-    @Retryable
     fun postSendOppgaveRequest(
         authorization: String,
         oppgaveId: String,
@@ -146,30 +123,6 @@ class SmregistreringClient(
             HttpEntity<String>(headers),
             PapirManuellOppgave::class.java,
         )
-    }
-
-    @Retryable
-    fun postOppgaveTilGosysRequest(
-        authorization: String,
-        oppgaveId: String,
-    ): ResponseEntity<HttpStatusCode> {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(removeBearerPrefix(authorization))
-        val uri =
-            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/{oppgaveId}/tilgosys")
-                .buildAndExpand(oppgaveId)
-                .toUri()
-
-        val res =
-            smregisteringRestTemplate.exchange(
-                uri,
-                HttpMethod.POST,
-                HttpEntity(null, headers),
-                HttpStatusCode::class.java,
-            )
-        log.info("Oppgave $oppgaveId sendt til Gosys med responskode ${res.statusCode}")
-        return res
     }
 
     @Retryable

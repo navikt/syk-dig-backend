@@ -42,7 +42,7 @@ class NasjonalOppgaveController(
     val securelog = securelog()
 
     @PostMapping("/oppgave/{oppgaveId}/avvis")
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization, '/oppgave/{oppgaveId}/avvis')")
     @WithSpan
     fun avvisOppgave(
         @PathVariable oppgaveId: String,
@@ -55,7 +55,7 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/oppgave/{oppgaveId}")
-    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization, '/oppgave/{oppgaveId}')")
     @ResponseBody
     @WithSpan
     fun getPapirsykmeldingManuellOppgave(
@@ -107,7 +107,7 @@ class NasjonalOppgaveController(
     }
 
     @PostMapping("/oppgave/{oppgaveId}/send")
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization, '/oppgave/{oppgaveId}/send')")
     @ResponseBody
     @WithSpan
     suspend fun sendOppgave(
@@ -122,7 +122,7 @@ class NasjonalOppgaveController(
     }
 
     @GetMapping("/sykmelding/{sykmeldingId}/ferdigstilt")
-    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization)")
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization, '/sykmelding/{sykmeldingId}/ferdigstilt')")
     @ResponseBody
     @WithSpan
     fun getFerdigstiltSykmelding(
@@ -140,18 +140,24 @@ class NasjonalOppgaveController(
         return ResponseEntity.notFound().build()
     }
 
-
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization, '/oppgave/{oppgaveId}/tilgosys')")
+    @WithSpan
     fun sendOppgaveTilGosys(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<HttpStatusCode> {
-        log.info("papirsykmelding: Sender oppgave med id $oppgaveId til Gosys gjennom syk-dig proxy")
-        return smregistreringClient.postOppgaveTilGosysRequest(authorization, oppgaveId)
+        if (oppgaveId.isBlank()) {
+            log.info("oppgaveId mangler for å kunne sende oppgave til Gosys")
+            return ResponseEntity.badRequest().build()
+        }
+        log.info("papirsykmelding: Sender oppgave med id $oppgaveId til Gosys")
+        nasjonalOppgaveService.ferdigstillOgSendOppgaveTilGosys(oppgaveId, authorization)
+        return ResponseEntity.noContent().build()
     }
 
     @PostMapping("/sykmelding/{sykmeldingId}")
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization, '/sykmelding/{sykmeldingId}')")
     @WithSpan
     fun korrigerSykmelding(
         @PathVariable sykmeldingId: String,

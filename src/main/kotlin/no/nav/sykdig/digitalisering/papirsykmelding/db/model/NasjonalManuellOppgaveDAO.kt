@@ -1,22 +1,12 @@
 package no.nav.sykdig.digitalisering.papirsykmelding.db.model
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import jakarta.persistence.GeneratedValue
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
-import no.nav.sykdig.objectMapper
-import org.postgresql.util.PGobject
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.core.convert.converter.Converter
 import org.springframework.data.annotation.Id
-import org.springframework.data.convert.ReadingConverter
-import org.springframework.data.convert.WritingConverter
-import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Table(name = "nasjonal_manuelloppgave")
 data class NasjonalManuellOppgaveDAO(
