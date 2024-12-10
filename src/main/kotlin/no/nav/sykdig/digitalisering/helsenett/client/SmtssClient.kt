@@ -37,10 +37,12 @@ class SmtssClient(
             smtssM2mRestTemplate.exchange(
                 "$smtssUrl/api/v1/samhandler/infotrygd",
                 HttpMethod.GET,
-                HttpEntity<Any>(headers),
-                String::class.java,
+                HttpEntity<TSSident>(headers),
+                TSSident::class.java,
             )
-        if (response.statusCode.is2xxSuccessful) return response.body
+        if (response.statusCode.is2xxSuccessful) {
+            return response.body?.tssid ?: throw SykmelderNotFoundException("Samhandlerpraksis ikke funnet for samhandlerOrgname ${samhandlerOrgName}")
+        }
         log.info(
             "smtss responded with an error code {} for {}",
             response.statusCode,
@@ -52,3 +54,7 @@ class SmtssClient(
 
 
 }
+
+data class TSSident(
+    val tssid: String,
+)
