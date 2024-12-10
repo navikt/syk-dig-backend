@@ -4,12 +4,11 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppg
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Transactional
 @Repository
 interface NasjonalOppgaveRepository : CrudRepository<NasjonalManuellOppgaveDAO, UUID> {
     fun findBySykmeldingId(sykmeldingId: String): NasjonalManuellOppgaveDAO?
     fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO?
-    fun findByOppgaveIdAndFerdigstiltIsFalse(oppgaveId: Int): NasjonalManuellOppgaveDAO?
 }

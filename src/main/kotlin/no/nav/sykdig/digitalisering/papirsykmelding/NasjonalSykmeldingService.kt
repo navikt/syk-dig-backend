@@ -47,16 +47,6 @@ class NasjonalSykmeldingService(
     val securelog = securelog()
 
 
-    private fun getLoggingMeta(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): LoggingMeta {
-        return LoggingMeta(
-            mottakId = sykmeldingId,
-            dokumentInfoId = oppgave.dokumentInfoId,
-            msgId = sykmeldingId,
-            sykmeldingId = sykmeldingId,
-            journalpostId = oppgave.journalpostId,
-        )
-    }
-
     suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String, authorization: String): ResponseEntity<Any> {
         val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         if (oppgave.ferdigstilt) {
@@ -66,7 +56,7 @@ class NasjonalSykmeldingService(
         val sykmeldingId = oppgave.sykmeldingId
         log.info("Forsøker å ferdigstille papirsykmelding med sykmeldingId $sykmeldingId")
 
-        val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
+        val loggingMeta = nasjonalCommonService.getLoggingMeta(sykmeldingId, oppgave)
         val sykmelder = getSykmelder(smRegistreringManuell, loggingMeta, callId)
         val receivedSykmelding = nasjonalCommonService.createReceivedSykmelding(sykmeldingId, oppgave, loggingMeta, smRegistreringManuell, callId, sykmelder)
 

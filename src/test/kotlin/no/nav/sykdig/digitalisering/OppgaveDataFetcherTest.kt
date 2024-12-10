@@ -37,7 +37,7 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDate
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 
 @SpringBootTest(
     classes = [
@@ -71,7 +71,7 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(securityContext.authentication).thenReturn(authentication)
         SecurityContextHolder.setContext(securityContext)
         Mockito.`when`(authentication.isAuthenticated).thenReturn(true)
-        Mockito.`when`(securityService.hasAccessToOppgave(anyString(), anyString())).thenAnswer { true }
+        Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { true }
     }
 
     @Test
@@ -168,7 +168,7 @@ class OppgaveDataFetcherTest {
 
     @Test
     fun `querying oppgave no access to oppgave`() {
-        Mockito.`when`(securityService.hasAccessToOppgave(anyString(), anyString())).thenAnswer { false }
+        Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { false }
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =
@@ -336,7 +336,7 @@ class OppgaveDataFetcherTest {
 
     @Test
     fun `lager oppgave uten tilgang`() {
-        Mockito.`when`(securityService.hasAccessToOppgave(anyString(), anyString())).thenAnswer { false }
+        Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { false }
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =

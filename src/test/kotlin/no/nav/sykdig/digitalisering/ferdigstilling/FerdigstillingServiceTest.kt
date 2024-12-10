@@ -5,8 +5,15 @@ import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.dokument.DocumentService
+import no.nav.sykdig.digitalisering.felles.AktivitetIkkeMulig
+import no.nav.sykdig.digitalisering.felles.AvsenderSystem
+import no.nav.sykdig.digitalisering.felles.Diagnose
+import no.nav.sykdig.digitalisering.felles.KontaktMedPasient
+import no.nav.sykdig.digitalisering.felles.Periode
+import no.nav.sykdig.digitalisering.felles.SporsmalSvar
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
@@ -22,14 +29,7 @@ import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
-import no.nav.sykdig.digitalisering.felles.AktivitetIkkeMulig
-import no.nav.sykdig.digitalisering.felles.AvsenderSystem
-import no.nav.sykdig.digitalisering.felles.Diagnose
-import no.nav.sykdig.digitalisering.felles.KontaktMedPasient
-import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
-import no.nav.sykdig.digitalisering.felles.SporsmalSvar
-import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
@@ -47,10 +47,11 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Month
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
@@ -78,8 +79,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
 
     @BeforeEach
     fun setup() {
-        ferdigstillingService =
-            FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService, sykmelderService, nasjonalOppgaveRepository)
+        ferdigstillingService = FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService, sykmelderService)
         nasjonalOppgaveRepository.deleteAll()
 
     }
@@ -426,16 +426,21 @@ class FerdigstillingServiceTest : IntegrationTest() {
     fun `ferdigstill oppgave gosys`() {
         val oppgaveId = 444
         nasjonalOppgaveRepository.save(nasjonalOppgave(null, oppgaveId))
-        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId).get()
+        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
 
-        oppgave.utfall = Utfall.SENDT_TIL_GOSYS
-        oppgave.ferdigstilt = true
-        oppgave.ferdigstiltAv = "nav-ident@mail.no"
+        requireNotNull(oppgave)
+        val updatedOppgave = oppgave.copy(
+            utfall = Utfall.SENDT_TIL_GOSYS.toString(),
+            ferdigstilt = true,
+            ferdigstiltAv = "nav-ident@mail.no"
+        )
 
-        val ferdigstiltOppgave = nasjonalOppgaveRepository.save(oppgave)
 
+        val ferdigstiltOppgave = nasjonalOppgaveRepository.save(updatedOppgave)
+
+        requireNotNull(ferdigstiltOppgave)
         assertEquals(ferdigstiltOppgave.oppgaveId, 444)
-        assertEquals(ferdigstiltOppgave.utfall, Utfall.SENDT_TIL_GOSYS)
+        assertEquals(ferdigstiltOppgave.utfall, Utfall.SENDT_TIL_GOSYS.toString())
         assertEquals(ferdigstiltOppgave.ferdigstilt, true)
         assertEquals(ferdigstiltOppgave.ferdigstiltAv, "nav-ident@mail.no")
     }

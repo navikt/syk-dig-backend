@@ -4,7 +4,6 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import no.nav.sykdig.digitalisering.papirsykmelding.isValidOppgaveId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity

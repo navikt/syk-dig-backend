@@ -1,7 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
 import no.nav.sykdig.LoggingMeta
-import jakarta.persistence.EntityNotFoundException
 import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
@@ -11,8 +10,6 @@ import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
@@ -36,7 +33,6 @@ class FerdigstillingService(
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val dokumentService: DocumentService,
     private val sykmelderService: SykmelderService,
-    private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -218,16 +214,5 @@ class FerdigstillingService(
         ).get()
         log.info("sendt oppdatert sykmelding med id ${receivedSykmelding.sykmelding.id}")
         updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
-    }
-
-    fun ferdigstillOppgaveGosys(oppgaveId: String, utfall: Utfall, navIdent: String) {
-        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt()).orElseThrow {
-            EntityNotFoundException("Fant ikke oppgave")
-        }
-        oppgave.utfall = utfall
-        oppgave.ferdigstilt = true
-        oppgave.ferdigstiltAv = navIdent
-
-        nasjonalOppgaveRepository.save(oppgave)
     }
 }

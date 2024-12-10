@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
+import java.util.*
 
 @RestController
 class DocumentController(
@@ -34,7 +34,7 @@ class DocumentController(
     }
 
     @GetMapping("/api/document/{oppgaveId}/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId, '/api/graphql')")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @ResponseBody
     fun getOppgaveDocument(
         @PathVariable oppgaveId: String,

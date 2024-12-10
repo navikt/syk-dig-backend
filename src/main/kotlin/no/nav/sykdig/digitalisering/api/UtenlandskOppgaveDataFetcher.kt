@@ -57,7 +57,7 @@ class UtenlandskOppgaveDataFetcher(
         return mapToDigitalisertSykmelding(oppgave)
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId, '/api/graphql')")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsQuery(field = DgsConstants.QUERY.Oppgave)
     fun getOppgave(
         @InputArgument oppgaveId: String,
@@ -118,7 +118,7 @@ class UtenlandskOppgaveDataFetcher(
         )
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId, '/api/graphql')")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.Lagre)
     fun lagreOppgave(
         @InputArgument oppgaveId: String,
@@ -157,7 +157,7 @@ class UtenlandskOppgaveDataFetcher(
         }
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId, '/api/graphql')")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
     fun oppgaveTilbakeTilGosys(
         @InputArgument oppgaveId: String,
@@ -177,7 +177,7 @@ class UtenlandskOppgaveDataFetcher(
         )
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId, '/api/graphql')")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.Avvis)
     fun avvis(
         @InputArgument oppgaveId: String,

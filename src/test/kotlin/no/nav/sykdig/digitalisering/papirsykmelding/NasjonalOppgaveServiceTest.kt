@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
+import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.dokument.DocumentService
@@ -130,6 +131,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         Mockito.`when`(sykmelderService.getSykmelder(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(testDataSykmelder())
         Mockito.doNothing().`when`(oppgaveClient).ferdigstillOppgave(org.mockito.kotlin.any(), org.mockito.kotlin.any())
         Mockito.doNothing().`when`(documentService).updateDocumentTitle(org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.any())
+        Mockito.`when`(nasjonaCommonService.getLoggingMeta(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(testDataLoggingMeta())
 
         assertTrue(originalOppgave.avvisningsgrunn == null)
         val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request,  "enhet", "auth")
@@ -306,5 +308,15 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         securityContext.authentication = authentication
         SecurityContextHolder.setContext(securityContext)
         ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext))
+    }
+
+    fun testDataLoggingMeta(): LoggingMeta {
+        return LoggingMeta(
+            mottakId = "mottakId",
+            journalpostId = "journalpostId",
+            dokumentInfoId = "dokumentInfoId",
+            msgId = "msgId",
+            sykmeldingId = "sykmeldingId",
+        )
     }
 }

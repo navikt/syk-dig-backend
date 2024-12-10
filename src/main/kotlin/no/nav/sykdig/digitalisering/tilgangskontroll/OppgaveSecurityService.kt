@@ -38,20 +38,34 @@ class OppgaveSecurityService(
         return tilgang
     }
 
-    fun hasAccessToNasjonalOppgave(oppgaveId: String, authorization: String): Boolean {
+    fun hasAccessToNasjonalOppgave(oppgaveId: String, authorization: String, requestPath: String): Boolean {
             securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
+
             val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization)
             val navEmail = nasjonalCommonService.getNavEmail()
             val fnr = oppgave?.fnr
             if (oppgave != null && fnr != null) {
                 val tilgang = hasAccess(fnr, navEmail)
                 securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
+                auditlog.info(
+                    AuditLogger().createcCefMessage(
+                        fnr = fnr,
+                        navEmail = navEmail,
+                        operation = AuditLogger.Operation.READ,
+                        requestPath = requestPath,
+                        permit =
+                            when (tilgang) {
+                                true -> AuditLogger.Permit.PERMIT
+                                false -> AuditLogger.Permit.DENY
+                            },
+                    ),
+                )
                 return tilgang
             }
             return false
         }
 
-        fun hasAccessToNasjonalSykmelding(sykmeldingId: String, authorization: String): Boolean {
+        fun hasAccessToNasjonalSykmelding(sykmeldingId: String, authorization: String, requestPath: String): Boolean {
             securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
             val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
             val navEmail = nasjonalCommonService.getNavEmail()
@@ -59,6 +73,19 @@ class OppgaveSecurityService(
             if (oppgave != null && fnr != null) {
                 val tilgang = hasAccess(fnr, navEmail)
                 securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId")
+                auditlog.info(
+                    AuditLogger().createcCefMessage(
+                        fnr = fnr,
+                        navEmail = navEmail,
+                        operation = AuditLogger.Operation.READ,
+                        requestPath = requestPath,
+                        permit =
+                            when (tilgang) {
+                                true -> AuditLogger.Permit.PERMIT
+                                false -> AuditLogger.Permit.DENY
+                            },
+                    ),
+                )
                 return tilgang
             }
             return false
