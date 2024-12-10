@@ -4,7 +4,7 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
+import no.nav.sykdig.digitalisering.papirsykmelding.isValidOppgaveId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -57,6 +57,8 @@ class SmregistreringClient(
         authorization: String,
         oppgaveId: String,
     ): ResponseEntity<PapirManuellOppgave> {
+        if(!isValidOppgaveId(oppgaveId))
+            throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(removeBearerPrefix(authorization))
@@ -73,28 +75,6 @@ class SmregistreringClient(
                 PapirManuellOppgave::class.java,
             )
         return res
-    }
-
-    @Retryable
-    fun getSykmelderRequest(
-        authorization: String,
-        hprNummer: String,
-    ): ResponseEntity<Sykmelder> {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(removeBearerPrefix(authorization))
-
-        val uri =
-            UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelder/{hprNummer}")
-                .buildAndExpand(hprNummer)
-                .toUri()
-
-        return smregisteringRestTemplate.exchange(
-            uri,
-            HttpMethod.GET,
-            HttpEntity<String>(headers),
-            Sykmelder::class.java,
-        )
     }
 
     @Retryable
@@ -146,30 +126,6 @@ class SmregistreringClient(
     }
 
     @Retryable
-    fun postOppgaveTilGosysRequest(
-        authorization: String,
-        oppgaveId: String,
-    ): ResponseEntity<HttpStatusCode> {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(removeBearerPrefix(authorization))
-        val uri =
-            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/{oppgaveId}/tilgosys")
-                .buildAndExpand(oppgaveId)
-                .toUri()
-
-        val res =
-            smregisteringRestTemplate.exchange(
-                uri,
-                HttpMethod.POST,
-                HttpEntity(null, headers),
-                HttpStatusCode::class.java,
-            )
-        log.info("Oppgave $oppgaveId sendt til Gosys med responskode ${res.statusCode}")
-        return res
-    }
-
-    @Retryable
     fun postKorrigerSykmeldingRequest(
         authorization: String,
         sykmeldingId: String,
@@ -191,7 +147,7 @@ class SmregistreringClient(
                 HttpEntity(papirSykmelding, headers),
                 String::class.java,
             )
-        log.info("Korrigering av sykmelding $sykmeldingId fikk følgende responskode ${res.statusCode}")
+        log.info("Korrigering av sykmelding $sykmeldingId fikk følgende responskode ${res.statusCode} der body er ${res.body}")
         return res
     }
 

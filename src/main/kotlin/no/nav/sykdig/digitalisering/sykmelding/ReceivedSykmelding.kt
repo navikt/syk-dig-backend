@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.sykmelding
 
+import no.nav.sykdig.digitalisering.felles.Sykmelding
 import java.time.LocalDateTime
 
 data class ReceivedSykmelding(
@@ -29,5 +30,5 @@ data class ReceivedSykmelding(
      * TSS-ident, this is only used for infotrygd compat and should be removed in thefuture
      */
     val tssid: String?,
-    val validationResult: ValidationResult,
+    val validationResult: ValidationResult? = null,
 )

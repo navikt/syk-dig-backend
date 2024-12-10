@@ -105,4 +105,4 @@ class AivenKafkaConfig(
 }
 
 const val SYK_DIG_OPPGAVE_TOPIC = "teamsykmelding.syk-dig-oppgave"
-const val OK_SYKMLEDING_TOPIC = "teamsykmelding.ok-sykmelding"
+const val OK_SYKMELDING_TOPIC = "teamsykmelding.ok-sykmelding"

@@ -47,9 +47,12 @@ val opentelemetryVersion = "2.10.0"
 val prometheusVersion = "0.16.0"
 val mockkVersion = "1.13.13"
 val kluentVersion = "1.73"
+
 val coroutinesVersion = "1.9.0"
 val hibernateVersion = "6.6.3.Final"
 val jacksonDatatypeJsr310Version = "2.18.1"
+val coroutineReactorVersion = "1.9.0"
+val mockitoKotlinVersion = "5.4.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
@@ -57,7 +60,8 @@ dependencies {
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutineReactorVersion")
+//    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonDatatypeJsr310Version")
@@ -109,11 +113,13 @@ dependencies {
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
     constraints {
         testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion") {
             because("overstyrer sårbar dependency fra com.opentable.components:otj-pg-embedded")
         }
     }
+    testImplementation(kotlin("test"))
 }
 
 tasks {

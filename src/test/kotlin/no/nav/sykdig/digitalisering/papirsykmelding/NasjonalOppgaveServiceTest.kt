@@ -1,30 +1,143 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
+import no.nav.sykdig.LoggingMeta
+import no.nav.sykdig.digitalisering.SykDigOppgaveService
+import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.dokument.DocumentService
+import no.nav.sykdig.digitalisering.felles.Adresse
+import no.nav.sykdig.digitalisering.felles.Behandler
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.helsenett.SykmelderService
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.digitalisering.pdl.Navn
+import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
+import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
+import no.nav.sykdig.model.OppgaveDbModel
 import okhttp3.internal.EMPTY_BYTE_ARRAY
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.web.client.RestTemplate
+import reactor.core.publisher.Mono
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 
 @ExtendWith(SpringExtension::class)
 class NasjonalOppgaveServiceTest : IntegrationTest() {
     @Autowired
     lateinit var nasjonalOppgaveService: NasjonalOppgaveService
 
+    val mapper = jacksonObjectMapper()
+
+    @MockBean
+    lateinit var sykdigOppgaveService: SykDigOppgaveService
+
+    @MockBean
+    lateinit var personService: PersonService
+
+    @MockBean
+    lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
+
+    @MockBean
+    lateinit var dokarkivClient: DokarkivClient
+
+    @MockBean
+    lateinit var sykmelderService: SykmelderService
+
+    @MockBean
+    lateinit var oppgaveClient: OppgaveClient
+
+    @MockBean
+    lateinit var documentService: DocumentService
+
+    @MockBean
+    lateinit var nasjonaCommonService: NasjonalCommonService
+
+    @Autowired
+    @Qualifier("smregisteringRestTemplate")
+    private lateinit var restTemplate: RestTemplate
+
     @BeforeEach
-    fun setUp() {
+    fun setUp() = runBlocking {
+        mockJwtAuthentication()
+        val mockServer = MockRestServiceServer.createServer(restTemplate)
+
+        mockServer.expect(requestTo("http://localhost:8081/azureator/token"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withSuccess("{\"access_token\": \"dummy-token\"}", MediaType.APPLICATION_JSON))
+
         nasjonalOppgaveRepository.deleteAll()
     }
+
+
+    @Test
+    fun `avvis oppgave blir oppdatert og lagra i DB`() {
+        val oppgaveId = "123"
+        val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
+        val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
+
+        Mockito.`when`(sykdigOppgaveService.getOppgave(anyString())).thenReturn(testDataOppgaveDbModel(oppgaveId))
+
+        Mockito.`when`(nasjonaCommonService.getNavEmail()).thenReturn("navEmail")
+        Mockito.`when`(nasjonaCommonService.getNavIdent()).thenReturn(Veileder("navIdent"))
+
+        Mockito.`when`(personService.getPerson(anyString(), anyString())).thenReturn(testDataPerson())
+        Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(anyString())).thenReturn(SafQueryJournalpost(null))
+
+        Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(org.mockito.kotlin.any())).thenReturn(false)
+        Mockito.`when`(dokarkivClient.oppdaterOgFerdigstillNasjonalJournalpost(
+            journalpostId = org.mockito.kotlin.any(),
+            dokumentInfoId = org.mockito.kotlin.any(),
+            pasientFnr = org.mockito.kotlin.any(),
+            sykmeldingId = org.mockito.kotlin.any(),
+            sykmelder = org.mockito.kotlin.any(),
+            loggingMeta = org.mockito.kotlin.any(),
+            navEnhet = org.mockito.kotlin.any(),
+            avvist = org.mockito.kotlin.any(),
+            perioder = org.mockito.kotlin.any(),
+        )).thenReturn(null)
+
+        Mockito.`when`(sykmelderService.getSykmelder(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(testDataSykmelder())
+        Mockito.doNothing().`when`(oppgaveClient).ferdigstillOppgave(org.mockito.kotlin.any(), org.mockito.kotlin.any())
+        Mockito.doNothing().`when`(documentService).updateDocumentTitle(org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.any())
+        Mockito.`when`(nasjonaCommonService.getLoggingMeta(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(testDataLoggingMeta())
+
+        assertTrue(originalOppgave.avvisningsgrunn == null)
+        val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request,  "enhet", "auth")
+        assertEquals(avvistOppgave.statusCode, HttpStatus.NO_CONTENT)
+    }
+
 
     @Test
     fun `mapToDao der id er null`() {
@@ -44,12 +157,14 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     }
 
     @Test
-    fun `oppgave isPresent`() {
+    fun `oppgave blir lagret`() = runBlocking {
         val uuid = UUID.randomUUID()
-        val dao = testDataNasjonalManuellOppgaveDAO(uuid, "123")
+        val dao = testDataNasjonalManuellOppgaveDAO(uuid, "123", 123)
         val oppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
 
         assertEquals(oppgave.sykmeldingId, dao.sykmeldingId)
+        val res = nasjonalOppgaveRepository.findBySykmeldingId(oppgave.sykmeldingId)
+        println(res)
     }
 
     fun testDataPapirManuellOppgave(): PapirManuellOppgave {
@@ -81,15 +196,36 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
                     meldingTilArbeidsgiver = null,
                     kontaktMedPasient = null,
                     behandletTidspunkt = null,
-                    behandler = null,
+                    behandler = Behandler("fornavn", "mellomnavn", "etternavn", "", "", "", null, Adresse(null, null, null, null, null), null),
                 ),
             documents = emptyList(),
+        )
+    }
+
+    private fun testDataOppgaveDbModel(oppgaveId: String): OppgaveDbModel {
+        return OppgaveDbModel(
+            oppgaveId = oppgaveId.toString(),
+            fnr = "fnr",
+            journalpostId = "jpdId",
+            dokumentInfoId = "DokInfoId",
+            dokumenter = emptyList(),
+            opprettet = OffsetDateTime.now(),
+            ferdigstilt = null,
+            tilbakeTilGosys = false,
+            avvisingsgrunn = null,
+            sykmeldingId = UUID.randomUUID(),
+            type = "type",
+            sykmelding = null,
+            endretAv = "sakebehandler",
+            timestamp = OffsetDateTime.now(),
+            source = "source",
         )
     }
 
     fun testDataNasjonalManuellOppgaveDAO(
         id: UUID?,
         sykmeldingId: String,
+        oppgaveId: Int?,
     ): NasjonalManuellOppgaveDAO {
         return NasjonalManuellOppgaveDAO(
             id = id,
@@ -99,7 +235,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
             aktorId = "aktor",
             dokumentInfoId = "123",
             datoOpprettet = LocalDateTime.now(),
-            oppgaveId = 123,
+            oppgaveId = oppgaveId,
             ferdigstilt = false,
             papirSmRegistrering =
                 PapirSmRegistering(
@@ -130,6 +266,57 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
             ferdigstiltAv = null,
             datoFerdigstilt = null,
             avvisningsgrunn = null,
+        )
+    }
+
+    fun testDataPerson(): Person {
+        return Person(
+            fnr = "fnr",
+            Navn(
+                fornavn = "fornavn",
+                etternavn =  "etternavn",
+                mellomnavn = "mellomnavn"
+            ),
+            aktorId = "aktorId",
+            bostedsadresse = null,
+            oppholdsadresse = null,
+            fodselsdato = null
+        )
+    }
+
+    fun testDataSykmelder(): Sykmelder {
+        return Sykmelder(
+            hprNummer = "123",
+            fnr = "fnr",
+            aktorId = "aktorId",
+            fornavn = "fornavn",
+            mellomnavn = "mellomnavn",
+            etternavn = "etternavn",
+            godkjenninger = emptyList()
+        )
+    }
+
+    fun mockJwtAuthentication() {
+        val jwt = Jwt.withTokenValue("dummy-token")
+            .header("alg", "none")
+            .claim("sub", "test-user")
+            .claim("NAVident", "test-ident")
+            .claim("scope", "test-scope")
+            .build()
+        val authentication = JwtAuthenticationToken(jwt)
+        val securityContext = SecurityContextHolder.createEmptyContext()
+        securityContext.authentication = authentication
+        SecurityContextHolder.setContext(securityContext)
+        ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext))
+    }
+
+    fun testDataLoggingMeta(): LoggingMeta {
+        return LoggingMeta(
+            mottakId = "mottakId",
+            journalpostId = "journalpostId",
+            dokumentInfoId = "dokumentInfoId",
+            msgId = "msgId",
+            sykmeldingId = "sykmeldingId",
         )
     }
 }

@@ -94,7 +94,7 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
 
     @Test
     fun ferdigstillerOppgaveIDb() {
-        sykDigOppgaveService.ferdigstillOppgave(
+        sykDigOppgaveService.ferdigstillUtenlandskAvvistOppgave(
             oppgave = createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"),
             navEpost = "X987654",
             values =

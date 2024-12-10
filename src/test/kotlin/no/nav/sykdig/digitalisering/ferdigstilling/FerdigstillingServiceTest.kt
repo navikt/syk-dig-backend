@@ -5,9 +5,19 @@ import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.dokument.DocumentService
+import no.nav.sykdig.digitalisering.felles.AktivitetIkkeMulig
+import no.nav.sykdig.digitalisering.felles.AvsenderSystem
+import no.nav.sykdig.digitalisering.felles.Diagnose
+import no.nav.sykdig.digitalisering.felles.KontaktMedPasient
+import no.nav.sykdig.digitalisering.felles.Periode
+import no.nav.sykdig.digitalisering.felles.SporsmalSvar
 import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
+import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
@@ -19,13 +29,7 @@ import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
-import no.nav.sykdig.digitalisering.sykmelding.AktivitetIkkeMulig
-import no.nav.sykdig.digitalisering.sykmelding.AvsenderSystem
-import no.nav.sykdig.digitalisering.sykmelding.Diagnose
-import no.nav.sykdig.digitalisering.sykmelding.KontaktMedPasient
-import no.nav.sykdig.digitalisering.sykmelding.Periode
 import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
-import no.nav.sykdig.digitalisering.sykmelding.SporsmalSvar
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
@@ -43,10 +47,11 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Month
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.UUID
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
@@ -61,6 +66,9 @@ class FerdigstillingServiceTest : IntegrationTest() {
     @MockBean
     lateinit var oppgaveClient: OppgaveClient
 
+    @MockBean
+    lateinit var sykmelderService: SykmelderService
+
     @Autowired
     lateinit var sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>
 
@@ -71,12 +79,13 @@ class FerdigstillingServiceTest : IntegrationTest() {
 
     @BeforeEach
     fun setup() {
-        ferdigstillingService =
-            FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService)
+        ferdigstillingService = FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService, sykmelderService)
+        nasjonalOppgaveRepository.deleteAll()
+
     }
 
     @Test
-    fun ferdigstillOppdatererDokarkivOppgaveOgTopic() {
+    fun ferdigstillUtenlandskOppgaveOppdatererDokarkivOppgaveOgTopic() {
         val sykmeldingId = UUID.randomUUID()
         val journalpostId = "9898"
         val dokumentInfoId = "111"
@@ -153,7 +162,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 fodselsdato = LocalDate.of(1970, 1, 1),
             )
 
-        ferdigstillingService.ferdigstill(
+        ferdigstillingService.ferdigstillUtenlandskOppgave(
             enhet = "2990",
             oppgave =
                 createDigitalseringsoppgaveDbModel(
@@ -167,7 +176,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
             validatedValues = validatedValues,
         )
 
-        verify(dokarkivClient).oppdaterOgFerdigstillJournalpost(
+        verify(dokarkivClient).oppdaterOgFerdigstillUtenlandskJournalpost(
             "SWE",
             "12345678910",
             "2990",
@@ -411,5 +420,74 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 )
             }
         assertEquals(exception.message, "Gradert sykmelding må ha grad")
+    }
+
+    @Test
+    fun `ferdigstill oppgave gosys`() {
+        val oppgaveId = 444
+        nasjonalOppgaveRepository.save(nasjonalOppgave(null, oppgaveId))
+        val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
+
+        requireNotNull(oppgave)
+        val updatedOppgave = oppgave.copy(
+            utfall = Utfall.SENDT_TIL_GOSYS.toString(),
+            ferdigstilt = true,
+            ferdigstiltAv = "nav-ident@mail.no"
+        )
+
+
+        val ferdigstiltOppgave = nasjonalOppgaveRepository.save(updatedOppgave)
+
+        requireNotNull(ferdigstiltOppgave)
+        assertEquals(ferdigstiltOppgave.oppgaveId, 444)
+        assertEquals(ferdigstiltOppgave.utfall, Utfall.SENDT_TIL_GOSYS.toString())
+        assertEquals(ferdigstiltOppgave.ferdigstilt, true)
+        assertEquals(ferdigstiltOppgave.ferdigstiltAv, "nav-ident@mail.no")
+    }
+
+    fun nasjonalOppgave(
+        id: UUID?,
+        oppgaveId: Int,
+    ): NasjonalManuellOppgaveDAO {
+        return NasjonalManuellOppgaveDAO(
+            id = id,
+            sykmeldingId = "987",
+            journalpostId = "123",
+            fnr = "fnr",
+            aktorId = "aktor",
+            dokumentInfoId = "123",
+            datoOpprettet = LocalDateTime.now(),
+            oppgaveId = oppgaveId,
+            ferdigstilt = false,
+            papirSmRegistrering =
+            PapirSmRegistering(
+                journalpostId = "123",
+                oppgaveId = "123",
+                fnr = "fnr",
+                aktorId = "aktor",
+                dokumentInfoId = "123",
+                datoOpprettet = OffsetDateTime.now(),
+                sykmeldingId = "123",
+                syketilfelleStartDato = LocalDate.now(),
+                arbeidsgiver = null,
+                medisinskVurdering = null,
+                skjermesForPasient = null,
+                perioder = null,
+                prognose = null,
+                utdypendeOpplysninger = null,
+                tiltakNAV = null,
+                tiltakArbeidsplassen = null,
+                andreTiltak = null,
+                meldingTilNAV = null,
+                meldingTilArbeidsgiver = null,
+                kontaktMedPasient = null,
+                behandletTidspunkt = null,
+                behandler = null,
+            ),
+            utfall = null,
+            ferdigstiltAv = null,
+            datoFerdigstilt = null,
+            avvisningsgrunn = null,
+        )
     }
 }
