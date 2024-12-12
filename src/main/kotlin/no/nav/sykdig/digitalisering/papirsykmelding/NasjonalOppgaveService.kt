@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.api.getPdfResult
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
@@ -371,16 +372,10 @@ class NasjonalOppgaveService(
         metricRegister.sendtTilGosysNasjonal.increment()
     }
 
-    fun getRegisterPdf(oppgaveId: String, authorization: String, dokumentInfoId: String): ByteArray {
-        val validOppgaveId = isValidOppgaveId(oppgaveId)
-        if (!validOppgaveId) {
-            log.warn("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
-            throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
-        }
-
-        val journalpostId = ""
-        safClient.getPdfFraSaf(journalpostId, dokumentInfoId, authorization)
-
-
+    fun getRegisterPdf(oppgaveId: String, authorization: String, dokumentInfoId: String): ResponseEntity<Any> {
+        val oppgave = getOppgave(oppgaveId, authorization)
+        requireNotNull(oppgave)
+        val pdfResult = safClient.getPdfFraSaf(oppgave.journalpostId, dokumentInfoId, authorization)
+        return getPdfResult(pdfResult)
     }
 }
