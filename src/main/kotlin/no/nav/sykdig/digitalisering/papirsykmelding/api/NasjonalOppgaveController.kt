@@ -173,6 +173,11 @@ class NasjonalOppgaveController(
         @PathVariable dokumentInfoId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<ByteArray> {
+        val res = nasjonalOppgaveService.getRegisterPdf(oppgaveId, dokumentInfoId, authorization)
+        if (res == null) {
+            return ResponseEntity.badRequest().build()
+        }
+        return ResponseEntity.ok(res)
         log.info("papirsykmelding: henter pdf med oppgaveId $oppgaveId of dokumentinfoId $dokumentInfoId gjennom syk-dig proxy")
         return smregistreringClient.getRegisterPdfRequest(authorization, oppgaveId, dokumentInfoId)
     }

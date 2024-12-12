@@ -21,6 +21,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.metrics.MetricRegister
 import no.nav.sykdig.securelog
@@ -41,6 +42,7 @@ class NasjonalOppgaveService(
     private val nasjonalCommonService: NasjonalCommonService,
     private val gosysService: GosysService,
     private val metricRegister: MetricRegister,
+    private val safClient: SafClient,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -367,5 +369,18 @@ class NasjonalOppgaveService(
         )
 
         metricRegister.sendtTilGosysNasjonal.increment()
+    }
+
+    fun getRegisterPdf(oppgaveId: String, authorization: String, dokumentInfoId: String): ByteArray {
+        val validOppgaveId = isValidOppgaveId(oppgaveId)
+        if (!validOppgaveId) {
+            log.warn("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
+            throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
+        }
+
+        val journalpostId = ""
+        safClient.getPdfFraSaf(journalpostId, dokumentInfoId, authorization)
+
+
     }
 }
