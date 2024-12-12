@@ -46,13 +46,24 @@ class NasjonalSykmeldingService(
     val log = applog()
     val securelog = securelog()
 
+    suspend fun korrigerSykmelding(sykmeldingId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell, authorization: String): ResponseEntity<Any> {
+        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(sykmeldingId, authorization) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        log.info("Forsøker å korriger sykmelding med sykmeldingId $sykmeldingId og oppgaveId ${oppgave.oppgaveId}")
+        return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave, authorization)
+    }
 
-    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String, authorization: String): ResponseEntity<Any> {
+    suspend fun sendPapirsykmeldingOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String, authorization: String): ResponseEntity<Any> {
         val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         if (oppgave.ferdigstilt) {
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
+        log.info("Forsøker å sende inn papirsykmelding med sykmeldingId ${oppgave.sykmeldingId} oppgaveId ${oppgave.oppgaveId}")
+        return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave, authorization, oppgaveId.toInt())
+
+    }
+
+    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgave: NasjonalManuellOppgaveDAO, authorization: String, oppgaveId: Int? = null): ResponseEntity<Any> {
         val sykmeldingId = oppgave.sykmeldingId
         log.info("Forsøker å ferdigstille papirsykmelding med sykmeldingId $sykmeldingId")
 
@@ -77,7 +88,7 @@ class NasjonalSykmeldingService(
 
         val ferdigstillRegistrering =
             FerdigstillRegistrering(
-                oppgaveId = oppgaveId.toInt(),
+                oppgaveId = oppgave.oppgaveId,
                 journalpostId = journalpostId,
                 dokumentInfoId = dokumentInfoId,
                 pasientFnr = receivedSykmelding.personNrPasient,
@@ -90,7 +101,7 @@ class NasjonalSykmeldingService(
             )
 
         if (!validationResult.ruleHits.isWhitelisted()) {
-            return handleBrokenRule(validationResult, oppgaveId.toInt())
+            return handleBrokenRule(validationResult, oppgave.oppgaveId)
         }
 
         return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta, null, smRegistreringManuell)

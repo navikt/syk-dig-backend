@@ -9,7 +9,6 @@ import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalSykmeldingService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.securelog
@@ -117,7 +116,7 @@ class NasjonalOppgaveController(
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<Any> {
         val callId = UUID.randomUUID().toString()
-        return nasjonalSykmeldingService.sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgaveId, authorization)
+        return nasjonalSykmeldingService.sendPapirsykmeldingOppgave(papirSykmelding, navEnhet, callId, oppgaveId, authorization)
 
     }
 
@@ -159,24 +158,14 @@ class NasjonalOppgaveController(
     @PostMapping("/sykmelding/{sykmeldingId}")
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization, '/sykmelding/{sykmeldingId}')")
     @WithSpan
-    fun korrigerSykmelding(
+    suspend fun korrigerSykmelding(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestBody papirSykmelding: SmRegistreringManuell,
-    ): ResponseEntity<String> {
-        log.info("papirsykmelding: Korrrigerer sykmelding med id $sykmeldingId gjennom syk-dig proxy")
-        val res = smregistreringClient.postKorrigerSykmeldingRequest(authorization, sykmeldingId, navEnhet, papirSykmelding)
-
+    ): ResponseEntity<Any> {
         securelog.info("Oppdaterer korrigert oppgave i syk-dig-backend db $papirSykmelding")
-        nasjonalOppgaveService.oppdaterOppgave(
-            sykmeldingId = sykmeldingId,
-            utfall = Utfall.OK.toString(),
-            ferdigstiltAv = nasjonalCommonService.getNavIdent().veilederIdent,
-            avvisningsgrunn = null,
-            smRegistreringManuell = papirSykmelding,
-        )
-        return res
+        return  nasjonalSykmeldingService.korrigerSykmelding(sykmeldingId, navEnhet, UUID.randomUUID().toString(), papirSykmelding, authorization)
     }
 
     @GetMapping("/pdf/{oppgaveId}/{dokumentInfoId}")
