@@ -20,6 +20,6 @@ class M2MTokenService(
                 ?: throw RuntimeException("Client properties for $type not found")
 
         val accessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)
-        return accessTokenResponse.accessToken ?: throw RuntimeException("Failed to retrieve M2M access token")
+        return accessTokenResponse.access_token ?: throw RuntimeException("Failed to retrieve M2M access token")
     }
 }
