@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.api.getPdfResult
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
@@ -21,6 +22,7 @@ import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.PersonService
+import no.nav.sykdig.digitalisering.saf.SafClient
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.metrics.MetricRegister
 import no.nav.sykdig.securelog
@@ -41,6 +43,7 @@ class NasjonalOppgaveService(
     private val nasjonalCommonService: NasjonalCommonService,
     private val gosysService: GosysService,
     private val metricRegister: MetricRegister,
+    private val safClient: SafClient,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -367,5 +370,12 @@ class NasjonalOppgaveService(
         )
 
         metricRegister.sendtTilGosysNasjonal.increment()
+    }
+
+    fun getRegisterPdf(oppgaveId: String, authorization: String, dokumentInfoId: String): ResponseEntity<Any> {
+        val oppgave = getOppgave(oppgaveId, authorization)
+        requireNotNull(oppgave)
+        val pdfResult = safClient.getPdfFraSaf(oppgave.journalpostId, dokumentInfoId, authorization)
+        return getPdfResult(pdfResult)
     }
 }

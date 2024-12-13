@@ -168,12 +168,14 @@ class NasjonalOppgaveController(
 
     @GetMapping("/pdf/{oppgaveId}/{dokumentInfoId}")
     @ResponseBody
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization, '/pdf/{oppgaveId}/{dokumentInfoId}')")
+    @WithSpan
     fun registerPdf(
         @PathVariable oppgaveId: String,
         @PathVariable dokumentInfoId: String,
         @RequestHeader("Authorization") authorization: String,
-    ): ResponseEntity<ByteArray> {
-        log.info("papirsykmelding: henter pdf med oppgaveId $oppgaveId of dokumentinfoId $dokumentInfoId gjennom syk-dig proxy")
-        return smregistreringClient.getRegisterPdfRequest(authorization, oppgaveId, dokumentInfoId)
+    ): ResponseEntity<Any> {
+        log.info("Forsøker å hente pdf for oppgaveId $oppgaveId og dokumentInfoId $dokumentInfoId")
+        return nasjonalOppgaveService.getRegisterPdf(oppgaveId, authorization, dokumentInfoId)
     }
 }
