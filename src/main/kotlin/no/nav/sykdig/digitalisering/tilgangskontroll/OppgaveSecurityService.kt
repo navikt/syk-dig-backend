@@ -131,7 +131,7 @@ class OppgaveSecurityService(
             return tilgang
         }
 
-                private fun hasAccess(
+        private fun hasAccess(
             fnr: String,
             navEmail: String,
         ): Boolean {
