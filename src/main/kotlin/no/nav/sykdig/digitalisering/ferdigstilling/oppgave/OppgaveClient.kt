@@ -307,7 +307,7 @@ class OppgaveClient(
         headers["X-Correlation-ID"] = sykmeldingId
 
         try {
-            val response = oppgaveRestTemplate.exchange(
+            val response = oppgaveM2mRestTemplate.exchange(
                 "$url/$oppgaveId",
                 HttpMethod.PATCH,
                 HttpEntity(nasjonalFerdigstillOppgave, headers),
@@ -317,7 +317,7 @@ class OppgaveClient(
             return response
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("Veileder har ikke tilgang til å ferdigstille oppgaveId $oppgaveId: ${e.message}")
+                log.warn("Veileder har ikke tilgang til å ferdigstille oppgaveId $oppgaveId: ${e.message} med httpStatus ${e.statusCode.value()}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
                 log.error(
