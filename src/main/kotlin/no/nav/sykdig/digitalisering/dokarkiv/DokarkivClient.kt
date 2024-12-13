@@ -4,10 +4,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
+import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
-import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.util.Locale
+import java.util.*
 
 @Component
 class DokarkivClient(
@@ -399,7 +399,7 @@ class DokarkivClient(
         return ferdigstillJournalpost(
             enhet = navEnhet,
             journalpostId = journalpostId,
-            sykmeldingId = sykmeldingId
+            sykmeldingId = sykmeldingId,
         ).body
     }
 
@@ -411,12 +411,7 @@ class DokarkivClient(
         receivedSykmelding: ReceivedSykmelding,
     ): OppdaterJournalpostRequest {
         val oppdaterJournalpostRequest = OppdaterJournalpostRequest(
-            avsenderMottaker = AvsenderMottakerRequest(
-                id = padHpr(sykmelder.hprNummer),
-                navn = finnNavn(sykmelder),
-                land = null,
-                idType = null,
-            ),
+            avsenderMottaker = getAvsenderMottakerRequest(sykmelder),
             bruker = DokBruker(id = pasientFnr),
             sak = Sak(),
             tittel = createTitleNasjonal(receivedSykmelding.sykmelding.perioder, avvist),
@@ -451,7 +446,7 @@ class DokarkivClient(
         return ferdigstillJournalpost(
             enhet = navEnhet,
             journalpostId = journalpostId,
-            sykmeldingId = sykmeldingId
+            sykmeldingId = sykmeldingId,
         ).body
     }
 
@@ -463,12 +458,7 @@ class DokarkivClient(
         perioder: List<Periode>,
     ): OppdaterJournalpostRequest {
         val oppdaterJournalpostRequest = OppdaterJournalpostRequest(
-            avsenderMottaker = AvsenderMottakerRequest(
-                id = padHpr(sykmelder.hprNummer),
-                navn = finnNavn(sykmelder),
-                land = null,
-                idType = null,
-            ),
+            avsenderMottaker = getAvsenderMottakerRequest(sykmelder),
             bruker = DokBruker(id = pasientFnr),
             sak = Sak(),
             tittel = createTitleNasjonal(perioder, avvist),
@@ -485,12 +475,22 @@ class DokarkivClient(
         )
         return oppdaterJournalpostRequest
     }
+
     private fun padHpr(hprnummer: String): String {
         if (hprnummer.length < 9) {
             securelog.info("padder hpr: $hprnummer")
             return hprnummer.padStart(9, '0')
         }
         return hprnummer
+    }
+
+    private fun getAvsenderMottakerRequest(sykmelder: Sykmelder): AvsenderMottakerRequest {
+        return AvsenderMottakerRequest(
+            id = padHpr(sykmelder.hprNummer),
+            navn = finnNavn(sykmelder),
+            land = null,
+            idType = IdType.HPRNR,
+        )
     }
 }
 
