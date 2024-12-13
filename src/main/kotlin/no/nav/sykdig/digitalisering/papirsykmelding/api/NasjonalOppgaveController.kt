@@ -3,7 +3,6 @@ package no.nav.sykdig.digitalisering.papirsykmelding.api
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
-import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalCommonService
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalOppgaveService
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalSykmeldingService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
@@ -35,7 +34,6 @@ class NasjonalOppgaveController(
     private val sykmelderService: SykmelderService,
     private val personService: PersonService,
     private val nasjonalSykmeldingService: NasjonalSykmeldingService,
-    private val nasjonalCommonService: NasjonalCommonService,
 ) {
     val log = applog()
     val securelog = securelog()

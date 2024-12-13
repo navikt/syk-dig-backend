@@ -13,14 +13,18 @@ import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 private const val OPPGAVETYPE = "JFR"
 
@@ -145,7 +149,7 @@ class OppgaveClient(
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
+                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave med id $oppgaveId")
             } else {
                 log.error(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
@@ -182,7 +186,7 @@ class OppgaveClient(
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
+                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave med id: $oppgaveId")
             } else {
                 log.error(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
