@@ -128,7 +128,7 @@ class DokarkivClient(
         headers["Nav-Callid"] = sykmeldingId
 
         try {
-            securelog.info("createOppdaterUtenlandskJournalpostRequest: ${objectMapper.writeValueAsString(oppdaterJournalpostRequest)}")
+            securelog.info("createOppdaterJournalpostRequest: ${objectMapper.writeValueAsString(oppdaterJournalpostRequest)}")
             val response = dokarkivRestTemplate.exchange(
                 "$url/$journalpostId",
                 HttpMethod.PUT,
