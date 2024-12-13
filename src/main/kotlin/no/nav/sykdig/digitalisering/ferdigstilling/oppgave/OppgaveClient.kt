@@ -176,7 +176,7 @@ class OppgaveClient(
         headers["X-Correlation-ID"] = sykmeldingId
         try {
             val response =
-                oppgaveRestTemplate.exchange(
+                oppgaveM2mRestTemplate.exchange(
                     "$url/$oppgaveId",
                     HttpMethod.GET,
                     HttpEntity<Any>(headers),
