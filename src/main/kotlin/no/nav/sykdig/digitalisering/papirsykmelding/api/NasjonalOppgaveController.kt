@@ -176,6 +176,6 @@ class NasjonalOppgaveController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<Any> {
         log.info("Forsøker å hente pdf for oppgaveId $oppgaveId og dokumentInfoId $dokumentInfoId")
-        return nasjonalOppgaveService.getRegisterPdf(oppgaveId, dokumentInfoId, authorization)
+        return nasjonalOppgaveService.getRegisterPdf(oppgaveId, authorization, dokumentInfoId)
     }
 }
