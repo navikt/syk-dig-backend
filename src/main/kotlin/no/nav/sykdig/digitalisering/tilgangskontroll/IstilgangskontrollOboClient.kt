@@ -18,6 +18,7 @@ class IstilgangskontrollOboClient(
 ) {
     companion object {
         const val ACCESS_TO_USER_WITH_AZURE_V2_PATH = "/api/tilgang/navident/person"
+        const val SUPER_USER_ACCESS_WITH_V2_PATH = "/api/tilgang/navident/person/papirsykmelding"
         const val NAV_PERSONIDENT_HEADER = "nav-personident"
     }
 
@@ -49,7 +50,37 @@ class IstilgangskontrollOboClient(
         }
     }
 
+    @Retryable
+    fun sjekkSuperBrukerTilgangVeileder(fnr: String): Boolean {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        headers[NAV_PERSONIDENT_HEADER] = fnr
+
+        try {
+            val response =
+                istilgangskontrollRestTemplate.exchange(
+                    superUserAccessToV2UrlForKorrigerePapirSykmelding(),
+                    GET,
+                    HttpEntity<Any>(headers),
+                    String::class.java,
+                )
+            return response.statusCode.is2xxSuccessful
+        } catch (e: HttpClientErrorException) {
+            return if (e.statusCode.value() == 403) {
+                log.error("istilgangskontroll returnerte 403", e)
+                false
+            } else {
+                log.error("HttpClientErrorException mot tilgangskontroll", e)
+                false
+            }
+        }
+    }
+
     fun accessToUserV2Url(): String {
         return "$url$ACCESS_TO_USER_WITH_AZURE_V2_PATH"
+    }
+
+    fun superUserAccessToV2UrlForKorrigerePapirSykmelding(): String {
+        return "$url$SUPER_USER_ACCESS_WITH_V2_PATH"
     }
 }

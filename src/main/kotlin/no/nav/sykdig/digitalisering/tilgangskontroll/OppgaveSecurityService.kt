@@ -45,7 +45,7 @@ class OppgaveSecurityService(
             val navEmail = nasjonalCommonService.getNavEmail()
             val fnr = oppgave?.fnr
             if (oppgave != null && fnr != null) {
-                val tilgang = hasAccess(fnr, navEmail)
+                val tilgang = hasAccess(fnr, navEmail, requestPath)
                 securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
                 auditlog.info(
                     AuditLogger().createcCefMessage(
@@ -71,7 +71,7 @@ class OppgaveSecurityService(
             val navEmail = nasjonalCommonService.getNavEmail()
             val fnr = oppgave?.fnr
             if (oppgave != null && fnr != null) {
-                val tilgang = hasAccess(fnr, navEmail)
+                val tilgang = hasAccess(fnr, navEmail, requestPath)
                 securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId")
                 auditlog.info(
                     AuditLogger().createcCefMessage(
@@ -89,6 +89,32 @@ class OppgaveSecurityService(
                 return tilgang
             }
             return false
+    }
+
+    fun hasSuperUserAccessToNasjonalSykmelding(sykmeldingId: String, authorization: String, requestPath: String): Boolean {
+        securelog.info("sjekker om bruker har super bruker tilgang på sykmelding $sykmeldingId")
+        val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
+        val navEmail = nasjonalCommonService.getNavEmail()
+        val fnr = oppgave?.fnr
+        if (oppgave != null && fnr != null) {
+            val tilgang = hasSuperUserAccess(fnr, navEmail, requestPath)
+            securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId")
+            auditlog.info(
+                AuditLogger().createcCefMessage(
+                    fnr = fnr,
+                    navEmail = navEmail,
+                    operation = AuditLogger.Operation.READ,
+                    requestPath = requestPath,
+                    permit =
+                        when (tilgang) {
+                            true -> AuditLogger.Permit.PERMIT
+                            false -> AuditLogger.Permit.DENY
+                        },
+                ),
+            )
+            return tilgang
+        }
+        return false
     }
         fun hasAccessToSykmelding(sykmeldingId: String): Boolean {
             securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
@@ -134,6 +160,7 @@ class OppgaveSecurityService(
         private fun hasAccess(
             fnr: String,
             navEmail: String,
+            requestPath: String = "/api/graphql",
         ): Boolean {
             val tilgang = istilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
             auditlog.info(
@@ -141,7 +168,7 @@ class OppgaveSecurityService(
                     fnr = fnr,
                     navEmail = navEmail,
                     operation = AuditLogger.Operation.READ,
-                    requestPath = "/api/graphql",
+                    requestPath = requestPath,
                     permit =
                         when (tilgang) {
                             true -> AuditLogger.Permit.PERMIT
@@ -152,6 +179,31 @@ class OppgaveSecurityService(
 
             return tilgang
         }
+
+        private fun hasSuperUserAccess(
+            fnr: String,
+            navEmail: String,
+            requestPath: String,
+        ): Boolean {
+            val tilgang = istilgangskontrollOboClient.sjekkSuperBrukerTilgangVeileder(fnr)
+            auditlog.info(
+                AuditLogger().createcCefMessage(
+                    fnr = fnr,
+                    navEmail = navEmail,
+                    operation = AuditLogger.Operation.READ,
+                    requestPath = requestPath,
+                    permit =
+                        when (tilgang) {
+                            true -> AuditLogger.Permit.PERMIT
+                            false -> AuditLogger.Permit.DENY
+                        },
+                ),
+            )
+
+            return tilgang
+        }
+
+
 
 
 }

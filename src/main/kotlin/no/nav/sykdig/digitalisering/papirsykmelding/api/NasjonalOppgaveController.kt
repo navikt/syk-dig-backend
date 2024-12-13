@@ -154,7 +154,7 @@ class NasjonalOppgaveController(
     }
 
     @PostMapping("/sykmelding/{sykmeldingId}")
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization, '/sykmelding/{sykmeldingId}')")
+    @PreAuthorize("@oppgaveSecurityService.hasSuperUserAccessToNasjonalSykmelding(#sykmeldingId, #authorization, '/sykmelding/{sykmeldingId}')")
     @WithSpan
     suspend fun korrigerSykmelding(
         @PathVariable sykmeldingId: String,

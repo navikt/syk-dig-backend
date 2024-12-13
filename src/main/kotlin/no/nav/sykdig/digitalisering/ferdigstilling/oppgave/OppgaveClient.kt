@@ -148,8 +148,8 @@ class OppgaveClient(
             return response.body ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $oppgaveId")
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave med id $oppgaveId")
+                log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message} med httpStatus ${e.statusCode.value()}")
+                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave med id: $oppgaveId")
             } else {
                 log.error(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
