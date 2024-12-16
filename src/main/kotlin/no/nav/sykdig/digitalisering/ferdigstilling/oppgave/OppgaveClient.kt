@@ -445,7 +445,7 @@ class OppgaveClient(
             )
 
         try {
-            oppgaveRestTemplate.exchange(
+            oppgaveM2mRestTemplate.exchange(
                 "$url/$oppgaveId",
                 HttpMethod.PATCH,
                 HttpEntity(body, headers),
