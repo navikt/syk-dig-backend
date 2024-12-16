@@ -64,7 +64,8 @@ class OppgaveClient(
         oppgaveId: String,
         sykmeldingId: String,
         ferdigstillRegistrering: FerdigstillRegistrering,
-        loggingMeta: LoggingMeta
+        loggingMeta: LoggingMeta,
+        beskrivelse: String?
     ) {
         val oppgave = getNasjonalOppgave(oppgaveId, sykmeldingId)
         if (oppgave.status == OppgaveStatus.FERDIGSTILT.name || oppgave.status == OppgaveStatus.FEILREGISTRERT.name) {
@@ -80,10 +81,10 @@ class OppgaveClient(
             tilordnetRessurs = ferdigstillRegistrering.veileder.veilederIdent,
             tildeltEnhetsnr = ferdigstillRegistrering.navEnhet,
             mappeId = null,
-            beskrivelse = oppgave.beskrivelse,
+            beskrivelse = if (beskrivelse?.isNotBlank() == true) beskrivelse else oppgave.beskrivelse,
         )
         log.info(
-            "Ferdigstiller oppgave med {}, {}",
+            "Ferdigstiller nasjonal oppgave med {}, {}",
             StructuredArguments.keyValue("oppgaveId", oppgaveId),
             StructuredArguments.fields(loggingMeta),
         )

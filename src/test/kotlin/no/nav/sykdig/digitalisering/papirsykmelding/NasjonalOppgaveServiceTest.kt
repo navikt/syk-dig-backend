@@ -9,6 +9,8 @@ import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
 import no.nav.sykdig.digitalisering.dokument.DocumentService
 import no.nav.sykdig.digitalisering.felles.Adresse
 import no.nav.sykdig.digitalisering.felles.Behandler
+import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.NasjonalOppgaveResponse
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
@@ -21,6 +23,7 @@ import no.nav.sykdig.digitalisering.pdl.Navn
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
+import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.model.OppgaveDbModel
 import okhttp3.internal.EMPTY_BYTE_ARRAY
@@ -31,6 +34,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -84,6 +88,9 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     @MockBean
     lateinit var nasjonaCommonService: NasjonalCommonService
 
+    @MockBean
+    lateinit var nasjonalFerdigstillingService: NasjonalFerdigstillingsService
+
     @Autowired
     @Qualifier("smregisteringRestTemplate")
     private lateinit var restTemplate: RestTemplate
@@ -102,7 +109,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
 
     @Test
-    fun `avvis oppgave blir oppdatert og lagra i DB`() {
+    fun `avvis oppgave blir oppdatert og lagra i DB`() = runBlocking {
         val oppgaveId = "123"
         val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
         val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
@@ -113,25 +120,26 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         Mockito.`when`(nasjonaCommonService.getNavIdent()).thenReturn(Veileder("navIdent"))
 
         Mockito.`when`(personService.getPerson(anyString(), anyString())).thenReturn(testDataPerson())
-        Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(anyString())).thenReturn(SafQueryJournalpost(null))
 
-        Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(org.mockito.kotlin.any())).thenReturn(false)
         Mockito.`when`(dokarkivClient.oppdaterOgFerdigstillNasjonalJournalpost(
-            journalpostId = org.mockito.kotlin.any(),
-            dokumentInfoId = org.mockito.kotlin.any(),
-            pasientFnr = org.mockito.kotlin.any(),
-            sykmeldingId = org.mockito.kotlin.any(),
-            sykmelder = org.mockito.kotlin.any(),
-            loggingMeta = org.mockito.kotlin.any(),
-            navEnhet = org.mockito.kotlin.any(),
-            avvist = org.mockito.kotlin.any(),
-            perioder = org.mockito.kotlin.any(),
+            journalpostId = any(),
+            dokumentInfoId = any(),
+            pasientFnr = any(),
+            sykmeldingId = any(),
+            sykmelder = any(),
+            loggingMeta = any(),
+            navEnhet = any(),
+            avvist = any(),
+            perioder = any(),
         )).thenReturn(null)
 
-        Mockito.`when`(sykmelderService.getSykmelder(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(testDataSykmelder())
-        Mockito.doNothing().`when`(oppgaveClient).ferdigstillOppgave(org.mockito.kotlin.any(), org.mockito.kotlin.any())
-        Mockito.doNothing().`when`(documentService).updateDocumentTitle(org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.any())
-        Mockito.`when`(nasjonaCommonService.getLoggingMeta(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(testDataLoggingMeta())
+        Mockito.doNothing().`when`(oppgaveClient).ferdigstillOppgave(any(), any())
+        Mockito.doNothing().`when`(documentService).updateDocumentTitle(any(), any(), any())
+        Mockito.`when`(nasjonaCommonService.getLoggingMeta(any(), any())).thenReturn(testDataLoggingMeta())
+        Mockito.`when`(sykmelderService.getSykmelderForAvvistOppgave(any(),any(),any())).thenReturn(testDataSykmelder())
+        Mockito.`when`(safJournalpostGraphQlClient.getJournalpostM2m(any())).thenReturn(SafQueryJournalpost(SafJournalpost("tittel", null, null, null, emptyList(), null, null)))
+        Mockito.`when`(oppgaveClient.getNasjonalOppgave(any(), any())).thenReturn(NasjonalOppgaveResponse(prioritet = "", aktivDato = LocalDate.now(), oppgavetype = ""))
+
 
         assertTrue(originalOppgave.avvisningsgrunn == null)
         val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request,  "enhet", "auth")

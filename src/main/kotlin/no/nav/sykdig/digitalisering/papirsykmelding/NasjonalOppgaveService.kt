@@ -5,25 +5,23 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
+import no.nav.sykdig.auditLogger.AuditLogger
+import no.nav.sykdig.auditlog
+import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.api.getPdfResult
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
-import no.nav.sykdig.digitalisering.mapAvvisningsgrunn
+import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.SmregistreringClient
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Document
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.SmRegistreringManuell
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.*
 import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
 import no.nav.sykdig.digitalisering.pdl.PersonService
 import no.nav.sykdig.digitalisering.saf.SafClient
-import no.nav.sykdig.generated.types.Avvisingsgrunn
+import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
 import no.nav.sykdig.metrics.MetricRegister
 import no.nav.sykdig.securelog
 import org.springframework.http.HttpStatus
@@ -37,16 +35,15 @@ import java.util.*
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
     private val oppgaveClient: OppgaveClient,
-    private val personService: PersonService,
-    private val ferdigstillingService: FerdigstillingService,
     private val smregistreringClient: SmregistreringClient,
     private val nasjonalCommonService: NasjonalCommonService,
-    private val gosysService: GosysService,
-    private val metricRegister: MetricRegister,
     private val safClient: SafClient,
+    private val nasjonalFerdigstillingsService: NasjonalFerdigstillingsService,
+    private val metricRegister: MetricRegister,
 ) {
     val log = applog()
     val securelog = securelog()
+    val auditLogger = auditlog()
     val mapper = jacksonObjectMapper()
 
     fun lagreOppgave(papirManuellOppgave: PapirManuellOppgave, ferdigstilt: Boolean = false): NasjonalManuellOppgaveDAO {
@@ -77,7 +74,7 @@ class NasjonalOppgaveService(
             avvisningsgrunn = avvisningsgrunn,
             datoFerdigstilt = LocalDateTime.now(),
             ferdigstilt = true,
-            papirSmRegistrering = mapToUpdatedPapirSmRegistrering(existingOppgave, smRegistreringManuell)
+            papirSmRegistrering = mapToUpdatedPapirSmRegistrering(existingOppgave, smRegistreringManuell),
         )
 
         securelog.info("Lagret oppgave med sykmeldingId ${updatedOppgave.sykmeldingId} og med database id ${updatedOppgave.id} som dette objektet: $updatedOppgave")
@@ -129,15 +126,6 @@ class NasjonalOppgaveService(
         return oppgave
     }
 
-    suspend fun ferdigstillOppgave(
-        ferdigstillRegistrering: FerdigstillRegistrering,
-        beskrivelse: String?,
-        loggingMeta: LoggingMeta,
-        oppgaveId: String,
-    ) {
-        oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta)
-    }
-
     fun getOppgaveBySykmeldingId(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {
         val sykmelding = findBySykmeldingId(sykmeldingId)
 
@@ -181,46 +169,56 @@ class NasjonalOppgaveService(
         return null
     }
 
-    fun avvisOppgave(
+    suspend fun avvisOppgave(
         oppgaveId: String,
         request: String,
         navEnhet: String,
-        authorization: String
+        authorization: String,
     ): ResponseEntity<HttpStatusCode> {
-        val eksisterendeOppgave = getOppgave(oppgaveId, authorization)
-
-        if (eksisterendeOppgave == null) {
+        val lokalOppgave = getOppgave(oppgaveId, authorization)
+        if (lokalOppgave == null) {
             log.info("Fant ikke oppgave som skulle avvises: $oppgaveId")
             return ResponseEntity(HttpStatus.NOT_FOUND)
         }
-
-        if (eksisterendeOppgave.ferdigstilt) {
+        if (lokalOppgave.ferdigstilt) {
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
 
+        val eksternOppgave = oppgaveClient.getNasjonalOppgave(oppgaveId, lokalOppgave.sykmeldingId)
         val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
-        val veilederIdent = nasjonalCommonService.getNavIdent().veilederIdent
 
-        ferdigstillNasjonalAvvistOppgave(eksisterendeOppgave, navEnhet, avvisningsgrunn, veilederIdent)
+        log.info("Avviser oppgave med oppgaveId: $oppgaveId. Avvisningsgrunn: $avvisningsgrunn")
+        val veilederIdent = nasjonalCommonService.getNavIdent().veilederIdent
+        nasjonalFerdigstillingsService.ferdigstillNasjonalAvvistOppgave(lokalOppgave, eksternOppgave, navEnhet, avvisningsgrunn, veilederIdent)
+
         oppdaterOppgave(
-            eksisterendeOppgave.sykmeldingId,
+            lokalOppgave.sykmeldingId,
             utfall = Utfall.AVVIST.toString(),
             ferdigstiltAv = veilederIdent,
             avvisningsgrunn = avvisningsgrunn,
-            null
+            null,
+        )
+        auditLogger.info(
+            AuditLogger()
+                .createcCefMessage(
+                    fnr = lokalOppgave.fnr,
+                    operation = AuditLogger.Operation.WRITE,
+                    requestPath = "/api/v1/oppgave/$oppgaveId/avvis",
+                    permit = AuditLogger.Permit.PERMIT,
+                    navEmail = nasjonalCommonService.getNavEmail(),
+                ),
         )
 
         log.info("Har avvist oppgave med oppgaveId $oppgaveId")
         return ResponseEntity(HttpStatus.NO_CONTENT)
-
     }
 
 
     fun mapToDao(
         papirManuellOppgave: PapirManuellOppgave,
         existingId: UUID?,
-        ferdigstilt: Boolean = false
+        ferdigstilt: Boolean = false,
     ): NasjonalManuellOppgaveDAO {
         mapper.registerModules(JavaTimeModule())
         securelog.info("Mapper til DAO: $papirManuellOppgave")
@@ -276,7 +274,7 @@ class NasjonalOppgaveService(
     }
 
     fun mapFromDao(
-        nasjonalManuellOppgaveDAO: NasjonalManuellOppgaveDAO
+        nasjonalManuellOppgaveDAO: NasjonalManuellOppgaveDAO,
     ): PapirManuellOppgave {
         val papirSmRegistering = nasjonalManuellOppgaveDAO.papirSmRegistrering
 
@@ -315,67 +313,25 @@ class NasjonalOppgaveService(
         )
     }
 
-
-    fun ferdigstillNasjonalAvvistOppgave(
-        oppgave: NasjonalManuellOppgaveDAO,
-        navEnhet: String,
-        avvisningsgrunn: String?,
-        veilederIdent: String,
-    ) {
-
-        if (oppgave.fnr != null) {
-            val sykmeldt =
-                personService.getPerson(
-                    id = oppgave.fnr,
-                    callId = oppgave.sykmeldingId,
-                )
-            val avvistGrunn = enumValues<Avvisingsgrunn>().find { it.name.equals(avvisningsgrunn, ignoreCase = true) }
-            ferdigstillingService.ferdigstillNasjonalAvvistJournalpost(
-                enhet = navEnhet,
-                oppgave = oppgave,
-                sykmeldt = sykmeldt,
-                avvisningsGrunn = avvistGrunn?.let { mapAvvisningsgrunn(it, null) },
-                loggingMeta = nasjonalCommonService.getLoggingMeta(oppgave.sykmeldingId, oppgave),
-            )
-
-        } else {
-            log.error("Fant ikke fnr for oppgave med id $oppgave.oppgaveId")
-        }
-    }
-
-    fun ferdigstillOgSendOppgaveTilGosys(oppgaveId: String, authorization: String) {
-        val eksisterendeOppgave = getOppgave(oppgaveId, authorization)
-
-        if (eksisterendeOppgave == null) {
-            log.warn("Fant ikke oppgave med id $oppgaveId")
-            throw NoOppgaveException("Fant ikke oppgave med id $oppgaveId")
-        }
-
-        val sykmeldingId = eksisterendeOppgave.sykmeldingId
-
-        val loggingMeta = nasjonalCommonService.getLoggingMeta(sykmeldingId, eksisterendeOppgave)
-
-        log.info(
-            "Sender nasjonal oppgave med id $oppgaveId til Gosys {}",
-            StructuredArguments.fields(loggingMeta)
-        )
-
-        val navIdent = nasjonalCommonService.getNavIdent().veilederIdent
-        gosysService.sendOppgaveTilGosys(oppgaveId, sykmeldingId, navIdent)
-        oppdaterOppgave(sykmeldingId, Utfall.SENDT_TIL_GOSYS.toString(), navIdent, null, null)
-
-        log.info(
-            "Ferdig å sende oppgave med id $oppgaveId til Gosys {}",
-            StructuredArguments.fields(loggingMeta)
-        )
-
-        metricRegister.sendtTilGosysNasjonal.increment()
-    }
-
     fun getRegisterPdf(oppgaveId: String, authorization: String, dokumentInfoId: String): ResponseEntity<Any> {
         val oppgave = getOppgave(oppgaveId, authorization)
         requireNotNull(oppgave)
         val pdfResult = safClient.getPdfFraSaf(oppgave.journalpostId, dokumentInfoId, authorization)
         return getPdfResult(pdfResult)
     }
+
+    fun oppgaveTilGosys(oppgaveId: String, authorization: String) {
+        val eksisterendeOppgave = getOppgave(oppgaveId, authorization) ?: return
+        val navIdent = nasjonalCommonService.getNavIdent()
+        val loggingMeta = nasjonalCommonService.getLoggingMeta(eksisterendeOppgave.sykmeldingId, eksisterendeOppgave)
+        nasjonalFerdigstillingsService.ferdigstillOgSendOppgaveTilGosys(oppgaveId, authorization, eksisterendeOppgave)
+        oppdaterOppgave(eksisterendeOppgave.sykmeldingId, Utfall.SENDT_TIL_GOSYS.toString(), navIdent.veilederIdent, null, null)
+
+        log.info(
+            "Ferdig å sende oppgave med id $oppgaveId til Gosys {}",
+            StructuredArguments.fields(loggingMeta),
+        )
+        metricRegister.sendtTilGosysNasjonal.increment()
+    }
+
 }

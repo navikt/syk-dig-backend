@@ -9,11 +9,14 @@ import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmeldi
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.digitalisering.pdl.Person
 import no.nav.sykdig.digitalisering.pdl.toFormattedNameString
 import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
+import no.nav.sykdig.digitalisering.sykmelding.service.JournalpostService
 import no.nav.sykdig.model.OppgaveDbModel
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
@@ -32,7 +35,6 @@ class FerdigstillingService(
     private val oppgaveClient: OppgaveClient,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val dokumentService: DocumentService,
-    private val sykmelderService: SykmelderService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -158,44 +160,6 @@ class FerdigstillingService(
                 avvisningsGrunn = avvisningsGrunn,
                 sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
                 orginalAvsenderMottaker = hentAvsenderMottar,
-            )
-        }
-    }
-
-    fun ferdigstillNasjonalAvvistJournalpost(
-        enhet: String,
-        oppgave: NasjonalManuellOppgaveDAO,
-        sykmeldt: Person,
-        avvisningsGrunn: String?,
-        loggingMeta: LoggingMeta,
-    ) {
-        requireNotNull(oppgave.dokumentInfoId) { "DokumentInfoId må være satt for å kunne ferdigstille oppgave" }
-        val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
-        securelog.info("journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}")
-
-        if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
-            log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
-        }
-        else {
-            log.info("Ferdigstiller journalpost med id ${oppgave.journalpostId},  dokumentInfoId ${oppgave.dokumentInfoId}, sykmeldingId ${oppgave.sykmeldingId} og oppgaveId ${oppgave.oppgaveId}")
-            dokarkivClient.oppdaterOgFerdigstillNasjonalJournalpost(
-                journalpostId = oppgave.journalpostId,
-                dokumentInfoId = oppgave.dokumentInfoId,
-                pasientFnr = oppgave.fnr!!,
-                sykmeldingId = oppgave.sykmeldingId,
-                sykmelder = sykmelderService.getSykmelder(oppgave.papirSmRegistrering.behandler?.hpr!!, "callId"),
-                loggingMeta = loggingMeta,
-                navEnhet = enhet,
-                avvist = true,
-                perioder = oppgave.papirSmRegistrering.perioder ?: emptyList(),
-            )
-
-            oppgaveClient.ferdigstillOppgave(oppgave.oppgaveId.toString(), oppgave.sykmeldingId)
-
-            dokarkivClient.updateDocument(
-                journalpostid = oppgave.journalpostId,
-                documentId = oppgave.dokumentInfoId,
-                tittel = createTitleNasjonal(oppgave.papirSmRegistrering.perioder, true),
             )
         }
     }

@@ -41,7 +41,7 @@ class NasjonalOppgaveController(
     @PostMapping("/oppgave/{oppgaveId}/avvis")
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization, '/oppgave/{oppgaveId}/avvis')")
     @WithSpan
-    fun avvisOppgave(
+    suspend fun avvisOppgave(
         @PathVariable oppgaveId: String,
         @RequestHeader("X-Nav-Enhet") navEnhet: String,
         @RequestHeader("Authorization") authorization: String,
@@ -149,7 +149,7 @@ class NasjonalOppgaveController(
             return ResponseEntity.badRequest().build()
         }
         log.info("papirsykmelding: Sender oppgave med id $oppgaveId til Gosys")
-        nasjonalOppgaveService.ferdigstillOgSendOppgaveTilGosys(oppgaveId, authorization)
+        nasjonalOppgaveService.oppgaveTilGosys(oppgaveId, authorization)
         return ResponseEntity.noContent().build()
     }
 
@@ -163,7 +163,7 @@ class NasjonalOppgaveController(
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<Any> {
         securelog.info("Oppdaterer korrigert oppgave i syk-dig-backend db $papirSykmelding")
-        return  nasjonalSykmeldingService.korrigerSykmelding(sykmeldingId, navEnhet, UUID.randomUUID().toString(), papirSykmelding, authorization)
+        return nasjonalSykmeldingService.korrigerSykmelding(sykmeldingId, navEnhet, UUID.randomUUID().toString(), papirSykmelding, authorization)
     }
 
     @GetMapping("/pdf/{oppgaveId}/{dokumentInfoId}")

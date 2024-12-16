@@ -133,7 +133,7 @@ class JournalpostService(
     }
     suspend fun ferdigstillNasjonalJournalpost(
         ferdigstillRegistrering: FerdigstillRegistrering,
-        receivedSykmelding: ReceivedSykmelding,
+        receivedSykmelding: ReceivedSykmelding?,
         loggingMeta: LoggingMeta,
     ) {
         if (
