@@ -121,7 +121,7 @@ class NasjonalSykmeldingService(
             if (ferdigstillRegistrering.oppgaveId != null) {
                 journalpostService.ferdigstillNasjonalJournalpost(
                     ferdigstillRegistrering = ferdigstillRegistrering,
-                    receivedSykmelding = receivedSykmelding,
+                    perioder = receivedSykmelding.sykmelding.perioder,
                     loggingMeta = loggingMeta,
                 )
                 nasjonalFerdigstillingsService.ferdigstillOppgave(

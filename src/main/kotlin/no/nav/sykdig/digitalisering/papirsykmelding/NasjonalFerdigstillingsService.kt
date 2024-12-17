@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
+import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.NasjonalOppgaveResponse
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
@@ -45,24 +46,17 @@ class NasjonalFerdigstillingsService(
         avvisningsgrunn: String?,
         veilederIdent: String,
     ) {
-        if (lokalOppgave.oppgaveId == null) {
-            log.error("Ingen oppgave tilgjengelig med oppgaveId ${lokalOppgave.oppgaveId} ")
-            return
-        }
-        // dette er nok ikke mulig
-        if (lokalOppgave.fnr == null) {
-            log.error("Fant ikke fnr for oppgave med id ${lokalOppgave.oppgaveId}. kan ikke avvise oppgave")
-            return
-        }
 
         val sykmeldingId = lokalOppgave.sykmeldingId
         val oppgaveId = lokalOppgave.oppgaveId
         val jounalpostId = lokalOppgave.journalpostId
         val dokumentInfoId = lokalOppgave.dokumentInfoId
         val loggingMeta = nasjonalCommonService.getLoggingMeta(lokalOppgave.sykmeldingId, lokalOppgave)
+        requireNotNull(lokalOppgave.oppgaveId)
         val sykmelder = sykmelderService.getSykmelderForAvvistOppgave(lokalOppgave.papirSmRegistrering.behandler?.hpr, lokalOppgave.sykmeldingId, lokalOppgave.oppgaveId)
 
 
+        requireNotNull(lokalOppgave.fnr)
         val ferdigstillRegistrering =
             FerdigstillRegistrering(
                 oppgaveId = oppgaveId,
@@ -76,7 +70,7 @@ class NasjonalFerdigstillingsService(
                 avvist = true,
                 oppgave = eksternOppgave,
             )
-        journalpostService.ferdigstillNasjonalJournalpost(ferdigstillRegistrering, null, loggingMeta)
+        journalpostService.ferdigstillNasjonalJournalpost(ferdigstillRegistrering, lokalOppgave.papirSmRegistrering.perioder, loggingMeta)
         ferdigstillOppgave(
             ferdigstillRegistrering = ferdigstillRegistrering,
             beskrivelse = lagAvvisOppgavebeskrivelse(

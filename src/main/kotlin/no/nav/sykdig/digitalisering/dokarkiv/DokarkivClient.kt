@@ -438,7 +438,7 @@ class DokarkivClient(
         loggingMeta: LoggingMeta,
         navEnhet: String,
         avvist: Boolean,
-        perioder: List<Periode>,
+        perioder: List<Periode>?,
     ): String? {
         val oppdaterJournalpostRequest = createOppdaterJournalpostNasjonalRequest(dokumentInfoId, pasientFnr, sykmelder, avvist, perioder)
         oppdaterJournalpostRequest(oppdaterJournalpostRequest, sykmeldingId, journalpostId)
@@ -455,7 +455,7 @@ class DokarkivClient(
         pasientFnr: String,
         sykmelder: Sykmelder,
         avvist: Boolean,
-        perioder: List<Periode>,
+        perioder: List<Periode>?,
     ): OppdaterJournalpostRequest {
         val oppdaterJournalpostRequest = OppdaterJournalpostRequest(
             avsenderMottaker = getAvsenderMottakerRequest(sykmelder),

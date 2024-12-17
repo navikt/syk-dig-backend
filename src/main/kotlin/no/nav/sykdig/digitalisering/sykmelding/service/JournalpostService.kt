@@ -5,6 +5,7 @@ import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.SykDigOppgaveService
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
+import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.papirsykmelding.NasjonalCommonService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
 import no.nav.sykdig.digitalisering.pdl.PersonService
@@ -133,7 +134,7 @@ class JournalpostService(
     }
     suspend fun ferdigstillNasjonalJournalpost(
         ferdigstillRegistrering: FerdigstillRegistrering,
-        receivedSykmelding: ReceivedSykmelding?,
+        perioder: List<Periode>?,
         loggingMeta: LoggingMeta,
     ) {
         if (
@@ -148,7 +149,7 @@ class JournalpostService(
                 loggingMeta = loggingMeta,
                 navEnhet = ferdigstillRegistrering.navEnhet,
                 avvist = ferdigstillRegistrering.avvist,
-                receivedSykmelding = receivedSykmelding
+                perioder = perioder
             )
         } else {
             log.info(
