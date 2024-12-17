@@ -391,54 +391,7 @@ class DokarkivClient(
         loggingMeta: LoggingMeta,
         navEnhet: String,
         avvist: Boolean,
-        receivedSykmelding: ReceivedSykmelding,
-    ): String? {
-        val oppdaterJournalpostRequest = createOppdaterJournalpostNasjonalRequest(dokumentInfoId, pasientFnr, sykmelder, avvist, receivedSykmelding)
-        oppdaterJournalpostRequest(oppdaterJournalpostRequest, sykmeldingId, journalpostId)
-
-        return ferdigstillJournalpost(
-            enhet = navEnhet,
-            journalpostId = journalpostId,
-            sykmeldingId = sykmeldingId,
-        ).body
-    }
-
-    private fun createOppdaterJournalpostNasjonalRequest(
-        dokumentInfoId: String?,
-        pasientFnr: String,
-        sykmelder: Sykmelder,
-        avvist: Boolean,
-        receivedSykmelding: ReceivedSykmelding,
-    ): OppdaterJournalpostRequest {
-        val oppdaterJournalpostRequest = OppdaterJournalpostRequest(
-            avsenderMottaker = getAvsenderMottakerRequest(sykmelder),
-            bruker = DokBruker(id = pasientFnr),
-            sak = Sak(),
-            tittel = createTitleNasjonal(receivedSykmelding.sykmelding.perioder, avvist),
-            dokumenter = if (dokumentInfoId != null) {
-                listOf(
-                    DokumentInfo(
-                        dokumentInfoId = dokumentInfoId,
-                        tittel = createTitleNasjonal(receivedSykmelding.sykmelding.perioder, avvist),
-                    ),
-                )
-            } else {
-                null
-            },
-        )
-        return oppdaterJournalpostRequest
-    }
-
-    fun oppdaterOgFerdigstillNasjonalJournalpost(
-        journalpostId: String,
-        dokumentInfoId: String? = null,
-        pasientFnr: String,
-        sykmeldingId: String,
-        sykmelder: Sykmelder,
-        loggingMeta: LoggingMeta,
-        navEnhet: String,
-        avvist: Boolean,
-        perioder: List<Periode>,
+        perioder: List<Periode>?,
     ): String? {
         val oppdaterJournalpostRequest = createOppdaterJournalpostNasjonalRequest(dokumentInfoId, pasientFnr, sykmelder, avvist, perioder)
         oppdaterJournalpostRequest(oppdaterJournalpostRequest, sykmeldingId, journalpostId)
@@ -455,7 +408,7 @@ class DokarkivClient(
         pasientFnr: String,
         sykmelder: Sykmelder,
         avvist: Boolean,
-        perioder: List<Periode>,
+        perioder: List<Periode>?,
     ): OppdaterJournalpostRequest {
         val oppdaterJournalpostRequest = OppdaterJournalpostRequest(
             avsenderMottaker = getAvsenderMottakerRequest(sykmelder),
@@ -486,7 +439,7 @@ class DokarkivClient(
 
     private fun getAvsenderMottakerRequest(sykmelder: Sykmelder): AvsenderMottakerRequest {
         return AvsenderMottakerRequest(
-            id = padHpr(sykmelder.hprNummer),
+            id = padHpr(sykmelder.hprNummer!!),
             navn = finnNavn(sykmelder),
             land = null,
             idType = IdType.HPRNR,

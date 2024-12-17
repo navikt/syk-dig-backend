@@ -79,7 +79,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
 
     @BeforeEach
     fun setup() {
-        ferdigstillingService = FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService, sykmelderService)
+        ferdigstillingService = FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService)
         nasjonalOppgaveRepository.deleteAll()
 
     }

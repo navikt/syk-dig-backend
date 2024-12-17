@@ -42,6 +42,7 @@ class NasjonalSykmeldingService(
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val sykmelderService: SykmelderService,
     private val nasjonalCommonService: NasjonalCommonService,
+    private val nasjonalFerdigstillingsService: NasjonalFerdigstillingsService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -120,10 +121,10 @@ class NasjonalSykmeldingService(
             if (ferdigstillRegistrering.oppgaveId != null) {
                 journalpostService.ferdigstillNasjonalJournalpost(
                     ferdigstillRegistrering = ferdigstillRegistrering,
-                    receivedSykmelding = receivedSykmelding,
+                    perioder = receivedSykmelding.sykmelding.perioder,
                     loggingMeta = loggingMeta,
                 )
-                nasjonalOppgaveService.ferdigstillOppgave(
+                nasjonalFerdigstillingsService.ferdigstillOppgave(
                     ferdigstillRegistrering,
                     null,
                     loggingMeta,

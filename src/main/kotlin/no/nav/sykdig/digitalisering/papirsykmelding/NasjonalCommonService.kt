@@ -46,7 +46,7 @@ class NasjonalCommonService(
                 callId = callId,
             )
 
-        val tssId = sykmelderService.getTssIdInfotrygd(sykmelder.fnr, "", loggingMeta, sykmeldingId)
+        val tssId = sykmelderService.getTssIdInfotrygd(sykmelder.fnr!!, "", loggingMeta, sykmeldingId)
 
         val datoOpprettet = oppgave.datoOpprettet
         val journalpostId = oppgave.journalpostId
@@ -67,7 +67,7 @@ class NasjonalCommonService(
             healthInformation.toSykmelding(
                 sykmeldingId,
                 pasient.aktorId,
-                sykmelder.aktorId,
+                sykmelder.aktorId!!,
                 sykmeldingId,
                 getLocalDateTime(msgHead.msgInfo.genDate),
             )

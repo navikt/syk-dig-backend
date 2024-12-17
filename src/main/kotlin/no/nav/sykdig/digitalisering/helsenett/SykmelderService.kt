@@ -50,6 +50,29 @@ class SykmelderService(
         )
     }
 
+    fun getSykmelderForAvvistOppgave(
+        hpr: String?,
+        callId: String,
+        oppgaveId: Int,
+    ): Sykmelder {
+        log.info("Henter sykmelder fra HPR og PDL for oppgaveid $oppgaveId")
+        if (hpr == null) {
+            return getDefaultSykmelder()
+        }
+        return getSykmelder(hpr, callId)
+    }
+
+    private fun getDefaultSykmelder(): Sykmelder =
+        Sykmelder(
+            fornavn = "Helseforetak",
+            hprNummer = null,
+            fnr = null,
+            aktorId = null,
+            mellomnavn = null,
+            etternavn = null,
+            godkjenninger = null,
+        )
+
     suspend fun getTssIdInfotrygd(samhandlerFnr: String, samhandlerOrgName: String, loggingMeta: LoggingMeta, sykmeldingId: String): String {
         return smtssClient.findBestTssInfotrygd(samhandlerFnr, samhandlerOrgName, loggingMeta, sykmeldingId)
     }
