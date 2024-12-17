@@ -8,6 +8,7 @@ import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.getFristForFerdigstillingAvOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.objectMapper
@@ -539,6 +540,44 @@ class OppgaveClient(
             log.error(
                 "Kunne ikke opprette oppgave med på journalpostId $journalpostId " +
                     "ved createOppgave med correlation id $xCorrelationId: ${e.message}",
+                e,
+            )
+            throw e
+        }
+    }
+
+    fun oppdaterNasjonalGosysOppgave(oppdatertOppgave: NasjonalOppgaveResponse, sykmeldingId: String, oppgaveId: String, veileder: String) {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-Correlation-ID"] = oppgaveId
+
+        try {
+            oppgaveM2mRestTemplate.exchange(
+                "$url/${oppdatertOppgave.id}",
+                HttpMethod.PUT,
+                HttpEntity(oppdatertOppgave, headers),
+                String::class.java,
+            )
+            log.info("OppdaterOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
+        } catch (e: HttpClientErrorException) {
+            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+                log.warn(
+                    "Veileder $veileder har ikke tilgang til å " +
+                            "oppdaterOppgave oppgaveId $oppgaveId: ${e.message}",
+                )
+                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
+            } else {
+                log.error(
+                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+                            "fra Oppgave ved oppdaterOppgave: ${e.message}",
+                    e,
+                )
+                throw e
+            }
+        } catch (e: HttpServerErrorException) {
+            log.error(
+                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+                        "fra Oppgave ved oppdaterOppgave: ${e.message}",
                 e,
             )
             throw e

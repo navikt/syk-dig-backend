@@ -108,8 +108,7 @@ class NasjonalFerdigstillingsService(
             StructuredArguments.fields(loggingMeta),
         )
         val navIdent = nasjonalCommonService.getNavIdent().veilederIdent
-        gosysService.sendOppgaveTilGosys(oppgaveId, sykmeldingId, navIdent)
-
+        gosysService.sendNasjonalOppgaveTilGosys(oppgaveId, sykmeldingId, navIdent)
     }
 
 }
