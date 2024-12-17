@@ -3,7 +3,6 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
-import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.NasjonalOppgaveResponse
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
@@ -46,11 +45,8 @@ class NasjonalFerdigstillingsService(
         avvisningsgrunn: String?,
         veilederIdent: String,
     ) {
-
         val sykmeldingId = lokalOppgave.sykmeldingId
         val oppgaveId = lokalOppgave.oppgaveId
-        val jounalpostId = lokalOppgave.journalpostId
-        val dokumentInfoId = lokalOppgave.dokumentInfoId
         val loggingMeta = nasjonalCommonService.getLoggingMeta(lokalOppgave.sykmeldingId, lokalOppgave)
         requireNotNull(lokalOppgave.oppgaveId)
         val sykmelder = sykmelderService.getSykmelderForAvvistOppgave(lokalOppgave.papirSmRegistrering.behandler?.hpr, lokalOppgave.sykmeldingId, lokalOppgave.oppgaveId)
@@ -60,8 +56,8 @@ class NasjonalFerdigstillingsService(
         val ferdigstillRegistrering =
             FerdigstillRegistrering(
                 oppgaveId = oppgaveId,
-                journalpostId = jounalpostId,
-                dokumentInfoId = dokumentInfoId,
+                journalpostId = lokalOppgave.journalpostId,
+                dokumentInfoId = lokalOppgave.dokumentInfoId,
                 pasientFnr = lokalOppgave.fnr,
                 sykmeldingId = sykmeldingId,
                 sykmelder = sykmelder,
