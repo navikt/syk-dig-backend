@@ -6,10 +6,7 @@ type Query {
     oppgave(oppgaveId: String!): DigitaliseringsoppgaveResult
     journalpost(id: String!): JournalpostResult!
     digitalisertSykmelding(sykmeldingId: String!) : DigitalisertSykmeldingResult
-
     nasjonalOppgave(oppgaveId: String!): NasjonalOppgaveResult
-
-
 }
 
 type Mutation {
