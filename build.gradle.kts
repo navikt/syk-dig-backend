@@ -1,7 +1,7 @@
 import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 
 plugins {
-    id("org.springframework.boot") version "3.3.2"
+    id("org.springframework.boot") version "3.4.0"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("jvm") version "2.0.10"
     kotlin("plugin.spring") version "2.0.10"
@@ -27,7 +27,7 @@ val tokenSupportVersion = "5.0.1"
 val testContainersVersion = "1.20.4"
 val logstashLogbackEncoderVersion = "8.0"
 val javaJwtVersion = "4.4.0"
-val springBootResourceVersion = "3.3.2"
+val springBootResourceVersion = "3.4.0"
 val graphqlVersion = "20.2"
 val kafkaClientsVersion = "3.9.0"
 val syfoXmlCodegen = "2.0.1"
