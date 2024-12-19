@@ -195,7 +195,7 @@ class NasjonalSykmeldingService(
 
     private suspend fun getSykmelder(smRegistreringManuell: SmRegistreringManuell, loggingMeta: LoggingMeta, callId: String): Sykmelder {
         val sykmelderHpr = smRegistreringManuell.behandler.hpr
-        if (sykmelderHpr.isNullOrEmpty()) {
+        if (sykmelderHpr.isNullOrEmpty() || sykmelderHpr.isBlank()) {
             log.error("HPR-nummer mangler {}", StructuredArguments.fields(loggingMeta))
             throw SykmelderNotFoundException("HPR-nummer mangler") // dobbeltsjekk at det blir rett å throwe, returnerte bad request før
         }
