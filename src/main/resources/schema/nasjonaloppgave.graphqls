@@ -2,11 +2,12 @@ union NasjonalOppgaveResult = NasjonalOppgave | NasjonalOppgaveStatus
 
 type NasjonalOppgave {
     oppgaveId: String!
-    papirSmRegistrering: PapirSmRegistrering!
+    nasjonalSykmelding: NasjonalSykmelding!
     documents: [Document!]!
 }
 
-type PapirSmRegistrering {
+type NasjonalSykmelding {
+    sykmeldingId: String,
     journalpostId: String!,
     fnr: String,
     datoOpprettet: String,
