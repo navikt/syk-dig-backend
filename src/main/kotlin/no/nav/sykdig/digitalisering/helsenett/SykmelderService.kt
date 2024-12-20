@@ -55,11 +55,16 @@ class SykmelderService(
         callId: String,
         oppgaveId: Int,
     ): Sykmelder {
-        log.info("Henter sykmelder fra HPR og PDL for oppgaveid $oppgaveId")
-        if (hpr == null) {
+        try {
+            log.info("Henter sykmelder fra HPR og PDL for oppgaveid $oppgaveId")
+            if (hpr.isNullOrBlank()) {
+                return getDefaultSykmelder()
+            }
+            return getSykmelder(hpr, callId)
+        } catch (ex: Exception) {
+            log.error(ex.message, ex)
             return getDefaultSykmelder()
         }
-        return getSykmelder(hpr, callId)
     }
 
     private fun getDefaultSykmelder(): Sykmelder =
