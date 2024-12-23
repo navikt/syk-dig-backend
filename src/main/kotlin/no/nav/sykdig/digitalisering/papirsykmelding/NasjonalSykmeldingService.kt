@@ -201,7 +201,7 @@ class NasjonalSykmeldingService(
             throw SykmelderNotFoundException("HPR-nummer mangler") // dobbeltsjekk at det blir rett å throwe, returnerte bad request før
         }
 
-        log.info("Henter sykmelder fra HPR og PDL {}", StructuredArguments.fields(loggingMeta))
+        log.info("Henter sykmelder fra HPR og PDL med hpr: $sykmelderHpr {}", StructuredArguments.fields(loggingMeta))
         val sykmelder = sykmelderService.getSykmelder(
             sykmelderHpr,
             callId,
