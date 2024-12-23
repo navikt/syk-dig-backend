@@ -334,7 +334,7 @@ class DokarkivClient(
     }
 
     @Retryable
-    private fun ferdigstillJournalpost(
+    private fun  ferdigstillJournalpost(
         enhet: String,
         journalpostId: String,
         sykmeldingId: String,

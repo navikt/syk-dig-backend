@@ -71,7 +71,7 @@ class NasjonalSykmeldingService(
         val loggingMeta = nasjonalCommonService.getLoggingMeta(sykmeldingId, oppgave)
         val sykmelder = getSykmelder(smRegistreringManuell, loggingMeta, callId)
         val receivedSykmelding = nasjonalCommonService.createReceivedSykmelding(sykmeldingId, oppgave, loggingMeta, smRegistreringManuell, callId, sykmelder)
-
+        securelog.info("sender oppgave med id $oppgaveId og navenhet $navEnhet og callId $callId og sykmelder $sykmelder")
         val validationResult = regelClient.valider(receivedSykmelding, sykmeldingId)
         log.info(
             "Resultat: {}, {}, {}",
@@ -118,6 +118,7 @@ class NasjonalSykmeldingService(
     ): ResponseEntity<Any> {
         if (validationResult.status == Status.OK || validationResult.status == Status.MANUAL_PROCESSING) {
             val veileder = nasjonalCommonService.getNavIdent()
+            log.info("oppgave er ok, skal ferdigstille i dokarkiv og oppgave {}", StructuredArguments.fields(loggingMeta))
             if (ferdigstillRegistrering.oppgaveId != null) {
                 journalpostService.ferdigstillNasjonalJournalpost(
                     ferdigstillRegistrering = ferdigstillRegistrering,
@@ -200,7 +201,7 @@ class NasjonalSykmeldingService(
             throw SykmelderNotFoundException("HPR-nummer mangler") // dobbeltsjekk at det blir rett å throwe, returnerte bad request før
         }
 
-        log.info("Henter sykmelder fra HPR og PDL")
+        log.info("Henter sykmelder fra HPR og PDL {}", StructuredArguments.fields(loggingMeta))
         val sykmelder = sykmelderService.getSykmelder(
             sykmelderHpr,
             callId,
