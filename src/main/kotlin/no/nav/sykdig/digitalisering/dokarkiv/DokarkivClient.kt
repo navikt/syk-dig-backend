@@ -429,9 +429,8 @@ class DokarkivClient(
         return oppdaterJournalpostRequest
     }
 
-    private fun padHpr(hprnummer: String): String {
-        if (hprnummer.length < 9) {
-            securelog.info("padder hpr: $hprnummer")
+    private fun padHpr(hprnummer: String?): String? {
+        if (hprnummer?.length != null && hprnummer.length < 9) {
             return hprnummer.padStart(9, '0')
         }
         return hprnummer
@@ -439,7 +438,7 @@ class DokarkivClient(
 
     private fun getAvsenderMottakerRequest(sykmelder: Sykmelder): AvsenderMottakerRequest {
         return AvsenderMottakerRequest(
-            id = padHpr(sykmelder.hprNummer!!),
+            id = padHpr(sykmelder.hprNummer),
             navn = finnNavn(sykmelder),
             land = null,
             idType = IdType.HPRNR,
