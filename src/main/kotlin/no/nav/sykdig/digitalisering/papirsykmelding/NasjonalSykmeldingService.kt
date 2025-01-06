@@ -8,6 +8,7 @@ import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
+import no.nav.sykdig.digitalisering.exceptions.ValidationException
 import no.nav.sykdig.digitalisering.felles.Sykmelding
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.RegelClient
