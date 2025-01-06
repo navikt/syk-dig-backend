@@ -2,10 +2,7 @@ package no.nav.sykdig.digitalisering.saf
 
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
 import no.nav.sykdig.applog
-import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
-import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
-import no.nav.sykdig.digitalisering.saf.graphql.SAF_QUERY_FIND_JOURNALPOST
-import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
+import no.nav.sykdig.digitalisering.saf.graphql.*
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 
@@ -27,6 +24,20 @@ class SafJournalpostGraphQlClient(
             if(safJournalpost.journalpost?.tittel == null) {
                 log.warn("Tittel is null for $journalpostId")
             }
+            return safJournalpost
+        } catch (e: Exception) {
+            log.error("Noe gikk galt ved kall til SAF for $journalpostId", e)
+            throw e
+        }
+    }
+
+    @Retryable
+    fun getJournalpostNasjonal(journalpostId: String): SafQueryJournalpostNasjonal {
+        try {
+            val response = safM2mGraphQlClient.executeQuery(SAF_QUERY_FIND_JOURNALPOST_NASJONAL, mapOf("id" to journalpostId))
+            val errors = response.errors
+            errors.forEach { log.error("Feilmelding fra SAF: ${it.message} for $journalpostId") }
+            val safJournalpost =  response.dataAsObject(SafQueryJournalpostNasjonal::class.java)
             return safJournalpost
         } catch (e: Exception) {
             log.error("Noe gikk galt ved kall til SAF for $journalpostId", e)

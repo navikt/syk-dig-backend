@@ -29,6 +29,22 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
     }
 """
 
+const val SAF_QUERY_FIND_JOURNALPOST_NASJONAL = """
+    query FindJournalpostNasjonal(${"$"}id: String!) {
+        journalpost(journalpostId: ${"$"}id) {
+            journalstatus
+        }
+    }
+"""
+
+data class SafQueryJournalpostNasjonal(
+    val journalpost: SafJournalpostNasjonal?
+)
+
+data class SafJournalpostNasjonal(
+    val journalstatus: Journalstatus?
+)
+
 data class SafQueryJournalpost(
     val journalpost: SafJournalpost?,
 )

@@ -12,3 +12,9 @@ query FindJournalpost($journalpostId: String!) {
     kanal
   }
 }
+
+query FindJournalpostNasjonal($id: String!) {
+  journalpost(journalpostId: $id) {
+    journalstatus
+  }
+}

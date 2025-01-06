@@ -5,8 +5,6 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.MissingJournalpostException
 import no.nav.sykdig.digitalisering.saf.graphql.DokumentInfo
 import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
-import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
-import no.nav.sykdig.generated.types.Journalpost
 import org.springframework.stereotype.Component
 
 @Component
@@ -37,7 +35,7 @@ class SafJournalpostService(
                 )
             }
 
-            if (erIkkeJournalfort(it)) {
+            if (erIkkeJournalfort(it.journalstatus)) {
                 return finnDokumentInfoIdForSykmeldingPdfListe(it.dokumenter, sykmeldingId)
             } else {
                 logger.warn(
@@ -50,17 +48,16 @@ class SafJournalpostService(
         return null
     }
 
-    private fun erIkkeJournalfort(journalpostResponse: SafJournalpost): Boolean {
-        return journalpostResponse.journalstatus?.let {
+    private fun erIkkeJournalfort(journalpostStatus: Journalstatus?): Boolean {
+        return journalpostStatus?.let {
             it == Journalstatus.MOTTATT || it == Journalstatus.FEILREGISTRERT
         }
             ?: false
     }
 
     fun erIkkeJournalfort(journalpostId: String): Boolean {
-        val journalpost = safJournalpostGraphQlClient.getJournalpostM2m(journalpostId)
-        if (journalpost.journalpost == null) throw MissingJournalpostException("Journalpost med id $journalpostId finnes ikke i SAF")
-        return erIkkeJournalfort(journalpost.journalpost)
+        val journalpost = safJournalpostGraphQlClient.getJournalpostNasjonal(journalpostId)
+        return erIkkeJournalfort(journalpost.journalpost?.journalstatus)
     }
 
     private fun finnDokumentInfoIdForSykmeldingPdfListe(
