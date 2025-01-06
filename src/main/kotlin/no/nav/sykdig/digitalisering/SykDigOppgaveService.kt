@@ -257,7 +257,7 @@ class SykDigOppgaveService(
     }
 
     private fun determineSource(journalpost: SafJournalpost): String {
-        val isEgenerklaering = journalpost.tittel.lowercase().contains("egenerklæring")
+        val isEgenerklaering = journalpost.tittel?.lowercase()?.contains("egenerklæring") ?: false
         return when {
             journalpost.kanal == "NAV_NO" || isEgenerklaering -> "navno"
             journalpost.kanal == "RINA" -> "rina"

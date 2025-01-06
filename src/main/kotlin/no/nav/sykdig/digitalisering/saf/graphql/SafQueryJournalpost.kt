@@ -34,7 +34,7 @@ data class SafQueryJournalpost(
 )
 
 data class SafJournalpost(
-    val tittel: String,
+    val tittel: String?,
     val journalstatus: Journalstatus?,
     val avsenderMottaker: AvsenderMottaker?,
     val bruker: Bruker?,

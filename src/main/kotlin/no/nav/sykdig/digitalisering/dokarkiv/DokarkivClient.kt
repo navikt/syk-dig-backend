@@ -8,7 +8,6 @@ import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
-import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
 import no.nav.sykdig.objectMapper
 import no.nav.sykdig.securelog
 import no.nav.sykdig.utils.createTitle
@@ -26,7 +25,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Locale
 
 @Component
 class DokarkivClient(
