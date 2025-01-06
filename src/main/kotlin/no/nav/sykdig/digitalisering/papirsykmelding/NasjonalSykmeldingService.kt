@@ -3,6 +3,7 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
@@ -46,6 +47,7 @@ class NasjonalSykmeldingService(
 ) {
     val log = applog()
     val securelog = securelog()
+    val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     suspend fun korrigerSykmelding(sykmeldingId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell, authorization: String): ResponseEntity<Any> {
         val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(sykmeldingId, authorization) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
@@ -54,6 +56,7 @@ class NasjonalSykmeldingService(
     }
 
     suspend fun sendPapirsykmeldingOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String, authorization: String): ResponseEntity<Any> {
+        securelog.info("sender papirsykmelding med oppgaveId $oppgaveId {}", kv("smregistreringManuell", objectMapper.writeValueAsString(papirSykmelding)))
         val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         if (oppgave.ferdigstilt) {
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
