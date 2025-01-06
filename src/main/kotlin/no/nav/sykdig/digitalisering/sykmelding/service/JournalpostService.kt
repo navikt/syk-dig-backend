@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.sykmelding.service
 
+import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
@@ -140,6 +141,7 @@ class JournalpostService(
         if (
             safJournalpostService.erIkkeJournalfort(journalpostId = ferdigstillRegistrering.journalpostId)
         ) {
+            log.info("ferdigstiller i dokarkiv {}", StructuredArguments.fields(loggingMeta))
             dokarkivClient.oppdaterOgFerdigstillNasjonalJournalpost(
                 journalpostId = ferdigstillRegistrering.journalpostId,
                 dokumentInfoId = ferdigstillRegistrering.dokumentInfoId,

@@ -28,7 +28,7 @@ class SafJournalpostGraphQlClient(
 
             return response.dataAsObject(SafQueryJournalpost::class.java)
         } catch (e: Exception) {
-            log.error("Noe gikk galt ved kall til SAF", e)
+            log.error("Noe gikk galt ved kall til SAF for $journalpostId", e)
             throw e
         }
     }
@@ -43,7 +43,7 @@ class SafJournalpostGraphQlClient(
 
             return response.dataAsObject(SafQueryJournalpost::class.java)
         } catch (e: Exception) {
-            log.error("Noe gikk galt ved kall til SAF", e)
+            log.error("Noe gikk galt ved kall til SAF for $journalpostId", e)
             throw e
         }
     }
