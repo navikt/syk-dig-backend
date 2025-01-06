@@ -1,2 +1,0 @@
-schema: 'saf-api-sdl.graphqls'
-documents: '**/*.graphql'
