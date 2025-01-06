@@ -10,6 +10,7 @@ import no.nav.sykdig.digitalisering.sykmelding.ValidationResult
 const val HPR_GODKJENNING_KODE = 7704
 
 fun checkValidState(
+    oppgaveId: Int?,
     smRegistreringManuell: SmRegistreringManuell,
     sykmelder: Sykmelder,
     validationResult: ValidationResult,
@@ -31,7 +32,7 @@ fun checkValidState(
                             ),
                         ),
                 )
-            throw ValidationException(vr)
+            throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
         }
         harOverlappendePerioder(smRegistreringManuell.perioder) -> {
             val vr =
@@ -48,7 +49,7 @@ fun checkValidState(
                             ),
                         ),
                 )
-            throw ValidationException(vr)
+            throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
         }
         harUlovligKombinasjonMedReisetilskudd(smRegistreringManuell.perioder) -> {
             val vr =
@@ -66,7 +67,7 @@ fun checkValidState(
                             ),
                         ),
                 )
-            throw ValidationException(vr)
+            throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
         }
         erFremtidigDato(smRegistreringManuell.behandletDato) -> {
             val vr =
@@ -83,7 +84,7 @@ fun checkValidState(
                             ),
                         ),
                 )
-            throw ValidationException(vr)
+            throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
         }
         studentBehandlerUtenAutorisasjon(validationResult, sykmelder) -> {
             val vr =
@@ -101,7 +102,7 @@ fun checkValidState(
                             ),
                         ),
                 )
-            throw ValidationException(vr)
+            throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
         }
         suspendertBehandler(validationResult) -> {
             val vr =
@@ -118,7 +119,7 @@ fun checkValidState(
                             ),
                         ),
                 )
-            throw ValidationException(vr)
+            throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
         }
     }
 }
