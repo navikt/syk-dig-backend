@@ -67,6 +67,12 @@ class GlobalExceptionHandler {
         log.warn("Caught UnauthorizedException ${e.message}", e)
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UnauthorizedException")
     }
+
+    @ExceptionHandler(ValidationException::class)
+    fun handleUnAuthorizedException(e: ValidationException): ResponseEntity<String> {
+        log.warn("Caught ValidationException ${e.message}", e)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ValidationException")
+    }
 }
 
 

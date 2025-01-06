@@ -83,11 +83,7 @@ class NasjonalSykmeldingService(
             ),
             StructuredArguments.fields(loggingMeta),
         )
-        try {
-            checkValidState(smRegistreringManuell, sykmelder, validationResult)
-        } catch (e: ValidationException) {
-            log.error("catched validationException for oppgaveId $oppgaveId", e)
-        }
+        checkValidState(smRegistreringManuell, sykmelder, validationResult)
 
         val dokumentInfoId = oppgave.dokumentInfoId
         val journalpostId = oppgave.journalpostId
