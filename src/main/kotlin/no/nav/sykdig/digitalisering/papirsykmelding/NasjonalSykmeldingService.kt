@@ -7,6 +7,7 @@ import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.exceptions.SykmelderNotFoundException
+import no.nav.sykdig.digitalisering.exceptions.ValidationException
 import no.nav.sykdig.digitalisering.felles.Sykmelding
 import no.nav.sykdig.digitalisering.helsenett.SykmelderService
 import no.nav.sykdig.digitalisering.papirsykmelding.api.RegelClient
@@ -82,7 +83,11 @@ class NasjonalSykmeldingService(
             ),
             StructuredArguments.fields(loggingMeta),
         )
-        checkValidState(smRegistreringManuell, sykmelder, validationResult)
+        try {
+            checkValidState(smRegistreringManuell, sykmelder, validationResult)
+        } catch (e: ValidationException) {
+            log.error("catched validationException for oppgaveId $oppgaveId", e)
+        }
 
         val dokumentInfoId = oppgave.dokumentInfoId
         val journalpostId = oppgave.journalpostId
