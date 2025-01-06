@@ -69,8 +69,8 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ValidationException::class)
-    fun handleUnAuthorizedException(e: ValidationException): ResponseEntity<String> {
-        log.warn("Caught ValidationException ${e.message} validationresult ${e.validationResult}", e)
+    fun handleValidationException(e: ValidationException): ResponseEntity<String> {
+        log.error("Caught ValidationException ${e.message} validationresult ${e.validationResult}", e)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ValidationException")
     }
 }
