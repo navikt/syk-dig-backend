@@ -35,7 +35,7 @@ fun createTitleNasjonal(
     avvist: Boolean,
 ): String {
     if (avvist && perioder != null) return "Avvist papirsykmelding ${getFomTomTekst(perioder)}"
-    if (perioder == null) return "Papirsykmelding"
+    if (perioder.isNullOrEmpty()) return "Papirsykmelding"
     return "Papirsykmelding ${getFomTomTekst(perioder)}"
 }
 
