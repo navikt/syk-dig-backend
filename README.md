@@ -43,6 +43,12 @@ Find the newest version of gradle here: https://gradle.org/releases/ Then run th
 ./gradlew wrapper --gradle-version $gradleVersion
 ```
 
+### GraphQL
+Generate GraphQL classes 
+```
+./gradlew generateJava
+```
+
 ### Contact
 
 This project is maintained by [CODEOWNERS](CODEOWNERS)
