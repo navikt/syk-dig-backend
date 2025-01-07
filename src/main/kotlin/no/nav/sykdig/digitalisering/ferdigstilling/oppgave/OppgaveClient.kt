@@ -6,10 +6,9 @@ import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
-import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingCommonService
-import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.getFristForFerdigstillingAvOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
+import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.objectMapper

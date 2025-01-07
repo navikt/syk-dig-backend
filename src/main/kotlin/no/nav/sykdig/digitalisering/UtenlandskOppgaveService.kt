@@ -1,7 +1,9 @@
 package no.nav.sykdig.digitalisering
 
+import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.ClientException
+import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingCommonService
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
@@ -24,6 +26,7 @@ class UtenlandskOppgaveService(
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val gosysService: GosysService,
     private val personService: PersonService,
+    private val ferdigstillingCommonService: FerdigstillingCommonService,
     private val metricRegister: MetricRegister,
     private val regelvalideringService: RegelvalideringService,
 ) {
@@ -47,8 +50,8 @@ class UtenlandskOppgaveService(
                 id = oppgave.fnr,
                 callId = oppgave.sykmeldingId.toString(),
             )
-
-        log.info("Hentet oppgave og sykmeldt for oppgave ${oppgave.oppgaveId} sykmeldingId ${oppgave.sykmeldingId}, lager SykDigOppgave!")
+        val loggingMeta = oppgave.sykmelding?.sykmelding?.id?.let { ferdigstillingCommonService.getLoggingMeta(it, oppgave) }
+        log.info("Hentet oppgave og sykmeldt for oppgave, lager SykDigOppgave! {}", StructuredArguments.fields(loggingMeta))
 
         return SykDigOppgave(oppgave, sykmeldt)
     }
@@ -183,7 +186,8 @@ class UtenlandskOppgaveService(
             )
         val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
         if (valideringsresultat.isNotEmpty()) {
-            log.warn("Oppdatering av sykmelding med id $sykmeldingId feilet pga regelsjekk")
+            val loggingMeta = oppgave.sykmelding?.sykmelding?.id?.let { ferdigstillingCommonService.getLoggingMeta(it, oppgave) }
+            log.warn("Oppdatering av sykmelding feilet pga regelsjekk {}", StructuredArguments.fields(loggingMeta))
             throw ClientException(valideringsresultat.joinToString())
         }
 
