@@ -25,7 +25,7 @@ class CustomDataFetchingExceptionHandler : DataFetcherExceptionHandler {
                 logger.warn(handlerParameters.exception.message, handlerParameters.exception)
                 val graphqlError =
                     TypedGraphQLError.newBuilder()
-                        .message(handlerParameters.exception.message)
+                        .message(handlerParameters.exception.message!!)
                         .build()
                 val result: DataFetcherExceptionHandlerResult =
                     DataFetcherExceptionHandlerResult.newResult()
