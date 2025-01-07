@@ -7,6 +7,7 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.db.toSykmelding
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
+import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingCommonService
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.AllOppgaveResponse
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.AllOppgaveType
@@ -30,6 +31,7 @@ import java.util.*
 class SykDigOppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val ferdigstillingService: FerdigstillingService,
+    private val ferdigstillingCommonService: FerdigstillingCommonService,
     private val oppgaveClient: OppgaveClient,
 ) {
     private val log = applog()
@@ -64,7 +66,7 @@ class SykDigOppgaveService(
 
     fun getOppgaveFromSykmeldingId(sykmeldingId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgaveBySykmeldingId(sykmeldingId)
-        val loggingMeta = ferdigstillingService.getLoggingMeta(sykmeldingId, oppgave)
+        val loggingMeta = ferdigstillingCommonService.getLoggingMeta(sykmeldingId, oppgave)
         if (oppgave == null) {
             log.warn("Fant ikke oppgave {}", StructuredArguments.fields(loggingMeta))
             throw DgsEntityNotFoundException("Fant ikke oppgave")
@@ -75,7 +77,7 @@ class SykDigOppgaveService(
 
     fun getOppgave(oppgaveId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
-        val loggingMeta = oppgave?.sykmelding?.sykmelding?.id?.let { ferdigstillingService.getLoggingMeta(it, oppgave) }
+        val loggingMeta = oppgave?.sykmelding?.sykmelding?.id?.let { ferdigstillingCommonService.getLoggingMeta(it, oppgave) }
         if (oppgave == null) {
             log.warn("Fant ikke oppgave {} ", StructuredArguments.fields(loggingMeta))
             throw DgsEntityNotFoundException("Fant ikke oppgave")

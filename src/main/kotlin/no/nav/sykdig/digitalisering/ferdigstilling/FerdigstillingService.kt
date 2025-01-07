@@ -173,14 +173,4 @@ class FerdigstillingService(
         log.info("sendt oppdatert sykmelding med id ${receivedSykmelding.sykmelding.id}")
         updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
     }
-
-    fun getLoggingMeta(sykmeldingId: String, oppgave:OppgaveDbModel?): LoggingMeta {
-        return LoggingMeta(
-            mottakId = sykmeldingId,
-            dokumentInfoId = oppgave?.dokumentInfoId,
-            msgId = sykmeldingId,
-            sykmeldingId = sykmeldingId,
-            journalpostId = oppgave?.journalpostId,
-        )
-    }
 }

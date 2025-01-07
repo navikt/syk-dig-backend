@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering
 
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
+import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingCommonService
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
@@ -33,6 +34,8 @@ import java.time.ZoneOffset
 class SykDigOppgaveServiceTest : IntegrationTest() {
     @MockBean
     lateinit var ferdigstillingService: FerdigstillingService
+    @MockBean
+    lateinit var ferdigstillingCommonService: FerdigstillingCommonService
 
     lateinit var sykDigOppgaveService: SykDigOppgaveService
 
@@ -41,7 +44,7 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
 
     @BeforeEach
     fun setup() {
-        sykDigOppgaveService = SykDigOppgaveService(oppgaveRepository, ferdigstillingService, oppgaveClient)
+        sykDigOppgaveService = SykDigOppgaveService(oppgaveRepository, ferdigstillingService, ferdigstillingCommonService, oppgaveClient)
         oppgaveRepository.lagreOppgave(createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"))
     }
 
