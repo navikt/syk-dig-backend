@@ -15,7 +15,6 @@ class GosysService(
             beskrivelse: String? = null,
         ) {
             val oppgave = oppgaveClient.getOppgave(oppgaveId, sykmeldingId)
-
             oppgaveClient.oppdaterGosysOppgave(
                 oppgaveId,
                 sykmeldingId,

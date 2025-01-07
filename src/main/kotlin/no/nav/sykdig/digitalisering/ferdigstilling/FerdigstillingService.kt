@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
+import no.nav.sykdig.LoggingMeta
 import no.nav.sykdig.applog
 import no.nav.sykdig.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
@@ -171,5 +172,15 @@ class FerdigstillingService(
         ).get()
         log.info("sendt oppdatert sykmelding med id ${receivedSykmelding.sykmelding.id}")
         updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
+    }
+
+    fun getLoggingMeta(sykmeldingId: String, oppgave:OppgaveDbModel?): LoggingMeta {
+        return LoggingMeta(
+            mottakId = sykmeldingId,
+            dokumentInfoId = oppgave?.dokumentInfoId,
+            msgId = sykmeldingId,
+            sykmeldingId = sykmeldingId,
+            journalpostId = oppgave?.journalpostId,
+        )
     }
 }
