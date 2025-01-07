@@ -17,4 +17,4 @@ class MissingJournalpostException(message: String) : RuntimeException(message)
 
 class UnauthorizedException(message: String) : Exception(message)
 
-class ValidationException(val validationResult: ValidationResult) : Exception()
+class ValidationException(override val message: String): Exception(message)

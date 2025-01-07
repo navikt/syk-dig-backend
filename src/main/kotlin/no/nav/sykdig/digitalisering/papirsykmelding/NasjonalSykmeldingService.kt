@@ -86,7 +86,7 @@ class NasjonalSykmeldingService(
             ),
             StructuredArguments.fields(loggingMeta),
         )
-        checkValidState(smRegistreringManuell, sykmelder, validationResult)
+        checkValidState(oppgaveId, smRegistreringManuell, sykmelder, validationResult)
 
         val dokumentInfoId = oppgave.dokumentInfoId
         val journalpostId = oppgave.journalpostId
