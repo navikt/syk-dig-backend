@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
+import java.io.IOException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -42,6 +43,15 @@ class GlobalExceptionHandler {
     fun handleHttpServerErrorException(e: HttpServerErrorException): ResponseEntity<String> {
         log.error("Server error. Status: ${e.statusCode}. Message: ${e.message}", e)
         return ResponseEntity.status(e.statusCode).body("Internal server error occurred.")
+    }
+
+    @ExceptionHandler(IOException::class)
+    fun handleIOException(e: IOException): ResponseEntity<String> {
+        return if (e.message?.contains("Broken pipe") == true) {
+            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Client closed the connection.")
+        } else {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error occurred.")
+        }
     }
 
     @ExceptionHandler(Exception::class)
