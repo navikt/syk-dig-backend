@@ -1,23 +1,27 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
 import no.nav.sykdig.digitalisering.felles.AnnenFraverGrunn
-import no.nav.sykdig.digitalisering.felles.AnnenFraversArsak
 import no.nav.sykdig.digitalisering.felles.Diagnose
 import no.nav.sykdig.digitalisering.felles.MedisinskArsak
-import no.nav.sykdig.digitalisering.felles.Periode
 import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.generated.types.AktivitetIkkeMulig
+import no.nav.sykdig.generated.types.AnnenFraversArsak
 import no.nav.sykdig.generated.types.AnnenFraversArsakGrunn
 import no.nav.sykdig.generated.types.Arbeidsgiver
 import no.nav.sykdig.generated.types.ArbeidsrelatertArsak
 import no.nav.sykdig.generated.types.ArbeidsrelatertArsakType
+import no.nav.sykdig.generated.types.Behandler
 import no.nav.sykdig.generated.types.DiagnoseSchema
 import no.nav.sykdig.generated.types.Document
+import no.nav.sykdig.generated.types.Gradert
 import no.nav.sykdig.generated.types.HarArbeidsgiver
+import no.nav.sykdig.generated.types.KontaktMedPasient
 import no.nav.sykdig.generated.types.MedisinskArsakType
 import no.nav.sykdig.generated.types.MedisinskVurdering
+import no.nav.sykdig.generated.types.MeldingTilNAV
 import no.nav.sykdig.generated.types.NasjonalOppgave
 import no.nav.sykdig.generated.types.NasjonalSykmelding
+import no.nav.sykdig.generated.types.Periode
 
 fun mapToNasjonalOppgave(oppgave: NasjonalManuellOppgaveDAO): NasjonalOppgave {
     requireNotNull(oppgave.dokumentInfoId)
@@ -38,12 +42,12 @@ fun mapToNasjonalSykmelding(oppgave: NasjonalManuellOppgaveDAO): NasjonalSykmeld
         arbeidsgiver = mapToArbeidsgiver(oppgave),
         medisinskVurdering = mapToMedisinskVurdering(oppgave),
         skjermesForPasient = oppgave.papirSmRegistrering.skjermesForPasient,
-        perioder = oppgave.papirSmRegistrering.perioder.map(mapToPerioder(it)) ?: emptyList(),
-        meldingTilNAV = TODO(),
-        meldingTilArbeidsgiver = TODO(),
-        kontaktMedPasient = TODO(),
-        behandletTidspunkt = TODO(),
-        behandler = TODO(),
+        perioder = oppgave.papirSmRegistrering.perioder?.map { mapToPerioder(it) } ?: emptyList(),
+        meldingTilNAV = mapTilMeldingTilNAV(oppgave.papirSmRegistrering.meldingTilNAV),
+        meldingTilArbeidsgiver = oppgave.papirSmRegistrering.meldingTilArbeidsgiver,
+        kontaktMedPasient = mapToKontaktMedPasient(oppgave.papirSmRegistrering.kontaktMedPasient),
+        behandletTidspunkt = oppgave.papirSmRegistrering.behandletTidspunkt,
+        behandler = mapToBehandler(oppgave.papirSmRegistrering.behandler),
     )
 }
 
@@ -90,10 +94,10 @@ fun mapToDiagnoseSchema(diagnose: Diagnose?): DiagnoseSchema? {
 }
 
 
-fun mapToAnnenFraversArsak(annenFraversArsak: AnnenFraversArsak?): no.nav.sykdig.generated.types.AnnenFraversArsak? {
+fun mapToAnnenFraversArsak(annenFraversArsak: no.nav.sykdig.digitalisering.felles.AnnenFraversArsak?): AnnenFraversArsak? {
     if (annenFraversArsak == null) return null
 
-    return no.nav.sykdig.generated.types.AnnenFraversArsak(
+    return AnnenFraversArsak(
         beskrivelse = annenFraversArsak.beskrivelse,
         grunn = annenFraversArsak.grunn.mapNotNull { mapToAnnenFraversArsakGrunn(it) }, // Use mapNotNull to skip invalid mappings
     )
@@ -114,18 +118,25 @@ fun mapToAnnenFraversArsakGrunn(annenFraverGrunn: AnnenFraverGrunn): AnnenFraver
     }
 }
 
-fun mapToPerioder(periode: Periode): no.nav.sykdig.generated.types.Periode {
-
-    return no.nav.sykdig.generated.types.Periode(
+fun mapToPerioder(periode: no.nav.sykdig.digitalisering.felles.Periode): Periode {
+    return Periode(
         fom = periode.fom,
         tom = periode.tom,
         aktivitetIkkeMulig = mapToAktivitetIkkeMulig(periode.aktivitetIkkeMulig),
-        avventendeInnspillTilArbeidsgiver = TODO(),
-        behandlingsdager = TODO(),
-        gradert = TODO(),
-        reisetilskudd = TODO(),
+        avventendeInnspillTilArbeidsgiver = periode.avventendeInnspillTilArbeidsgiver,
+        behandlingsdager = periode.behandlingsdager,
+        gradert = mapToGradert(periode.gradert),
+        reisetilskudd = periode.reisetilskudd,
     )
+}
 
+fun mapToGradert(gradert: no.nav.sykdig.digitalisering.felles.Gradert?): Gradert? {
+    if (gradert == null) return null
+
+    return Gradert(
+        grad = gradert.grad,
+        reisetilskudd = gradert.reisetilskudd,
+    )
 }
 
 fun mapToAktivitetIkkeMulig(aktivitetIkkeMulig: no.nav.sykdig.digitalisering.felles.AktivitetIkkeMulig?): AktivitetIkkeMulig? {
@@ -173,3 +184,34 @@ fun mapToArbeidsrelatertArsakType(arbeidsrelatertArsakType: no.nav.sykdig.digita
 }
 
 
+fun mapTilMeldingTilNAV(meldingTilNAV: no.nav.sykdig.digitalisering.felles.MeldingTilNAV?): MeldingTilNAV? {
+    if (meldingTilNAV == null) return null
+
+    return MeldingTilNAV(
+        beskrivBistand = meldingTilNAV.beskrivBistand,
+        bistandUmiddelbart = meldingTilNAV.bistandUmiddelbart,
+    )
+}
+
+
+fun mapToKontaktMedPasient(kontaktMedPasient: no.nav.sykdig.digitalisering.felles.KontaktMedPasient?): KontaktMedPasient? {
+    if (kontaktMedPasient == null) return null
+
+    return KontaktMedPasient(
+        kontaktDato = kontaktMedPasient.kontaktDato.toString(),
+        begrunnelseIkkeKontakt = kontaktMedPasient.begrunnelseIkkeKontakt,
+    )
+}
+
+fun mapToBehandler(behandler: no.nav.sykdig.digitalisering.felles.Behandler?): Behandler? {
+    if (behandler == null) return null
+
+    return Behandler(
+        fornavn = behandler.fornavn,
+        mellomnavn = behandler.mellomnavn,
+        etternavn = behandler.etternavn,
+        fnr = behandler.fnr,
+        hpr = behandler.hpr,
+        tlf = behandler.tlf,
+    )
+}
