@@ -26,7 +26,7 @@ class UtenlandskOppgaveService(
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val gosysService: GosysService,
     private val personService: PersonService,
-    private val ferdigstillingCommonService: OppgaveCommonService,
+    private val oppgaveCommonService: OppgaveCommonService,
     private val metricRegister: MetricRegister,
     private val regelvalideringService: RegelvalideringService,
 ) {
@@ -50,7 +50,7 @@ class UtenlandskOppgaveService(
                 id = oppgave.fnr,
                 callId = oppgave.sykmeldingId.toString(),
             )
-        val loggingMeta = oppgave.sykmelding?.sykmelding?.id?.let { ferdigstillingCommonService.getLoggingMeta(it, oppgave) }
+        val loggingMeta = oppgave.sykmelding?.sykmelding?.id?.let { oppgaveCommonService.getLoggingMeta(it, oppgave) }
         log.info("Hentet oppgave og sykmeldt for oppgave, lager SykDigOppgave! {}", StructuredArguments.fields(loggingMeta))
 
         return SykDigOppgave(oppgave, sykmeldt)
@@ -186,7 +186,7 @@ class UtenlandskOppgaveService(
             )
         val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
         if (valideringsresultat.isNotEmpty()) {
-            val loggingMeta = oppgave.sykmelding?.sykmelding?.id?.let { ferdigstillingCommonService.getLoggingMeta(it, oppgave) }
+            val loggingMeta = oppgave.sykmelding?.sykmelding?.id?.let { oppgaveCommonService.getLoggingMeta(it, oppgave) }
             log.warn("Oppdatering av sykmelding feilet pga regelsjekk {}", StructuredArguments.fields(loggingMeta))
             throw ClientException(valideringsresultat.joinToString())
         }

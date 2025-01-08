@@ -31,7 +31,7 @@ import java.util.*
 class SykDigOppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val ferdigstillingService: FerdigstillingService,
-    private val ferdigstillingCommonService: OppgaveCommonService,
+    private val oppgaveCommonService: OppgaveCommonService,
     private val oppgaveClient: OppgaveClient,
 ) {
     private val log = applog()
@@ -66,7 +66,7 @@ class SykDigOppgaveService(
 
     fun getOppgaveFromSykmeldingId(sykmeldingId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgaveBySykmeldingId(sykmeldingId)
-        val loggingMeta = ferdigstillingCommonService.getLoggingMeta(sykmeldingId, oppgave)
+        val loggingMeta = oppgaveCommonService.getLoggingMeta(sykmeldingId, oppgave)
         if (oppgave == null) {
             log.warn("Fant ikke oppgave {}", StructuredArguments.fields(loggingMeta))
             throw DgsEntityNotFoundException("Fant ikke oppgave")
@@ -77,7 +77,7 @@ class SykDigOppgaveService(
 
     fun getOppgave(oppgaveId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
-        val loggingMeta = oppgave?.sykmelding?.sykmelding?.id?.let { ferdigstillingCommonService.getLoggingMeta(it, oppgave) }
+        val loggingMeta = oppgave?.sykmelding?.sykmelding?.id?.let { oppgaveCommonService.getLoggingMeta(it, oppgave) }
         if (oppgave == null) {
             log.warn("Fant ikke oppgave {} ", StructuredArguments.fields(loggingMeta))
             throw DgsEntityNotFoundException("Fant ikke oppgave")
