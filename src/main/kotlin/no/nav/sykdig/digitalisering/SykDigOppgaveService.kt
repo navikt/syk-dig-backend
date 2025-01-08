@@ -7,7 +7,7 @@ import no.nav.sykdig.applog
 import no.nav.sykdig.db.OppgaveRepository
 import no.nav.sykdig.db.toSykmelding
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
-import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingCommonService
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveCommonService
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.AllOppgaveResponse
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.AllOppgaveType
@@ -31,7 +31,7 @@ import java.util.*
 class SykDigOppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val ferdigstillingService: FerdigstillingService,
-    private val ferdigstillingCommonService: FerdigstillingCommonService,
+    private val ferdigstillingCommonService: OppgaveCommonService,
     private val oppgaveClient: OppgaveClient,
 ) {
     private val log = applog()

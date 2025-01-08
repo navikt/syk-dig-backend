@@ -2,7 +2,7 @@ package no.nav.sykdig.digitalisering
 
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingCommonService
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveCommonService
 import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
 import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
@@ -35,7 +35,7 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
     @MockBean
     lateinit var ferdigstillingService: FerdigstillingService
     @MockBean
-    lateinit var ferdigstillingCommonService: FerdigstillingCommonService
+    lateinit var ferdigstillingCommonService: OppgaveCommonService
 
     lateinit var sykDigOppgaveService: SykDigOppgaveService
 

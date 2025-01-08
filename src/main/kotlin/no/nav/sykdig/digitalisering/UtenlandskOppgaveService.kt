@@ -3,7 +3,7 @@ package no.nav.sykdig.digitalisering
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.applog
 import no.nav.sykdig.digitalisering.exceptions.ClientException
-import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingCommonService
+import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveCommonService
 import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
 import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.digitalisering.model.RegisterOppgaveValues
@@ -26,7 +26,7 @@ class UtenlandskOppgaveService(
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val gosysService: GosysService,
     private val personService: PersonService,
-    private val ferdigstillingCommonService: FerdigstillingCommonService,
+    private val ferdigstillingCommonService: OppgaveCommonService,
     private val metricRegister: MetricRegister,
     private val regelvalideringService: RegelvalideringService,
 ) {
