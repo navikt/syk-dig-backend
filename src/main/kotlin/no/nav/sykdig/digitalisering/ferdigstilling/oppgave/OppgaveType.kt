@@ -13,4 +13,5 @@ enum class AllOppgaveType {
     BEH_SAK_MK,
     BEH_EL_SYM,
     VUR_KONS_YTE,
+    KONT_BRUK,
 }
