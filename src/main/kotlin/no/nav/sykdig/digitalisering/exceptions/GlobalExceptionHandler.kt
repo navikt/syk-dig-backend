@@ -48,7 +48,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(IOException::class)
     fun handleIOException(e: IOException): ResponseEntity<String> {
         return if (e.message?.contains("Broken pipe") == true) {
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Client closed the connection.")
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Client closed the connection.")
         } else {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error occurred.")
         }
