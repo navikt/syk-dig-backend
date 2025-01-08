@@ -2,6 +2,8 @@ package no.nav.sykdig.oppgavemottak
 
 import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
 import no.nav.sykdig.IntegrationTest
+import no.nav.sykdig.utenlandsk.kafka.DigitaliseringsoppgaveScanning
+import no.nav.sykdig.utenlandsk.kafka.MottaOppgaverFraKafka
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

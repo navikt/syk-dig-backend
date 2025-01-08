@@ -1,6 +1,7 @@
 package no.nav.sykdig.poststed.client
 
-import no.nav.sykdig.objectMapper
+import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.utenlandsk.poststed.client.GetKodeverkKoderBetydningerResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

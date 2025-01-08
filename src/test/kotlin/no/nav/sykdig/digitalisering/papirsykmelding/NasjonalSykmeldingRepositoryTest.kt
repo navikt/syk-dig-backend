@@ -1,20 +1,20 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.digitalisering.felles.Adresse
-import no.nav.sykdig.digitalisering.felles.AktivitetIkkeMulig
-import no.nav.sykdig.digitalisering.felles.Arbeidsgiver
-import no.nav.sykdig.digitalisering.felles.ArbeidsrelatertArsak
-import no.nav.sykdig.digitalisering.felles.ArbeidsrelatertArsakType
-import no.nav.sykdig.digitalisering.felles.AvsenderSystem
-import no.nav.sykdig.digitalisering.felles.Behandler
-import no.nav.sykdig.digitalisering.felles.Diagnose
-import no.nav.sykdig.digitalisering.felles.HarArbeidsgiver
-import no.nav.sykdig.digitalisering.felles.KontaktMedPasient
-import no.nav.sykdig.digitalisering.felles.MedisinskVurdering
-import no.nav.sykdig.digitalisering.felles.Periode
-import no.nav.sykdig.digitalisering.felles.Sykmelding
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalSykmeldingDAO
+import no.nav.sykdig.shared.Adresse
+import no.nav.sykdig.shared.AktivitetIkkeMulig
+import no.nav.sykdig.shared.Arbeidsgiver
+import no.nav.sykdig.shared.ArbeidsrelatertArsak
+import no.nav.sykdig.shared.ArbeidsrelatertArsakType
+import no.nav.sykdig.shared.AvsenderSystem
+import no.nav.sykdig.shared.Behandler
+import no.nav.sykdig.shared.Diagnose
+import no.nav.sykdig.shared.HarArbeidsgiver
+import no.nav.sykdig.shared.KontaktMedPasient
+import no.nav.sykdig.shared.MedisinskVurdering
+import no.nav.sykdig.shared.Periode
+import no.nav.sykdig.shared.Sykmelding
+import no.nav.sykdig.nasjonal.db.models.NasjonalSykmeldingDAO
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -117,7 +117,8 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
     }
 
     fun perioderTestData(): List<Periode> {
-        return listOf(Periode(
+        return listOf(
+            Periode(
             fom = LocalDate.now(),
             tom = LocalDate.now().plusDays(3),
             aktivitetIkkeMulig = AktivitetIkkeMulig(
@@ -131,6 +132,7 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
             behandlingsdager = null,
             gradert = null,
             reisetilskudd = false
-        ))
+        )
+        )
     }
 }

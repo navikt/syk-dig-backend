@@ -3,24 +3,27 @@ import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
 import no.nav.sykdig.TestGraphQLContextContributor
-import no.nav.sykdig.config.CustomDataFetchingExceptionHandler
-import no.nav.sykdig.db.PoststedRepository
-import no.nav.sykdig.digitalisering.api.UtenlandskOppgaveDataFetcher
-import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
-import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
-import no.nav.sykdig.digitalisering.pdl.Matrikkeladresse
-import no.nav.sykdig.digitalisering.pdl.Navn
-import no.nav.sykdig.digitalisering.pdl.Person
-import no.nav.sykdig.digitalisering.pdl.Vegadresse
-import no.nav.sykdig.digitalisering.tilgangskontroll.OppgaveSecurityService
+import no.nav.sykdig.shared.config.CustomDataFetchingExceptionHandler
+import no.nav.sykdig.utenlandsk.db.PoststedRepository
+import no.nav.sykdig.utenlandsk.api.UtenlandskOppgaveDataFetcher
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
+import no.nav.sykdig.pdl.Bostedsadresse
+import no.nav.sykdig.pdl.Matrikkeladresse
+import no.nav.sykdig.pdl.Navn
+import no.nav.sykdig.pdl.Person
+import no.nav.sykdig.pdl.Vegadresse
+import no.nav.sykdig.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
-import no.nav.sykdig.model.DokumentDbModel
-import no.nav.sykdig.model.OppgaveDbModel
-import no.nav.sykdig.model.SykmeldingUnderArbeid
-import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
+import no.nav.sykdig.utenlandsk.models.DokumentDbModel
+import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
+import no.nav.sykdig.utenlandsk.models.SykmeldingUnderArbeid
+import no.nav.sykdig.utenlandsk.models.SykDigOppgave
+import no.nav.sykdig.utenlandsk.poststed.api.AdresseDataFetchers
+import no.nav.sykdig.utenlandsk.services.UtenlandskOppgaveService
+import no.nav.sykdig.shared.utils.toOffsetDateTimeAtNoon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,11 +33,11 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
@@ -52,13 +55,13 @@ import java.util.*
 )
 @EnableMethodSecurity(prePostEnabled = true)
 class OppgaveDataFetcherTest {
-    @MockBean
+    @MockitoBean
     lateinit var poststedRepository: PoststedRepository
 
-    @MockBean
+    @MockitoBean
     lateinit var oppgaveService: UtenlandskOppgaveService
 
-    @MockBean
+    @MockitoBean
     lateinit var securityService: OppgaveSecurityService
 
     @Autowired

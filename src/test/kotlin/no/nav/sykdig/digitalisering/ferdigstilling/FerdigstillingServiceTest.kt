@@ -3,36 +3,37 @@ package no.nav.sykdig.digitalisering.ferdigstilling
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
-import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
-import no.nav.sykdig.digitalisering.dokument.DocumentService
-import no.nav.sykdig.digitalisering.felles.AktivitetIkkeMulig
-import no.nav.sykdig.digitalisering.felles.AvsenderSystem
-import no.nav.sykdig.digitalisering.felles.Diagnose
-import no.nav.sykdig.digitalisering.felles.KontaktMedPasient
-import no.nav.sykdig.digitalisering.felles.Periode
-import no.nav.sykdig.digitalisering.felles.SporsmalSvar
-import no.nav.sykdig.digitalisering.ferdigstilling.mapping.mapToReceivedSykmelding
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
-import no.nav.sykdig.digitalisering.helsenett.SykmelderService
-import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.Utfall
-import no.nav.sykdig.digitalisering.pdl.Bostedsadresse
-import no.nav.sykdig.digitalisering.pdl.Navn
-import no.nav.sykdig.digitalisering.pdl.Person
-import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
-import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottaker
-import no.nav.sykdig.digitalisering.saf.graphql.AvsenderMottakerIdType
-import no.nav.sykdig.digitalisering.saf.graphql.CHANNEL_SCAN_IM
-import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
-import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
-import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
-import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
-import no.nav.sykdig.digitalisering.sykmelding.ReceivedSykmelding
+import no.nav.sykdig.dokarkiv.DokarkivClient
+import no.nav.sykdig.dokarkiv.DocumentService
+import no.nav.sykdig.shared.AktivitetIkkeMulig
+import no.nav.sykdig.shared.AvsenderSystem
+import no.nav.sykdig.shared.Diagnose
+import no.nav.sykdig.shared.KontaktMedPasient
+import no.nav.sykdig.shared.Periode
+import no.nav.sykdig.shared.SporsmalSvar
+import no.nav.sykdig.utenlandsk.mapping.mapToReceivedSykmelding
+import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.nasjonal.helsenett.SykmelderService
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.nasjonal.models.PapirSmRegistering
+import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.nasjonal.db.models.Utfall
+import no.nav.sykdig.pdl.Bostedsadresse
+import no.nav.sykdig.pdl.Navn
+import no.nav.sykdig.pdl.Person
+import no.nav.sykdig.saf.SafJournalpostGraphQlClient
+import no.nav.sykdig.saf.graphql.AvsenderMottaker
+import no.nav.sykdig.saf.graphql.AvsenderMottakerIdType
+import no.nav.sykdig.saf.graphql.CHANNEL_SCAN_IM
+import no.nav.sykdig.saf.graphql.Journalstatus
+import no.nav.sykdig.saf.graphql.SafJournalpost
+import no.nav.sykdig.saf.graphql.SafQueryJournalpost
+import no.nav.sykdig.saf.graphql.TEMA_SYKMELDING
+import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
+import no.nav.sykdig.utenlandsk.services.FerdigstillingService
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -45,7 +46,7 @@ import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -57,16 +58,16 @@ import java.util.*
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 class FerdigstillingServiceTest : IntegrationTest() {
-    @MockBean
+    @MockitoBean
     lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
 
-    @MockBean
+    @MockitoBean
     lateinit var dokarkivClient: DokarkivClient
 
-    @MockBean
+    @MockitoBean
     lateinit var oppgaveClient: OppgaveClient
 
-    @MockBean
+    @MockitoBean
     lateinit var sykmelderService: SykmelderService
 
     @Autowired

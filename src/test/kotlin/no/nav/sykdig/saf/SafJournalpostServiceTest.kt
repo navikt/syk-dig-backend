@@ -2,20 +2,10 @@ package no.nav.sykdig.saf
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sykdig.digitalisering.exceptions.MissingJournalpostException
-import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
-import no.nav.sykdig.digitalisering.saf.SafJournalpostService
-import no.nav.sykdig.digitalisering.saf.graphql.DokumentInfo
-import no.nav.sykdig.digitalisering.saf.graphql.Dokumentvariant
-import no.nav.sykdig.digitalisering.saf.graphql.Journalstatus
-import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
-import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
-import org.amshove.kluent.assertionError
+import no.nav.sykdig.saf.graphql.*
 import org.amshove.kluent.internal.assertFailsWith
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class SafJournalpostServiceTest {
     private val safJournalpostGraphQlClient: SafJournalpostGraphQlClient = mockk()
@@ -123,60 +113,33 @@ class SafJournalpostServiceTest {
     @Test
     fun `er ikke journalført fordi status er mottatt`() {
         val journalpostId = "123"
-
-        every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
-                SafQueryJournalpost(
-                    SafJournalpost(
-                        journalstatus = Journalstatus.MOTTATT,
-                        dokumenter =
-                            listOf(
-                                DokumentInfo(
-                                    dokumentInfoId = "dok1",
-                                    tittel = "Dokument 1",
-                                    dokumentvarianter = listOf(Dokumentvariant(variantformat = "NON-ARKIV")),
-                                    brevkode = "1",
-                                ),
-                            ),
-                        kanal = "EESSI",
-                        avsenderMottaker = null,
-                        bruker = null,
-                        tema = null,
-                        tittel = "Journalpost 1"
-                    ),
-                )
-
+        every { safJournalpostGraphQlClient.getJournalpostNasjonal(journalpostId) } returns SafQueryJournalpostNasjonal(
+            journalpost = SafJournalpostNasjonal(
+                journalstatus = Journalstatus.MOTTATT,
+            )
+        )
         val erIkkeJournalfort = safJournalpostService.erIkkeJournalfort(journalpostId)
         assertTrue(erIkkeJournalfort)
     }
     @Test
     fun `er ikke journalført fordi safjournalpost er null`() {
         val journalpostId = "123"
-        every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns SafQueryJournalpost(null)
-        assertThrows<MissingJournalpostException>{safJournalpostService.erIkkeJournalfort(journalpostId)}
+        every { safJournalpostGraphQlClient.getJournalpostNasjonal(journalpostId) } returns SafQueryJournalpostNasjonal(
+            journalpost = null
+        )
+        val erIkkeJournalfort = safJournalpostService.erIkkeJournalfort(journalpostId)
+        assertFalse(erIkkeJournalfort)
     }
     @Test
     fun `er journalført fordi status er ukjent`() {
         val journalpostId = "123"
-        every { safJournalpostGraphQlClient.getJournalpostM2m(journalpostId) } returns
-                SafQueryJournalpost(
-                    SafJournalpost(
-                        journalstatus = Journalstatus.UKJENT,
-                        dokumenter =
-                            listOf(
-                                DokumentInfo(
-                                    dokumentInfoId = "dok1",
-                                    tittel = "Dokument 1",
-                                    dokumentvarianter = listOf(Dokumentvariant(variantformat = "NON-ARKIV")),
-                                    brevkode = "1",
-                                ),
-                            ),
-                        kanal = "EESSI",
-                        avsenderMottaker = null,
-                        bruker = null,
-                        tema = null,
-                        tittel = "Journalpost 2"
-                    ),
+        every { safJournalpostGraphQlClient.getJournalpostNasjonal(journalpostId) } returns
+                SafQueryJournalpostNasjonal(
+                    journalpost = SafJournalpostNasjonal(
+                        Journalstatus.UKJENT
+                    )
                 )
+
         val erIkkeJournalfort = safJournalpostService.erIkkeJournalfort(journalpostId)
         assertFalse(erIkkeJournalfort)
     }

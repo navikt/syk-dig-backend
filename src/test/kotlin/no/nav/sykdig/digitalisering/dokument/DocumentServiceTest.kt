@@ -1,10 +1,11 @@
 package no.nav.sykdig.digitalisering.dokument
 
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
-import no.nav.sykdig.db.OppgaveRepository
-import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
-import no.nav.sykdig.model.DokumentDbModel
-import no.nav.sykdig.model.OppgaveDbModel
+import no.nav.sykdig.utenlandsk.db.OppgaveRepository
+import no.nav.sykdig.dokarkiv.DokarkivClient
+import no.nav.sykdig.utenlandsk.models.DokumentDbModel
+import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
+import no.nav.sykdig.dokarkiv.DocumentService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

@@ -3,18 +3,20 @@ package no.nav.sykdig.digitalisering
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
-import no.nav.sykdig.digitalisering.ferdigstilling.GosysService
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.GetOppgaveResponse
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveType
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveStatus
-import no.nav.sykdig.digitalisering.pdl.Navn
-import no.nav.sykdig.digitalisering.pdl.Person
-import no.nav.sykdig.digitalisering.pdl.PersonService
-import no.nav.sykdig.digitalisering.sykmelding.db.JournalpostSykmeldingRepository
+import no.nav.sykdig.utenlandsk.services.FerdigstillingService
+import no.nav.sykdig.utenlandsk.services.GosysService
+import no.nav.sykdig.oppgave.models.GetOppgaveResponse
+import no.nav.sykdig.oppgave.models.OppgaveType
+import no.nav.sykdig.oppgave.models.OppgaveStatus
+import no.nav.sykdig.pdl.Navn
+import no.nav.sykdig.pdl.Person
+import no.nav.sykdig.pdl.PersonService
+import no.nav.sykdig.utenlandsk.db.JournalpostSykmeldingRepository
 import no.nav.sykdig.generated.types.Avvisingsgrunn
-import no.nav.sykdig.metrics.MetricRegister
-import no.nav.sykdig.model.OppgaveDbModel
+import no.nav.sykdig.shared.metrics.MetricRegister
+import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
+import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
+import no.nav.sykdig.utenlandsk.services.UtenlandskOppgaveService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -26,7 +28,7 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -41,19 +43,19 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
     @Autowired
     lateinit var journalpostSykmeldingRepository: JournalpostSykmeldingRepository
 
-    @MockBean
+    @MockitoBean
     lateinit var gosysService: GosysService
 
-    @MockBean
+    @MockitoBean
     lateinit var personService: PersonService
 
-    @MockBean
+    @MockitoBean
     lateinit var metricRegister: MetricRegister
 
     @Autowired
     lateinit var utenlandskOppgaveService: UtenlandskOppgaveService
 
-    @MockBean
+    @MockitoBean
     lateinit var ferdigstillingService: FerdigstillingService
 
     final val sykmeldingId = UUID.randomUUID()
