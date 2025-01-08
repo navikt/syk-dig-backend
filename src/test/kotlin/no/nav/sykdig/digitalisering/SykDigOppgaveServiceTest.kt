@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -31,12 +31,12 @@ import java.time.ZoneOffset
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 @Transactional
 class SykDigOppgaveServiceTest : IntegrationTest() {
-    @MockBean
+    @MockitoBean
     lateinit var ferdigstillingService: FerdigstillingService
 
     lateinit var sykDigOppgaveService: SykDigOppgaveService
 
-    @MockBean
+    @MockitoBean
     lateinit var oppgaveClient: OppgaveClient
 
     @BeforeEach

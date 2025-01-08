@@ -26,7 +26,7 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -41,19 +41,19 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
     @Autowired
     lateinit var journalpostSykmeldingRepository: JournalpostSykmeldingRepository
 
-    @MockBean
+    @MockitoBean
     lateinit var gosysService: GosysService
 
-    @MockBean
+    @MockitoBean
     lateinit var personService: PersonService
 
-    @MockBean
+    @MockitoBean
     lateinit var metricRegister: MetricRegister
 
     @Autowired
     lateinit var utenlandskOppgaveService: UtenlandskOppgaveService
 
-    @MockBean
+    @MockitoBean
     lateinit var ferdigstillingService: FerdigstillingService
 
     final val sykmeldingId = UUID.randomUUID()

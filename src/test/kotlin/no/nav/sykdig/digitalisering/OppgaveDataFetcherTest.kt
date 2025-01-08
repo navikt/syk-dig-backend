@@ -30,11 +30,11 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
@@ -52,13 +52,13 @@ import java.util.*
 )
 @EnableMethodSecurity(prePostEnabled = true)
 class OppgaveDataFetcherTest {
-    @MockBean
+    @MockitoBean
     lateinit var poststedRepository: PoststedRepository
 
-    @MockBean
+    @MockitoBean
     lateinit var oppgaveService: UtenlandskOppgaveService
 
-    @MockBean
+    @MockitoBean
     lateinit var securityService: OppgaveSecurityService
 
     @Autowired
