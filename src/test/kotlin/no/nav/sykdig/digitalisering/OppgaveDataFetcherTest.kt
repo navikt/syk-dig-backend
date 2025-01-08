@@ -21,7 +21,7 @@ import no.nav.sykdig.utenlandsk.models.DokumentDbModel
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import no.nav.sykdig.utenlandsk.models.SykmeldingUnderArbeid
 import no.nav.sykdig.utenlandsk.models.SykDigOppgave
-import no.nav.sykdig.utenlandsk.api.AdresseDataFetchers
+import no.nav.sykdig.utenlandsk.poststed.api.AdresseDataFetchers
 import no.nav.sykdig.utenlandsk.services.UtenlandskOppgaveService
 import no.nav.sykdig.shared.utils.toOffsetDateTimeAtNoon
 import org.junit.jupiter.api.Assertions.assertEquals

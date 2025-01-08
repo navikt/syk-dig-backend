@@ -1,4 +1,4 @@
-package no.nav.sykdig.utenlandsk.api
+package no.nav.sykdig.utenlandsk.poststed.api
 
 import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsData
@@ -10,6 +10,7 @@ import no.nav.sykdig.generated.types.Vegadresse
 
 @DgsComponent
 class AdresseDataFetchers(
+    // TODO: ikke inject repository direkte i controlleren
     private val poststedRepository: PoststedRepository,
 ) {
     @DgsData(parentType = DgsConstants.VEGADRESSE.TYPE_NAME, field = DgsConstants.VEGADRESSE.Poststed)

@@ -1,8 +1,8 @@
 package no.nav.sykdig.utenlandsk.api
 
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.utenlandsk.db.OppgaveRepository
 import no.nav.sykdig.saf.SafClient
+import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -15,7 +15,7 @@ import java.util.*
 
 @RestController
 class DocumentController(
-    private val oppgaveRepository: OppgaveRepository,
+    private val sykDigOppgaveService: SykDigOppgaveService,
     private val safClient: SafClient,
 ) {
     val log = applog()
@@ -40,7 +40,7 @@ class DocumentController(
         @PathVariable oppgaveId: String,
         @PathVariable dokumentInfoId: String,
     ): ResponseEntity<Any> {
-        val oppgave = oppgaveRepository.getOppgave(oppgaveId)
+        val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
 
         if (oppgave != null) {
             if (
