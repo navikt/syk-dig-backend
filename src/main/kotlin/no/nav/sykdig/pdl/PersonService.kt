@@ -1,6 +1,6 @@
 package no.nav.sykdig.pdl
 
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.pdl.client.PdlClient
 import no.nav.sykdig.pdl.client.graphql.PdlResponse
 import org.springframework.stereotype.Component

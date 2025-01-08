@@ -1,7 +1,7 @@
 package no.nav.sykdig.utenlandsk.poststed
 
-import no.nav.sykdig.felles.applog
-import no.nav.sykdig.felles.objectMapper
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus

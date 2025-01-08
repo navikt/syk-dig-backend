@@ -1,6 +1,6 @@
 package no.nav.sykdig.nasjonal.helsenett
 
-import no.nav.sykdig.nasjonal.model.Godkjenning
+import no.nav.sykdig.nasjonal.models.Godkjenning
 
 data class Behandler(
     val godkjenninger: List<Godkjenning>,

@@ -1,7 +1,7 @@
 package no.nav.sykdig.utenlandsk.mapping
 
 import no.nav.sykdig.pdl.toFormattedNameString
-import no.nav.sykdig.felles.Periode
+import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.generated.types.Bostedsadresse
 import no.nav.sykdig.generated.types.DiagnoseValue
 import no.nav.sykdig.generated.types.Digitaliseringsoppgave
@@ -19,8 +19,8 @@ import no.nav.sykdig.generated.types.SykmeldingsType
 import no.nav.sykdig.generated.types.UkjentBosted
 import no.nav.sykdig.generated.types.UtenlandskAdresse
 import no.nav.sykdig.generated.types.Vegadresse
-import no.nav.sykdig.utenlandsk.model.SykmeldingUnderArbeid
-import no.nav.sykdig.utenlandsk.model.SykDigOppgave
+import no.nav.sykdig.utenlandsk.models.SykmeldingUnderArbeid
+import no.nav.sykdig.utenlandsk.models.SykDigOppgave
 
 fun mapToDigitalisertSykmelding(oppgave: SykDigOppgave): DigitalisertSykmeldingResult {
     requireNotNull(oppgave.oppgaveDbModel.sykmelding)

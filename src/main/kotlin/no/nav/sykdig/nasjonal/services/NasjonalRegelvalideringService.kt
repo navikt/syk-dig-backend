@@ -1,14 +1,14 @@
 package no.nav.sykdig.nasjonal.services
 
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.sykdig.felles.*
-import no.nav.sykdig.felles.exceptions.ValidationException
-import no.nav.sykdig.nasjonal.api.RegelClient
-import no.nav.sykdig.nasjonal.model.RuleHitCustomError
-import no.nav.sykdig.nasjonal.model.WhitelistedRuleHit
-import no.nav.sykdig.nasjonal.model.SmRegistreringManuell
-import no.nav.sykdig.nasjonal.model.Sykmelder
-import no.nav.sykdig.utenlandsk.model.ReceivedSykmelding
+import no.nav.sykdig.shared.*
+import no.nav.sykdig.shared.exceptions.ValidationException
+import no.nav.sykdig.nasjonal.clients.RegelClient
+import no.nav.sykdig.nasjonal.models.RuleHitCustomError
+import no.nav.sykdig.nasjonal.models.WhitelistedRuleHit
+import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
+import no.nav.sykdig.nasjonal.models.Sykmelder
+import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 

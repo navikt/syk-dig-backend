@@ -1,6 +1,6 @@
 package no.nav.sykdig.utenlandsk.poststed
 
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.db.PoststedRepository
 import no.nav.sykdig.utenlandsk.poststed.client.KodeverkClient
 import org.springframework.scheduling.annotation.Scheduled

@@ -1,6 +1,6 @@
 package no.nav.sykdig.utenlandsk.db
 
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.poststed.PostInformasjon
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository

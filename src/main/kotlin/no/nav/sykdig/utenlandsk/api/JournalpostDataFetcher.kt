@@ -4,7 +4,7 @@ import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.utenlandsk.services.JournalpostService
 import no.nav.sykdig.utenlandsk.services.SykmeldingService
@@ -12,8 +12,8 @@ import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.generated.types.JournalpostStatusEnum
-import no.nav.sykdig.felles.objectMapper
-import no.nav.sykdig.felles.securelog
+import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.securelog
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 

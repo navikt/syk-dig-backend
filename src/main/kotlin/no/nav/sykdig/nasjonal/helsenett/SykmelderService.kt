@@ -1,15 +1,15 @@
 package no.nav.sykdig.nasjonal.helsenett
 
-import no.nav.sykdig.felles.LoggingMeta
-import no.nav.sykdig.felles.applog
-import no.nav.sykdig.felles.exceptions.SykmelderNotFoundException
+import no.nav.sykdig.shared.LoggingMeta
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.nasjonal.helsenett.client.HelsenettClient
 import no.nav.sykdig.nasjonal.helsenett.client.SmtssClient
-import no.nav.sykdig.nasjonal.model.Godkjenning
-import no.nav.sykdig.nasjonal.model.Kode
-import no.nav.sykdig.nasjonal.model.Sykmelder
+import no.nav.sykdig.nasjonal.models.Godkjenning
+import no.nav.sykdig.nasjonal.models.Kode
+import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.pdl.PersonService
-import no.nav.sykdig.felles.securelog
+import no.nav.sykdig.shared.securelog
 import org.springframework.stereotype.Service
 
 @Service

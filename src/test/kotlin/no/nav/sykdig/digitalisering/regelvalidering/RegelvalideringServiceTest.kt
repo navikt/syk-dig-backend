@@ -1,6 +1,6 @@
 package no.nav.sykdig.digitalisering.regelvalidering
 
-import no.nav.sykdig.utenlandsk.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput

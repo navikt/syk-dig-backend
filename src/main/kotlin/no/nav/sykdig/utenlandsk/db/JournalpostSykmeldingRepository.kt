@@ -1,6 +1,6 @@
 package no.nav.sykdig.utenlandsk.db
 
-import no.nav.sykdig.utenlandsk.model.JournalpostSykmelding
+import no.nav.sykdig.utenlandsk.models.JournalpostSykmelding
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet

@@ -4,11 +4,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.sykdig.felles.exceptions.SykmelderNotFoundException
+import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.nasjonal.helsenett.client.HelsenettClient
 import no.nav.sykdig.nasjonal.helsenett.client.SmtssClient
-import no.nav.sykdig.nasjonal.model.Godkjenning
-import no.nav.sykdig.nasjonal.model.Kode
+import no.nav.sykdig.nasjonal.models.Godkjenning
+import no.nav.sykdig.nasjonal.models.Kode
 import no.nav.sykdig.nasjonal.helsenett.Behandler
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.pdl.Navn

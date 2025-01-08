@@ -1,8 +1,8 @@
 package no.nav.sykdig.utenlandsk.kafka
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.sykdig.felles.applog
-import no.nav.sykdig.felles.objectMapper
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment

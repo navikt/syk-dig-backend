@@ -1,6 +1,6 @@
 package no.nav.sykdig.saf
 
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.api.DocumentController.ErrorTypes
 import no.nav.sykdig.utenlandsk.api.DocumentController.PdfLoadingState
 import org.springframework.beans.factory.annotation.Value

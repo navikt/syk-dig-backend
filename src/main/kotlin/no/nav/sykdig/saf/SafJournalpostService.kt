@@ -1,7 +1,7 @@
 package no.nav.sykdig.saf
 
 import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.saf.graphql.DokumentInfo
 import no.nav.sykdig.saf.graphql.Journalstatus
 import org.springframework.stereotype.Component

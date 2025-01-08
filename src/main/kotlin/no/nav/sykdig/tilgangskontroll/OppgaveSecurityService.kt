@@ -1,7 +1,7 @@
 package no.nav.sykdig.tilgangskontroll
 
-import no.nav.sykdig.felles.auditLogger.AuditLogger
-import no.nav.sykdig.felles.auditlog
+import no.nav.sykdig.shared.auditLogger.AuditLogger
+import no.nav.sykdig.shared.auditlog
 import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
 import no.nav.sykdig.nasjonal.services.NasjonalCommonService
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
@@ -11,8 +11,8 @@ import no.nav.sykdig.saf.graphql.Type
 import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
-import no.nav.sykdig.felles.objectMapper
-import no.nav.sykdig.felles.securelog
+import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.securelog
 import org.springframework.stereotype.Service
 
 @Service

@@ -20,8 +20,8 @@ import no.nav.helse.sm2013.Ident
 import no.nav.helse.sm2013.NavnType
 import no.nav.helse.sm2013.TeleCom
 import no.nav.helse.sm2013.URL
-import no.nav.sykdig.felles.exceptions.MappingException
-import no.nav.sykdig.utenlandsk.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.shared.exceptions.MappingException
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput

@@ -1,7 +1,7 @@
 package no.nav.sykdig.utils
 
-import no.nav.sykdig.felles.exceptions.ClientException
-import no.nav.sykdig.felles.utils.validateDiagnose
+import no.nav.sykdig.shared.exceptions.ClientException
+import no.nav.sykdig.shared.utils.validateDiagnose
 import no.nav.sykdig.generated.types.DiagnoseInput
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

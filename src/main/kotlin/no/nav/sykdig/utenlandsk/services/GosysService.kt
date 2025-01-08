@@ -1,7 +1,7 @@
 package no.nav.sykdig.utenlandsk.services
 
 import no.nav.sykdig.oppgave.OppgaveClient
-import no.nav.sykdig.oppgave.model.OppgaveStatus
+import no.nav.sykdig.oppgave.models.OppgaveStatus
 import org.springframework.stereotype.Component
 
 @Component

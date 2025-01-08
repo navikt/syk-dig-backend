@@ -1,6 +1,6 @@
 package no.nav.sykdig.utenlandsk.api
 
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.db.OppgaveRepository
 import no.nav.sykdig.saf.SafClient
 import org.springframework.http.HttpStatus

@@ -1,7 +1,7 @@
 package no.nav.sykdig.pdl.client.graphql
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.sykdig.felles.objectMapper
+import no.nav.sykdig.shared.objectMapper
 
 const val PDL_QUERY = """
     query(${"$"}ident: ID!){

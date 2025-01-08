@@ -2,8 +2,8 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.nasjonal.model.PapirSmRegistering
-import no.nav.sykdig.nasjonal.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.nasjonal.models.PapirSmRegistering
+import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import org.amshove.kluent.internal.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach

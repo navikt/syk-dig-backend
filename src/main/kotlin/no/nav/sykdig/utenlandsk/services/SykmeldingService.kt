@@ -1,8 +1,8 @@
 package no.nav.sykdig.utenlandsk.services
 
-import no.nav.sykdig.utenlandsk.model.CreateSykmeldingKafkaMessage
-import no.nav.sykdig.utenlandsk.model.JournalpostMetadata
-import no.nav.sykdig.utenlandsk.model.Metadata
+import no.nav.sykdig.utenlandsk.models.CreateSykmeldingKafkaMessage
+import no.nav.sykdig.utenlandsk.models.JournalpostMetadata
+import no.nav.sykdig.utenlandsk.models.Metadata
 import no.nav.sykdig.utenlandsk.db.JournalpostSykmeldingRepository
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord

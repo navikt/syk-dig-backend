@@ -2,12 +2,12 @@ package no.nav.sykdig.utenlandsk.services
 
 import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.sykdig.felles.LoggingMeta
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.LoggingMeta
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.dokarkiv.DokarkivClient
-import no.nav.sykdig.felles.Periode
+import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.nasjonal.services.NasjonalCommonService
-import no.nav.sykdig.nasjonal.model.FerdigstillRegistrering
+import no.nav.sykdig.nasjonal.models.FerdigstillRegistrering
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.saf.SafJournalpostService
 import no.nav.sykdig.saf.graphql.SafJournalpost
@@ -20,8 +20,8 @@ import no.nav.sykdig.generated.types.Journalpost
 import no.nav.sykdig.generated.types.JournalpostResult
 import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.generated.types.JournalpostStatusEnum
-import no.nav.sykdig.felles.metrics.MetricRegister
-import no.nav.sykdig.felles.securelog
+import no.nav.sykdig.shared.metrics.MetricRegister
+import no.nav.sykdig.shared.securelog
 import org.springframework.stereotype.Service
 
 @Service

@@ -1,7 +1,7 @@
 package no.nav.sykdig.dokarkiv
 
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.db.OppgaveRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

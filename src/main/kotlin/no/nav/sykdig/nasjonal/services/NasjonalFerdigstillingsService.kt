@@ -1,17 +1,17 @@
 package no.nav.sykdig.nasjonal.services
 
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.sykdig.felles.LoggingMeta
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.LoggingMeta
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.services.GosysService
-import no.nav.sykdig.oppgave.model.NasjonalOppgaveResponse
+import no.nav.sykdig.oppgave.models.NasjonalOppgaveResponse
 import no.nav.sykdig.oppgave.OppgaveClient
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
-import no.nav.sykdig.nasjonal.model.FerdigstillRegistrering
-import no.nav.sykdig.nasjonal.model.Veileder
-import no.nav.sykdig.nasjonal.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.nasjonal.models.FerdigstillRegistrering
+import no.nav.sykdig.nasjonal.models.Veileder
+import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.utenlandsk.services.JournalpostService
-import no.nav.sykdig.felles.securelog
+import no.nav.sykdig.shared.securelog
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

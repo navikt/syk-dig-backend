@@ -1,6 +1,6 @@
 package no.nav.sykdig.utenlandsk.poststed.client
 
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.poststed.PostInformasjon
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity

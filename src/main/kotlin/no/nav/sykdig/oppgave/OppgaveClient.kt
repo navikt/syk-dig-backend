@@ -2,17 +2,17 @@ package no.nav.sykdig.oppgave
 
 import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.sykdig.felles.LoggingMeta
-import no.nav.sykdig.felles.applog
-import no.nav.sykdig.felles.exceptions.IkkeTilgangException
-import no.nav.sykdig.felles.exceptions.NoOppgaveException
+import no.nav.sykdig.shared.LoggingMeta
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.exceptions.IkkeTilgangException
+import no.nav.sykdig.shared.exceptions.NoOppgaveException
 import no.nav.sykdig.utenlandsk.services.getFristForFerdigstillingAvOppgave
-import no.nav.sykdig.nasjonal.model.FerdigstillRegistrering
+import no.nav.sykdig.nasjonal.models.FerdigstillRegistrering
 import no.nav.sykdig.saf.graphql.SafJournalpost
 import no.nav.sykdig.saf.graphql.TEMA_SYKMELDING
-import no.nav.sykdig.felles.objectMapper
-import no.nav.sykdig.felles.securelog
-import no.nav.sykdig.oppgave.model.*
+import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.securelog
+import no.nav.sykdig.oppgave.models.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders

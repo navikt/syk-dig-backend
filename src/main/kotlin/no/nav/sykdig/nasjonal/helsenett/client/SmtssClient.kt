@@ -1,10 +1,10 @@
 package no.nav.sykdig.nasjonal.helsenett.client
 
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.sykdig.felles.LoggingMeta
-import no.nav.sykdig.felles.applog
-import no.nav.sykdig.felles.exceptions.SykmelderNotFoundException
-import no.nav.sykdig.felles.securelog
+import no.nav.sykdig.shared.LoggingMeta
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
+import no.nav.sykdig.shared.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders

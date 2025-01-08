@@ -1,14 +1,14 @@
 package no.nav.sykdig.utenlandsk.kafka
 
 import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.db.OppgaveRepository
-import no.nav.sykdig.oppgave.model.GetOppgaveResponse
-import no.nav.sykdig.oppgave.model.OppdaterOppgaveRequest
+import no.nav.sykdig.oppgave.models.GetOppgaveResponse
+import no.nav.sykdig.oppgave.models.OppdaterOppgaveRequest
 import no.nav.sykdig.oppgave.OppgaveClient
 import no.nav.sykdig.saf.SafJournalpostService
-import no.nav.sykdig.felles.metrics.MetricRegister
-import no.nav.sykdig.felles.utils.toOppgaveDbModel
+import no.nav.sykdig.shared.metrics.MetricRegister
+import no.nav.sykdig.shared.utils.toOppgaveDbModel
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.OffsetDateTime

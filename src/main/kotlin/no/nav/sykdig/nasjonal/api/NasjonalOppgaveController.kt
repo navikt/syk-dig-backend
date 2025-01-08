@@ -1,16 +1,16 @@
 package no.nav.sykdig.nasjonal.api
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.sykdig.felles.applog
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
-import no.nav.sykdig.nasjonal.model.PapirManuellOppgave
-import no.nav.sykdig.nasjonal.model.SmRegistreringManuell
-import no.nav.sykdig.nasjonal.model.Sykmelder
+import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
+import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
+import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.PersonService
-import no.nav.sykdig.felles.securelog
+import no.nav.sykdig.shared.securelog
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity

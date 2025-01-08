@@ -4,8 +4,8 @@ import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.utenlandsk.services.FerdigstillingService
 import no.nav.sykdig.oppgave.OppgaveClient
-import no.nav.sykdig.utenlandsk.model.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.utenlandsk.model.UferdigRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput

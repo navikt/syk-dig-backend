@@ -1,16 +1,16 @@
 package no.nav.sykdig.utenlandsk.services
 
-import no.nav.sykdig.felles.applog
-import no.nav.sykdig.utenlandsk.model.SykDigOppgave
-import no.nav.sykdig.felles.exceptions.ClientException
-import no.nav.sykdig.utenlandsk.model.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.utenlandsk.model.RegisterOppgaveValues
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.utenlandsk.models.SykDigOppgave
+import no.nav.sykdig.shared.exceptions.ClientException
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.OppdatertSykmeldingStatus
 import no.nav.sykdig.generated.types.OppdatertSykmeldingStatusEnum
-import no.nav.sykdig.felles.metrics.MetricRegister
-import no.nav.sykdig.utenlandsk.model.OppgaveDbModel
+import no.nav.sykdig.shared.metrics.MetricRegister
+import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek
