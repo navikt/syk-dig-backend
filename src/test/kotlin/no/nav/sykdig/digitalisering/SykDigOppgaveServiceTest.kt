@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -32,11 +33,14 @@ import java.time.ZoneOffset
 @Transactional
 class SykDigOppgaveServiceTest : IntegrationTest() {
 
+    @MockBean
     lateinit var ferdigstillingService: FerdigstillingService
+    @MockBean
     lateinit var oppgaveCommonService: OppgaveCommonService
 
     lateinit var sykDigOppgaveService: SykDigOppgaveService
 
+    @MockBean
     lateinit var oppgaveClient: OppgaveClient
 
     @BeforeEach
