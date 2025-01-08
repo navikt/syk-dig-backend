@@ -37,7 +37,6 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -45,6 +44,7 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
@@ -64,31 +64,31 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
     val mapper = jacksonObjectMapper()
 
-    @MockBean
+    @MockitoBean
     lateinit var sykdigOppgaveService: SykDigOppgaveService
 
-    @MockBean
+    @MockitoBean
     lateinit var personService: PersonService
 
-    @MockBean
+    @MockitoBean
     lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
 
-    @MockBean
+    @MockitoBean
     lateinit var dokarkivClient: DokarkivClient
 
-    @MockBean
+    @MockitoBean
     lateinit var sykmelderService: SykmelderService
 
-    @MockBean
+    @MockitoBean
     lateinit var oppgaveClient: OppgaveClient
 
-    @MockBean
+    @MockitoBean
     lateinit var documentService: DocumentService
 
-    @MockBean
+    @MockitoBean
     lateinit var nasjonaCommonService: NasjonalCommonService
 
-    @MockBean
+    @MockitoBean
     lateinit var nasjonalFerdigstillingService: NasjonalFerdigstillingsService
 
     @Autowired
@@ -182,30 +182,30 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
             oppgaveid = 123,
             pdfPapirSykmelding = EMPTY_BYTE_ARRAY,
             papirSmRegistering =
-                PapirSmRegistering(
-                    journalpostId = "123",
-                    oppgaveId = "123",
-                    fnr = "fnr",
-                    aktorId = "aktor",
-                    dokumentInfoId = "123",
-                    datoOpprettet = OffsetDateTime.now(),
-                    sykmeldingId = "123",
-                    syketilfelleStartDato = LocalDate.now(),
-                    arbeidsgiver = null,
-                    medisinskVurdering = null,
-                    skjermesForPasient = null,
-                    perioder = null,
-                    prognose = null,
-                    utdypendeOpplysninger = null,
-                    tiltakNAV = null,
-                    tiltakArbeidsplassen = null,
-                    andreTiltak = null,
-                    meldingTilNAV = null,
-                    meldingTilArbeidsgiver = null,
-                    kontaktMedPasient = null,
-                    behandletTidspunkt = null,
-                    behandler = Behandler("fornavn", "mellomnavn", "etternavn", "", "", "", null, Adresse(null, null, null, null, null), null),
-                ),
+            PapirSmRegistering(
+                journalpostId = "123",
+                oppgaveId = "123",
+                fnr = "fnr",
+                aktorId = "aktor",
+                dokumentInfoId = "123",
+                datoOpprettet = OffsetDateTime.now(),
+                sykmeldingId = "123",
+                syketilfelleStartDato = LocalDate.now(),
+                arbeidsgiver = null,
+                medisinskVurdering = null,
+                skjermesForPasient = null,
+                perioder = null,
+                prognose = null,
+                utdypendeOpplysninger = null,
+                tiltakNAV = null,
+                tiltakArbeidsplassen = null,
+                andreTiltak = null,
+                meldingTilNAV = null,
+                meldingTilArbeidsgiver = null,
+                kontaktMedPasient = null,
+                behandletTidspunkt = null,
+                behandler = Behandler("fornavn", "mellomnavn", "etternavn", "", "", "", null, Adresse(null, null, null, null, null), null),
+            ),
             documents = emptyList(),
         )
     }
@@ -246,30 +246,30 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
             oppgaveId = oppgaveId,
             ferdigstilt = false,
             papirSmRegistrering =
-                PapirSmRegistering(
-                    journalpostId = "123",
-                    oppgaveId = "123",
-                    fnr = "fnr",
-                    aktorId = "aktor",
-                    dokumentInfoId = "123",
-                    datoOpprettet = OffsetDateTime.now(),
-                    sykmeldingId = "123",
-                    syketilfelleStartDato = LocalDate.now(),
-                    arbeidsgiver = null,
-                    medisinskVurdering = null,
-                    skjermesForPasient = null,
-                    perioder = null,
-                    prognose = null,
-                    utdypendeOpplysninger = null,
-                    tiltakNAV = null,
-                    tiltakArbeidsplassen = null,
-                    andreTiltak = null,
-                    meldingTilNAV = null,
-                    meldingTilArbeidsgiver = null,
-                    kontaktMedPasient = null,
-                    behandletTidspunkt = null,
-                    behandler = null,
-                ),
+            PapirSmRegistering(
+                journalpostId = "123",
+                oppgaveId = "123",
+                fnr = "fnr",
+                aktorId = "aktor",
+                dokumentInfoId = "123",
+                datoOpprettet = OffsetDateTime.now(),
+                sykmeldingId = "123",
+                syketilfelleStartDato = LocalDate.now(),
+                arbeidsgiver = null,
+                medisinskVurdering = null,
+                skjermesForPasient = null,
+                perioder = null,
+                prognose = null,
+                utdypendeOpplysninger = null,
+                tiltakNAV = null,
+                tiltakArbeidsplassen = null,
+                andreTiltak = null,
+                meldingTilNAV = null,
+                meldingTilArbeidsgiver = null,
+                kontaktMedPasient = null,
+                behandletTidspunkt = null,
+                behandler = null,
+            ),
             utfall = null,
             ferdigstiltAv = null,
             datoFerdigstilt = null,

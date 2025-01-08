@@ -45,7 +45,7 @@ import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -57,16 +57,16 @@ import java.util.*
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 class FerdigstillingServiceTest : IntegrationTest() {
-    @MockBean
+    @MockitoBean
     lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
 
-    @MockBean
+    @MockitoBean
     lateinit var dokarkivClient: DokarkivClient
 
-    @MockBean
+    @MockitoBean
     lateinit var oppgaveClient: OppgaveClient
 
-    @MockBean
+    @MockitoBean
     lateinit var sykmelderService: SykmelderService
 
     @Autowired
