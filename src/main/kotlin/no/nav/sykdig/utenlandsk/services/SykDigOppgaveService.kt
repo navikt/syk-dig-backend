@@ -21,6 +21,7 @@ import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import no.nav.sykdig.shared.securelog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import no.nav.sykdig.shared.utils.getLoggingMeta
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -29,7 +30,6 @@ import java.util.*
 class SykDigOppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val ferdigstillingService: FerdigstillingService,
-    private val oppgaveCommonService: OppgaveCommonService,
     private val oppgaveClient: OppgaveClient,
 ) {
     private val log = applog()
@@ -64,7 +64,7 @@ class SykDigOppgaveService(
 
     fun getOppgaveFromSykmeldingId(sykmeldingId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgaveBySykmeldingId(sykmeldingId)
-        val loggingMeta = oppgaveCommonService.getLoggingMeta(sykmeldingId, oppgave)
+        val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
         if (oppgave == null) {
             log.warn("Fant ikke oppgave {}", StructuredArguments.fields(loggingMeta))
             throw DgsEntityNotFoundException("Fant ikke oppgave")
@@ -75,7 +75,7 @@ class SykDigOppgaveService(
 
     fun getOppgave(oppgaveId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
-        val loggingMeta = oppgave?.sykmelding?.sykmelding?.id?.let { oppgaveCommonService.getLoggingMeta(it, oppgave) }
+        val loggingMeta = oppgave?.sykmelding?.sykmelding?.id?.let { getLoggingMeta(it, oppgave) }
         if (oppgave == null) {
             log.warn("Fant ikke oppgave {} ", StructuredArguments.fields(loggingMeta))
             throw DgsEntityNotFoundException("Fant ikke oppgave")

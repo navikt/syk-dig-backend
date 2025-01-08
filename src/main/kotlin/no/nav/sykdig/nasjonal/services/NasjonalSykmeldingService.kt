@@ -23,6 +23,7 @@ import no.nav.sykdig.shared.Status
 import no.nav.sykdig.shared.ValidationResult
 import no.nav.sykdig.utenlandsk.services.JournalpostService
 import no.nav.sykdig.shared.securelog
+import no.nav.sykdig.shared.utils.getLoggingMeta
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.http.HttpStatus
@@ -70,7 +71,7 @@ class NasjonalSykmeldingService(
         val sykmeldingId = oppgave.sykmeldingId
         log.info("Forsøker å ferdigstille papirsykmelding med sykmeldingId $sykmeldingId")
 
-        val loggingMeta = nasjonalCommonService.getLoggingMeta(sykmeldingId, oppgave)
+        val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
         val sykmelder = getSykmelder(smRegistreringManuell, loggingMeta, callId)
         val receivedSykmelding = nasjonalCommonService.createReceivedSykmelding(sykmeldingId, oppgave, loggingMeta, smRegistreringManuell, callId, sykmelder)
         securelog.info("sender oppgave med id $oppgaveId og navenhet $navEnhet og callId $callId og sykmelder $sykmelder")
