@@ -11,6 +11,7 @@ import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
+import no.nav.sykdig.utenlandsk.services.OppgaveCommonService
 import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -38,11 +39,14 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
     lateinit var sykDigOppgaveService: SykDigOppgaveService
 
     @MockitoBean
+    lateinit var oppgaveCommonService: OppgaveCommonService
+
+    @MockitoBean
     lateinit var oppgaveClient: OppgaveClient
 
     @BeforeEach
     fun setup() {
-        sykDigOppgaveService = SykDigOppgaveService(oppgaveRepository, ferdigstillingService, oppgaveClient)
+        sykDigOppgaveService = SykDigOppgaveService(oppgaveRepository, ferdigstillingService, oppgaveCommonService, oppgaveClient)
         oppgaveRepository.lagreOppgave(createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"))
     }
 
