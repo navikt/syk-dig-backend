@@ -1,8 +1,8 @@
 package no.nav.sykdig
 
-import no.nav.sykdig.db.OppgaveRepository
-import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalOppgaveRepository
-import no.nav.sykdig.digitalisering.papirsykmelding.db.NasjonalSykmeldingRepository
+import no.nav.sykdig.utenlandsk.db.OppgaveRepository
+import no.nav.sykdig.nasjonal.db.NasjonalOppgaveRepository
+import no.nav.sykdig.nasjonal.db.NasjonalSykmeldingRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired

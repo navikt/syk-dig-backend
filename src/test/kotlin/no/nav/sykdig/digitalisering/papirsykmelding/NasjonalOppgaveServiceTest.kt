@@ -3,29 +3,31 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.LoggingMeta
-import no.nav.sykdig.digitalisering.SykDigOppgaveService
-import no.nav.sykdig.digitalisering.dokarkiv.DokarkivClient
-import no.nav.sykdig.digitalisering.dokument.DocumentService
-import no.nav.sykdig.digitalisering.felles.Adresse
-import no.nav.sykdig.digitalisering.felles.Behandler
-import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.NasjonalOppgaveResponse
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
-import no.nav.sykdig.digitalisering.helsenett.SykmelderService
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.AvvisSykmeldingRequest
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirManuellOppgave
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.PapirSmRegistering
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Sykmelder
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.digitalisering.pdl.Navn
-import no.nav.sykdig.digitalisering.pdl.Person
-import no.nav.sykdig.digitalisering.pdl.PersonService
-import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
-import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
-import no.nav.sykdig.digitalisering.saf.graphql.SafQueryJournalpost
-import no.nav.sykdig.model.OppgaveDbModel
+import no.nav.sykdig.felles.LoggingMeta
+import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
+import no.nav.sykdig.dokarkiv.DokarkivClient
+import no.nav.sykdig.dokarkiv.DocumentService
+import no.nav.sykdig.felles.Adresse
+import no.nav.sykdig.felles.Behandler
+import no.nav.sykdig.oppgave.model.NasjonalOppgaveResponse
+import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.nasjonal.helsenett.SykmelderService
+import no.nav.sykdig.nasjonal.model.AvvisSykmeldingRequest
+import no.nav.sykdig.nasjonal.model.PapirManuellOppgave
+import no.nav.sykdig.nasjonal.model.PapirSmRegistering
+import no.nav.sykdig.nasjonal.model.Sykmelder
+import no.nav.sykdig.nasjonal.model.Veileder
+import no.nav.sykdig.nasjonal.db.model.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.nasjonal.services.NasjonalCommonService
+import no.nav.sykdig.nasjonal.services.NasjonalFerdigstillingsService
+import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
+import no.nav.sykdig.pdl.Navn
+import no.nav.sykdig.pdl.Person
+import no.nav.sykdig.pdl.PersonService
+import no.nav.sykdig.saf.SafJournalpostGraphQlClient
+import no.nav.sykdig.saf.graphql.SafJournalpost
+import no.nav.sykdig.saf.graphql.SafQueryJournalpost
+import no.nav.sykdig.utenlandsk.model.OppgaveDbModel
 import okhttp3.internal.EMPTY_BYTE_ARRAY
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -137,7 +139,11 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         Mockito.doNothing().`when`(documentService).updateDocumentTitle(any(), any(), any())
         Mockito.`when`(nasjonaCommonService.getLoggingMeta(any(), any())).thenReturn(testDataLoggingMeta())
         Mockito.`when`(sykmelderService.getSykmelderForAvvistOppgave(any(),any(),any())).thenReturn(testDataSykmelder())
-        Mockito.`when`(safJournalpostGraphQlClient.getJournalpostM2m(any())).thenReturn(SafQueryJournalpost(SafJournalpost("tittel", null, null, null, emptyList(), null, null)))
+        Mockito.`when`(safJournalpostGraphQlClient.getJournalpostM2m(any())).thenReturn(
+            SafQueryJournalpost(
+                SafJournalpost("tittel", null, null, null, emptyList(), null, null)
+            )
+        )
         Mockito.`when`(oppgaveClient.getNasjonalOppgave(any(), any())).thenReturn(NasjonalOppgaveResponse(prioritet = "", aktivDato = LocalDate.now(), oppgavetype = ""))
 
 

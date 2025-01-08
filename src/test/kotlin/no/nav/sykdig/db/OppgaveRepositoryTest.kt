@@ -2,11 +2,12 @@ package no.nav.sykdig.db
 
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
-import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.model.UferdigRegisterOppgaveValues
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
-import no.nav.sykdig.utils.toOffsetDateTimeAtNoon
+import no.nav.sykdig.utenlandsk.db.toSykmelding
+import no.nav.sykdig.felles.utils.toOffsetDateTimeAtNoon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -1,11 +1,12 @@
 package no.nav.sykdig.digitalisering.regelvalidering
 
-import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.digitalisering.pdl.Navn
-import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.utenlandsk.model.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.pdl.Navn
+import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
+import no.nav.sykdig.utenlandsk.services.RegelvalideringService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
