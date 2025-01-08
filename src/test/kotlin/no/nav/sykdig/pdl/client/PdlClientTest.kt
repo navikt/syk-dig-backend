@@ -1,6 +1,6 @@
 package no.nav.sykdig.pdl.client
 
-import no.nav.sykdig.digitalisering.pdl.client.graphql.mapToPdlResponse
+import no.nav.sykdig.pdl.client.graphql.mapToPdlResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets

@@ -2,15 +2,16 @@ package no.nav.sykdig.digitalisering
 
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.digitalisering.ferdigstilling.FerdigstillingService
-import no.nav.sykdig.digitalisering.ferdigstilling.oppgave.OppgaveClient
-import no.nav.sykdig.digitalisering.model.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.digitalisering.model.UferdigRegisterOppgaveValues
-import no.nav.sykdig.digitalisering.pdl.Navn
-import no.nav.sykdig.digitalisering.pdl.Person
+import no.nav.sykdig.utenlandsk.services.FerdigstillingService
+import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
+import no.nav.sykdig.pdl.Navn
+import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
+import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals

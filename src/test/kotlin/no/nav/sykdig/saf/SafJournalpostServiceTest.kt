@@ -2,16 +2,10 @@ package no.nav.sykdig.saf
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sykdig.digitalisering.exceptions.MissingJournalpostException
-import no.nav.sykdig.digitalisering.saf.SafJournalpostGraphQlClient
-import no.nav.sykdig.digitalisering.saf.SafJournalpostService
-import no.nav.sykdig.digitalisering.saf.graphql.*
-import org.amshove.kluent.assertionError
+import no.nav.sykdig.saf.graphql.*
 import org.amshove.kluent.internal.assertFailsWith
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class SafJournalpostServiceTest {
     private val safJournalpostGraphQlClient: SafJournalpostGraphQlClient = mockk()
