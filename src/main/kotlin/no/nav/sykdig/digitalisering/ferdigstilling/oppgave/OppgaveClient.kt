@@ -230,8 +230,8 @@ class OppgaveClient(
                     AllOppgaveResponses::class.java,
                 )
             log.info("Mottok respons for journalpostId $journalpostId med antall oppgaver: ${response.body?.oppgaver?.size ?: "ingen"}")
-            checkOppgavetype(response.body?.oppgaver!!)
-            return response.body?.oppgaver ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $journalpostId")
+            return response.body?.oppgaver?.also { checkOppgavetype(it) }
+                ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $journalpostId")
         } catch (e: HttpClientErrorException) {
             log.error(
                 "HttpClientErrorException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}",
