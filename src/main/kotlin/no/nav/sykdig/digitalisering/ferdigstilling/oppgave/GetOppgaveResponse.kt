@@ -52,7 +52,7 @@ data class AllOppgaveResponse(
     val id: Int? = null,
     val tema: String? = null,
     val tildeltEnhetsnr: String,
-    val oppgavetype: AllOppgaveType,
+    val oppgavetype: String,
 )
 
 data class AllOppgaveResponses(

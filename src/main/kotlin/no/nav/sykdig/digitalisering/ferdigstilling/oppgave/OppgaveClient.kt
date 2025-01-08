@@ -8,7 +8,6 @@ import no.nav.sykdig.digitalisering.exceptions.IkkeTilgangException
 import no.nav.sykdig.digitalisering.exceptions.NoOppgaveException
 import no.nav.sykdig.digitalisering.getFristForFerdigstillingAvOppgave
 import no.nav.sykdig.digitalisering.papirsykmelding.api.model.FerdigstillRegistrering
-import no.nav.sykdig.digitalisering.papirsykmelding.api.model.Veileder
 import no.nav.sykdig.digitalisering.saf.graphql.SafJournalpost
 import no.nav.sykdig.digitalisering.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.objectMapper
@@ -205,6 +204,12 @@ class OppgaveClient(
         }
     }
 
+    private fun checkOppgavetype(response: List<AllOppgaveResponse>) {
+        val (gyldige, ugyldige) = response.partition { it.oppgavetype in enumValues<AllOppgaveType>().map { enum -> enum.name} }
+        gyldige.forEach { log.info("Gyldig oppgaveType: $it") }
+        ugyldige.forEach { log.warn("Ugyldig oppgaveType mottatt: $it") }
+    }
+
     @Retryable
     fun getOppgaver(
         journalpostId: String,
@@ -225,7 +230,8 @@ class OppgaveClient(
                     AllOppgaveResponses::class.java,
                 )
             log.info("Mottok respons for journalpostId $journalpostId med antall oppgaver: ${response.body?.oppgaver?.size ?: "ingen"}")
-            return response.body?.oppgaver ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $journalpostId")
+            return response.body?.oppgaver?.also { checkOppgavetype(it) }
+                ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $journalpostId")
         } catch (e: HttpClientErrorException) {
             log.error(
                 "HttpClientErrorException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}",

@@ -131,7 +131,7 @@ class SykDigOppgaveService(
             log.info("hentet ${oppgaver.size}, på journalpostId $journalpostId")
             val filtrerteOppgaver =
                 oppgaver.filter {
-                    (it.tema == "SYM" || it.tema == "SYK") && it.oppgavetype == AllOppgaveType.JFR
+                    (it.tema == "SYM" || it.tema == "SYK") && it.oppgavetype == AllOppgaveType.JFR.name
                 }
             if (filtrerteOppgaver.size != 1) {
                 val oppgaverInfo =
