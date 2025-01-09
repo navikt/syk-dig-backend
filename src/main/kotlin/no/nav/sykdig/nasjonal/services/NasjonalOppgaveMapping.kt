@@ -1,9 +1,5 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
-import no.nav.sykdig.digitalisering.felles.AnnenFraverGrunn
-import no.nav.sykdig.digitalisering.felles.Diagnose
-import no.nav.sykdig.digitalisering.felles.MedisinskArsak
-import no.nav.sykdig.digitalisering.papirsykmelding.db.model.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.generated.types.AktivitetIkkeMulig
 import no.nav.sykdig.generated.types.AnnenFraversArsak
 import no.nav.sykdig.generated.types.AnnenFraversArsakGrunn
@@ -22,6 +18,10 @@ import no.nav.sykdig.generated.types.MeldingTilNAV
 import no.nav.sykdig.generated.types.NasjonalOppgave
 import no.nav.sykdig.generated.types.NasjonalSykmelding
 import no.nav.sykdig.generated.types.Periode
+import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.shared.AnnenFraverGrunn
+import no.nav.sykdig.shared.Diagnose
+import no.nav.sykdig.shared.MedisinskArsak
 
 fun mapToNasjonalOppgave(oppgave: NasjonalManuellOppgaveDAO): NasjonalOppgave {
     requireNotNull(oppgave.dokumentInfoId)
@@ -64,8 +64,8 @@ fun mapToArbeidsgiver(oppgave: NasjonalManuellOppgaveDAO): Arbeidsgiver {
 fun mapToHarArbeidsGiver(oppgave: NasjonalManuellOppgaveDAO): HarArbeidsgiver? {
     return when (oppgave.papirSmRegistrering.arbeidsgiver?.harArbeidsgiver) {
         null -> null
-        no.nav.sykdig.digitalisering.felles.HarArbeidsgiver.EN_ARBEIDSGIVER -> HarArbeidsgiver.EN_ARBEIDSGIVER
-        no.nav.sykdig.digitalisering.felles.HarArbeidsgiver.FLERE_ARBEIDSGIVERE -> HarArbeidsgiver.FLERE_ARBEIDSGIVERE
+        no.nav.sykdig.shared.HarArbeidsgiver.EN_ARBEIDSGIVER -> HarArbeidsgiver.EN_ARBEIDSGIVER
+        no.nav.sykdig.shared.HarArbeidsgiver.FLERE_ARBEIDSGIVERE -> HarArbeidsgiver.FLERE_ARBEIDSGIVERE
         else -> HarArbeidsgiver.INGEN_ARBEIDSGIVER
     }
 }
@@ -94,7 +94,7 @@ fun mapToDiagnoseSchema(diagnose: Diagnose?): DiagnoseSchema? {
 }
 
 
-fun mapToAnnenFraversArsak(annenFraversArsak: no.nav.sykdig.digitalisering.felles.AnnenFraversArsak?): AnnenFraversArsak? {
+fun mapToAnnenFraversArsak(annenFraversArsak: no.nav.sykdig.shared.AnnenFraversArsak?): AnnenFraversArsak? {
     if (annenFraversArsak == null) return null
 
     return AnnenFraversArsak(
@@ -118,7 +118,7 @@ fun mapToAnnenFraversArsakGrunn(annenFraverGrunn: AnnenFraverGrunn): AnnenFraver
     }
 }
 
-fun mapToPerioder(periode: no.nav.sykdig.digitalisering.felles.Periode): Periode {
+fun mapToPerioder(periode: no.nav.sykdig.shared.Periode): Periode {
     return Periode(
         fom = periode.fom,
         tom = periode.tom,
@@ -130,7 +130,7 @@ fun mapToPerioder(periode: no.nav.sykdig.digitalisering.felles.Periode): Periode
     )
 }
 
-fun mapToGradert(gradert: no.nav.sykdig.digitalisering.felles.Gradert?): Gradert? {
+fun mapToGradert(gradert: no.nav.sykdig.shared.Gradert?): Gradert? {
     if (gradert == null) return null
 
     return Gradert(
@@ -139,7 +139,7 @@ fun mapToGradert(gradert: no.nav.sykdig.digitalisering.felles.Gradert?): Gradert
     )
 }
 
-fun mapToAktivitetIkkeMulig(aktivitetIkkeMulig: no.nav.sykdig.digitalisering.felles.AktivitetIkkeMulig?): AktivitetIkkeMulig? {
+fun mapToAktivitetIkkeMulig(aktivitetIkkeMulig: no.nav.sykdig.shared.AktivitetIkkeMulig?): AktivitetIkkeMulig? {
     if (aktivitetIkkeMulig == null) return null
 
     return AktivitetIkkeMulig(
@@ -158,16 +158,16 @@ fun mapToMedisinskArsak(medisinskArsak: MedisinskArsak?): no.nav.sykdig.generate
     )
 }
 
-fun mapToMedisinskArsakType(medisinskArsakType: no.nav.sykdig.digitalisering.felles.MedisinskArsakType): MedisinskArsakType {
+fun mapToMedisinskArsakType(medisinskArsakType: no.nav.sykdig.shared.MedisinskArsakType): MedisinskArsakType {
     return when (medisinskArsakType) {
-        no.nav.sykdig.digitalisering.felles.MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET -> MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET
-        no.nav.sykdig.digitalisering.felles.MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND -> MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND
-        no.nav.sykdig.digitalisering.felles.MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING -> MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING
-        no.nav.sykdig.digitalisering.felles.MedisinskArsakType.ANNET -> MedisinskArsakType.ANNET
+        no.nav.sykdig.shared.MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET -> MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET
+        no.nav.sykdig.shared.MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND -> MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND
+        no.nav.sykdig.shared.MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING -> MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING
+        no.nav.sykdig.shared.MedisinskArsakType.ANNET -> MedisinskArsakType.ANNET
     }
 }
 
-fun mapToArbeidsrelatertArsak(arbeidsrelatertArsak: no.nav.sykdig.digitalisering.felles.ArbeidsrelatertArsak?): ArbeidsrelatertArsak? {
+fun mapToArbeidsrelatertArsak(arbeidsrelatertArsak: no.nav.sykdig.shared.ArbeidsrelatertArsak?): ArbeidsrelatertArsak? {
     if (arbeidsrelatertArsak == null) return null
 
     return ArbeidsrelatertArsak(
@@ -176,15 +176,15 @@ fun mapToArbeidsrelatertArsak(arbeidsrelatertArsak: no.nav.sykdig.digitalisering
     )
 }
 
-fun mapToArbeidsrelatertArsakType(arbeidsrelatertArsakType: no.nav.sykdig.digitalisering.felles.ArbeidsrelatertArsakType): ArbeidsrelatertArsakType {
+fun mapToArbeidsrelatertArsakType(arbeidsrelatertArsakType: no.nav.sykdig.shared.ArbeidsrelatertArsakType): ArbeidsrelatertArsakType {
     return when (arbeidsrelatertArsakType) {
-        no.nav.sykdig.digitalisering.felles.ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING -> ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING
-        no.nav.sykdig.digitalisering.felles.ArbeidsrelatertArsakType.ANNET -> ArbeidsrelatertArsakType.ANNET
+        no.nav.sykdig.shared.ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING -> ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING
+        no.nav.sykdig.shared.ArbeidsrelatertArsakType.ANNET -> ArbeidsrelatertArsakType.ANNET
     }
 }
 
 
-fun mapTilMeldingTilNAV(meldingTilNAV: no.nav.sykdig.digitalisering.felles.MeldingTilNAV?): MeldingTilNAV? {
+fun mapTilMeldingTilNAV(meldingTilNAV: no.nav.sykdig.shared.MeldingTilNAV?): MeldingTilNAV? {
     if (meldingTilNAV == null) return null
 
     return MeldingTilNAV(
@@ -194,7 +194,7 @@ fun mapTilMeldingTilNAV(meldingTilNAV: no.nav.sykdig.digitalisering.felles.Meldi
 }
 
 
-fun mapToKontaktMedPasient(kontaktMedPasient: no.nav.sykdig.digitalisering.felles.KontaktMedPasient?): KontaktMedPasient? {
+fun mapToKontaktMedPasient(kontaktMedPasient: no.nav.sykdig.shared.KontaktMedPasient?): KontaktMedPasient? {
     if (kontaktMedPasient == null) return null
 
     return KontaktMedPasient(
@@ -203,7 +203,7 @@ fun mapToKontaktMedPasient(kontaktMedPasient: no.nav.sykdig.digitalisering.felle
     )
 }
 
-fun mapToBehandler(behandler: no.nav.sykdig.digitalisering.felles.Behandler?): Behandler? {
+fun mapToBehandler(behandler: no.nav.sykdig.shared.Behandler?): Behandler? {
     if (behandler == null) return null
 
     return Behandler(
