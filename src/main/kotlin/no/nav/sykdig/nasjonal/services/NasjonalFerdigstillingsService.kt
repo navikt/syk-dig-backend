@@ -12,6 +12,7 @@ import no.nav.sykdig.nasjonal.models.Veileder
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.utenlandsk.services.JournalpostService
 import no.nav.sykdig.shared.securelog
+import no.nav.sykdig.shared.utils.getLoggingMeta
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -47,7 +48,7 @@ class NasjonalFerdigstillingsService(
     ) {
         val sykmeldingId = lokalOppgave.sykmeldingId
         val oppgaveId = lokalOppgave.oppgaveId
-        val loggingMeta = nasjonalCommonService.getLoggingMeta(lokalOppgave.sykmeldingId, lokalOppgave)
+        val loggingMeta = getLoggingMeta(lokalOppgave.sykmeldingId, lokalOppgave)
         requireNotNull(lokalOppgave.oppgaveId)
         val sykmelder = sykmelderService.getSykmelderForAvvistOppgave(lokalOppgave.papirSmRegistrering.behandler?.hpr, lokalOppgave.sykmeldingId, lokalOppgave.oppgaveId)
 
@@ -102,7 +103,7 @@ class NasjonalFerdigstillingsService(
 
     fun ferdigstillOgSendOppgaveTilGosys(oppgaveId: String, authorization: String, eksisterendeOppgave: NasjonalManuellOppgaveDAO) {
         val sykmeldingId = eksisterendeOppgave.sykmeldingId
-        val loggingMeta = nasjonalCommonService.getLoggingMeta(sykmeldingId, eksisterendeOppgave)
+        val loggingMeta = getLoggingMeta(sykmeldingId, eksisterendeOppgave)
         log.info(
             "Sender nasjonal oppgave med id $oppgaveId til Gosys {}",
             StructuredArguments.fields(loggingMeta),

@@ -1,5 +1,6 @@
 package no.nav.sykdig.utenlandsk.services
 
+import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.models.SykDigOppgave
 import no.nav.sykdig.shared.exceptions.ClientException
@@ -10,6 +11,7 @@ import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.OppdatertSykmeldingStatus
 import no.nav.sykdig.generated.types.OppdatertSykmeldingStatusEnum
 import no.nav.sykdig.shared.metrics.MetricRegister
+import no.nav.sykdig.shared.utils.getLoggingMeta
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -47,7 +49,8 @@ class UtenlandskOppgaveService(
                 callId = oppgave.sykmeldingId.toString(),
             )
 
-        log.info("Hentet oppgave og sykmeldt for oppgave ${oppgave.oppgaveId} sykmeldingId ${oppgave.sykmeldingId}, lager SykDigOppgave!")
+        val loggingMeta = oppgave.sykmelding?.sykmelding?.id?.let { getLoggingMeta(it, oppgave) }
+        log.info("Hentet oppgave og sykmeldt for oppgave, lager SykDigOppgave! {}", StructuredArguments.fields(loggingMeta))
 
         return SykDigOppgave(oppgave, sykmeldt)
     }
@@ -182,7 +185,8 @@ class UtenlandskOppgaveService(
             )
         val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
         if (valideringsresultat.isNotEmpty()) {
-            log.warn("Oppdatering av sykmelding med id $sykmeldingId feilet pga regelsjekk")
+            val loggingMeta = oppgave.sykmelding?.sykmelding?.id?.let { getLoggingMeta(it, oppgave) }
+            log.warn("Oppdatering av sykmelding feilet pga regelsjekk {}", StructuredArguments.fields(loggingMeta))
             throw ClientException(valideringsresultat.joinToString())
         }
 

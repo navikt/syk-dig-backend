@@ -23,6 +23,7 @@ import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.shared.utils.getLocalDateTime
 import no.nav.sykdig.shared.utils.mapsmRegistreringManuelltTilFellesformat
+import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
@@ -170,16 +171,6 @@ class NasjonalCommonService(
             syketilfelleStartDato = oppgave.papirSmRegistrering.syketilfelleStartDato,
             signaturDato = LocalDateTime.from(oppgave.papirSmRegistrering.behandletTidspunkt),
             navnFastlege = "Fastlege navn", //TODO
-        )
-    }
-
-    fun getLoggingMeta(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): LoggingMeta {
-        return LoggingMeta(
-            mottakId = sykmeldingId,
-            dokumentInfoId = oppgave.dokumentInfoId,
-            msgId = sykmeldingId,
-            sykmeldingId = sykmeldingId,
-            journalpostId = oppgave.journalpostId,
         )
     }
 }

@@ -27,6 +27,7 @@ import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.saf.graphql.SafJournalpost
 import no.nav.sykdig.saf.graphql.SafQueryJournalpost
+import no.nav.sykdig.shared.utils.getLoggingMeta
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import okhttp3.internal.EMPTY_BYTE_ARRAY
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -137,7 +139,8 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
         Mockito.doNothing().`when`(oppgaveClient).ferdigstillOppgave(any(), any())
         Mockito.doNothing().`when`(documentService).updateDocumentTitle(any(), any(), any())
-        Mockito.`when`(nasjonaCommonService.getLoggingMeta(any(), any())).thenReturn(testDataLoggingMeta())
+        val loggingMeta = getLoggingMeta("sykmeldingId", testDataOppgaveDbModel("oppgaveId"))
+        assertEquals(testDataLoggingMeta(), loggingMeta)
         Mockito.`when`(sykmelderService.getSykmelderForAvvistOppgave(any(),any(),any())).thenReturn(testDataSykmelder())
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpostM2m(any())).thenReturn(
             SafQueryJournalpost(
@@ -326,10 +329,10 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
     fun testDataLoggingMeta(): LoggingMeta {
         return LoggingMeta(
-            mottakId = "mottakId",
-            journalpostId = "journalpostId",
-            dokumentInfoId = "dokumentInfoId",
-            msgId = "msgId",
+            mottakId = "sykmeldingId",
+            journalpostId = "jpdId",
+            dokumentInfoId = "DokInfoId",
+            msgId = "sykmeldingId",
             sykmeldingId = "sykmeldingId",
         )
     }
