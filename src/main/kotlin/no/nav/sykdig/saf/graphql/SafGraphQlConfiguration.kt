@@ -6,46 +6,41 @@ import com.netflix.graphql.dgs.client.HttpResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class SafGraphQlConfiguration {
     @Bean
     fun safM2mGraphQlClient(
         @Value("\${saf.url}") safUrl: String,
-        safM2mRestTemplate: RestTemplate,
+        safM2mWebClient: WebClient,
     ): CustomGraphQLClient {
-        return graphQLClient(safUrl, safM2mRestTemplate)
+        return graphQLClient(safUrl, safM2mWebClient)
     }
 
     @Bean
     fun safGraphQlClient(
         @Value("\${saf.url}") safUrl: String,
-        safRestTemplate: RestTemplate,
+        safWebClient: WebClient,
     ): CustomGraphQLClient {
-        return graphQLClient(safUrl, safRestTemplate)
+        return graphQLClient(safUrl, safWebClient)
     }
 
     private fun graphQLClient(
         safUrl: String,
-        safDokumentTemplate: RestTemplate,
+        safWebClient: WebClient
     ): CustomGraphQLClient {
         return GraphQLClient.createCustom(safUrl) { url, _, body ->
-            val httpHeaders = HttpHeaders()
-            httpHeaders.contentType = MediaType.APPLICATION_JSON
+            val response = safWebClient.post()
+                .uri("$url/graphql")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .retrieve()
+                .toEntity(String::class.java)
+                .block() // block() makes it a synchronous call (can be replaced with a non-blocking approach if needed)
 
-            val response =
-                safDokumentTemplate.exchange(
-                    "$url/graphql",
-                    HttpMethod.POST,
-                    HttpEntity(body, httpHeaders),
-                    String::class.java,
-                )
-
+            // Assuming HttpResponse is a custom class that encapsulates the status code and body
             HttpResponse(response.statusCode.value(), response.body)
         }
     }

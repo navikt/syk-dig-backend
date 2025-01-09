@@ -40,7 +40,7 @@ class JournalpostService(
         private val log = applog()
     }
 
-    fun createSykmeldingFromJournalpost(
+    suspend fun createSykmeldingFromJournalpost(
         journalpost: SafJournalpost,
         journalpostId: String,
         isNorsk: Boolean,

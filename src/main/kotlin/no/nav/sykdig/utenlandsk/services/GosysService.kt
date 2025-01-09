@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class GosysService(
     private val oppgaveClient: OppgaveClient,
     ) {
-        fun sendOppgaveTilGosys(
+        suspend fun sendOppgaveTilGosys(
             oppgaveId: String,
             sykmeldingId: String,
             veilederNavIdent: String,
@@ -27,7 +27,7 @@ class GosysService(
             )
         }
     // TODO: flytt denne til nasjonal
-    fun sendNasjonalOppgaveTilGosys(
+    suspend fun sendNasjonalOppgaveTilGosys(
         oppgaveId: String,
         sykmeldingId: String,
         veilederNavIdent: String,
@@ -47,7 +47,7 @@ class GosysService(
     }
 
 
-    fun avvisOppgaveTilGosys(
+    suspend fun avvisOppgaveTilGosys(
         oppgaveId: String,
         sykmeldingId: String,
         veilederNavIdent: String,
@@ -66,7 +66,7 @@ class GosysService(
         )
     }
 
-    fun hentOppgave(
+    suspend fun hentOppgave(
         oppgaveId: String,
         sykmeldingId: String,
     ) = oppgaveClient.getOppgave(oppgaveId, sykmeldingId)

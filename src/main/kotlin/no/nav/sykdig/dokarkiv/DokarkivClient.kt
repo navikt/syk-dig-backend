@@ -1,6 +1,7 @@
 package no.nav.sykdig.dokarkiv
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.reactor.awaitSingle
 import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.exceptions.IkkeTilgangException
@@ -19,45 +20,57 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 import java.util.Locale
 
 @Component
 class DokarkivClient(
     @Value("\${dokarkiv.url}") private val url: String,
-    private val dokarkivRestTemplate: RestTemplate,
+    private val dokarkivWebClient: WebClient,
 ) {
     val log = applog()
     val securelog = securelog()
 
-    fun updateDocument(
+    suspend fun updateDocument(
         journalpostid: String,
         documentId: String,
         tittel: String,
     ) {
-        val oppaterDokumentRequest =
-            OppdaterDokumentRequest(
-                dokumenter =
-                    listOf(
-                        DokumentInfo(
-                            dokumentInfoId = documentId,
-                            tittel = tittel,
-                        ),
-                    ),
+        val oppdaterDokumentRequest = OppdaterDokumentRequest(
+            dokumenter = listOf(
+                DokumentInfo(
+                    dokumentInfoId = documentId,
+                    tittel = tittel,
+                )
             )
-        dokarkivRestTemplate.put(
-            "$url/$journalpostid",
-            oppaterDokumentRequest,
         )
-    }
 
-    fun oppdaterOgFerdigstillUtenlandskJournalpost(
+        try {
+            dokarkivWebClient.put()
+                .uri("$url/$journalpostid")
+                .bodyValue(oppdaterDokumentRequest)
+                .retrieve()
+                .onStatus({ it != HttpStatus.OK }) { response ->
+                    Mono.error(HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Dokumentoppdatering feilet"))
+                }
+                .toBodilessEntity()
+                .awaitSingle()
+        } catch (e: Exception) {
+            log.error("Feil ved oppdatering av dokument for journalpostId: $journalpostid, error: ${e.message}", e)
+            throw e
+        }
+
+}
+
+    suspend fun oppdaterOgFerdigstillUtenlandskJournalpost(
         landAlpha3: String?,
         fnr: String,
         enhet: String,
@@ -90,7 +103,7 @@ class DokarkivClient(
     }
 
     @Retryable
-    private fun oppdaterUtenlandskJournalpost(
+    suspend private fun oppdaterUtenlandskJournalpost(
         landAlpha3: String?,
         fnr: String,
         dokumentinfoId: String?,
@@ -117,24 +130,31 @@ class DokarkivClient(
     }
 
     @Retryable
-    private fun oppdaterJournalpostRequest(
+    private suspend fun oppdaterJournalpostRequest(
         oppdaterJournalpostRequest: OppdaterJournalpostRequest,
         sykmeldingId: String,
         journalpostId: String,
-    ): ResponseEntity<String> {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.accept = listOf(MediaType.APPLICATION_JSON)
-        headers["Nav-Callid"] = sykmeldingId
+    ): ResponseEntity<Void>? {
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+            accept = listOf(MediaType.APPLICATION_JSON)
+            set("Nav-Callid", sykmeldingId)
+        }
 
         try {
             securelog.info("createOppdaterJournalpostRequest: ${objectMapper.writeValueAsString(oppdaterJournalpostRequest)}")
-            val response = dokarkivRestTemplate.exchange(
-                "$url/$journalpostId",
-                HttpMethod.PUT,
-                HttpEntity(oppdaterJournalpostRequest, headers),
-                String::class.java,
-            )
+
+            val response = dokarkivWebClient.put()
+                .uri("$url/$journalpostId")
+                .headers { it.addAll(headers) }
+                .bodyValue(oppdaterJournalpostRequest)
+                .retrieve()
+                .onStatus({ it != HttpStatus.OK }) { response ->
+                    Mono.error(HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Feil ved oppdatering av journalpost"))
+                }
+                .toBodilessEntity()
+                .awaitSingle()
+
             log.info("Oppdatert journalpost $journalpostId for sykmelding $sykmeldingId")
             return response
         } catch (e: HttpClientErrorException) {
@@ -142,22 +162,13 @@ class DokarkivClient(
                 log.warn("Veileder har ikke tilgang til å oppdatere journalpostId $journalpostId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else if (e.statusCode.value() == 400) {
-                log.error(
-                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
-                    e,
-                )
+                log.error("HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}", e)
             } else {
-                log.error(
-                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
-                    e,
-                )
+                log.error("HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}", e)
             }
             throw e
         } catch (e: HttpServerErrorException) {
-            log.error(
-                "HttpServerErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
-                e,
-            )
+            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}", e)
             throw e
         }
     }
@@ -334,27 +345,33 @@ class DokarkivClient(
     }
 
     @Retryable
-    private fun  ferdigstillJournalpost(
+    private suspend fun ferdigstillJournalpost(
         enhet: String,
         journalpostId: String,
         sykmeldingId: String,
-    ): ResponseEntity<String> {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.accept = listOf(MediaType.APPLICATION_JSON)
-        headers["Nav-Callid"] = sykmeldingId
+    ): ResponseEntity<String>? {
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+            accept = listOf(MediaType.APPLICATION_JSON)
+            set("Nav-Callid", sykmeldingId)
+        }
 
-        val body =
-            FerdigstillJournalpostRequest(
-                journalfoerendeEnhet = enhet,
-            )
+        val body = FerdigstillJournalpostRequest(
+            journalfoerendeEnhet = enhet,
+        )
+
         try {
-            val response = dokarkivRestTemplate.exchange(
-                "$url/$journalpostId/ferdigstill",
-                HttpMethod.PATCH,
-                HttpEntity(body, headers),
-                String::class.java,
-            )
+            val response = dokarkivWebClient.patch()
+                .uri("$url/$journalpostId/ferdigstill")
+                .headers { it.addAll(headers) }
+                .bodyValue(body)
+                .retrieve()
+                .onStatus({ it != HttpStatus.OK }) { response ->
+                    Mono.error(HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Feil ved ferdigstilling av journalpost"))
+                }
+                .toBodilessEntity()
+                .awaitSingle()
+
             log.info("Ferdigstilt journalpost $journalpostId for sykmelding $sykmeldingId")
             return response
         } catch (e: HttpClientErrorException) {
@@ -362,27 +379,19 @@ class DokarkivClient(
                 log.warn("Veileder har ikke tilgang til å ferdigstille journalpostId $journalpostId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else if (e.statusCode.value() == 400) {
-                log.error(
-                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
-                    e,
-                )
+                log.error("HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}", e)
             } else {
-                log.error(
-                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}",
-                    e,
-                )
+                log.error("HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}", e)
             }
             throw e
         } catch (e: HttpServerErrorException) {
-            log.error(
-                "HttpServerErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}",
-                e,
-            )
+            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}", e)
             throw e
         }
     }
 
-    fun oppdaterOgFerdigstillNasjonalJournalpost(
+
+    suspend fun oppdaterOgFerdigstillNasjonalJournalpost(
         journalpostId: String,
         dokumentInfoId: String? = null,
         pasientFnr: String,

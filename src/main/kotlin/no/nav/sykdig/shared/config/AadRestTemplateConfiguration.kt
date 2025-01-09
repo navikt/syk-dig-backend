@@ -1,158 +1,115 @@
 package no.nav.sykdig.shared.config
 
 import no.nav.security.token.support.client.core.ClientProperties
-import no.nav.security.token.support.client.core.context.JwtBearerTokenResolver
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
-import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.sykdig.shared.applog
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
-import org.apache.hc.client5.http.impl.classic.HttpClients
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
-import org.springframework.http.HttpRequest
-import org.springframework.http.client.ClientHttpRequestExecution
-import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
-import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
-
-@Primary
-@Component
-class SykDigTokenResolver : JwtBearerTokenResolver {
-    val log = applog()
-
-    override fun token(): String? {
-        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
-        return autentication.token.tokenValue
-    }
-}
+import org.springframework.http.HttpHeaders
+import org.springframework.web.reactive.function.client.ClientRequest
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 
 @EnableOAuth2Client(cacheEnabled = true)
 @Configuration
-class AadRestTemplateConfiguration {
+class AadWebClientConfiguration {
+
     val log = applog()
 
     @Bean
-    fun istilgangskontrollRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
+    fun istilgangskontrollWebClient(
         clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate =
-        downstreamRestTemplate(
+        oAuth2AccessTokenService: OAuth2AccessTokenService
+    ): WebClient =
+        downstreamWebClient(
             registrationName = "onbehalfof-istilgangskontroll",
-            restTemplateBuilder = restTemplateBuilder,
             clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
+            oAuth2AccessTokenService = oAuth2AccessTokenService
         )
 
     @Bean
-    fun tokenValidationContextHolder(): TokenValidationContextHolder {
-        return SpringTokenValidationContextHolder()
-    }
-
-    @Bean
-    fun safRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
+    fun safWebClient(
         clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate =
-        downstreamRestTemplate(
+        oAuth2AccessTokenService: OAuth2AccessTokenService
+    ): WebClient =
+        downstreamWebClient(
             registrationName = "onbehalfof-saf",
-            restTemplateBuilder = restTemplateBuilder,
             clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
+            oAuth2AccessTokenService = oAuth2AccessTokenService
         )
 
     @Bean
-    fun pdlRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
+    fun pdlWebClient(
         clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate =
-        downstreamRestTemplate(
+        oAuth2AccessTokenService: OAuth2AccessTokenService
+    ): WebClient =
+        downstreamWebClient(
             registrationName = "onbehalfof-pdl",
-            restTemplateBuilder = restTemplateBuilder,
             clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
+            oAuth2AccessTokenService = oAuth2AccessTokenService
         )
 
     @Bean
-    fun dokarkivRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
+    fun dokarkivWebClient(
         clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate {
-        val restTemplate =
-            downstreamRestTemplate(
-                registrationName = "onbehalfof-dokarkiv",
-                restTemplateBuilder = restTemplateBuilder,
-                clientConfigurationProperties = clientConfigurationProperties,
-                oAuth2AccessTokenService = oAuth2AccessTokenService,
-            )
-        // Bruker HttpComponentsClientHttpRequestFactory til requests for å støtte PATCH.
-        val httpClient: CloseableHttpClient = HttpClients.createDefault()
-        val requestFactory = HttpComponentsClientHttpRequestFactory(httpClient)
-
-        restTemplate.requestFactory = requestFactory
-        return restTemplate
-    }
+        oAuth2AccessTokenService: OAuth2AccessTokenService
+    ): WebClient =
+        downstreamWebClient(
+            registrationName = "onbehalfof-dokarkiv",
+            clientConfigurationProperties = clientConfigurationProperties,
+            oAuth2AccessTokenService = oAuth2AccessTokenService
+        )
 
     @Bean
-    fun oppgaveRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
+    fun oppgaveWebClient(
         clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate =
-        downstreamRestTemplate(
+        oAuth2AccessTokenService: OAuth2AccessTokenService
+    ): WebClient =
+        downstreamWebClient(
             registrationName = "onbehalfof-oppgave",
-            restTemplateBuilder = restTemplateBuilder,
             clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
+            oAuth2AccessTokenService = oAuth2AccessTokenService
         )
 
     @Bean
-    fun smregisteringRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
+    fun smregisteringWebClient(
         clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate {
-        return downstreamRestTemplate(
+        oAuth2AccessTokenService: OAuth2AccessTokenService
+    ): WebClient =
+        downstreamWebClient(
             registrationName = "onbehalfof-smreg",
-            restTemplateBuilder = restTemplateBuilder,
             clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
+            oAuth2AccessTokenService = oAuth2AccessTokenService
         )
-    }
 
-    private fun downstreamRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
-        clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
+    private fun downstreamWebClient(
         registrationName: String,
-    ): RestTemplate {
+        clientConfigurationProperties: ClientConfigurationProperties,
+        oAuth2AccessTokenService: OAuth2AccessTokenService
+    ): WebClient {
         val clientProperties =
             clientConfigurationProperties.registration[registrationName]
                 ?: throw RuntimeException("Fant ikke config for $registrationName")
-        return restTemplateBuilder
-            .additionalInterceptors(bearerTokenInterceptor(clientProperties, oAuth2AccessTokenService))
+
+        return WebClient.builder()
+            .baseUrl(clientProperties.resourceUrl.toString())
+            .filter(bearerTokenFilter(clientProperties, oAuth2AccessTokenService))
             .build()
     }
 
-    private fun bearerTokenInterceptor(
+    private fun bearerTokenFilter(
         clientProperties: ClientProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): ClientHttpRequestInterceptor {
-        return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
-            val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
-            request.headers.setBearerAuth(response.accessToken!!)
-            execution.execute(request, body)
+        oAuth2AccessTokenService: OAuth2AccessTokenService
+    ): ExchangeFilterFunction {
+        return ExchangeFilterFunction.ofRequestProcessor { clientRequest ->
+            val token = oAuth2AccessTokenService.getAccessToken(clientProperties).accessToken
+            val updatedRequest = ClientRequest.from(clientRequest)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+                .build()
+            Mono.just(updatedRequest)
         }
     }
 }

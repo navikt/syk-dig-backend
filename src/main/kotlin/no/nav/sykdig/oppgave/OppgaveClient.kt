@@ -1,5 +1,7 @@
 package no.nav.sykdig.oppgave
 
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.shared.LoggingMeta
@@ -17,13 +19,14 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import reactor.core.publisher.Mono
 import java.time.LocalDate
 import java.util.*
 
@@ -42,13 +45,12 @@ private const val BEHANDLINGS_TYPE_UTLAND = "ae0106"
 @Component
 class OppgaveClient(
     @Value("\${oppgave.url}") private val url: String,
-    private val oppgaveRestTemplate: RestTemplate,
-    private val oppgaveM2mRestTemplate: RestTemplate,
+    private val oppgaveWebClient: WebClient,
 ) {
     val log = applog()
     val secureLog = securelog()
 
-    fun ferdigstillOppgave(
+    suspend fun ferdigstillOppgave(
         oppgaveId: String,
         sykmeldingId: String,
     ) {
@@ -61,7 +63,7 @@ class OppgaveClient(
         }
     }
 
-    fun ferdigstillNasjonalOppgave(
+    suspend fun ferdigstillNasjonalOppgave(
         oppgaveId: String,
         sykmeldingId: String,
         ferdigstillRegistrering: FerdigstillRegistrering,
@@ -94,110 +96,146 @@ class OppgaveClient(
     }
 
     @Retryable
-    fun getOppgaveM2m(
+    suspend fun getOppgaveM2m(
         oppgaveId: String,
         sykmeldingId: String,
     ): GetOppgaveResponse {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = sykmeldingId
+        log.info("Fetching oppgave with ID: $oppgaveId")
 
-        try {
-            val response =
-                oppgaveM2mRestTemplate.exchange(
-                    "$url/$oppgaveId",
-                    HttpMethod.GET,
-                    HttpEntity<Any>(headers),
-                    GetOppgaveResponse::class.java,
-                )
-            return response.body ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $oppgaveId")
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("syk-dig-backend har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
-                throw IkkeTilgangException("syk-dig-backend har ikke tilgang til oppgave")
-            } else {
-                log.error(
-                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
-                    e,
-                )
-                throw e
-            }
-        } catch (e: HttpServerErrorException) {
-            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
-            throw e
+        return try {
+            oppgaveWebClient.get()
+                .uri("$url/$oppgaveId")
+                .headers { headers ->
+                    headers.contentType = MediaType.APPLICATION_JSON
+                    headers["X-Correlation-ID"] = sykmeldingId
+                }
+                .retrieve()
+                .onStatus({ status -> status.value() == 401 || status.value() == 403 }) { response ->
+                    log.warn("Access denied for oppgaveId $oppgaveId: ${response.statusCode()}")
+                    Mono.error(IkkeTilgangException("syk-dig-backend har ikke tilgang til oppgave"))
+                }
+                .onStatus({ status -> !status.is2xxSuccessful }) { response ->
+                    log.error("Unexpected error from Oppgave service: ${response.statusCode()}")
+                    response.bodyToMono(String::class.java).flatMap { errorBody ->
+                        Mono.error(Exception("Error from Oppgave: $errorBody"))
+                    }
+                }
+                .bodyToMono(GetOppgaveResponse::class.java)
+                .awaitSingle()
+        } catch (e: WebClientResponseException) {
+            handleWebClientResponseException(e, oppgaveId)
         } catch (e: Exception) {
-            log.error("Other Exception fra Oppgave: ${e.message}", e)
+            log.error("Unexpected exception while fetching oppgave: ${e.message}", e)
+            throw e
+        }
+    }
+
+    private fun handleWebClientResponseException(
+        e: WebClientResponseException,
+        oppgaveId: String,
+        veileder: String?
+    ): GetOppgaveResponse {
+        if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+            log.warn("syk-dig-backend har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
+            throw IkkeTilgangException("syk-dig-backend har ikke tilgang til oppgave")
+        } else {
+            log.error(
+                "WebClientResponseException with status code ${e.statusCode.value()} from Oppgave: ${e.message}",
+                e,
+            )
             throw e
         }
     }
 
     @Retryable
-    fun getOppgave(
+    suspend fun getOppgave(
         oppgaveId: String,
         sykmeldingId: String,
     ): GetOppgaveResponse {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = sykmeldingId
-        try {
-            val response =
-                oppgaveRestTemplate.exchange(
-                    "$url/$oppgaveId",
-                    HttpMethod.GET,
-                    HttpEntity<Any>(headers),
-                    GetOppgaveResponse::class.java,
-                )
-            return response.body ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $oppgaveId")
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message} med httpStatus ${e.statusCode.value()}")
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave med id: $oppgaveId")
-            } else {
-                log.error(
-                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
-                    e,
-                )
-                throw e
-            }
-        } catch (e: HttpServerErrorException) {
-            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
-            throw e
+        log.info("Fetching oppgave with ID: $oppgaveId for sykmelding: $sykmeldingId")
+
+        return try {
+            oppgaveWebClient.get()
+                .uri("$url/$oppgaveId")
+                .headers { headers ->
+                    headers.contentType = MediaType.APPLICATION_JSON
+                    headers["X-Correlation-ID"] = sykmeldingId
+                }
+                .retrieve()
+                .onStatus({ status -> status.value() == 401 || status.value() == 403 }) { response ->
+                    log.warn(
+                        "Veileder does not have access to oppgaveId $oppgaveId: ${response.statusCode()}"
+                    )
+                    Mono.error(IkkeTilgangException("Veileder har ikke tilgang til oppgave med id: $oppgaveId"))
+                }
+                .onStatus({ status -> !status.is2xxSuccessful }) { response ->
+                    log.error("Unexpected error while fetching oppgaveId $oppgaveId: ${response.statusCode()}")
+                    response.bodyToMono(String::class.java).flatMap { errorBody ->
+                        Mono.error(Exception("Error fetching oppgave: $errorBody"))
+                    }
+                }
+                .bodyToMono(GetOppgaveResponse::class.java)
+                .awaitSingle()
+        } catch (e: WebClientResponseException) {
+            handleWebClientResponseException(e, oppgaveId)
         } catch (e: Exception) {
-            log.error("Other Exception fra Oppgave: ${e.message}", e)
+            log.error("Unexpected exception while fetching oppgaveId $oppgaveId: ${e.message}", e)
+            throw e
+        }
+    }
+
+    private fun handleWebClientResponseException(
+        e: WebClientResponseException,
+        oppgaveId: String,
+    ): GetOppgaveResponse {
+        if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
+            log.warn(
+                "Veileder does not have access to oppgaveId $oppgaveId: ${e.message} with httpStatus ${e.statusCode.value()}"
+            )
+            throw IkkeTilgangException("Veileder har ikke tilgang til oppgave med id: $oppgaveId")
+        } else {
+            log.error(
+                "WebClientResponseException with status code ${e.statusCode.value()} for oppgaveId $oppgaveId: ${e.message}",
+                e,
+            )
             throw e
         }
     }
 
     @Retryable
-    fun getNasjonalOppgave(
+    suspend fun getNasjonalOppgave(
         oppgaveId: String,
         sykmeldingId: String,
     ): NasjonalOppgaveResponse {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = sykmeldingId
         try {
-            val response =
-                oppgaveM2mRestTemplate.exchange(
-                    "$url/$oppgaveId",
-                    HttpMethod.GET,
-                    HttpEntity<Any>(headers),
-                    NasjonalOppgaveResponse::class.java,
-                )
-            return response.body ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $oppgaveId")
-        } catch (e: HttpClientErrorException) {
+            return oppgaveWebClient.get()
+                .uri("$url/$oppgaveId")
+                .headers { headers ->
+                    headers.contentType = MediaType.APPLICATION_JSON
+                    headers["X-Correlation-ID"] = sykmeldingId
+                }
+                .retrieve()
+                .onStatus({ status -> status.value() == 401 || status.value() == 403 }) {
+                    log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${it.statusCode()}")
+                    Mono.error(IkkeTilgangException("Veileder har ikke tilgang til oppgave med id: $oppgaveId"))
+                }
+                .onStatus({ status -> !status.is2xxSuccessful }) {
+                    log.error("HttpClientErrorException med responskode ${it.statusCode()} fra Oppgave")
+                    Mono.error(Exception("Unexpected error when fetching oppgave"))
+                }
+                .bodyToMono(NasjonalOppgaveResponse::class.java)
+                .awaitSingle()
+        } catch (e: WebClientResponseException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message} med httpStatus ${e.statusCode.value()}")
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave med id: $oppgaveId")
-            } else {
-                log.error(
-                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message} med httpStatus ${e.statusCode.value()}",
-                    e,
+                log.warn(
+                    "Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message} med httpStatus ${e.statusCode.value()}"
                 )
-                throw e
+                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave med id: $oppgaveId")
             }
-        } catch (e: HttpServerErrorException) {
-            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}", e)
+            log.error(
+                "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
+                e
+            )
             throw e
         } catch (e: Exception) {
             log.error("Other Exception fra Oppgave: ${e.message}", e)
@@ -212,37 +250,33 @@ class OppgaveClient(
     }
 
     @Retryable
-    fun getOppgaver(
+    suspend fun getOppgaver(
         journalpostId: String,
         journalpost: SafJournalpost,
     ): List<AllOppgaveResponse> {
-        val headers = HttpHeaders()
         val urlWithParams = urlWithParams(journalpostId, journalpost)
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = UUID.randomUUID().toString()
 
-        log.info("Kaller oppgaveRestTemplate.exchange med URL: $urlWithParams og journalpostId: $journalpostId")
         try {
-            val response =
-                oppgaveRestTemplate.exchange(
-                    urlWithParams,
-                    HttpMethod.GET,
-                    HttpEntity<Any>(headers),
-                    AllOppgaveResponses::class.java,
-                )
-            log.info("Mottok respons for journalpostId $journalpostId med antall oppgaver: ${response.body?.oppgaver?.size ?: "ingen"}")
-            return response.body?.oppgaver?.also { checkOppgavetype(it) }
-                ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $journalpostId")
-        } catch (e: HttpClientErrorException) {
+            val response = oppgaveWebClient.get()
+                .uri(urlWithParams)
+                .headers { headers ->
+                    headers.contentType = MediaType.APPLICATION_JSON
+                    headers["X-Correlation-ID"] = UUID.randomUUID().toString()
+                }
+                .retrieve()
+                .onStatus({ status -> !status.is2xxSuccessful }) {
+                    log.error("HttpClientErrorException med responskode ${it.statusCode()} fra journalpostId $journalpostId")
+                    Mono.error(Exception("Unexpected error when fetching oppgaver"))
+                }
+                .bodyToMono(AllOppgaveResponses::class.java)
+                .awaitSingle()
+
+            log.info("Mottok respons for journalpostId $journalpostId med antall oppgaver: ${response.oppgaver.size}")
+            return response.oppgaver.also { checkOppgavetype(it) }
+        } catch (e: WebClientResponseException) {
             log.error(
-                "HttpClientErrorException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}",
-                e,
-            )
-            throw e
-        } catch (e: HttpServerErrorException) {
-            log.error(
-                "HttpServerErrorException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}",
-                e,
+                "WebClientResponseException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}",
+                e
             )
             throw e
         } catch (e: Exception) {
@@ -260,177 +294,182 @@ class OppgaveClient(
     }
 
     @Retryable
-    private fun ferdigstillOppgave(
+    suspend fun ferdigstillOppgave(
         oppgaveId: String,
         sykmeldingId: String,
         oppgaveVersjon: Int,
     ) {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = sykmeldingId
+        val body = PatchFerdigStillOppgaveRequest(
+            versjon = oppgaveVersjon,
+            status = OppgaveStatus.FERDIGSTILT,
+            id = oppgaveId.toInt(),
+        )
 
-        val body =
-            PatchFerdigStillOppgaveRequest(
-                versjon = oppgaveVersjon,
-                status = OppgaveStatus.FERDIGSTILT,
-                id = oppgaveId.toInt(),
-            )
         try {
-            oppgaveRestTemplate.exchange(
-                "$url/$oppgaveId",
-                HttpMethod.PATCH,
-                HttpEntity(body, headers),
-                String::class.java,
-            )
+            oppgaveWebClient.patch()
+                .uri("$url/$oppgaveId")
+                .headers { headers ->
+                    headers.contentType = MediaType.APPLICATION_JSON
+                    headers["X-Correlation-ID"] = sykmeldingId
+                }
+                .bodyValue(body)
+                .retrieve()
+                .onStatus({ status -> status.value() == 401 || status.value() == 403 }) {
+                    log.warn("Veileder har ikke tilgang til å ferdigstille oppgaveId $oppgaveId: ${it.statusCode()}")
+                    Mono.error(IkkeTilgangException("Veileder har ikke tilgang til oppgave"))
+                }
+                .onStatus({ status -> !status.is2xxSuccessful }) {
+                    log.error("HttpClientErrorException for oppgaveId $oppgaveId: ${it.statusCode()}")
+                    Mono.error(Exception("Error when completing oppgave"))
+                }
+                .bodyToMono(String::class.java)
+                .awaitSingle()
+
             log.info("Ferdigstilt oppgave $oppgaveId for sykmelding $sykmeldingId")
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("Veileder har ikke tilgang til å ferdigstille oppgaveId $oppgaveId: ${e.message}")
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
-            } else {
-                log.error(
-                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
-                        "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
-                    e,
-                )
-                throw e
-            }
-        } catch (e: HttpServerErrorException) {
+        } catch (e: WebClientResponseException) {
             log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
-                    "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
-                e,
+                "WebClientResponseException for oppgaveId $oppgaveId: ${e.message} with status ${e.statusCode}",
+                e
             )
+            throw e
+        } catch (e: Exception) {
+            log.error("Exception when completing oppgaveId $oppgaveId: ${e.message}", e)
             throw e
         }
     }
 
     @Retryable
-    private fun ferdigstillNasjonalOppgave(
+    suspend fun ferdigstillNasjonalOppgave(
         oppgaveId: String,
         sykmeldingId: String,
         nasjonalFerdigstillOppgave: PatchFerdigstillNasjonalOppgaveRequest
     ): ResponseEntity<String> {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = sykmeldingId
-
         try {
-            val response = oppgaveM2mRestTemplate.exchange(
-                "$url/$oppgaveId",
-                HttpMethod.PATCH,
-                HttpEntity(nasjonalFerdigstillOppgave, headers),
-                String::class.java,
-            )
+            val response = oppgaveWebClient.patch()
+                .uri("$url/$oppgaveId")
+                .headers { headers ->
+                    headers.contentType = MediaType.APPLICATION_JSON
+                    headers["X-Correlation-ID"] = sykmeldingId
+                }
+                .bodyValue(nasjonalFerdigstillOppgave)
+                .retrieve()
+                .onStatus({ status -> status.value() == 401 || status.value() == 403 }) {
+                    log.warn("Veileder har ikke tilgang til å ferdigstille oppgaveId $oppgaveId: ${it.statusCode()}")
+                    Mono.error(IkkeTilgangException("Veileder har ikke tilgang til oppgave"))
+                }
+                .onStatus({ status -> !status.is2xxSuccessful }) {
+                    log.error("HttpClientErrorException for oppgaveId $oppgaveId: ${it.statusCode()}")
+                    Mono.error(Exception("Error when completing nasjonal oppgave"))
+                }
+                .toEntity(String::class.java)
+                .awaitSingle()
+
             log.info("Ferdigstilt nasjonal oppgave $oppgaveId for sykmelding $sykmeldingId")
             return response
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn("Veileder har ikke tilgang til å ferdigstille oppgaveId $oppgaveId: ${e.message} med httpStatus ${e.statusCode.value()}")
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
-            } else {
-                log.error(
-                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
-                        "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
-                    e,
-                )
-                throw e
-            }
-        } catch (e: HttpServerErrorException) {
+        } catch (e: WebClientResponseException) {
             log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId med responskode " +
-                    "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
-                e,
+                "WebClientResponseException for oppgaveId $oppgaveId: ${e.message} with status ${e.statusCode}",
+                e
             )
+            throw e
+        } catch (e: Exception) {
+            log.error("Exception when completing nasjonal oppgaveId $oppgaveId: ${e.message}", e)
             throw e
         }
     }
 
     @Retryable
-    fun ferdigstillJournalføringsoppgave(
+    suspend fun ferdigstillJournalføringsoppgave(
         oppgaveId: Int,
         oppgaveVersjon: Int,
         journalpostId: String,
     ) {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = UUID.randomUUID().toString()
+        val body = PatchFerdigStillOppgaveRequest(
+            versjon = oppgaveVersjon,
+            status = OppgaveStatus.FERDIGSTILT,
+            id = oppgaveId,
+        )
 
-        val body =
-            PatchFerdigStillOppgaveRequest(
-                versjon = oppgaveVersjon,
-                status = OppgaveStatus.FERDIGSTILT,
-                id = oppgaveId,
-            )
         try {
-            oppgaveRestTemplate.exchange(
-                "$url/$oppgaveId",
-                HttpMethod.PATCH,
-                HttpEntity(body, headers),
-                String::class.java,
-            )
+            oppgaveWebClient.patch()
+                .uri("$url/$oppgaveId")
+                .headers { headers ->
+                    headers.contentType = MediaType.APPLICATION_JSON
+                    headers["X-Correlation-ID"] = UUID.randomUUID().toString()
+                }
+                .bodyValue(body)
+                .retrieve()
+                .onStatus({ status -> !status.is2xxSuccessful }) {
+                    log.error("Error when completing journalføringsoppgave with oppgaveId $oppgaveId and journalpostId $journalpostId")
+                    Mono.error(Exception("Error completing journalføringsoppgave"))
+                }
+                .bodyToMono(String::class.java)
+                .awaitSingle()
+
             log.info(
-                "Ferdigstilt journalføringsopoppgave {} {}",
+                "Ferdigstilt journalføringsoppgave {} {}",
                 kv("journalpostId", journalpostId),
                 kv("oppgaveId", oppgaveId),
             )
-        } catch (e: HttpServerErrorException) {
+        } catch (e: WebClientResponseException) {
             log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId og journalpostId $journalpostId med responskode " +
-                    "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
-                e,
+                "WebClientResponseException for oppgaveId $oppgaveId and journalpostId $journalpostId: ${e.message} with status ${e.statusCode}",
+                e
             )
             throw e
         } catch (e: Exception) {
-            log.error("Exception. Fra journalpost: ${e.message}", e)
+            log.error("Exception when completing journalføringsoppgave: ${e.message}", e)
             throw e
         }
     }
 
-    fun oppdaterOppgaveM2m(
+    suspend fun oppdaterOppgaveM2m(
         oppdaterOppgaveRequest: OppdaterOppgaveRequest,
         sykmeldingId: String,
     ) {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = sykmeldingId
         val oppgaveId = oppdaterOppgaveRequest.id
+        val body = oppdaterOppgaveRequest
 
         try {
-            oppgaveM2mRestTemplate.exchange(
-                "$url/$oppgaveId",
-                HttpMethod.PATCH,
-                HttpEntity(oppdaterOppgaveRequest, headers),
-                String::class.java,
-            )
+            oppgaveWebClient.patch()
+                .uri("$url/$oppgaveId")
+                .headers { headers ->
+                    headers.contentType = MediaType.APPLICATION_JSON
+                    headers["X-Correlation-ID"] = sykmeldingId
+                }
+                .bodyValue(body)
+                .retrieve()
+                .onStatus({ status -> !status.is2xxSuccessful }) {
+                    log.error(
+                        "Error updating oppgave $oppgaveId for sykmelding $sykmeldingId with status: ${it.statusCode()}",
+                        it
+                    )
+                    Mono.error(Exception("Error updating oppgave"))
+                }
+                .bodyToMono(String::class.java)
+                .awaitSingle()
+
             log.info("OppdaterOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn(
-                    "Syk-dig-backend har ikke tilgang til å " +
-                        "oppdaterOppgave oppgaveId $oppgaveId: ${e.message}",
-                )
-                throw IkkeTilgangException("Syk-dig har ikke tilgang til oppgave")
+        } catch (e: WebClientResponseException) {
+            if (e.statusCode == HttpStatus.UNAUTHORIZED || e.statusCode == HttpStatus.FORBIDDEN) {
+                log.warn("Syk-dig-backend has no access to update oppgaveId $oppgaveId: ${e.message}")
+                throw IkkeTilgangException("Syk-dig has no access to oppgave")
             } else {
                 log.error(
-                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                        "fra Oppgave ved oppdaterOppgave: ${e.message}",
-                    e,
+                    "WebClientResponseException for oppgaveId $oppgaveId: ${e.message} with status ${e.statusCode}",
+                    e
                 )
                 throw e
             }
-        } catch (e: HttpServerErrorException) {
-            log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                    "fra Oppgave ved oppdaterOppgave: ${e.message}",
-                e,
-            )
+        } catch (e: Exception) {
+            log.error("Exception when updating oppgaveId $oppgaveId: ${e.message}", e)
             throw e
         }
     }
 
+
     @Retryable
-    fun oppdaterGosysOppgave(
+    suspend fun oppdaterGosysOppgave(
         oppgaveId: String,
         sykmeldingId: String,
         oppgaveVersjon: Int,
@@ -439,154 +478,146 @@ class OppgaveClient(
         oppgaveTilordnetRessurs: String,
         beskrivelse: String?,
     ) {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = sykmeldingId
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+            this["X-Correlation-ID"] = sykmeldingId
+        }
 
-        val body =
-            PatchToGosysOppgaveRequest(
-                versjon = oppgaveVersjon,
-                status = oppgaveStatus,
-                id = oppgaveId.toInt(),
-                behandlesAvApplikasjon = oppgaveBehandlesAvApplikasjon,
-                tilordnetRessurs = oppgaveTilordnetRessurs,
-                beskrivelse = beskrivelse,
-            )
+        val body = PatchToGosysOppgaveRequest(
+            versjon = oppgaveVersjon,
+            status = oppgaveStatus,
+            id = oppgaveId.toInt(),
+            behandlesAvApplikasjon = oppgaveBehandlesAvApplikasjon,
+            tilordnetRessurs = oppgaveTilordnetRessurs,
+            beskrivelse = beskrivelse,
+        )
 
         try {
-            oppgaveRestTemplate.exchange(
-                "$url/$oppgaveId",
-                HttpMethod.PATCH,
-                HttpEntity(body, headers),
-                String::class.java,
-            )
+            oppgaveWebClient.patch()
+                .uri("$url/$oppgaveId")
+                .headers { it.addAll(headers) }
+                .bodyValue(body)
+                .retrieve()
+                .onStatus({ status -> !status.is2xxSuccessful }) { response ->
+                    Mono.error(Exception("Error response: ${response.statusCode()}"))
+                }
+                .bodyToMono(String::class.java)
+                .awaitSingle()
+
             log.info("OppdaterOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn(
-                    "Veileder $oppgaveTilordnetRessurs har ikke tilgang til å " +
-                        "oppdaterOppgave oppgaveId $oppgaveId: ${e.message}",
-                )
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
+        } catch (e: WebClientResponseException) {
+            if (e.statusCode == HttpStatus.UNAUTHORIZED || e.statusCode == HttpStatus.FORBIDDEN) {
+                log.warn("Veileder $oppgaveTilordnetRessurs has no access to update oppgaveId $oppgaveId: ${e.message}")
+                throw IkkeTilgangException("Veileder has no access to oppgave")
             } else {
                 log.error(
-                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                        "fra Oppgave ved oppdaterOppgave: ${e.message}",
-                    e,
+                    "WebClientResponseException for oppgaveId $oppgaveId: ${e.message} with status ${e.statusCode}",
+                    e
                 )
                 throw e
             }
-        } catch (e: HttpServerErrorException) {
-            log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                    "fra Oppgave ved oppdaterOppgave: ${e.message}",
-                e,
-            )
+        } catch (e: Exception) {
+            log.error("Exception when updating oppgaveId $oppgaveId: ${e.message}", e)
             throw e
         }
     }
 
-    fun opprettOppgave(
+    suspend fun opprettOppgave(
         journalpostId: String,
         aktoerId: String,
     ): GetOppgaveResponse {
-        val headers = HttpHeaders()
-        val xCorrelationId = UUID.randomUUID().toString()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = xCorrelationId
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+            this["X-Correlation-ID"] = UUID.randomUUID().toString()
+        }
+
+        val createRequest = CreateOppgaveRequest(
+            aktoerId = aktoerId,
+            journalpostId = journalpostId,
+            tema = TEMA_SYKMELDING,
+            oppgavetype = OPPGAVETYPE,
+            prioritet = PRIORITET_NORM,
+            opprettetAvEnhetsnr = OPPRETTET_AV_ENHETSNR,
+            aktivDato = LocalDate.now(),
+            behandlesAvApplikasjon = BEHANDLES_AV_APPLIKASJON,
+            behandlingstype = BEHANDLINGS_TYPE_UTLAND,
+            fristFerdigstillelse = getFristForFerdigstillingAvOppgave(LocalDate.now()),
+            tildeltEnhetsnr = TILDELT_ENHETSNR,
+        )
+
         try {
-            val result =
-                oppgaveRestTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    HttpEntity(
-                        CreateOppgaveRequest(
-                            aktoerId = aktoerId,
-                            journalpostId = journalpostId,
-                            tema = TEMA_SYKMELDING,
-                            oppgavetype = OPPGAVETYPE,
-                            prioritet = PRIORITET_NORM,
-                            opprettetAvEnhetsnr = OPPRETTET_AV_ENHETSNR,
-                            aktivDato = LocalDate.now(),
-                            behandlesAvApplikasjon = BEHANDLES_AV_APPLIKASJON,
-                            behandlingstype = BEHANDLINGS_TYPE_UTLAND,
-                            fristFerdigstillelse = getFristForFerdigstillingAvOppgave(LocalDate.now()),
-                            tildeltEnhetsnr = TILDELT_ENHETSNR,
-                        ),
-                        headers,
-                    ),
-                    GetOppgaveResponse::class.java,
-                )
-            secureLog.info("OpprettOppgave: $journalpostId: ${objectMapper.writeValueAsString(result.body)}, aktørId: $aktoerId")
-            val oppgave = result.body!!
-            log.info("OpprettOppgave fra journalpostId: $journalpostId  med oppgaveId: ${oppgave.id}")
-            return oppgave
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn(
-                    "Veileder har ikke tilgang til å opprette oppgaveId $journalpostId " +
-                        "med correlation id $xCorrelationId: ${e.message}",
-                )
+            val response = oppgaveWebClient.post()
+                .uri(url)
+                .headers { it.addAll(headers) }
+                .bodyValue(createRequest)
+                .retrieve()
+                .onStatus({ status -> !status.is2xxSuccessful }) { response ->
+                    Mono.error(Exception("Error response: ${response.statusCode()}"))
+                }
+                .bodyToMono(GetOppgaveResponse::class.java)
+                .awaitSingle()
+
+            secureLog.info("OpprettOppgave: $journalpostId: ${objectMapper.writeValueAsString(response)}, aktørId: $aktoerId")
+            log.info("OpprettOppgave fra journalpostId: $journalpostId med oppgaveId: ${response.id}")
+            return response
+        } catch (e: WebClientResponseException) {
+            val xCorrelationId = headers["X-Correlation-ID"]?.first() ?: "N/A"
+            if (e.statusCode == HttpStatus.UNAUTHORIZED || e.statusCode == HttpStatus.FORBIDDEN) {
+                log.warn("Veileder har ikke tilgang til å opprette oppgaveId $journalpostId med correlation id $xCorrelationId: ${e.message}")
                 throw IkkeTilgangException("Veileder har ikke tilgang til å opprette oppgave")
             } else {
                 log.error(
-                    "HttpClientErrorException for oppgaveId $journalpostId med responskode " +
-                        "${e.statusCode.value()} fra Oppgave ved createOppgave med correlation id $xCorrelationId: ${e.message}",
+                    "WebClientResponseException for oppgaveId $journalpostId med responskode ${e.statusCode} " +
+                            "fra Oppgave ved createOppgave med correlation id $xCorrelationId: ${e.message}",
                     e,
                 )
                 throw e
             }
-        } catch (e: HttpServerErrorException) {
-            log.error(
-                "HttpServerErrorException for oppgaveId $journalpostId med responskode" +
-                    " ${e.statusCode.value()} fra Oppgave ved createOppgave med correlation id $xCorrelationId: ${e.message}",
-                e,
-            )
-            throw e
         } catch (e: Exception) {
-            log.error(
-                "Kunne ikke opprette oppgave med på journalpostId $journalpostId " +
-                    "ved createOppgave med correlation id $xCorrelationId: ${e.message}",
-                e,
-            )
+            log.error("Kunne ikke opprette oppgave med på journalpostId $journalpostId ved createOppgave: ${e.message}", e)
             throw e
         }
     }
 
-    fun oppdaterNasjonalGosysOppgave(oppdatertOppgave: NasjonalOppgaveResponse, sykmeldingId: String, oppgaveId: String, veileder: String) {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = oppgaveId
+    suspend fun oppdaterNasjonalGosysOppgave(
+        oppdatertOppgave: NasjonalOppgaveResponse,
+        sykmeldingId: String,
+        oppgaveId: String,
+        veileder: String,
+    ) {
+        log.info("Updating oppgave with ID: $oppgaveId for sykmelding: $sykmeldingId")
 
         try {
-            oppgaveM2mRestTemplate.exchange(
-                "$url/${oppdatertOppgave.id}",
-                HttpMethod.PUT,
-                HttpEntity(oppdatertOppgave, headers),
-                String::class.java,
-            )
-            log.info("OppdaterOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
-                log.warn(
-                    "Veileder $veileder har ikke tilgang til å " +
-                            "oppdaterOppgave oppgaveId $oppgaveId: ${e.message}",
-                )
-                throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
-            } else {
-                log.error(
-                    "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                            "fra Oppgave ved oppdaterOppgave: ${e.message}",
-                    e,
-                )
-                throw e
-            }
-        } catch (e: HttpServerErrorException) {
-            log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                        "fra Oppgave ved oppdaterOppgave: ${e.message}",
-                e,
-            )
+            oppgaveWebClient.put()
+                .uri("$url/${oppdatertOppgave.id}")
+                .headers { headers ->
+                    headers.contentType = MediaType.APPLICATION_JSON
+                    headers["X-Correlation-ID"] = oppgaveId
+                }
+                .bodyValue(oppdatertOppgave)
+                .retrieve()
+                .onStatus({ status -> status.value() == 401 || status.value() == 403 }) { response ->
+                    log.warn(
+                        "Veileder $veileder does not have access to update oppgaveId $oppgaveId: ${response.statusCode()}"
+                    )
+                    Mono.error(IkkeTilgangException("Veileder har ikke tilgang til oppgave"))
+                }
+                .onStatus({ status -> !status.is2xxSuccessful }) { response ->
+                    log.error(
+                        "Unexpected error when updating oppgaveId $oppgaveId: ${response.statusCode()}"
+                    )
+                    response.bodyToMono(String::class.java).flatMap { errorBody ->
+                        Mono.error(Exception("Error updating oppgave: $errorBody"))
+                    }
+                }
+                .bodyToMono(String::class.java) // Consuming response as String
+                .awaitSingleOrNull()
+
+            log.info("Oppgave $oppgaveId successfully updated for sykmelding $sykmeldingId")
+        } catch (e: WebClientResponseException) {
+            handleWebClientResponseException(e, oppgaveId, veileder)
+        } catch (e: Exception) {
+            log.error("Unexpected exception while updating oppgaveId $oppgaveId: ${e.message}", e)
             throw e
         }
     }

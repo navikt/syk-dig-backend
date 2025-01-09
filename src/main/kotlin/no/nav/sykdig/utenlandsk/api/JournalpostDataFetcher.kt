@@ -54,7 +54,7 @@ class JournalpostDataFetcher(
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToJournalpostId(#journalpostId)")
     @DgsMutation(field = DgsConstants.MUTATION.SykmeldingFraJournalpost)
-    fun createSykmelding(
+    suspend fun createSykmelding(
         @InputArgument journalpostId: String,
         @InputArgument norsk: Boolean,
     ): JournalpostResult {

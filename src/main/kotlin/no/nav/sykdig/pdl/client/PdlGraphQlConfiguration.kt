@@ -8,16 +8,16 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class PdlGraphQlConfiguration {
+
     @Bean
     fun pdlGraphQlClient(
         @Value("\${pdl.url}") pdlUrl: String,
-        pdlRestTemplate: RestTemplate,
+        pdlWebClient: WebClient,
     ): CustomGraphQLClient {
         return GraphQLClient.createCustom(pdlUrl) { url, _, body ->
             val httpHeaders = HttpHeaders()
@@ -25,10 +25,15 @@ class PdlGraphQlConfiguration {
             httpHeaders["Behandlingsnummer"] = "B229"
             httpHeaders.contentType = MediaType.APPLICATION_JSON
 
-            val response =
-                pdlRestTemplate.exchange(url, HttpMethod.POST, HttpEntity(body, httpHeaders), String::class.java)
+            val response = pdlWebClient.post()
+                .uri(url)
+                .headers { it.addAll(httpHeaders) }
+                .bodyValue(body)
+                .retrieve()
+                .toEntity(String::class.java)
+                .block()
 
-            HttpResponse(response.statusCode.value(), response.body)
+            HttpResponse(response?.statusCode?.value() ?: 500, response?.body)
         }
     }
 }

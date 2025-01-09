@@ -132,7 +132,7 @@ class NasjonalOppgaveController(
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #authorization, '/oppgave/{oppgaveId}/tilgosys')")
     @WithSpan
-    fun sendOppgaveTilGosys(
+    suspend fun sendOppgaveTilGosys(
         @PathVariable oppgaveId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<HttpStatusCode> {

@@ -1,46 +1,51 @@
 package no.nav.sykdig.utenlandsk.poststed.client
 
+import kotlinx.coroutines.reactor.awaitSingle
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.poststed.PostInformasjon
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 import java.time.LocalDate
 import java.util.UUID
 
 @Component
 class KodeverkClient(
     @Value("\${kodeverk.url}") private val url: String,
-    private val kodeverkRestTemplate: RestTemplate,
+    private val kodeverkWebClient: WebClient,
 ) {
     val log = applog()
 
     @Retryable
-    fun hentKodeverk(callId: UUID): List<PostInformasjon> {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
-        headers["Nav-Call-Id"] = callId.toString()
-        headers["Nav-Consumer-Id"] = "syk-dig-backend"
+    suspend fun hentKodeverk(callId: UUID): List<PostInformasjon> {
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            this["Nav-Call-Id"] = callId.toString()
+            this["Nav-Consumer-Id"] = "syk-dig-backend"
+        }
 
         try {
-            val response =
-                kodeverkRestTemplate.exchange(
-                    "$url/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato=${LocalDate.now()}&spraak=nb",
-                    HttpMethod.GET,
-                    HttpEntity<Any>(headers),
-                    GetKodeverkKoderBetydningerResponse::class.java,
-                )
-            return response.body?.toPostInformasjonListe() ?: throw RuntimeException("Ingen respons fra kodeverk")
+            val response = kodeverkWebClient.get()
+                .uri("$url/api/v1/kodeverk/Postnummer/koder/betydninger?ekskluderUgyldige=true&oppslagsdato=${LocalDate.now()}&spraak=nb")
+                .headers { it.addAll(headers) }
+                .retrieve()
+                .onStatus({ status -> !status.is2xxSuccessful }) { response ->
+                    Mono.error(Exception("Error response: ${response.statusCode()}"))
+                }
+                .bodyToMono(GetKodeverkKoderBetydningerResponse::class.java)
+                .awaitSingle()
+
+            return response.toPostInformasjonListe() ?: throw RuntimeException("Ingen respons fra kodeverk")
         } catch (e: Exception) {
             log.error("Noe gikk galt ved henting av postinformasjon fra kodeverk: ${e.message}", e)
             throw RuntimeException("Noe gikk galt ved henting av postinformasjon fra kodeverk")
         }
     }
+
 }
 
 data class GetKodeverkKoderBetydningerResponse(

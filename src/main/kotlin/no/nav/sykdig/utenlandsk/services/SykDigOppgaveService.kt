@@ -36,7 +36,7 @@ class SykDigOppgaveService(
     private val securelog = securelog()
 
 
-    fun opprettOgLagreOppgave(
+    suspend fun opprettOgLagreOppgave(
         journalpost: SafJournalpost,
         journalpostId: String,
         fnr: String,
@@ -84,7 +84,7 @@ class SykDigOppgaveService(
         return oppgave
     }
 
-    fun ferdigstillExistingJournalfoeringsoppgave(
+    suspend fun ferdigstillExistingJournalfoeringsoppgave(
         journalpostId: String,
         journalpost: SafJournalpost,
     ) {
@@ -120,7 +120,7 @@ class SykDigOppgaveService(
         )
     }
 
-    fun getExistingOppgave(
+    suspend fun getExistingOppgave(
         journalpostId: String,
         journalpost: SafJournalpost,
     ): AllOppgaveResponse? {
@@ -191,7 +191,7 @@ class SykDigOppgaveService(
     }
 
     @Transactional
-    fun ferdigstillUtenlandskAvvistOppgave(
+    suspend fun ferdigstillUtenlandskAvvistOppgave(
         oppgave: OppgaveDbModel,
         navEpost: String,
         values: FerdistilltRegisterOppgaveValues,

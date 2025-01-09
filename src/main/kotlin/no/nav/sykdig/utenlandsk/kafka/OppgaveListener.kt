@@ -20,7 +20,7 @@ class OppgaveListener(
         properties = ["auto.offset.reset = none"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
-    fun listen(
+    suspend fun listen(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {

@@ -27,7 +27,7 @@ class MottaOppgaverFraKafka(
 ) {
     val logger = applog()
 
-    fun behandleOppgave(oppgaveKafkaAivenRecord: OppgaveKafkaAivenRecord) {
+    suspend fun behandleOppgave(oppgaveKafkaAivenRecord: OppgaveKafkaAivenRecord) {
         val sykmeldingId = UUID.randomUUID().toString()
         val oppgaveId = oppgaveKafkaAivenRecord.oppgave.oppgaveId
         val oppgave =

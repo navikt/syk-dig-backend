@@ -1,18 +1,22 @@
 package no.nav.sykdig.utenlandsk.poststed.config
 
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.converter.StringHttpMessageConverter
-import org.springframework.web.client.RestTemplate
-import java.nio.charset.StandardCharsets
+import org.springframework.http.HttpHeaders
+
+import org.springframework.web.reactive.function.client.WebClient
+
 
 @Configuration
-class RestTemplateConfig {
+class WebClientConfig {
+
     @Bean
-    fun plainTextUtf8RestTemplate(): RestTemplate {
-        return RestTemplateBuilder()
-            .messageConverters(StringHttpMessageConverter(StandardCharsets.UTF_8))
+    fun plainTextUtf8WebClient(): WebClient {
+        return WebClient.builder()
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, "text/plain; charset=UTF-8")
+            .codecs { configurer ->
+                configurer.defaultCodecs().multipartCodecs()
+            }
             .build()
     }
 }

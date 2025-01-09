@@ -2,19 +2,18 @@ package no.nav.sykdig.tilgangskontroll
 
 import no.nav.sykdig.shared.applog
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod.GET
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 
 @Component
 class IstilgangskontrollOboClient(
     @Value("\${istilgangskontroll.url}") private val url: String,
-    private val istilgangskontrollRestTemplate: RestTemplate,
+    private val istilgangskontrollWebClient: WebClient,
 ) {
     companion object {
         const val ACCESS_TO_USER_WITH_AZURE_V2_PATH = "/api/tilgang/navident/person"
@@ -30,21 +29,21 @@ class IstilgangskontrollOboClient(
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
         headers[NAV_PERSONIDENT_HEADER] = fnr
 
-        try {
-            val response =
-                istilgangskontrollRestTemplate.exchange(
-                    accessToUserV2Url(),
-                    GET,
-                    HttpEntity<Any>(headers),
-                    String::class.java,
-                )
-            return response.statusCode.is2xxSuccessful
-        } catch (e: HttpClientErrorException) {
-            return if (e.statusCode.value() == 403) {
+        return try {
+            val response = istilgangskontrollWebClient.get()  // Changed from exchange to get()
+                .uri(accessToUserV2Url())
+                .headers { it.addAll(headers) }
+                .retrieve()
+                .toEntity(String::class.java)
+                .block()  // Blocking for synchronous response (you can use subscribe() for asynchronous)
+
+            response?.statusCode?.is2xxSuccessful == true
+        } catch (e: WebClientResponseException) {
+            if (e.statusCode == HttpStatus.FORBIDDEN) {
                 log.error("istilgangskontroll returnerte 403", e)
                 false
             } else {
-                log.error("HttpClientErrorException mot tilgangskontroll", e)
+                log.error("WebClientResponseException mot tilgangskontroll", e)
                 false
             }
         }
@@ -56,21 +55,21 @@ class IstilgangskontrollOboClient(
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
         headers[NAV_PERSONIDENT_HEADER] = fnr
 
-        try {
-            val response =
-                istilgangskontrollRestTemplate.exchange(
-                    superUserAccessToV2UrlForKorrigerePapirSykmelding(),
-                    GET,
-                    HttpEntity<Any>(headers),
-                    String::class.java,
-                )
-            return response.statusCode.is2xxSuccessful
-        } catch (e: HttpClientErrorException) {
-            return if (e.statusCode.value() == 403) {
+        return try {
+            val response = istilgangskontrollWebClient.get()  // Changed from exchange to get()
+                .uri(superUserAccessToV2UrlForKorrigerePapirSykmelding())
+                .headers { it.addAll(headers) }
+                .retrieve()
+                .toEntity(String::class.java)
+                .block()  // Blocking for synchronous response (you can use subscribe() for asynchronous)
+
+            response?.statusCode?.is2xxSuccessful == true
+        } catch (e: WebClientResponseException) {
+            if (e.statusCode == HttpStatus.FORBIDDEN) {
                 log.error("istilgangskontroll returnerte 403", e)
                 false
             } else {
-                log.error("HttpClientErrorException mot tilgangskontroll", e)
+                log.error("WebClientResponseException mot tilgangskontroll", e)
                 false
             }
         }

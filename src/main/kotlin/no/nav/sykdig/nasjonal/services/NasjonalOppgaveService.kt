@@ -314,7 +314,7 @@ class NasjonalOppgaveService(
         return getPdfResult(pdfResult)
     }
 
-    fun oppgaveTilGosys(oppgaveId: String, authorization: String) {
+    suspend fun oppgaveTilGosys(oppgaveId: String, authorization: String) {
         val eksisterendeOppgave = getOppgave(oppgaveId, authorization) ?: return
         val navIdent = nasjonalCommonService.getNavIdent()
         val loggingMeta = getLoggingMeta(eksisterendeOppgave.sykmeldingId, eksisterendeOppgave)
