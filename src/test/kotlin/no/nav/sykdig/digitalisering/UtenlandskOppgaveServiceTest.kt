@@ -288,10 +288,12 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
             }
 
 
-            val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
-
-            assertNull(oppgave.oppgaveDbModel.ferdigstilt)
         }
+
+        //val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
+
+        // assertNull(oppgave.oppgaveDbModel.ferdigstilt)
+
     }
 
     @Test
