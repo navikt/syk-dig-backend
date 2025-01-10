@@ -3,6 +3,7 @@ package no.nav.sykdig.dokarkiv.api
 import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.InputArgument
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.dokarkiv.DocumentService
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.Document
@@ -19,7 +20,7 @@ class DocumentMutation(
         @InputArgument dokumentInfoId: String,
         @InputArgument tittel: String,
     ): Document {
-        documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, tittel)
+        runBlocking { documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, tittel) }
         return Document(
             dokumentInfoId = dokumentInfoId,
             tittel = tittel,

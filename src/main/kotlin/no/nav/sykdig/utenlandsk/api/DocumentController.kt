@@ -1,5 +1,6 @@
 package no.nav.sykdig.utenlandsk.api
 
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.saf.SafClient
 import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
@@ -30,7 +31,7 @@ class DocumentController(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String,
     ): ResponseEntity<Any> {
-        return getPdfResult(safClient.getPdfFraSaf(journalpostId, dokumentInfoId, UUID.randomUUID().toString()))
+        return runBlocking { getPdfResult(safClient.getPdfFraSaf(journalpostId, dokumentInfoId, UUID.randomUUID().toString())) }
     }
 
     @GetMapping("/api/document/{oppgaveId}/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
@@ -51,13 +52,15 @@ class DocumentController(
                     return ResponseEntity.badRequest()
                         .body(toHtml("oppgave: $oppgaveId mangler dokumentInfoId"))
                 }
-                return getPdfResult(
-                    safClient.getPdfFraSaf(
-                        dokumentInfoId = oppgave.dokumentInfoId,
-                        journalpostId = oppgave.journalpostId,
-                        callId = oppgave.sykmeldingId.toString(),
-                    ),
-                )
+                return runBlocking {
+                    getPdfResult(
+                        safClient.getPdfFraSaf(
+                            dokumentInfoId = oppgave.dokumentInfoId,
+                            journalpostId = oppgave.journalpostId,
+                            callId = oppgave.sykmeldingId.toString(),
+                        ),
+                    )
+                }
             }
 
             val dokumentInfoIdInDokumenter = oppgave.dokumenter.firstOrNull { it.dokumentInfoId == dokumentInfoId }
@@ -70,13 +73,15 @@ class DocumentController(
             }
 
             try {
-                return getPdfResult(
-                    safClient.getPdfFraSaf(
-                        dokumentInfoId = dokumentInfoId,
-                        journalpostId = oppgave.journalpostId,
-                        callId = oppgave.sykmeldingId.toString(),
-                    ),
-                )
+                return runBlocking {
+                    getPdfResult(
+                        safClient.getPdfFraSaf(
+                            dokumentInfoId = dokumentInfoId,
+                            journalpostId = oppgave.journalpostId,
+                            callId = oppgave.sykmeldingId.toString(),
+                        ),
+                    )
+                }
             } catch (e: Exception) {
                 log.error("Noe gikk galt ved henting av pdf for oppgave med id $oppgaveId")
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

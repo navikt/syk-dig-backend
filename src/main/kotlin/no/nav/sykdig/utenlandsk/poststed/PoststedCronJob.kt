@@ -16,7 +16,7 @@ class PoststedCronJob(
     val log = applog()
 
     @Scheduled(cron = "0 0 6 * * *")
-    fun run() {
+    suspend fun run() {
         if (leaderElection.isLeader()) {
             val callId = UUID.randomUUID()
             log.info("Oppdaterer database med postnummer og poststed, $callId")

@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering.dokument
 
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.utenlandsk.db.OppgaveRepository
 import no.nav.sykdig.dokarkiv.DokarkivClient
 import no.nav.sykdig.utenlandsk.models.DokumentDbModel
@@ -46,7 +47,7 @@ class DocumentServiceTest {
             ),
         )
 
-        documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, nyTittel)
+        runBlocking { documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, nyTittel) }
         val newListOfDocuments =
             listOf(
                 DokumentDbModel(
@@ -59,7 +60,7 @@ class DocumentServiceTest {
             newListOfDocuments,
         )
 
-        verify(dokarkivClient, times(1)).updateDocument(journalpostId, dokumentInfoId, nyTittel)
+        runBlocking { verify(dokarkivClient, times(1)).updateDocument(journalpostId, dokumentInfoId, nyTittel) }
         verify(oppgaveRepository, times(1)).updateDocuments(oppgaveId, newListOfDocuments)
     }
 
@@ -89,9 +90,9 @@ class DocumentServiceTest {
             getOppgave(oppgaveId, "fnr", journalpostId, documents),
         )
 
-        documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, "4-ny")
+        runBlocking { documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, "4-ny") }
 
-        verify(dokarkivClient, times(1)).updateDocument(journalpostId, "4", "4-ny")
+        runBlocking { verify(dokarkivClient, times(1)).updateDocument(journalpostId, "4", "4-ny") }
         verify(oppgaveRepository, times(1)).updateDocuments(oppgaveId, newDocuments)
     }
 
@@ -110,11 +111,13 @@ class DocumentServiceTest {
         `when`(oppgaveRepository.getOppgave(oppgaveId)).thenReturn(
             getOppgave(oppgaveId, "fnr", journalpostId, documents),
         )
-        assertThrows<DgsEntityNotFoundException> {
-            documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, "ny-tittel")
+        runBlocking {
+            assertThrows<DgsEntityNotFoundException> {
+                documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, "ny-tittel")
+            }
         }
 
-        verify(dokarkivClient, times(0)).updateDocument(anyString(), anyString(), anyString())
+        runBlocking { verify(dokarkivClient, times(0)).updateDocument(anyString(), anyString(), anyString()) }
         verify(oppgaveRepository, times(0)).updateDocuments(anyString(), anyList())
     }
 
@@ -134,9 +137,9 @@ class DocumentServiceTest {
             getOppgave(oppgaveId, "fnr", journalpostId, documents),
         )
 
-        documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, "2")
+        runBlocking { documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, "2") }
 
-        verify(dokarkivClient, times(0)).updateDocument(anyString(), anyString(), anyString())
+        runBlocking { verify(dokarkivClient, times(0)).updateDocument(anyString(), anyString(), anyString()) }
         verify(oppgaveRepository, times(0)).updateDocuments(anyString(), anyList())
     }
 

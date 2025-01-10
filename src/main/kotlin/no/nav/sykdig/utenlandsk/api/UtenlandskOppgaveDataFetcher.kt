@@ -101,7 +101,7 @@ class UtenlandskOppgaveDataFetcher(
     }
     @PreAuthorize("@oppgaveSecurityService.hasAccessToSykmelding(#sykmeldingId)")
     @DgsMutation(field = DgsConstants.MUTATION.OppdaterDigitalisertSykmelding)
-    fun oppdaterSykmelding(
+    suspend fun oppdaterSykmelding(
         @InputArgument sykmeldingId: String,
         @InputArgument enhetId: String,
         @InputArgument values: SykmeldingUnderArbeidValues,

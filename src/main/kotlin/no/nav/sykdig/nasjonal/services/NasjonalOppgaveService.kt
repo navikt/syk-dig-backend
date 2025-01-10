@@ -307,7 +307,7 @@ class NasjonalOppgaveService(
         )
     }
 
-    fun getRegisterPdf(oppgaveId: String, authorization: String, dokumentInfoId: String): ResponseEntity<Any> {
+    suspend fun getRegisterPdf(oppgaveId: String, authorization: String, dokumentInfoId: String): ResponseEntity<Any> {
         val oppgave = getOppgave(oppgaveId, authorization)
         requireNotNull(oppgave)
         val pdfResult = safClient.getPdfFraSaf(oppgave.journalpostId, dokumentInfoId, authorization)

@@ -1,6 +1,7 @@
 package no.nav.sykdig.nasjonal.api
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
@@ -54,7 +55,7 @@ class NasjonalOppgaveController(
         val papirManuellOppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization)
 
         if (papirManuellOppgave != null) {
-            if(papirManuellOppgave.ferdigstilt) {
+            if (papirManuellOppgave.ferdigstilt) {
                 log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Oppgave med id $oppgaveId er allerede ferdigstilt")
             }
@@ -120,7 +121,7 @@ class NasjonalOppgaveController(
     ): ResponseEntity<PapirManuellOppgave> {
         val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(sykmeldingId, authorization)
         if (oppgave != null) {
-            if(!oppgave.ferdigstilt) {
+            if (!oppgave.ferdigstilt) {
                 log.info("Oppgave med id $sykmeldingId er ikke ferdigstilt")
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
             }
@@ -168,6 +169,6 @@ class NasjonalOppgaveController(
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<Any> {
         log.info("Forsøker å hente pdf for oppgaveId $oppgaveId og dokumentInfoId $dokumentInfoId")
-        return nasjonalOppgaveService.getRegisterPdf(oppgaveId, authorization, dokumentInfoId)
+        return runBlocking { nasjonalOppgaveService.getRegisterPdf(oppgaveId, authorization, dokumentInfoId) }
     }
 }

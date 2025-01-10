@@ -172,7 +172,7 @@ class SykDigOppgaveService(
         oppgaveRepository.ferdigstillOppgaveGosys(oppgave, navEpost, sykmelding)
     }
 
-    fun ferdigstillAvvistOppgave(
+    suspend fun ferdigstillAvvistOppgave(
         oppgave: OppgaveDbModel,
         navEpost: String,
         enhetId: String,
@@ -210,7 +210,7 @@ class SykDigOppgaveService(
     }
 
     @Transactional
-    fun oppdaterSykmelding(oppgave: OppgaveDbModel, navEmail: String, values: FerdistilltRegisterOppgaveValues, enhetId: String, sykmeldt: Person) {
+    suspend fun oppdaterSykmelding(oppgave: OppgaveDbModel, navEmail: String, values: FerdistilltRegisterOppgaveValues, enhetId: String, sykmeldt: Person) {
         val sykmelding = toSykmelding(oppgave, values)
         oppgaveRepository.updateSykmelding(oppgave, navEmail, sykmelding)
         log.info("updated sykmelding in db")

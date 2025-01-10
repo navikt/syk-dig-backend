@@ -14,7 +14,7 @@ class DocumentService internal constructor(
     val log = applog()
 
     @Transactional
-    fun updateDocumentTitle(
+    suspend fun updateDocumentTitle(
         oppgaveId: String,
         dokumentInfoId: String,
         tittel: String,

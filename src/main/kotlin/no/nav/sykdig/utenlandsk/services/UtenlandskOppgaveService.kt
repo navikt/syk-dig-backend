@@ -167,7 +167,7 @@ class UtenlandskOppgaveService(
         return OppdatertSykmeldingStatusEnum.FERDIGSTILT
     }
 
-    fun oppdaterDigitalisertSykmelding(sykmeldingId: String, enhetId: String, values: FerdistilltRegisterOppgaveValues, navEmail: String): OppdatertSykmeldingStatus {
+    suspend fun oppdaterDigitalisertSykmelding(sykmeldingId: String, enhetId: String, values: FerdistilltRegisterOppgaveValues, navEmail: String): OppdatertSykmeldingStatus {
         val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
 
         val state = checkOppgaveState(oppgave)

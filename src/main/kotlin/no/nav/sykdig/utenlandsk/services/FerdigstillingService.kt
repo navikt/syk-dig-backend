@@ -88,7 +88,7 @@ class FerdigstillingService(
         }
     }
 
-    private fun updateUtenlandskDocumentTitle(
+    private suspend fun updateUtenlandskDocumentTitle(
         oppgave: OppgaveDbModel,
         receivedSykmelding: ReceivedSykmelding,
         isAvvist: Boolean = false
@@ -127,7 +127,7 @@ class FerdigstillingService(
         }
     }
 
-    fun ferdigstillUtenlandskAvvistJournalpost(
+    suspend fun ferdigstillUtenlandskAvvistJournalpost(
         enhet: String,
         oppgave: OppgaveDbModel,
         sykmeldt: Person,
@@ -157,7 +157,7 @@ class FerdigstillingService(
         }
     }
 
-    fun sendUpdatedSykmelding(oppgave: OppgaveDbModel, sykmeldt: Person, navEmail: String, values: FerdistilltRegisterOppgaveValues) {
+    suspend fun sendUpdatedSykmelding(oppgave: OppgaveDbModel, sykmeldt: Person, navEmail: String, values: FerdistilltRegisterOppgaveValues) {
         val receivedSykmelding =
             mapToReceivedSykmelding(
                 ferdigstillteRegisterOppgaveValues = values,

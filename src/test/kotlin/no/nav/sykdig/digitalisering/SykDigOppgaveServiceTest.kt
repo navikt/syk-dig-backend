@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering
 
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.utenlandsk.services.FerdigstillingService
@@ -69,16 +70,16 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
         sykDigOppgaveService.updateOppgave(
             oppgaveId = "123",
             registerOppgaveValues =
-                UferdigRegisterOppgaveValues(
-                    fnrPasient = "12345678910",
-                    skrevetLand = "SWE",
-                    hovedDiagnose = DiagnoseInput("A070", "ICD10"),
-                    behandletTidspunkt = null,
-                    perioder = null,
-                    biDiagnoser = null,
-                    folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
-                    erAdresseUtland = null,
-                ),
+            UferdigRegisterOppgaveValues(
+                fnrPasient = "12345678910",
+                skrevetLand = "SWE",
+                hovedDiagnose = DiagnoseInput("A070", "ICD10"),
+                behandletTidspunkt = null,
+                perioder = null,
+                biDiagnoser = null,
+                folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
+                erAdresseUtland = null,
+            ),
             navEpost = "X987654",
         )
 
@@ -95,29 +96,30 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
 
     @Test
     fun ferdigstillerOppgaveIDb() {
-        sykDigOppgaveService.ferdigstillUtenlandskAvvistOppgave(
-            oppgave = createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"),
-            navEpost = "X987654",
-            values =
+        runBlocking {
+            sykDigOppgaveService.ferdigstillUtenlandskAvvistOppgave(
+                oppgave = createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"),
+                navEpost = "X987654",
+                values =
                 FerdistilltRegisterOppgaveValues(
                     fnrPasient = "12345678910",
                     behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
                     skrevetLand = "SWE",
                     perioder =
-                        listOf(
-                            PeriodeInput(
-                                PeriodeType.AKTIVITET_IKKE_MULIG,
-                                LocalDate.now().minusMonths(1),
-                                LocalDate.now().minusWeeks(2),
-                            ),
+                    listOf(
+                        PeriodeInput(
+                            PeriodeType.AKTIVITET_IKKE_MULIG,
+                            LocalDate.now().minusMonths(1),
+                            LocalDate.now().minusWeeks(2),
                         ),
+                    ),
                     hovedDiagnose = DiagnoseInput("A070", "ICD10"),
                     biDiagnoser = emptyList(),
                     folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
                     erAdresseUtland = null,
                 ),
-            enhetId = "2990",
-            sykmeldt =
+                enhetId = "2990",
+                sykmeldt =
                 Person(
                     fnr = "12345678910",
                     navn = Navn("Fornavn", null, "Etternavn"),
@@ -126,8 +128,8 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
                     oppholdsadresse = null,
                     fodselsdato = LocalDate.of(1980, 5, 5),
                 ),
-        )
-
+            )
+        }
         val oppdatertOppgave = sykDigOppgaveService.getOppgave("123")
         assertEquals("12345678910", oppdatertOppgave.fnr)
         assertEquals("X987654", oppdatertOppgave.endretAv)

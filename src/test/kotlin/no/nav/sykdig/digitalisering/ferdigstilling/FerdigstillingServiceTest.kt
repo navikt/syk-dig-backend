@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
@@ -93,21 +94,21 @@ class FerdigstillingServiceTest : IntegrationTest() {
         val journalpost =
             SafQueryJournalpost(
                 journalpost =
-                    SafJournalpost(
-                        tittel = "tittel",
-                        journalstatus = Journalstatus.JOURNALFOERT,
-                        avsenderMottaker =
-                            AvsenderMottaker(
-                                id = "12345678910",
-                                navn = "Fornavn Etternavn",
-                                type = AvsenderMottakerIdType.FNR,
-                                land = null,
-                            ),
-                        dokumenter = emptyList(),
-                        bruker = null,
-                        tema = TEMA_SYKMELDING,
-                        kanal = CHANNEL_SCAN_IM,
+                SafJournalpost(
+                    tittel = "tittel",
+                    journalstatus = Journalstatus.JOURNALFOERT,
+                    avsenderMottaker =
+                    AvsenderMottaker(
+                        id = "12345678910",
+                        navn = "Fornavn Etternavn",
+                        type = AvsenderMottakerIdType.FNR,
+                        land = null,
                     ),
+                    dokumenter = emptyList(),
+                    bruker = null,
+                    tema = TEMA_SYKMELDING,
+                    kanal = CHANNEL_SCAN_IM,
+                ),
             )
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpost)).thenAnswer { false }
@@ -126,7 +127,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                     fom = LocalDate.now().minusMonths(1),
                     tom = LocalDate.now().minusWeeks(2),
                     aktivitetIkkeMulig =
-                        AktivitetIkkeMulig(medisinskArsak = null, arbeidsrelatertArsak = null),
+                    AktivitetIkkeMulig(medisinskArsak = null, arbeidsrelatertArsak = null),
                     avventendeInnspillTilArbeidsgiver = null,
                     behandlingsdager = null,
                     gradert = null,
@@ -140,13 +141,13 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 behandletTidspunkt = OffsetDateTime.now(ZoneOffset.UTC),
                 skrevetLand = "SWE",
                 perioder =
-                    listOf(
-                        PeriodeInput(
-                            PeriodeType.AKTIVITET_IKKE_MULIG,
-                            LocalDate.now().minusMonths(1),
-                            LocalDate.now().minusWeeks(2),
-                        ),
+                listOf(
+                    PeriodeInput(
+                        PeriodeType.AKTIVITET_IKKE_MULIG,
+                        LocalDate.now().minusMonths(1),
+                        LocalDate.now().minusWeeks(2),
                     ),
+                ),
                 hovedDiagnose = DiagnoseInput("A070", "ICD10"),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = true,
@@ -163,9 +164,10 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 fodselsdato = LocalDate.of(1970, 1, 1),
             )
 
-        ferdigstillingService.ferdigstillUtenlandskOppgave(
-            enhet = "2990",
-            oppgave =
+        runBlocking {
+            ferdigstillingService.ferdigstillUtenlandskOppgave(
+                enhet = "2990",
+                oppgave =
                 createDigitalseringsoppgaveDbModel(
                     oppgaveId = "123",
                     fnr = "12345678910",
@@ -173,24 +175,27 @@ class FerdigstillingServiceTest : IntegrationTest() {
                     journalpostId = journalpostId,
                     dokumentInfoId = dokumentInfoId,
                 ),
-            sykmeldt = sykmeldt,
-            validatedValues = validatedValues,
-        )
+                sykmeldt = sykmeldt,
+                validatedValues = validatedValues,
+            )
+        }
 
-        verify(dokarkivClient).oppdaterOgFerdigstillUtenlandskJournalpost(
-            "SWE",
-            "12345678910",
-            "2990",
-            "111",
-            journalpostId,
-            sykmeldingId.toString(),
-            perioder,
-            "scanning",
-            null,
-            journalpost.journalpost?.avsenderMottaker!!,
-            "Fornavn Etternavn",
-        )
-        verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
+        runBlocking {
+            verify(dokarkivClient).oppdaterOgFerdigstillUtenlandskJournalpost(
+                "SWE",
+                "12345678910",
+                "2990",
+                "111",
+                journalpostId,
+                sykmeldingId.toString(),
+                perioder,
+                "scanning",
+                null,
+                journalpost.journalpost?.avsenderMottaker!!,
+                "Fornavn Etternavn",
+            )
+        }
+        runBlocking { verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString()) }
     }
 
     @Test
@@ -215,14 +220,14 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 behandletTidspunkt = behandletTidspunkt,
                 skrevetLand = "POL",
                 perioder =
-                    listOf(
-                        PeriodeInput(
-                            type = PeriodeType.AKTIVITET_IKKE_MULIG,
-                            fom = LocalDate.of(2019, Month.AUGUST, 15),
-                            tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                            grad = null,
-                        ),
+                listOf(
+                    PeriodeInput(
+                        type = PeriodeType.AKTIVITET_IKKE_MULIG,
+                        fom = LocalDate.of(2019, Month.AUGUST, 15),
+                        tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
+                        grad = null,
                     ),
+                ),
                 hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
@@ -316,14 +321,14 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 behandletTidspunkt = behandletTidspunkt,
                 skrevetLand = "POL",
                 perioder =
-                    listOf(
-                        PeriodeInput(
-                            type = PeriodeType.GRADERT,
-                            fom = LocalDate.of(2019, Month.AUGUST, 15),
-                            tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                            grad = 69,
-                        ),
+                listOf(
+                    PeriodeInput(
+                        type = PeriodeType.GRADERT,
+                        fom = LocalDate.of(2019, Month.AUGUST, 15),
+                        tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
+                        grad = 69,
                     ),
+                ),
                 hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
@@ -380,14 +385,14 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 behandletTidspunkt = behandletTidspunkt,
                 skrevetLand = "POL",
                 perioder =
-                    listOf(
-                        PeriodeInput(
-                            type = PeriodeType.GRADERT,
-                            fom = LocalDate.of(2019, Month.AUGUST, 15),
-                            tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
-                            grad = 120,
-                        ),
+                listOf(
+                    PeriodeInput(
+                        type = PeriodeType.GRADERT,
+                        fom = LocalDate.of(2019, Month.AUGUST, 15),
+                        tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
+                        grad = 120,
                     ),
+                ),
                 hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
@@ -433,7 +438,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
         val updatedOppgave = oppgave.copy(
             utfall = Utfall.SENDT_TIL_GOSYS.toString(),
             ferdigstilt = true,
-            ferdigstiltAv = "nav-ident@mail.no"
+            ferdigstiltAv = "nav-ident@mail.no",
         )
 
 

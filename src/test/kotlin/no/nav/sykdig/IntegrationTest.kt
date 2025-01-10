@@ -1,3 +1,4 @@
+
 package no.nav.sykdig
 
 import no.nav.sykdig.utenlandsk.db.OppgaveRepository

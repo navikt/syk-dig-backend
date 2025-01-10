@@ -1,7 +1,9 @@
 package no.nav.sykdig.digitalisering
+
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.TestGraphQLContextContributor
 import no.nav.sykdig.shared.config.CustomDataFetchingExceptionHandler
 import no.nav.sykdig.utenlandsk.db.PoststedRepository
@@ -82,9 +84,9 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =
-                    createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                    ),
+                createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
                 person = createPerson(),
             )
         }
@@ -113,10 +115,10 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =
-                    createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                        ferdigstilt = OffsetDateTime.now(),
-                    ),
+                createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ferdigstilt = OffsetDateTime.now(),
+                ),
                 person = createPerson(),
             )
         }
@@ -143,11 +145,11 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =
-                    createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                        ferdigstilt = OffsetDateTime.now(),
-                        tilbakeTilGosys = true,
-                    ),
+                createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    ferdigstilt = OffsetDateTime.now(),
+                    tilbakeTilGosys = true,
+                ),
                 person = createPerson(),
             )
         }
@@ -175,9 +177,9 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =
-                    createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                    ),
+                createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
                 person = createPerson(),
             )
         }
@@ -208,9 +210,9 @@ class OppgaveDataFetcherTest {
                     sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
                 ),
                 person =
-                    createPerson(
-                        vegadresse = Vegadresse("7", null, null, "Gateveien", null, "1111"),
-                    ),
+                createPerson(
+                    vegadresse = Vegadresse("7", null, null, "Gateveien", null, "1111"),
+                ),
             )
         }
         Mockito.`when`(poststedRepository.getPoststed("1111")).thenAnswer {
@@ -247,13 +249,13 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =
-                    createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                    ),
+                createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
                 person =
-                    createPerson(
-                        matrikkeladresse = Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222"),
-                    ),
+                createPerson(
+                    matrikkeladresse = Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222"),
+                ),
             )
         }
 
@@ -292,9 +294,9 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =
-                    createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                    ),
+                createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
                 person = createPerson(),
             )
         }
@@ -314,14 +316,14 @@ class OppgaveDataFetcherTest {
                     "id" to "345",
                     "enhetId" to "1234",
                     "values" to
-                        mapOf(
-                            "fnrPasient" to "20086600138",
-                            "behandletTidspunkt" to null,
-                            "skrevetLand" to null,
-                            "perioder" to null,
-                            "hovedDiagnose" to null,
-                            "biDiagnoser" to null,
-                        ),
+                            mapOf(
+                                "fnrPasient" to "20086600138",
+                                "behandletTidspunkt" to null,
+                                "skrevetLand" to null,
+                                "perioder" to null,
+                                "hovedDiagnose" to null,
+                                "biDiagnoser" to null,
+                            ),
                     "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID,
                 ),
             )
@@ -343,9 +345,9 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =
-                    createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                    ),
+                createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
                 person = createPerson(),
             )
         }
@@ -365,14 +367,14 @@ class OppgaveDataFetcherTest {
                     "id" to "345",
                     "enhetId" to "1234",
                     "values" to
-                        mapOf(
-                            "fnrPasient" to "20086600138",
-                            "behandletTidspunkt" to null,
-                            "skrevetLand" to null,
-                            "perioder" to null,
-                            "hovedDiagnose" to null,
-                            "biDiagnoser" to null,
-                        ),
+                            mapOf(
+                                "fnrPasient" to "20086600138",
+                                "behandletTidspunkt" to null,
+                                "skrevetLand" to null,
+                                "perioder" to null,
+                                "hovedDiagnose" to null,
+                                "biDiagnoser" to null,
+                            ),
                     "status" to SykmeldingUnderArbeidStatus.UNDER_ARBEID,
                 ),
             )
@@ -385,9 +387,9 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =
-                    createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                    ),
+                createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
                 person = createPerson(),
             )
         }
@@ -407,30 +409,31 @@ class OppgaveDataFetcherTest {
                     "id" to "345",
                     "enhetId" to "1234",
                     "values" to
-                        mapOf(
-                            "fnrPasient" to "20086600138",
-                            "behandletTidspunkt" to "2022-10-26",
-                            "skrevetLand" to "POL",
-                            "perioder" to emptyList<PeriodeInput>(),
-                            "hovedDiagnose" to
-                                mapOf(
-                                    "kode" to "Z09",
-                                    "system" to "ICPC2",
-                                ),
-                            "biDiagnoser" to emptyList<DiagnoseInput>(),
-                        ),
+                            mapOf(
+                                "fnrPasient" to "20086600138",
+                                "behandletTidspunkt" to "2022-10-26",
+                                "skrevetLand" to "POL",
+                                "perioder" to emptyList<PeriodeInput>(),
+                                "hovedDiagnose" to
+                                        mapOf(
+                                            "kode" to "Z09",
+                                            "system" to "ICPC2",
+                                        ),
+                                "biDiagnoser" to emptyList<DiagnoseInput>(),
+                            ),
                     "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT,
                 ),
             )
 
         assertEquals(0, result.errors.size)
-        verify(
-            oppgaveService,
-            times(1),
-        ).ferdigstillOppgave(
-            oppgaveId = "345",
-            navEpost = "fake-test-ident",
-            values =
+        runBlocking {
+            verify(
+                oppgaveService,
+                times(1),
+            ).ferdigstillOppgave(
+                oppgaveId = "345",
+                navEpost = "fake-test-ident",
+                values =
                 FerdistilltRegisterOppgaveValues(
                     fnrPasient = "20086600138",
                     behandletTidspunkt = LocalDate.parse("2022-10-26").toOffsetDateTimeAtNoon()!!,
@@ -441,8 +444,9 @@ class OppgaveDataFetcherTest {
                     folkeRegistertAdresseErBrakkeEllerTilsvarende = null,
                     erAdresseUtland = null,
                 ),
-            enhetId = "1234",
-        )
+                enhetId = "1234",
+            )
+        }
     }
 
     @Test
@@ -450,9 +454,9 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("345")).thenAnswer {
             SykDigOppgave(
                 oppgaveDbModel =
-                    createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
-                    ),
+                createDigitalseringsoppgaveDbModel(
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                ),
                 person = createPerson(),
             )
         }
@@ -472,19 +476,19 @@ class OppgaveDataFetcherTest {
                     "id" to "345",
                     "enhetId" to "1234",
                     "values" to
-                        mapOf(
-                            "fnrPasient" to "testfnr-pasient",
-                            "behandletTidspunkt" to "2022-10-26",
-                            // empty string is not valid
-                            "skrevetLand" to "",
-                            "perioder" to emptyList<PeriodeInput>(),
-                            "hovedDiagnose" to
-                                mapOf(
-                                    "kode" to "Køde",
-                                    "system" to "ICDCPC12",
-                                ),
-                            "biDiagnoser" to emptyList<DiagnoseInput>(),
-                        ),
+                            mapOf(
+                                "fnrPasient" to "testfnr-pasient",
+                                "behandletTidspunkt" to "2022-10-26",
+                                // empty string is not valid
+                                "skrevetLand" to "",
+                                "perioder" to emptyList<PeriodeInput>(),
+                                "hovedDiagnose" to
+                                        mapOf(
+                                            "kode" to "Køde",
+                                            "system" to "ICDCPC12",
+                                        ),
+                                "biDiagnoser" to emptyList<DiagnoseInput>(),
+                            ),
                     "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT,
                 ),
             )

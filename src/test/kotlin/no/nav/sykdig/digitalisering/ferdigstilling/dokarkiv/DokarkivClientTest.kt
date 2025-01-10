@@ -9,18 +9,18 @@ import org.junit.jupiter.api.TestInstance
 import org.mockito.Mock
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 class DokarkivClientTest : IntegrationTest() {
     @Mock
-    lateinit var dokarkivRestTemplate: RestTemplate
+    lateinit var dokarkivWebClient: WebClient
 
     @Test
     fun `Should find Bahamas as country name`() {
-        val dokarkivClient = DokarkivClient(url = "localhost", dokarkivRestTemplate = dokarkivRestTemplate)
+        val dokarkivClient = DokarkivClient(url = "localhost", dokarkivWebClient = dokarkivWebClient)
 
         val landAlpha3 = "BHS"
 
@@ -31,7 +31,7 @@ class DokarkivClientTest : IntegrationTest() {
 
     @Test
     fun `Should find bs as country alpha2`() {
-        val dokarkivClient = DokarkivClient(url = "localhost", dokarkivRestTemplate = dokarkivRestTemplate)
+        val dokarkivClient = DokarkivClient(url = "localhost", dokarkivWebClient = dokarkivWebClient)
 
         val landAlpha3 = "BHS"
 
