@@ -14,6 +14,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
@@ -22,6 +23,10 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.ClientRequest
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 
 @Primary
 @Component
@@ -105,6 +110,17 @@ class AadRestTemplateConfiguration {
     }
 
     @Bean
+    fun oppgaveWebClient(
+        clientConfigurationProperties: ClientConfigurationProperties,
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+    ): WebClient =
+        mainWebClient(
+            registrationName = "onbehalfof-oppgave",
+            clientConfigurationProperties = clientConfigurationProperties,
+            oAuth2AccessTokenService = oAuth2AccessTokenService,
+        )
+
+    @Bean
     fun oppgaveRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,
@@ -153,6 +169,34 @@ class AadRestTemplateConfiguration {
             val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
             request.headers.setBearerAuth(response.accessToken!!)
             execution.execute(request, body)
+        }
+    }
+
+    private fun mainWebClient(
+        registrationName: String,
+        clientConfigurationProperties: ClientConfigurationProperties,
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+    ): WebClient {
+        val clientProperties =
+            clientConfigurationProperties.registration[registrationName]
+                ?: throw RuntimeException("Fant ikke config for $registrationName")
+
+        return WebClient.builder()
+            .baseUrl(clientProperties.resourceUrl.toString())
+            .filter(bearerTokenFilter(clientProperties, oAuth2AccessTokenService))
+            .build()
+    }
+
+    private fun bearerTokenFilter(
+        clientProperties: ClientProperties,
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+    ): ExchangeFilterFunction {
+        return ExchangeFilterFunction.ofRequestProcessor { clientRequest ->
+            val token = oAuth2AccessTokenService.getAccessToken(clientProperties).accessToken
+            val updatedRequest = ClientRequest.from(clientRequest)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+                .build()
+            Mono.just(updatedRequest)
         }
     }
 }

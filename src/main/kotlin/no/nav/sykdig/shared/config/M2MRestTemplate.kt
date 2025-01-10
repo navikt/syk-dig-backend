@@ -7,6 +7,10 @@ import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.ClientRequest
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 
 @Configuration
 class M2MRestTemplate(
@@ -17,6 +21,13 @@ class M2MRestTemplate(
     fun kodeverkRestTemplate(): RestTemplate {
         return restTemplateBuilder
             .additionalInterceptors(bearerTokenInterceptor("kodeverk-m2m"))
+            .build()
+    }
+
+    @Bean
+    fun oppgaveWebClient(): WebClient {
+        return webClientBuilder()
+            .filter(bearerTokenExchangeFilterFunction("oppgave-m2m"))
             .build()
     }
 
@@ -61,5 +72,25 @@ class M2MRestTemplate(
             request.headers.setBearerAuth(token)
             execution.execute(request, body)
         }
+    }
+
+    fun bearerTokenExchangeFilterFunction(service: String): ExchangeFilterFunction {
+        return ExchangeFilterFunction.ofRequestProcessor { clientRequest ->
+            Mono.defer {
+                val token = retrieveBearerTokenForService(service)
+                val updatedRequest = ClientRequest.from(clientRequest)
+                    .header("Authorization", "Bearer $token")
+                    .build()
+                Mono.just(updatedRequest)
+            }
+        }
+    }
+
+    private fun retrieveBearerTokenForService(service: String): String {
+        return "mocked-token-for-$service"
+    }
+
+    private fun webClientBuilder(): WebClient.Builder {
+        return WebClient.builder()
     }
 }

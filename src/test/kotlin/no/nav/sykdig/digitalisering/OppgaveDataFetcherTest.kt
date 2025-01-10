@@ -2,6 +2,7 @@ package no.nav.sykdig.digitalisering
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.TestGraphQLContextContributor
 import no.nav.sykdig.shared.config.CustomDataFetchingExceptionHandler
 import no.nav.sykdig.utenlandsk.db.PoststedRepository
@@ -424,7 +425,7 @@ class OppgaveDataFetcherTest {
             )
 
         assertEquals(0, result.errors.size)
-        verify(
+        runBlocking {verify(
             oppgaveService,
             times(1),
         ).ferdigstillOppgave(
@@ -443,7 +444,7 @@ class OppgaveDataFetcherTest {
                 ),
             enhetId = "1234",
         )
-    }
+    } }
 
     @Test
     fun `should throw ClientException when values are not validated correctly`() {

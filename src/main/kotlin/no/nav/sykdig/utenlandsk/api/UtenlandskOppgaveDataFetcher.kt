@@ -120,7 +120,7 @@ class UtenlandskOppgaveDataFetcher(
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.Lagre)
-    fun lagreOppgave(
+    suspend fun lagreOppgave(
         @InputArgument oppgaveId: String,
         @InputArgument enhetId: String,
         @InputArgument values: SykmeldingUnderArbeidValues,
@@ -159,7 +159,7 @@ class UtenlandskOppgaveDataFetcher(
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
-    fun oppgaveTilbakeTilGosys(
+    suspend fun oppgaveTilbakeTilGosys(
         @InputArgument oppgaveId: String,
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveStatus {
@@ -179,7 +179,7 @@ class UtenlandskOppgaveDataFetcher(
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.Avvis)
-    fun avvis(
+    suspend fun avvis(
         @InputArgument oppgaveId: String,
         @InputArgument avvisningsgrunn: Avvisingsgrunn,
         @InputArgument enhetId: String,

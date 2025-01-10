@@ -32,7 +32,7 @@ class FerdigstillingService(
     val log = applog()
     val securelog = securelog()
 
-    fun ferdigstillUtenlandskOppgave(
+    suspend fun ferdigstillUtenlandskOppgave(
         enhet: String,
         oppgave: OppgaveDbModel,
         sykmeldt: Person,

@@ -1,6 +1,7 @@
 package no.nav.sykdig.digitalisering
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.utenlandsk.services.FerdigstillingService
@@ -107,40 +108,42 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
     @Test
     fun testJournalpostSykmeldingAvvist() {
         journalpostSykmeldingRepository.insertJournalpostId("journalpostAvvist")
-        val oppgave =
-            oppgaveMock.copy(
-                "journalpostAvvist-oppgave-avvist",
-                sykmeldingId = UUID.randomUUID(),
-                journalpostId = "journalpostAvvist",
-            )
-        Mockito.`when`(gosysService.hentOppgave(anyString(), anyString())).thenAnswer {
-            oppgaveResponseMock
-        }
+        runBlocking {
+            val oppgave =
+                oppgaveMock.copy(
+                    "journalpostAvvist-oppgave-avvist",
+                    sykmeldingId = UUID.randomUUID(),
+                    journalpostId = "journalpostAvvist",
+                )
+            Mockito.`when`(gosysService.hentOppgave(anyString(), anyString())).thenAnswer {
+                oppgaveResponseMock
+            }
 
-        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
-            SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
-        }
-        Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
-            Person(
-                fnr = "20086600138",
-                navn = Navn("Fornavn", null, "Etternavn"),
-                aktorId = "aktorid",
-                bostedsadresse = null,
-                oppholdsadresse = null,
-                fodselsdato = LocalDate.of(1980, 5, 5),
+            Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
+                SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
+            }
+            Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
+                Person(
+                    fnr = "20086600138",
+                    navn = Navn("Fornavn", null, "Etternavn"),
+                    aktorId = "aktorid",
+                    bostedsadresse = null,
+                    oppholdsadresse = null,
+                    fodselsdato = LocalDate.of(1980, 5, 5),
+                )
+            }
+            oppgaveRepository.lagreOppgave(oppgave)
+            utenlandskOppgaveService.avvisOppgave(
+                oppgave.oppgaveId,
+                "Z123456",
+                "Z123456@trygdeetaten.no",
+                "0393",
+                Avvisingsgrunn.MANGLENDE_DIAGNOSE,
+                null,
             )
+            val journalpostSykmelding = journalpostSykmeldingRepository.getJournalpostSykmelding("journalpostAvvist")
+            assertNull(journalpostSykmelding)
         }
-        oppgaveRepository.lagreOppgave(oppgave)
-        utenlandskOppgaveService.avvisOppgave(
-            oppgave.oppgaveId,
-            "Z123456",
-            "Z123456@trygdeetaten.no",
-            "0393",
-            Avvisingsgrunn.MANGLENDE_DIAGNOSE,
-            null,
-        )
-        val journalpostSykmelding = journalpostSykmeldingRepository.getJournalpostSykmelding("journalpostAvvist")
-        assertNull(journalpostSykmelding)
     }
 
     @Test
@@ -149,48 +152,50 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
         val oppgaveId1 = "journalpostAvvist-oppgave-avvist-2"
         val oppgaveId2 = "journalpostAvvist-oppgave-avvist-3"
         journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
-        val oppgave =
-            oppgaveMock.copy(
-                oppgaveId1,
-                sykmeldingId = UUID.randomUUID(),
-                journalpostId = journalpostId,
-            )
-        Mockito.`when`(gosysService.hentOppgave(anyString(), anyString())).thenAnswer {
-            oppgaveResponseMock
-        }
+        runBlocking {
+            val oppgave =
+                oppgaveMock.copy(
+                    oppgaveId1,
+                    sykmeldingId = UUID.randomUUID(),
+                    journalpostId = journalpostId,
+                )
+            Mockito.`when`(gosysService.hentOppgave(anyString(), anyString())).thenAnswer {
+                oppgaveResponseMock
+            }
 
-        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
-            SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
-        }
-        Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
-            Person(
-                fnr = "20086600138",
-                navn = Navn("Fornavn", null, "Etternavn"),
-                aktorId = "aktorid",
-                bostedsadresse = null,
-                oppholdsadresse = null,
-                fodselsdato = LocalDate.of(1980, 5, 5),
-            )
-        }
-        oppgaveRepository.lagreOppgave(oppgave)
+            Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
+                SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
+            }
+            Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
+                Person(
+                    fnr = "20086600138",
+                    navn = Navn("Fornavn", null, "Etternavn"),
+                    aktorId = "aktorid",
+                    bostedsadresse = null,
+                    oppholdsadresse = null,
+                    fodselsdato = LocalDate.of(1980, 5, 5),
+                )
+            }
+            oppgaveRepository.lagreOppgave(oppgave)
 
-        val oppgave2 =
-            oppgaveMock.copy(
-                oppgaveId2,
-                sykmeldingId = UUID.randomUUID(),
-                journalpostId = journalpostId,
+            val oppgave2 =
+                oppgaveMock.copy(
+                    oppgaveId2,
+                    sykmeldingId = UUID.randomUUID(),
+                    journalpostId = journalpostId,
+                )
+            oppgaveRepository.lagreOppgave(oppgave2)
+            utenlandskOppgaveService.avvisOppgave(
+                oppgave.oppgaveId,
+                "Z123456",
+                "Z123456@trygdeetaten.no",
+                "0393",
+                Avvisingsgrunn.MANGLENDE_DIAGNOSE,
+                null,
             )
-        oppgaveRepository.lagreOppgave(oppgave2)
-        utenlandskOppgaveService.avvisOppgave(
-            oppgave.oppgaveId,
-            "Z123456",
-            "Z123456@trygdeetaten.no",
-            "0393",
-            Avvisingsgrunn.MANGLENDE_DIAGNOSE,
-            null,
-        )
-        val journalpostSykmelding = journalpostSykmeldingRepository.getJournalpostSykmelding(journalpostId)
-        assertNotNull(journalpostSykmelding)
+            val journalpostSykmelding = journalpostSykmeldingRepository.getJournalpostSykmelding(journalpostId)
+            assertNotNull(journalpostSykmelding)
+        }
     }
 
     @Test
@@ -211,115 +216,122 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
     fun testAvvisOk() {
         val oppgave = oppgaveMock.copy(oppgaveId = "3", sykmeldingId = UUID.randomUUID())
         oppgaveRepository.lagreOppgave(oppgave)
-        Mockito.`when`(gosysService.hentOppgave(oppgave.oppgaveId, oppgave.sykmeldingId.toString())).thenAnswer {
-            oppgaveResponseMock
-        }
+        runBlocking {
+            Mockito.`when`(gosysService.hentOppgave(oppgave.oppgaveId, oppgave.sykmeldingId.toString())).thenAnswer {
+                oppgaveResponseMock
+            }
 
-        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
-            SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
-        }
-        Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
-            Person(
-                fnr = "20086600138",
-                navn = Navn("Fornavn", null, "Etternavn"),
-                aktorId = "aktorid",
-                bostedsadresse = null,
-                oppholdsadresse = null,
-                fodselsdato = LocalDate.of(1980, 5, 5),
-            )
-        }
-        val avvistOppgave =
-            utenlandskOppgaveService.avvisOppgave(
-                oppgave.oppgaveId,
-                "Z123456",
-                "Z123456@trygdeetaten.no",
-                "0393",
-                excpetedAvvisingsgrunn,
-                null,
-            )
-        val lagretOppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
+            Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
+                SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
+            }
+            Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
+                Person(
+                    fnr = "20086600138",
+                    navn = Navn("Fornavn", null, "Etternavn"),
+                    aktorId = "aktorid",
+                    bostedsadresse = null,
+                    oppholdsadresse = null,
+                    fodselsdato = LocalDate.of(1980, 5, 5),
+                )
+            }
+            val avvistOppgave =
+                utenlandskOppgaveService.avvisOppgave(
+                    oppgave.oppgaveId,
+                    "Z123456",
+                    "Z123456@trygdeetaten.no",
+                    "0393",
+                    excpetedAvvisingsgrunn,
+                    null,
+                )
+            val lagretOppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
 
-        assertNotNull(lagretOppgave.oppgaveDbModel.ferdigstilt)
-        assertEquals(avvistOppgave.oppgaveDbModel.ferdigstilt, lagretOppgave.oppgaveDbModel.ferdigstilt)
+            assertNotNull(lagretOppgave.oppgaveDbModel.ferdigstilt)
+            assertEquals(avvistOppgave.oppgaveDbModel.ferdigstilt, lagretOppgave.oppgaveDbModel.ferdigstilt)
+        }
     }
 
     @Test
     fun testAvvisRollbackVedFeil() {
-        oppgaveRepository.lagreOppgave(oppgaveMock)
+        runBlocking {
+            oppgaveRepository.lagreOppgave(oppgaveMock)
 
-        Mockito.`when`(gosysService.hentOppgave(oppgaveId, sykmeldingId.toString())).thenAnswer {
-            oppgaveResponseMock
+            Mockito.`when`(gosysService.hentOppgave(oppgaveId, sykmeldingId.toString())).thenAnswer {
+                oppgaveResponseMock
+            }
+            Mockito.`when`(
+                gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString()),
+            ).thenThrow(RuntimeException("Real bad error"))
+
+            Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
+                SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
+            }
+            Mockito.`when`(personService.getPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
+                Person(
+                    fnr = "20086600138",
+                    navn = Navn("Fornavn", null, "Etternavn"),
+                    aktorId = "aktorid",
+                    bostedsadresse = null,
+                    oppholdsadresse = null,
+                    fodselsdato = LocalDate.of(1980, 5, 5),
+                )
+            }
+
+            assertThrows<RuntimeException> {
+                utenlandskOppgaveService.avvisOppgave(
+                    oppgaveMock.oppgaveId,
+                    "Z123456",
+                    "Z123456@trygdeetaten.no",
+                    "0393",
+                    excpetedAvvisingsgrunn,
+                    null,
+                )
+            }
+
+
+            val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
+
+            assertNull(oppgave.oppgaveDbModel.ferdigstilt)
         }
-        Mockito.`when`(
-            gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString()),
-        ).thenThrow(RuntimeException("Real bad error"))
-
-        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
-            SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
-        }
-        Mockito.`when`(personService.getPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
-            Person(
-                fnr = "20086600138",
-                navn = Navn("Fornavn", null, "Etternavn"),
-                aktorId = "aktorid",
-                bostedsadresse = null,
-                oppholdsadresse = null,
-                fodselsdato = LocalDate.of(1980, 5, 5),
-            )
-        }
-
-        assertThrows<RuntimeException> {
-            utenlandskOppgaveService.avvisOppgave(
-                oppgaveMock.oppgaveId,
-                "Z123456",
-                "Z123456@trygdeetaten.no",
-                "0393",
-                excpetedAvvisingsgrunn,
-                null,
-            )
-        }
-
-        val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
-
-        assertNull(oppgave.oppgaveDbModel.ferdigstilt)
     }
 
     @Test
     fun testAvvisAnnet() {
         val oppgave = oppgaveMock.copy(oppgaveId = "2", sykmeldingId = UUID.randomUUID())
         oppgaveRepository.lagreOppgave(oppgave)
-        Mockito.`when`(gosysService.hentOppgave(oppgave.oppgaveId, oppgave.sykmeldingId.toString())).thenAnswer {
-            oppgaveResponseMock
-        }
+        runBlocking {
+            Mockito.`when`(gosysService.hentOppgave(oppgave.oppgaveId, oppgave.sykmeldingId.toString())).thenAnswer {
+                oppgaveResponseMock
+            }
 
-        val excpetedAvvisingsgrunnAnnet = Avvisingsgrunn.ANNET
+            val excpetedAvvisingsgrunnAnnet = Avvisingsgrunn.ANNET
 
-        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
-            SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
-        }
-        Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
-            Person(
-                fnr = "20086600138",
-                navn = Navn("Fornavn", null, "Etternavn"),
-                aktorId = "aktorid",
-                bostedsadresse = null,
-                oppholdsadresse = null,
-                fodselsdato = LocalDate.of(1980, 5, 5),
-            )
-        }
-        val avvistOppgave =
-            utenlandskOppgaveService.avvisOppgave(
-                oppgave.oppgaveId,
-                "Z123456",
-                "Z123456@trygdeetaten.no",
-                "0393",
-                excpetedAvvisingsgrunnAnnet,
-                "Feil dato",
-            )
-        val lagretOppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
+            Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
+                SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
+            }
+            Mockito.`when`(personService.getPerson(oppgave.fnr, oppgave.sykmeldingId.toString())).thenAnswer {
+                Person(
+                    fnr = "20086600138",
+                    navn = Navn("Fornavn", null, "Etternavn"),
+                    aktorId = "aktorid",
+                    bostedsadresse = null,
+                    oppholdsadresse = null,
+                    fodselsdato = LocalDate.of(1980, 5, 5),
+                )
+            }
+            val avvistOppgave =
+                utenlandskOppgaveService.avvisOppgave(
+                    oppgave.oppgaveId,
+                    "Z123456",
+                    "Z123456@trygdeetaten.no",
+                    "0393",
+                    excpetedAvvisingsgrunnAnnet,
+                    "Feil dato",
+                )
+            val lagretOppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgave.oppgaveId)
 
-        assertNotNull(lagretOppgave.oppgaveDbModel.ferdigstilt)
-        assertEquals(avvistOppgave.oppgaveDbModel.ferdigstilt, lagretOppgave.oppgaveDbModel.ferdigstilt)
+            assertNotNull(lagretOppgave.oppgaveDbModel.ferdigstilt)
+            assertEquals(avvistOppgave.oppgaveDbModel.ferdigstilt, lagretOppgave.oppgaveDbModel.ferdigstilt)
+        }
     }
 
     @Test
@@ -327,41 +339,43 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
         oppgaveRepository.lagreOppgave(oppgaveMock)
 
         val excpetedAvvisingsgrunnAnnet = Avvisingsgrunn.ANNET
+        runBlocking {
+            Mockito.`when`(gosysService.hentOppgave(oppgaveId, sykmeldingId.toString())).thenAnswer {
+                oppgaveResponseMock
+            }
+            Mockito.`when`(
+                gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString()),
+            ).thenThrow(RuntimeException("Real bad error"))
 
-        Mockito.`when`(gosysService.hentOppgave(oppgaveId, sykmeldingId.toString())).thenAnswer {
-            oppgaveResponseMock
+            Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
+                SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
+            }
+            Mockito.`when`(personService.getPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
+                Person(
+                    fnr = "20086600138",
+                    navn = Navn("Fornavn", null, "Etternavn"),
+                    aktorId = "aktorid",
+                    bostedsadresse = null,
+                    oppholdsadresse = null,
+                    fodselsdato = LocalDate.of(1980, 5, 5),
+                )
+            }
+
+
+            assertThrows<RuntimeException> {
+                utenlandskOppgaveService.avvisOppgave(
+                    oppgaveMock.oppgaveId,
+                    "Z123456",
+                    "Z123456@trygdeetaten.no",
+                    "0393",
+                    excpetedAvvisingsgrunnAnnet,
+                    null,
+                )
+            }
+
+            val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
+
+            assertNull(oppgave.oppgaveDbModel.ferdigstilt)
         }
-        Mockito.`when`(
-            gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString()),
-        ).thenThrow(RuntimeException("Real bad error"))
-
-        Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
-            SimpleMeterRegistry().counter("AVVIST_SENDT_TIL_GOSYS")
-        }
-        Mockito.`when`(personService.getPerson(oppgaveMock.fnr, oppgaveMock.sykmeldingId.toString())).thenAnswer {
-            Person(
-                fnr = "20086600138",
-                navn = Navn("Fornavn", null, "Etternavn"),
-                aktorId = "aktorid",
-                bostedsadresse = null,
-                oppholdsadresse = null,
-                fodselsdato = LocalDate.of(1980, 5, 5),
-            )
-        }
-
-        assertThrows<RuntimeException> {
-            utenlandskOppgaveService.avvisOppgave(
-                oppgaveMock.oppgaveId,
-                "Z123456",
-                "Z123456@trygdeetaten.no",
-                "0393",
-                excpetedAvvisingsgrunnAnnet,
-                null,
-            )
-        }
-
-        val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveMock.oppgaveId)
-
-        assertNull(oppgave.oppgaveDbModel.ferdigstilt)
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.sykdig.digitalisering.ferdigstilling
 
+import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
 import no.nav.sykdig.digitalisering.createDigitalseringsoppgaveDbModel
@@ -109,6 +110,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                         kanal = CHANNEL_SCAN_IM,
                     ),
             )
+        runBlocking {
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpost)).thenAnswer { false }
         Mockito.`when`(safJournalpostGraphQlClient.getAvsenderMottar(journalpost)).thenAnswer {
@@ -191,6 +193,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
             "Fornavn Etternavn",
         )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
+        }
     }
 
     @Test

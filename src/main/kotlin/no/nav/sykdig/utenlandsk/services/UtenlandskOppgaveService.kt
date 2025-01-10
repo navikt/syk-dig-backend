@@ -63,7 +63,7 @@ class UtenlandskOppgaveService(
         sykDigOppgaveService.updateOppgave(oppgaveId, values, navEpost)
     }
 
-    fun ferdigstillOppgave(
+    suspend fun ferdigstillOppgave(
         oppgaveId: String,
         navEpost: String,
         values: FerdistilltRegisterOppgaveValues,
@@ -85,7 +85,7 @@ class UtenlandskOppgaveService(
         metricRegister.ferdigstiltOppgave.increment()
     }
 
-    fun ferdigstillOppgaveSendTilGosys(
+    suspend fun ferdigstillOppgaveSendTilGosys(
         oppgaveId: String,
         navIdent: String,
         navEpost: String,
@@ -106,7 +106,7 @@ class UtenlandskOppgaveService(
     }
 
     @Transactional
-    fun avvisOppgave(
+    suspend fun avvisOppgave(
         oppgaveId: String,
         navIdent: String,
         navEpost: String,

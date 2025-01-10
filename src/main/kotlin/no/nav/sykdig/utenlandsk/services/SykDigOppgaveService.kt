@@ -191,7 +191,7 @@ class SykDigOppgaveService(
     }
 
     @Transactional
-    fun ferdigstillUtenlandskAvvistOppgave(
+    suspend fun ferdigstillUtenlandskAvvistOppgave(
         oppgave: OppgaveDbModel,
         navEpost: String,
         values: FerdistilltRegisterOppgaveValues,
