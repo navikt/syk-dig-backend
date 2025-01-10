@@ -1,6 +1,7 @@
 package no.nav.sykdig.shared.config
 
 import no.nav.security.token.support.client.core.ClientProperties
+import no.nav.security.token.support.client.core.context.JwtBearerTokenResolver
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -12,6 +13,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
@@ -22,6 +25,15 @@ import reactor.core.publisher.Mono
 @Configuration
 class AadWebClientConfiguration {
 
+    class SykDigTokenResolver : JwtBearerTokenResolver {
+        val log = applog()
+
+        override fun token(): String? {
+            val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+            return autentication.token.tokenValue
+        }
+    }
+    
     val log = applog()
 
     @Bean
