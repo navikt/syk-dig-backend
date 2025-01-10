@@ -9,30 +9,34 @@ import no.nav.sykdig.shared.applog
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
+@Primary
+@Component
+class SykDigTokenResolver : JwtBearerTokenResolver {
+    val log = applog()
+
+    override fun token(): String? {
+        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        return autentication.token.tokenValue
+    }
+}
+
 @EnableOAuth2Client(cacheEnabled = true)
 @Configuration
 class AadWebClientConfiguration {
-
-    class SykDigTokenResolver : JwtBearerTokenResolver {
-        val log = applog()
-
-        override fun token(): String? {
-            val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
-            return autentication.token.tokenValue
-        }
-    }
     
     val log = applog()
 
