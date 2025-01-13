@@ -17,6 +17,7 @@ import no.nav.sykdig.saf.SafClient
 import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.nasjonal.models.*
 import no.nav.sykdig.shared.securelog
+import no.nav.sykdig.shared.utils.getLoggingMeta
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
@@ -316,7 +317,7 @@ class NasjonalOppgaveService(
     fun oppgaveTilGosys(oppgaveId: String, authorization: String) {
         val eksisterendeOppgave = getOppgave(oppgaveId, authorization) ?: return
         val navIdent = nasjonalCommonService.getNavIdent()
-        val loggingMeta = nasjonalCommonService.getLoggingMeta(eksisterendeOppgave.sykmeldingId, eksisterendeOppgave)
+        val loggingMeta = getLoggingMeta(eksisterendeOppgave.sykmeldingId, eksisterendeOppgave)
         nasjonalFerdigstillingsService.ferdigstillOgSendOppgaveTilGosys(oppgaveId, authorization, eksisterendeOppgave)
         oppdaterOppgave(eksisterendeOppgave.sykmeldingId, Utfall.SENDT_TIL_GOSYS.toString(), navIdent.veilederIdent, null, null)
 

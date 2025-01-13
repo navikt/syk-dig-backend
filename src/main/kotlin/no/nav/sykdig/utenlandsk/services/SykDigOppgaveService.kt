@@ -1,6 +1,7 @@
 package no.nav.sykdig.utenlandsk.services
 
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
+import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.db.OppgaveRepository
@@ -20,6 +21,7 @@ import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import no.nav.sykdig.shared.securelog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import no.nav.sykdig.shared.utils.getLoggingMeta
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -62,21 +64,23 @@ class SykDigOppgaveService(
 
     fun getOppgaveFromSykmeldingId(sykmeldingId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgaveBySykmeldingId(sykmeldingId)
+        val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
         if (oppgave == null) {
-            log.warn("Fant ikke oppgave med sykmeldingId $sykmeldingId")
+            log.warn("Fant ikke oppgave {}", StructuredArguments.fields(loggingMeta))
             throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
-        log.info("Hentet oppgave med sykmelding id $sykmeldingId")
+        log.info("Hentet oppgave {}", StructuredArguments.fields(loggingMeta))
         return oppgave
     }
 
     fun getOppgave(oppgaveId: String): OppgaveDbModel {
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
+        val loggingMeta = oppgave?.sykmelding?.sykmelding?.id?.let { getLoggingMeta(it, oppgave) }
         if (oppgave == null) {
-            log.warn("Fant ikke oppgave med id $oppgaveId")
+            log.warn("Fant ikke oppgave {} ", StructuredArguments.fields(loggingMeta))
             throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
-        log.info("Hentet oppgave med id $oppgaveId")
+        log.info("Hentet oppgave {} ", StructuredArguments.fields(loggingMeta))
         return oppgave
     }
 
