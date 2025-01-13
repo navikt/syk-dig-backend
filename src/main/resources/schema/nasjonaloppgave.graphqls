@@ -15,7 +15,7 @@ type NasjonalSykmelding {
     arbeidsgiver: Arbeidsgiver,
     medisinskVurdering: MedisinskVurdering,
     skjermesForPasient: Boolean,
-    perioder: [Periode],
+    perioder: [Periode!]!,
     meldingTilNAV: MeldingTilNAV,
     meldingTilArbeidsgiver: String,
     kontaktMedPasient: KontaktMedPasient,
@@ -38,7 +38,7 @@ type AktivitetIkkeMulig {
 }
 type ArbeidsrelatertArsak {
     beskrivelse: String,
-    arsak: [ArbeidsrelatertArsakType],
+    arsak: [ArbeidsrelatertArsakType!]!,
 }
 
 enum ArbeidsrelatertArsakType {
@@ -48,7 +48,7 @@ enum ArbeidsrelatertArsakType {
 }
 type MedisinskArsak {
     beskrivelse: String,
-    arsak: [MedisinskArsakType],
+    arsak: [MedisinskArsakType!]!,
 }
 
 enum MedisinskArsakType {
@@ -74,7 +74,7 @@ type KontaktMedPasient {
 
 type MedisinskVurdering {
     hovedDiagnose: DiagnoseSchema,
-    biDiagnoser: [DiagnoseSchema]!,
+    biDiagnoser: [DiagnoseSchema!]!,
     svangerskap: Boolean!,
     yrkesskade: Boolean!,
     yrkesskadeDato: String,
@@ -83,7 +83,7 @@ type MedisinskVurdering {
 
 type AnnenFraversArsak {
     beskrivelse: String,
-    grunn: [AnnenFraversArsakGrunn]
+    grunn: [AnnenFraversArsakGrunn!]
 }
 
 enum AnnenFraversArsakGrunn {
