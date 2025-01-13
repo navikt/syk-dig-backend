@@ -73,7 +73,7 @@ fun mapToHarArbeidsGiver(oppgave: NasjonalManuellOppgaveDAO): HarArbeidsgiver? {
 fun mapToMedisinskVurdering(oppgave: NasjonalManuellOppgaveDAO): MedisinskVurdering {
     val oppgaveMedisinskVurdering = oppgave.papirSmRegistrering.medisinskVurdering
     return MedisinskVurdering(
-        hovedDiagnose = mapToDiagnoseSchema(oppgaveMedisinskVurdering?.hovedDiagnose),
+        hovedDiagnose = oppgaveMedisinskVurdering?.hovedDiagnose?.let { mapToDiagnoseSchema(it) },
         biDiagnoser = oppgaveMedisinskVurdering?.biDiagnoser?.map { mapToDiagnoseSchema(it) } ?: emptyList(),
         svangerskap = oppgaveMedisinskVurdering?.svangerskap ?: false,
         yrkesskade = oppgaveMedisinskVurdering?.yrkesskade ?: false,
@@ -83,9 +83,7 @@ fun mapToMedisinskVurdering(oppgave: NasjonalManuellOppgaveDAO): MedisinskVurder
 }
 
 
-fun mapToDiagnoseSchema(diagnose: Diagnose?): DiagnoseSchema? {
-    if (diagnose == null) return null
-
+fun mapToDiagnoseSchema(diagnose: Diagnose): DiagnoseSchema {
     return DiagnoseSchema(
         system = diagnose.system,
         kode = diagnose.kode,
