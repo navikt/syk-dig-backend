@@ -1,5 +1,7 @@
 union NasjonalOppgaveResult = NasjonalOppgave | NasjonalOppgaveStatus
 
+union NasjonalSykmeldingResult = NasjonalSykmelding | NasjonalSykmeldingStatus
+
 type NasjonalOppgave {
     oppgaveId: String!
     nasjonalSykmelding: NasjonalSykmelding!
@@ -21,6 +23,11 @@ type NasjonalSykmelding {
     kontaktMedPasient: KontaktMedPasient,
     behandletTidspunkt: Date,
     behandler: Behandler,
+}
+
+type NasjonalSykmeldingStatus {
+    sykmeldingId: String
+    status: NasjonalOppdatertSykmeldingStatusEnum
 }
 
 type Periode {
@@ -135,4 +142,13 @@ enum NasjonalOppgaveStatusEnum {
     IKKE_EN_SYKMELDING
     FINNES_IKKE
     AVVIST
+}
+
+enum NasjonalOppdatertSykmeldingStatusEnum {
+    OPPDATERT
+    IKKE_FERDIGSTILT
+    FERDIGSTILT
+    FINNES_IKKE
+    AVVIST
+    IKKE_EN_SYKMELDING
 }
