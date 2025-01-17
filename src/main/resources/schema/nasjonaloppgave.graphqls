@@ -1,0 +1,154 @@
+union NasjonalOppgaveResult = NasjonalOppgave | NasjonalOppgaveStatus
+
+union NasjonalSykmeldingResult = NasjonalSykmelding | NasjonalSykmeldingStatus
+
+type NasjonalOppgave {
+    oppgaveId: String!
+    nasjonalSykmelding: NasjonalSykmelding!
+    documents: [Document!]!
+}
+
+type NasjonalSykmelding {
+    sykmeldingId: String,
+    journalpostId: String!,
+    fnr: String,
+    datoOpprettet: String,
+    syketilfelleStartDato: String,
+    arbeidsgiver: Arbeidsgiver,
+    medisinskVurdering: MedisinskVurdering,
+    skjermesForPasient: Boolean,
+    perioder: [Periode!]!,
+    meldingTilNAV: MeldingTilNAV,
+    meldingTilArbeidsgiver: String,
+    kontaktMedPasient: KontaktMedPasient,
+    behandletTidspunkt: Date,
+    behandler: Behandler,
+}
+
+type NasjonalSykmeldingStatus {
+    sykmeldingId: String
+    status: NasjonalOppdatertSykmeldingStatusEnum
+}
+
+type Periode {
+    fom: Date!,
+    tom: Date!,
+    aktivitetIkkeMulig: AktivitetIkkeMulig,
+    avventendeInnspillTilArbeidsgiver: String,
+    behandlingsdager: Int,
+    gradert: Gradert,
+    reisetilskudd: Boolean,
+}
+type AktivitetIkkeMulig {
+    medisinskArsak: MedisinskArsak,
+    arbeidsrelatertArsak: ArbeidsrelatertArsak,
+}
+type ArbeidsrelatertArsak {
+    beskrivelse: String,
+    arsak: [ArbeidsrelatertArsakType!]!,
+}
+
+enum ArbeidsrelatertArsakType {
+    MANGLENDE_TILRETTELEGGING,
+    ANNET,
+
+}
+type MedisinskArsak {
+    beskrivelse: String,
+    arsak: [MedisinskArsakType!]!,
+}
+
+enum MedisinskArsakType {
+    TILSTAND_HINDRER_AKTIVITET,
+    AKTIVITET_FORVERRER_TILSTAND,
+    AKTIVITET_FORHINDRER_BEDRING,
+    ANNET,
+}
+
+type Gradert {
+    reisetilskudd: Boolean!,
+    grad: Int,
+}
+
+type MeldingTilNAV {
+    bistandUmiddelbart: Boolean!,
+    beskrivBistand: String,
+}
+type KontaktMedPasient {
+    kontaktDato: String,
+    begrunnelseIkkeKontakt: String,
+}
+
+type MedisinskVurdering {
+    hovedDiagnose: DiagnoseSchema,
+    biDiagnoser: [DiagnoseSchema!]!,
+    svangerskap: Boolean!,
+    yrkesskade: Boolean!,
+    yrkesskadeDato: String,
+    annenFraversArsak: AnnenFraversArsak,
+}
+
+type AnnenFraversArsak {
+    beskrivelse: String,
+    grunn: [AnnenFraversArsakGrunn!]
+}
+
+enum AnnenFraversArsakGrunn {
+    GODKJENT_HELSEINSTITUSJON,
+    BEHANDLING_FORHINDRER_ARBEID,
+    ARBEIDSRETTET_TILTAK,
+    MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND,
+    NODVENDIG_KONTROLLUNDENRSOKELSE,
+    SMITTEFARE,
+    ABORT,
+    UFOR_GRUNNET_BARNLOSHET,
+    DONOR,
+    BEHANDLING_STERILISERING,
+}
+
+type DiagnoseSchema{
+    system: String,
+    kode: String,
+    tekst: String,
+}
+type Behandler {
+    fornavn: String!,
+    mellomnavn: String,
+    etternavn: String!,
+    fnr: String!,
+    hpr: String,
+    tlf: String,
+}
+type Arbeidsgiver {
+    harArbeidsgiver: HarArbeidsgiver,
+    navn: String,
+    yrkesbetegnelse: String,
+    stillingsprosent: Int
+}
+
+enum HarArbeidsgiver {
+    EN_ARBEIDSGIVER
+    FLERE_ARBEIDSGIVERE
+    INGEN_ARBEIDSGIVER
+}
+
+type NasjonalOppgaveStatus {
+    oppgaveId: String!
+    status: NasjonalOppgaveStatusEnum!
+}
+
+enum NasjonalOppgaveStatusEnum {
+    FERDIGSTILT
+    IKKE_EN_SYKMELDING
+    FINNES_IKKE
+    AVVIST
+}
+
+enum NasjonalOppdatertSykmeldingStatusEnum {
+    OPPDATERT
+    IKKE_FERDIGSTILT
+    FERDIGSTILT
+    FINNES_IKKE
+    AVVIST
+    IKKE_EN_SYKMELDING
+}
