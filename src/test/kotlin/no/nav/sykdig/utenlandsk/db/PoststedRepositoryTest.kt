@@ -1,8 +1,7 @@
-package no.nav.sykdig.db
+package no.nav.sykdig.utenlandsk.db
 
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.utenlandsk.poststed.PostInformasjon
-import no.nav.sykdig.utenlandsk.db.PoststedRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

@@ -1,4 +1,4 @@
-package no.nav.sykdig.digitalisering.helsenett
+package no.nav.sykdig.nasjonal.helsenett
 
 import io.mockk.coEvery
 import io.mockk.coVerify

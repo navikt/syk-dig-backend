@@ -1,10 +1,8 @@
-package no.nav.sykdig.digitalisering
+package no.nav.sykdig.utenlandsk.services
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.utenlandsk.services.FerdigstillingService
-import no.nav.sykdig.utenlandsk.services.GosysService
 import no.nav.sykdig.oppgave.models.GetOppgaveResponse
 import no.nav.sykdig.oppgave.models.OppgaveType
 import no.nav.sykdig.oppgave.models.OppgaveStatus
@@ -15,8 +13,6 @@ import no.nav.sykdig.utenlandsk.db.JournalpostSykmeldingRepository
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
-import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
-import no.nav.sykdig.utenlandsk.services.UtenlandskOppgaveService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull

@@ -1,4 +1,4 @@
-package no.nav.sykdig.digitalisering
+package no.nav.sykdig.utenlandsk.services
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
@@ -22,7 +22,6 @@ import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import no.nav.sykdig.utenlandsk.models.SykmeldingUnderArbeid
 import no.nav.sykdig.utenlandsk.models.SykDigOppgave
 import no.nav.sykdig.utenlandsk.poststed.api.AdresseDataFetchers
-import no.nav.sykdig.utenlandsk.services.UtenlandskOppgaveService
 import no.nav.sykdig.shared.utils.toOffsetDateTimeAtNoon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

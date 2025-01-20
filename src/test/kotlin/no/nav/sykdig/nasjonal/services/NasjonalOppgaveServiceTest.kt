@@ -1,4 +1,4 @@
-package no.nav.sykdig.digitalisering.papirsykmelding
+package no.nav.sykdig.nasjonal.services
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.runBlocking
@@ -18,9 +18,6 @@ import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.nasjonal.models.Veileder
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.nasjonal.services.NasjonalCommonService
-import no.nav.sykdig.nasjonal.services.NasjonalFerdigstillingsService
-import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.PersonService
@@ -37,7 +34,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
