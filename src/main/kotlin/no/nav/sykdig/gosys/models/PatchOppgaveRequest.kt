@@ -1,4 +1,4 @@
-package no.nav.sykdig.oppgave.models
+package no.nav.sykdig.gosys.models
 
 data class PatchFerdigStillOppgaveRequest(
     val versjon: Int,

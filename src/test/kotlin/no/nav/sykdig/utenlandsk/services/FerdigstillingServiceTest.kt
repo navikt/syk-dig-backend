@@ -11,7 +11,7 @@ import no.nav.sykdig.shared.KontaktMedPasient
 import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.shared.SporsmalSvar
 import no.nav.sykdig.utenlandsk.mapping.mapToReceivedSykmelding
-import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering

@@ -9,8 +9,8 @@ import no.nav.sykdig.dokarkiv.DokarkivClient
 import no.nav.sykdig.dokarkiv.DocumentService
 import no.nav.sykdig.shared.Adresse
 import no.nav.sykdig.shared.Behandler
-import no.nav.sykdig.oppgave.models.NasjonalOppgaveResponse
-import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
+import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave

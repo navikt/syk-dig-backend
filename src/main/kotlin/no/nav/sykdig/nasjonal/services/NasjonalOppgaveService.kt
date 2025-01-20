@@ -8,7 +8,7 @@ import no.nav.sykdig.shared.auditLogger.AuditLogger
 import no.nav.sykdig.shared.auditlog
 import no.nav.sykdig.utenlandsk.api.getPdfResult
 import no.nav.sykdig.shared.exceptions.NoOppgaveException
-import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.nasjonal.clients.SmregistreringClient
 import no.nav.sykdig.nasjonal.db.NasjonalOppgaveRepository
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO

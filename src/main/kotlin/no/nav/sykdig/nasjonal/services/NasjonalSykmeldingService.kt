@@ -160,9 +160,13 @@ class NasjonalSykmeldingService(
             throw exception
         }
         securelog.info("receivedSykmelding som skal lagres: ${receivedSykmelding}")
+        lagreSykmelding(receivedSykmelding, veileder)
+        log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
+    }
+
+    fun lagreSykmelding(receivedSykmelding: ReceivedSykmelding, veileder: Veileder) {
         val dao = mapToDao(receivedSykmelding, veileder)
         nasjonalSykmeldingRepository.save(dao)
-        log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
     }
 
     private fun handleBrokenRule(

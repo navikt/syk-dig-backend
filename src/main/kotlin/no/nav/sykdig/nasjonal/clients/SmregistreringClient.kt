@@ -5,7 +5,10 @@ import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.services.isValidOppgaveId
+import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
+import org.apache.kafka.common.network.Send
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -16,6 +19,7 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
+import java.time.OffsetDateTime
 
 @Component
 class SmregistreringClient(
@@ -74,6 +78,57 @@ class SmregistreringClient(
                 HttpEntity<String>(headers),
                 PapirManuellOppgave::class.java,
             )
+        return res
+    }
+
+    @Retryable
+    fun getOppgaveRequestWithoutAuth(
+        oppgaveId: String,
+    ): ResponseEntity<PapirManuellOppgave> {
+        if(!isValidOppgaveId(oppgaveId))
+            throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/sykDig/{oppgaveId}")
+                .buildAndExpand(oppgaveId)
+                .toUri()
+
+        val res =
+            smregisteringRestTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                HttpEntity<String>(headers),
+                PapirManuellOppgave::class.java,
+            )
+        return res
+    }
+
+    @Retryable
+    fun getSykmeldingRequestWithoutAuth(
+        sykmeldingId: String,
+    ): ResponseEntity<List<SendtSykmeldingHistory>> {
+        if(!isValidOppgaveId(sykmeldingId))
+            throw IllegalArgumentException("Invalid sykmeldingId does not contain only alphanumerical characters. SykmeldingId: $sykmeldingId")
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val uri =
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelding/sykDig/{sykmeldingId}")
+                .buildAndExpand(sykmeldingId)
+                .toUri()
+
+        val responseType = object : ParameterizedTypeReference<List<SendtSykmeldingHistory>>() {}
+
+        val res =
+            smregisteringRestTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                HttpEntity<String>(headers),
+                responseType
+            )
+
         return res
     }
 
@@ -180,3 +235,11 @@ class SmregistreringClient(
         return authorization.removePrefix("Bearer ")
     }
 }
+
+data class SendtSykmeldingHistory(
+    val id: String,
+    val sykmeldingId: String,
+    val ferdigstiltAv: String,
+    val datoFerdigstilt: OffsetDateTime?,
+    val receivedSykmelding: ReceivedSykmelding,
+)
