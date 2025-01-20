@@ -184,6 +184,7 @@ class SmregistreringClient(
     }
 }
 
+// TODO: denne gjelder kun migrering
 data class SendtSykmeldingHistory(
     val id: String,
     val sykmeldingId: String,
@@ -191,3 +192,22 @@ data class SendtSykmeldingHistory(
     val datoFerdigstilt: OffsetDateTime?,
     val receivedSykmelding: ReceivedSykmelding,
 )
+
+
+// TODO: denne gjelder kun migrering
+data class ManuellOppgaveDTOSykDig(
+    val journalpostId: String,
+    val fnr: String?,
+    val aktorId: String?,
+    val dokumentInfoId: String?,
+    val datoOpprettet: OffsetDateTime?,
+    val sykmeldingId: String,
+    val oppgaveid: Int?,
+    val ferdigstilt: Boolean,
+    val papirSmRegistering: PapirSmRegistering?,
+    var pdfPapirSykmelding: ByteArray?,
+    val ferdigstiltAv: String?,
+    val utfall: String?,
+    val datoFerdigstilt: LocalDateTime?
+)
+
