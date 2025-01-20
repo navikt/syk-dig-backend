@@ -1,7 +1,6 @@
-package no.nav.sykdig.digitalisering.sykmelding.db
+package no.nav.sykdig.utenlandsk.db
 
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.utenlandsk.db.JournalpostSykmeldingRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

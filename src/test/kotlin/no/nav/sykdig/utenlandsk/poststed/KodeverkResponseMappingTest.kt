@@ -1,4 +1,4 @@
-package no.nav.sykdig.poststed.client
+package no.nav.sykdig.utenlandsk.poststed
 
 import no.nav.sykdig.shared.objectMapper
 import no.nav.sykdig.utenlandsk.poststed.client.GetKodeverkKoderBetydningerResponse

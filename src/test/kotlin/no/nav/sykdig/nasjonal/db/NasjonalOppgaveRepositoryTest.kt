@@ -1,4 +1,4 @@
-package no.nav.sykdig.digitalisering.papirsykmelding
+package no.nav.sykdig.nasjonal.db
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest

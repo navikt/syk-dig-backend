@@ -1,8 +1,7 @@
-package no.nav.sykdig.digitalisering.ferdigstilling.dokarkiv
+package no.nav.sykdig.dokarkiv
 
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.dokarkiv.DokarkivClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
