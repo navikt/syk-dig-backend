@@ -164,9 +164,15 @@ class NasjonalSykmeldingService(
         log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
     }
 
-    fun lagreSykmelding(receivedSykmelding: ReceivedSykmelding, veileder: Veileder) {
-        val dao = mapToDao(receivedSykmelding, veileder)
-        nasjonalSykmeldingRepository.save(dao)
+    fun lagreSykmelding(receivedSykmelding: ReceivedSykmelding, veileder: Veileder, datoFerdigstilt: LocalDateTime? = null) {
+        // TODO: endres etter migreringen
+        if (datoFerdigstilt != null){
+            val dao = mapToDao(receivedSykmelding, veileder, datoFerdigstilt)
+            nasjonalSykmeldingRepository.save(dao)
+        } else {
+            val dao = mapToDao(receivedSykmelding, veileder)
+            nasjonalSykmeldingRepository.save(dao)
+        }
     }
 
     private fun handleBrokenRule(
@@ -207,9 +213,18 @@ class NasjonalSykmeldingService(
     }
 
 
+    fun deleteSykmelding(sykmeldingId: String): Int {
+        val id = nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
+        id.forEach {
+            it.id?.let { id -> nasjonalSykmeldingRepository.deleteById(id) }
+        }
+        return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId).count()
+    }
+
     fun mapToDao(
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
+        datoFerdigstilt: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC),
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
@@ -241,7 +256,7 @@ class NasjonalSykmeldingService(
                 ),
                 timestamp = OffsetDateTime.now(ZoneOffset.UTC),
                 ferdigstiltAv = veileder.veilederIdent,
-                datoFerdigstilt = LocalDateTime.now(ZoneOffset.UTC),
+                datoFerdigstilt = datoFerdigstilt
             )
         return nasjonalManuellOppgaveDAO
     }

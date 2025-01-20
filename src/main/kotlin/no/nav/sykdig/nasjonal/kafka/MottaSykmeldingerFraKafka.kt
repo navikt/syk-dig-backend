@@ -1,16 +1,16 @@
 package no.nav.sykdig.nasjonal.kafka
 
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.sykdig.nasjonal.models.PapirSmRegistering
-import no.nav.sykdig.nasjonal.models.toPapirManuellOppgave
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.shared.utils.getLoggingMeta
 import no.nav.sykdig.gosys.GosysService
 import no.nav.sykdig.nasjonal.clients.SmregistreringClient
-import no.nav.sykdig.nasjonal.models.Veileder
+import no.nav.sykdig.nasjonal.models.*
+import no.nav.sykdig.nasjonal.services.NasjonalCommonService
 import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
+import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.utenlandsk.services.SykmeldingService
 import org.springframework.stereotype.Component
 
@@ -22,7 +22,6 @@ class MottaSykmeldingerFraKafka(
     private val gosysService: GosysService,
     private val smregistreringClient: SmregistreringClient,
     private val nasjonalSykmeldingService: NasjonalSykmeldingService,
-    private val sykmeldingService: SykmeldingService,
 ) {
     val logger = applog()
 
@@ -59,18 +58,40 @@ class MottaSykmeldingerFraKafka(
         }
     }
 
+    // TODO: kun migrering
     fun lagreISykDig(papirsmregistrering: PapirSmRegistering) {
         val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(papirsmregistrering.sykmeldingId, "")
         if (eksisterendeOppgave == null && papirsmregistrering.oppgaveId != null) {
-            val oppgaveSmreg = smregistreringClient.getOppgaveRequestWithoutAuth(papirsmregistrering.oppgaveId).body
+            val oppgaveSmregResponse = smregistreringClient.getOppgaveRequestWithoutAuth(papirsmregistrering.oppgaveId)
+            val oppgaveSmreg = oppgaveSmregResponse.body?.firstOrNull()
+
             if (oppgaveSmreg != null) {
-                nasjonalOppgaveService.lagreOppgave(oppgaveSmreg)
-            }
-            smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId).body?.forEach {
-                nasjonalSykmeldingService.lagreSykmelding(it.receivedSykmelding, Veileder(it.ferdigstiltAv))
+                val papirManuellOppgave = PapirManuellOppgave(
+                    fnr = oppgaveSmreg.fnr,
+                    sykmeldingId = oppgaveSmreg.sykmeldingId,
+                    oppgaveid = oppgaveSmreg.oppgaveid,
+                    pdfPapirSykmelding = oppgaveSmreg.pdfPapirSykmelding ?: ByteArray(0),
+                    papirSmRegistering = oppgaveSmreg.papirSmRegistering,
+                    documents = listOf(
+                        Document(
+                            dokumentInfoId = oppgaveSmreg.dokumentInfoId ?: "",
+                            tittel = "papirsykmelding"
+                        )
+                    )
+                )
+                nasjonalOppgaveService.lagreOppgave(papirManuellOppgave, journalpostId =  oppgaveSmreg.journalpostId)
+                val sykmeldingerResponse = smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId)
+                val sykmeldinger = sykmeldingerResponse.body
+                sykmeldinger?.forEach { sykmelding ->
+                    val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isBlank()) oppgaveSmreg.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
+                    nasjonalSykmeldingService.lagreSykmelding(
+                        sykmelding.receivedSykmelding,
+                        Veileder(ferdigstiltAv),
+                        datoFerdigstilt = oppgaveSmreg.datoFerdigstilt
+                    )
+                }
             }
         }
         behandleNasjonalOppgave(papirsmregistrering)
     }
-
 }

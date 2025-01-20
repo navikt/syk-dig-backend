@@ -65,9 +65,6 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     val mapper = jacksonObjectMapper()
 
     @MockitoBean
-    lateinit var sykdigOppgaveService: SykDigOppgaveService
-
-    @MockitoBean
     lateinit var personService: PersonService
 
     @MockitoBean
@@ -113,8 +110,6 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         val oppgaveId = "123"
         val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
         val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
-
-        Mockito.`when`(sykdigOppgaveService.getOppgave(anyString())).thenReturn(testDataOppgaveDbModel(oppgaveId))
 
         Mockito.`when`(nasjonaCommonService.getNavEmail()).thenReturn("navEmail")
         Mockito.`when`(nasjonaCommonService.getNavIdent()).thenReturn(Veileder("navIdent"))

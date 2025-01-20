@@ -9,5 +9,5 @@ import java.util.*
 @Transactional
 @Repository
 interface NasjonalSykmeldingRepository : CrudRepository<NasjonalSykmeldingDAO, UUID> {
-    fun findBySykmeldingId(sykmeldingId: String): Optional<NasjonalSykmeldingDAO>
+    fun findBySykmeldingId(sykmeldingId: String): List<NasjonalSykmeldingDAO>
 }

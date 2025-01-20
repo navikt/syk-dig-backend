@@ -3,6 +3,7 @@ package no.nav.sykdig.nasjonal.clients
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
+import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.services.isValidOppgaveId
 import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
@@ -19,6 +20,7 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 @Component
@@ -84,7 +86,7 @@ class SmregistreringClient(
     @Retryable
     fun getOppgaveRequestWithoutAuth(
         oppgaveId: String,
-    ): ResponseEntity<PapirManuellOppgave> {
+    ): ResponseEntity<List<ManuellOppgaveDTOSykDig>> {
         if(!isValidOppgaveId(oppgaveId))
             throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
         val headers = HttpHeaders()
@@ -94,12 +96,14 @@ class SmregistreringClient(
                 .buildAndExpand(oppgaveId)
                 .toUri()
 
+        val responseType = object : ParameterizedTypeReference<List<ManuellOppgaveDTOSykDig>>() {}
+
         val res =
             smregisteringRestTemplate.exchange(
                 uri,
                 HttpMethod.GET,
                 HttpEntity<String>(headers),
-                PapirManuellOppgave::class.java,
+                responseType,
             )
         return res
     }
@@ -236,6 +240,7 @@ class SmregistreringClient(
     }
 }
 
+// TODO: denne gjelder kun migrering
 data class SendtSykmeldingHistory(
     val id: String,
     val sykmeldingId: String,
@@ -243,3 +248,22 @@ data class SendtSykmeldingHistory(
     val datoFerdigstilt: OffsetDateTime?,
     val receivedSykmelding: ReceivedSykmelding,
 )
+
+
+// TODO: denne gjelder kun migrering
+data class ManuellOppgaveDTOSykDig(
+    val journalpostId: String,
+    val fnr: String?,
+    val aktorId: String?,
+    val dokumentInfoId: String?,
+    val datoOpprettet: OffsetDateTime?,
+    val sykmeldingId: String,
+    val oppgaveid: Int?,
+    val ferdigstilt: Boolean,
+    val papirSmRegistering: PapirSmRegistering?,
+    var pdfPapirSykmelding: ByteArray?,
+    val ferdigstiltAv: String?,
+    val utfall: String?,
+    val datoFerdigstilt: LocalDateTime?
+)
+
