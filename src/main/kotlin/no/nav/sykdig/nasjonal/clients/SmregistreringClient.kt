@@ -184,4 +184,10 @@ class SmregistreringClient(
     }
 }
 
-
+data class SendtSykmeldingHistory(
+    val id: String,
+    val sykmeldingId: String,
+    val ferdigstiltAv: String,
+    val datoFerdigstilt: OffsetDateTime?,
+    val receivedSykmelding: ReceivedSykmelding,
+)
