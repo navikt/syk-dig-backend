@@ -8,10 +8,7 @@ import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.NasjonalOppgaveResult
 import no.nav.sykdig.generated.types.NasjonalOppgaveStatus
 import no.nav.sykdig.generated.types.NasjonalOppgaveStatusEnum
-import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
-import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
-import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.securelog
 import org.springframework.security.access.prepost.PostAuthorize
@@ -20,9 +17,6 @@ import org.springframework.security.access.prepost.PostAuthorize
 @DgsComponent
 class NasjonalOppgaveDataFetcher(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
-    private val sykmelderService: SykmelderService,
-    private val personService: PersonService,
-    private val nasjonalSykmeldingService: NasjonalSykmeldingService,
 ) {
 
     companion object {
@@ -48,5 +42,22 @@ class NasjonalOppgaveDataFetcher(
         return null
     }
 
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #authorization, '/dgs/nasjonal/oppgave/{sykmeldingId}')")
+    @DgsQuery(field = DgsConstants.QUERY.NasjonalOppgave)
+    fun getFerdigstiltNasjonalOppgave(sykmeldingId: String, authorization: String, dfe: DataFetchingEnvironment): NasjonalOppgaveResult? {
+        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(sykmeldingId, authorization)
+        if (oppgave != null) {
+            if (!oppgave.ferdigstilt) {
+                log.info("Oppgave med sykmeldingId $sykmeldingId er ikke ferdigstilt")
+                return null
+            }
+            requireNotNull(oppgave.fnr)
+            val sykmelderFnr = oppgave.papirSmRegistrering.behandler?.fnr
+            requireNotNull(sykmelderFnr)
+            return mapToNasjonalOppgave(oppgave)
+        }
+
+        return null
+    }
 
 }

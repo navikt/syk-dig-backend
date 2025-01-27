@@ -7,6 +7,7 @@ type Query {
     journalpost(id: String!): JournalpostResult!
     digitalisertSykmelding(sykmeldingId: String!) : DigitalisertSykmeldingResult
     nasjonalOppgave(oppgaveId: String!): NasjonalOppgaveResult
+    nasjonalFerdigstiltOppgave(sykmeldingId: String!): NasjonalOppgaveResult
 }
 
 type Mutation {
