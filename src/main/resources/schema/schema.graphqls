@@ -3,6 +3,7 @@ scalar DateTime
 scalar UUID
 
 type Query {
+
     oppgave(oppgaveId: String!): DigitaliseringsoppgaveResult
     journalpost(id: String!): JournalpostResult!
     digitalisertSykmelding(sykmeldingId: String!) : DigitalisertSykmeldingResult
