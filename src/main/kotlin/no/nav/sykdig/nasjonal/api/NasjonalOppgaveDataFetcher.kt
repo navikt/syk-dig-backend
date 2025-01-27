@@ -49,7 +49,7 @@ class NasjonalOppgaveDataFetcher(
         if (oppgave != null) {
             if (!oppgave.ferdigstilt) {
                 log.info("Oppgave med sykmeldingId $sykmeldingId er ikke ferdigstilt")
-                return null
+                return NasjonalOppgaveStatus(oppgave.oppgaveId.toString(), NasjonalOppgaveStatusEnum.IKKE_FERDIGSTILT)
             }
             requireNotNull(oppgave.fnr)
             val sykmelderFnr = oppgave.papirSmRegistrering.behandler?.fnr
@@ -57,7 +57,7 @@ class NasjonalOppgaveDataFetcher(
             return mapToNasjonalOppgave(oppgave)
         }
 
-        return null
+        return NasjonalOppgaveStatus(oppgave?.oppgaveId.toString(), NasjonalOppgaveStatusEnum.FINNES_IKKE)
     }
 
 }

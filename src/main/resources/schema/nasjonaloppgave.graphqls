@@ -140,6 +140,7 @@ type NasjonalOppgaveStatus {
 enum NasjonalOppgaveStatusEnum {
     FERDIGSTILT
     IKKE_EN_SYKMELDING
+    IKKE_FERDIGSTILT
     FINNES_IKKE
     AVVIST
 }
