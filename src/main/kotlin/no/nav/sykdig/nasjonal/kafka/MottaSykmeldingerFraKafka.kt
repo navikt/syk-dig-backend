@@ -13,6 +13,7 @@ import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
 import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.utenlandsk.services.SykmeldingService
 import org.springframework.stereotype.Component
+import kotlin.math.log
 
 
 @Component
@@ -60,12 +61,15 @@ class MottaSykmeldingerFraKafka(
 
     // TODO: kun migrering
     fun lagreISykDig(papirsmregistrering: PapirSmRegistering) {
-        val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(papirsmregistrering.sykmeldingId, "")
+        val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSykDig(papirsmregistrering.sykmeldingId, "")
+        logger.info("henter eksisterende oppgave fra db so å se om den ligger der ${papirsmregistrering.sykmeldingId}")
         if (eksisterendeOppgave == null && papirsmregistrering.oppgaveId != null) {
             val oppgaveSmregResponse = smregistreringClient.getOppgaveRequestWithoutAuth(papirsmregistrering.oppgaveId)
+            logger.info("migrerer sykmelding med sykmeldingId ${papirsmregistrering.sykmeldingId}, respons fra smreg: ${oppgaveSmregResponse.body.first().sykmeldingId}")
             val oppgaveSmreg = oppgaveSmregResponse.body?.firstOrNull()
 
             if (oppgaveSmreg != null) {
+                logger.info("migrerer sykmelding med sykmeldingId ${papirsmregistrering.sykmeldingId}, oppgaveSmreg er ikke null")
                 val papirManuellOppgave = PapirManuellOppgave(
                     fnr = oppgaveSmreg.fnr,
                     sykmeldingId = oppgaveSmreg.sykmeldingId,
@@ -79,6 +83,7 @@ class MottaSykmeldingerFraKafka(
                         )
                     )
                 )
+                logger.info("lagrer oppgave med sykmeldingId ${oppgaveSmreg.sykmeldingId}")
                 nasjonalOppgaveService.lagreOppgave(papirManuellOppgave, journalpostId =  oppgaveSmreg.journalpostId)
                 val sykmeldingerResponse = smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId)
                 val sykmeldinger = sykmeldingerResponse.body
