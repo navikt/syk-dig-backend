@@ -138,3 +138,5 @@ spec:
       value: http://syfosmpapirregler
     - name: SYFOSMPAPIRREGLER_CLIENT_ID
       value: prod-gcp.teamsykmelding.syfosmpapirregler
+    - name: SMREG_TOPIC
+      value: teamsykmelding.papir-sm-registering
