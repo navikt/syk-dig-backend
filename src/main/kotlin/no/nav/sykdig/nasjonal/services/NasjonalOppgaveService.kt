@@ -144,6 +144,16 @@ class NasjonalOppgaveService(
         return null
     }
 
+    fun getOppgaveBySykmeldingIdSykDig(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {
+        val sykmelding = findBySykmeldingId(sykmeldingId)
+        if (sykmelding != null) {
+            log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
+            securelog.info("hentet nasjonalOppgave fra db $sykmelding")
+            return sykmelding
+        }
+        return null
+    }
+
     fun getOppgave(oppgaveId: String, authorization: String): NasjonalManuellOppgaveDAO? {
         val nasjonalOppgave = findByOppgaveId(oppgaveId)
         if (nasjonalOppgave != null) {

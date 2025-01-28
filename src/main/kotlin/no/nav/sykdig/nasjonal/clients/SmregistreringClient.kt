@@ -105,6 +105,8 @@ class SmregistreringClient(
                 HttpEntity<String>(headers),
                 responseType,
             )
+
+        log.info("opppgave med sykmeldingId ${res.body.first().sykmeldingId} hentet fra smreg")
         return res
     }
 
