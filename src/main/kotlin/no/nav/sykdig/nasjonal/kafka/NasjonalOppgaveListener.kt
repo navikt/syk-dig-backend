@@ -31,6 +31,7 @@ class NasjonalOppgaveListener(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
+        logger.info("Processing record with key: ${cr.key()}")
         if (cr.value() == null){
             logger.info(
                 "Mottatt tombstone for sykmelding med id ${cr.key()}"
