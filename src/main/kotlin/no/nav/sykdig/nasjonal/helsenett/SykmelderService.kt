@@ -78,7 +78,7 @@ class SykmelderService(
             godkjenninger = null,
         )
 
-    suspend fun getTssIdInfotrygd(samhandlerFnr: String, samhandlerOrgName: String, loggingMeta: LoggingMeta, sykmeldingId: String): String {
+    suspend fun getTssIdInfotrygd(samhandlerFnr: String, samhandlerOrgName: String, loggingMeta: LoggingMeta, sykmeldingId: String): String? {
         return smtssClient.findBestTssInfotrygd(samhandlerFnr, samhandlerOrgName, loggingMeta, sykmeldingId)
     }
 

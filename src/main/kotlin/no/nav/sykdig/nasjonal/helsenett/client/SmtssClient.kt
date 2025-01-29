@@ -10,6 +10,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 @Component
@@ -26,29 +27,31 @@ class SmtssClient(
         samhandlerOrgName: String,
         loggingMeta: LoggingMeta,
         sykmeldingId: String,
-    ): String {
+    ): String? {
 
         val headers = HttpHeaders()
         headers["samhandlerFnr"] = samhandlerFnr
         headers["samhandlerOrgName"] = samhandlerOrgName
         headers["requestId"] = sykmeldingId
-
-        val response =
-            smtssM2mRestTemplate.exchange(
-                "$smtssUrl/api/v1/samhandler/infotrygd",
-                HttpMethod.GET,
-                HttpEntity<TSSident>(headers),
-                TSSident::class.java,
+        try {
+            val response =
+                smtssM2mRestTemplate.exchange(
+                    "$smtssUrl/api/v1/samhandler/infotrygd",
+                    HttpMethod.GET,
+                    HttpEntity<TSSident>(headers),
+                    TSSident::class.java,
+                )
+            if (response.statusCode.is2xxSuccessful) {
+                return response.body?.tssid
+            }
+        } catch (httpClientErrorException: HttpClientErrorException) {
+            log.warn(
+                "smtss responded with an error code {} for {}",
+                httpClientErrorException.statusCode,
+                StructuredArguments.fields(loggingMeta),
             )
-        if (response.statusCode.is2xxSuccessful) {
-            return response.body?.tssid ?: throw SykmelderNotFoundException("Samhandlerpraksis ikke funnet for samhandlerOrgname ${samhandlerOrgName}")
         }
-        log.info(
-            "smtss responded with an error code {} for {}",
-            response.statusCode,
-            StructuredArguments.fields(loggingMeta),
-        )
-        throw SykmelderNotFoundException("Samhandlerpraksis ikke funnet for samhandlerOrgname ${samhandlerOrgName}")
+        return null
     }
 
 
