@@ -63,9 +63,9 @@ class MottaSykmeldingerFraKafka(
     fun lagreISykDig(papirsmregistrering: PapirSmRegistering) {
         val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSykDig(papirsmregistrering.sykmeldingId, "")
         logger.info("henter eksisterende oppgave fra db for å se om den ligger der ${papirsmregistrering.sykmeldingId}, oppgaveId: ${papirsmregistrering.oppgaveId}, eksisterende: ${eksisterendeOppgave?.sykmeldingId}")
-        if (eksisterendeOppgave == null && papirsmregistrering.oppgaveId != null) {
+        if (eksisterendeOppgave == null) {
             logger.info("gjør kall mot smreg for å hente oppgave der")
-            val oppgaveSmregResponse = smregistreringClient.getOppgaveRequestWithoutAuth(papirsmregistrering.oppgaveId)
+            val oppgaveSmregResponse = smregistreringClient.getOppgaveRequestWithoutAuth(papirsmregistrering.sykmeldingId)
             logger.info("hentet respons fra smreg med sykmeldingId ${papirsmregistrering.sykmeldingId}, respons fra smreg: ${oppgaveSmregResponse.body.first().sykmeldingId}")
             val oppgaveSmreg = oppgaveSmregResponse.body?.firstOrNull()
 

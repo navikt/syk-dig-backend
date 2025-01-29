@@ -85,16 +85,13 @@ class SmregistreringClient(
 
     @Retryable
     fun getOppgaveRequestWithoutAuth(
-        oppgaveId: String,
+        sykmeldingId: String,
     ): ResponseEntity<List<ManuellOppgaveDTOSykDig>> {
-        if (!isValidOppgaveId(oppgaveId) || !oppgaveId.all { it.isDigit() }) {
-            throw IllegalArgumentException("Invalid oppgaveId does not contain only numerical characters. oppgaveId: $oppgaveId")
-        }
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         val uri =
-            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/sykDig/{oppgaveId}")
-                .buildAndExpand(oppgaveId.toInt())
+            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/sykDig/{sykmeldingId}")
+                .buildAndExpand(sykmeldingId)
                 .toUri()
 
         val responseType = object : ParameterizedTypeReference<List<ManuellOppgaveDTOSykDig>>() {}
