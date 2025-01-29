@@ -62,14 +62,15 @@ class MottaSykmeldingerFraKafka(
     // TODO: kun migrering
     fun lagreISykDig(papirsmregistrering: PapirSmRegistering) {
         val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSykDig(papirsmregistrering.sykmeldingId, "")
-        logger.info("henter eksisterende oppgave fra db so å se om den ligger der ${papirsmregistrering.sykmeldingId}")
+        logger.info("henter eksisterende oppgave fra db for å se om den ligger der ${papirsmregistrering.sykmeldingId}, oppgaveId: ${papirsmregistrering.oppgaveId}, eksisterende: ${eksisterendeOppgave?.sykmeldingId}")
         if (eksisterendeOppgave == null && papirsmregistrering.oppgaveId != null) {
+            logger.info("gjør kall mot smreg for å hente oppgave der")
             val oppgaveSmregResponse = smregistreringClient.getOppgaveRequestWithoutAuth(papirsmregistrering.oppgaveId)
-            logger.info("migrerer sykmelding med sykmeldingId ${papirsmregistrering.sykmeldingId}, respons fra smreg: ${oppgaveSmregResponse.body.first().sykmeldingId}")
+            logger.info("hentet respons fra smreg med sykmeldingId ${papirsmregistrering.sykmeldingId}, respons fra smreg: ${oppgaveSmregResponse.body.first().sykmeldingId}")
             val oppgaveSmreg = oppgaveSmregResponse.body?.firstOrNull()
 
             if (oppgaveSmreg != null) {
-                logger.info("migrerer sykmelding med sykmeldingId ${papirsmregistrering.sykmeldingId}, oppgaveSmreg er ikke null")
+                logger.info("respons smreg med sykmeldingId ${papirsmregistrering.sykmeldingId}, oppgaveSmreg er ikke null")
                 val papirManuellOppgave = PapirManuellOppgave(
                     fnr = oppgaveSmreg.fnr,
                     sykmeldingId = oppgaveSmreg.sykmeldingId,
