@@ -13,6 +13,8 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpStatusCodeException
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDateTime
@@ -22,6 +24,7 @@ import java.time.OffsetDateTime
 class SmregistreringClient(
     @Value("\${smregistrering.url}") private val url: String,
     val smregisteringRestTemplate: RestTemplate,
+    val smregM2mRestTemplate: RestTemplate,
 ) {
     val log = applog()
 
@@ -81,10 +84,9 @@ class SmregistreringClient(
     @Retryable
     fun getOppgaveRequestWithoutAuth(
         sykmeldingId: String,
-    ): ResponseEntity<List<ManuellOppgaveDTOSykDig>> {
+    ): List<ManuellOppgaveDTOSykDig>? {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.set("Authorization", "")
 
         log.info("skal gjøre kall mot smreg for sykmeldingid $sykmeldingId")
         val uri = UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/sykDig/{sykmeldingId}")
@@ -94,7 +96,7 @@ class SmregistreringClient(
         return try {
             val responseType = object : ParameterizedTypeReference<List<ManuellOppgaveDTOSykDig>>() {}
 
-            val res = smregisteringRestTemplate.exchange(
+            val res = smregM2mRestTemplate.exchange(
                 uri,
                 HttpMethod.GET,
                 HttpEntity<String>(headers),
@@ -104,16 +106,29 @@ class SmregistreringClient(
             val body = res.body
             if (body.isNullOrEmpty()) {
                 log.warn("No oppgave found for sykmeldingId $sykmeldingId")
-                ResponseEntity.noContent().build()
+                null
             } else {
                 log.info("Oppgave with sykmeldingId ${body.first().sykmeldingId} fetched from smreg")
-                res
+                body
             }
+        } catch (e: ClassCastException) {
+            log.error("Caught ClassCastException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
+        } catch (e: HttpStatusCodeException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                log.warn("No oppgave found for sykmeldingId $sykmeldingId: ${e.statusCode}")
+                null
+            } else {
+                log.error("Caught HttpStatusCodeException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+                null
+            }
+        } catch (e: RestClientException) {
+            log.error("Caught RestClientException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
         } catch (e: Exception) {
-            log.error("Caught exception while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message} ${e.stackTrace}", e)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            log.error("Caught exception while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
         }
-
     }
 
     @Retryable
@@ -125,24 +140,33 @@ class SmregistreringClient(
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.set("Authorization", "")
-
         val uri =
             UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelding/sykDig/{sykmeldingId}")
                 .buildAndExpand(sykmeldingId)
                 .toUri()
+        return try {
+            val responseType = object : ParameterizedTypeReference<List<SendtSykmeldingHistory>>() {}
 
-        val responseType = object : ParameterizedTypeReference<List<SendtSykmeldingHistory>>() {}
+            val res =
+                smregM2mRestTemplate.exchange(
+                    uri,
+                    HttpMethod.GET,
+                    HttpEntity<String>(headers),
+                    responseType
+                )
+            val body = res.body
+            if (body.isNullOrEmpty()) {
+                log.warn("No sykmelding found for sykmeldingId $sykmeldingId")
+                ResponseEntity.noContent().build()
+            } else {
+                log.info("sykmelding with sykmeldingId ${body.first().sykmeldingId} fetched from smreg")
+                res
+            }
+        } catch (e: Exception) {
+            log.error("Caught exception while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message} ${e.stackTrace}", e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
 
-        val res =
-            smregisteringRestTemplate.exchange(
-                uri,
-                HttpMethod.GET,
-                HttpEntity<String>(headers),
-                responseType
-            )
-
-        return res
     }
 
     @Retryable
