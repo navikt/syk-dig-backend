@@ -64,11 +64,11 @@ class MottaSykmeldingerFraKafka(
         val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSykDig(papirsmregistrering.sykmeldingId, "")
         logger.info("henter eksisterende oppgave fra db for å se om den ligger der ${papirsmregistrering.sykmeldingId}, oppgaveId: ${papirsmregistrering.oppgaveId}, eksisterende: ${eksisterendeOppgave?.sykmeldingId}")
         if (eksisterendeOppgave == null) {
-            logger.info("gjør kall mot smreg for å hente oppgave der")
+            logger.info("gjør kall mot smreg for å hente oppgave der ${papirsmregistrering.sykmeldingId}")
             val oppgaveSmregResponse = smregistreringClient.getOppgaveRequestWithoutAuth(papirsmregistrering.sykmeldingId)
-            logger.info("hentet respons fra smreg med sykmeldingId ${papirsmregistrering.sykmeldingId}, respons fra smreg: ${oppgaveSmregResponse.body.first().sykmeldingId}")
-            val oppgaveSmreg = oppgaveSmregResponse.body?.firstOrNull()
 
+            logger.info("hentet respons fra smreg med sykmeldingId ${papirsmregistrering.sykmeldingId}, respons fra smreg: ${oppgaveSmregResponse?.first()?.sykmeldingId}")
+            val oppgaveSmreg = oppgaveSmregResponse?.firstOrNull()
             if (oppgaveSmreg != null) {
                 logger.info("respons smreg med sykmeldingId ${papirsmregistrering.sykmeldingId}, oppgaveSmreg er ikke null")
                 val papirManuellOppgave = PapirManuellOppgave(
@@ -85,7 +85,7 @@ class MottaSykmeldingerFraKafka(
                     )
                 )
                 logger.info("lagrer oppgave med sykmeldingId ${oppgaveSmreg.sykmeldingId}")
-                nasjonalOppgaveService.lagreOppgave(papirManuellOppgave, journalpostId =  oppgaveSmreg.journalpostId)
+                nasjonalOppgaveService.lagreOppgave(papirManuellOppgave, journalpostId =  oppgaveSmreg.journalpostId, ferdigstilt = oppgaveSmreg.ferdigstilt)
                 val sykmeldingerResponse = smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId)
                 val sykmeldinger = sykmeldingerResponse.body
                 sykmeldinger?.forEach { sykmelding ->
