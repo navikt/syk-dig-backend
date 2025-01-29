@@ -10,12 +10,7 @@ import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
 import org.apache.kafka.common.network.Send
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
@@ -89,23 +84,36 @@ class SmregistreringClient(
     ): ResponseEntity<List<ManuellOppgaveDTOSykDig>> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        val uri =
-            UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/sykDig/{sykmeldingId}")
-                .buildAndExpand(sykmeldingId)
-                .toUri()
+        headers.set("Authorization", "")
 
-        val responseType = object : ParameterizedTypeReference<List<ManuellOppgaveDTOSykDig>>() {}
+        log.info("skal gjøre kall mot smreg for sykmeldingid $sykmeldingId")
+        val uri = UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/sykDig/{sykmeldingId}")
+            .buildAndExpand(sykmeldingId)
+            .toUri()
 
-        val res =
-            smregisteringRestTemplate.exchange(
+        return try {
+            val responseType = object : ParameterizedTypeReference<List<ManuellOppgaveDTOSykDig>>() {}
+
+            val res = smregisteringRestTemplate.exchange(
                 uri,
                 HttpMethod.GET,
                 HttpEntity<String>(headers),
                 responseType,
             )
 
-        log.info("opppgave med sykmeldingId ${res.body.first().sykmeldingId} hentet fra smreg")
-        return res
+            val body = res.body
+            if (body.isNullOrEmpty()) {
+                log.warn("No oppgave found for sykmeldingId $sykmeldingId")
+                ResponseEntity.noContent().build()
+            } else {
+                log.info("Oppgave with sykmeldingId ${body.first().sykmeldingId} fetched from smreg")
+                res
+            }
+        } catch (e: Exception) {
+            log.error("Caught exception while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message} ${e.stackTrace}", e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+
     }
 
     @Retryable
@@ -117,6 +125,7 @@ class SmregistreringClient(
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
+        headers.set("Authorization", "")
 
         val uri =
             UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelding/sykDig/{sykmeldingId}")
