@@ -106,9 +106,7 @@ class NasjonalOppgaveService(
     }
 
     fun findBySykmeldingId(sykmeldingId: String): NasjonalManuellOppgaveDAO? {
-        val oppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
-
-        if (oppgave == null) return null
+        val oppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId) ?: return null
         return oppgave
     }
 

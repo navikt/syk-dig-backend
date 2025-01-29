@@ -87,13 +87,14 @@ class SmregistreringClient(
     fun getOppgaveRequestWithoutAuth(
         oppgaveId: String,
     ): ResponseEntity<List<ManuellOppgaveDTOSykDig>> {
-        if(!isValidOppgaveId(oppgaveId))
-            throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
+        if (!isValidOppgaveId(oppgaveId) || !oppgaveId.all { it.isDigit() }) {
+            throw IllegalArgumentException("Invalid oppgaveId does not contain only numerical characters. oppgaveId: $oppgaveId")
+        }
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         val uri =
             UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/sykDig/{oppgaveId}")
-                .buildAndExpand(oppgaveId)
+                .buildAndExpand(oppgaveId.toInt())
                 .toUri()
 
         val responseType = object : ParameterizedTypeReference<List<ManuellOppgaveDTOSykDig>>() {}

@@ -1,6 +1,7 @@
 package no.nav.sykdig.nasjonal.kafka
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
@@ -44,7 +45,7 @@ class NasjonalOppgaveListener(
             return
         }
         val oppgaveRecord: PapirSmRegistering = objectMapper.readValue(cr.value())
-        logger.info("migrerer sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId} and datoOpprettet ${oppgaveRecord.datoOpprettet}")
+        logger.info("migrerer sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId} and datoOpprettet ${oppgaveRecord.datoOpprettet} {}", kv("object", oppgaveRecord))
         oppgaveKafkaService.lagreISykDig(oppgaveRecord)
         //oppgaveKafkaService.behandleNasjonalOppgave(oppgaveRecord)
     }

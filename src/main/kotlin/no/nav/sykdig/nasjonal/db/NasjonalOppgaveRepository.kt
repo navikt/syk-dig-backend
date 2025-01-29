@@ -12,5 +12,4 @@ import java.util.*
 interface NasjonalOppgaveRepository : CrudRepository<NasjonalManuellOppgaveDAO, UUID> {
     fun findBySykmeldingId(sykmeldingId: String): NasjonalManuellOppgaveDAO?
     fun findByOppgaveId(oppgaveId: Int): NasjonalManuellOppgaveDAO?
-    fun deleteBySykmeldingId(sykmeldingId: String): NasjonalManuellOppgaveDAO?
 }
