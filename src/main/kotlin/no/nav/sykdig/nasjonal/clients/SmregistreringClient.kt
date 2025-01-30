@@ -134,7 +134,7 @@ class SmregistreringClient(
     @Retryable
     fun getSykmeldingRequestWithoutAuth(
         sykmeldingId: String,
-    ): List<SendtSykmeldingHistory>? {
+    ): List<SendtSykmeldingHistorySykDig>? {
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
         }
@@ -144,7 +144,7 @@ class SmregistreringClient(
             .toUri()
 
         return try {
-            val responseType = object : ParameterizedTypeReference<List<SendtSykmeldingHistory>>() {}
+            val responseType = object : ParameterizedTypeReference<List<SendtSykmeldingHistorySykDig>>() {}
 
             val res = smregM2mRestTemplate.exchange(
                 uri,
@@ -292,7 +292,18 @@ data class SendtSykmeldingHistory(
     val ferdigstiltAv: String,
     val datoFerdigstilt: OffsetDateTime?,
     val receivedSykmelding: ReceivedSykmelding,
+    val timestamp: OffsetDateTime,
 )
+
+data class SendtSykmeldingHistorySykDig(
+    val id: String,
+    val sykmeldingId: String,
+    val ferdigstiltAv: String,
+    val datoFerdigstilt: OffsetDateTime?,
+    val timestamp: OffsetDateTime,
+    val receivedSykmelding: ReceivedSykmelding,
+)
+
 
 
 // TODO: denne gjelder kun migrering

@@ -169,8 +169,8 @@ class NasjonalSykmeldingService(
         nasjonalSykmeldingRepository.save(dao)
     }
 
-    fun lagreSykmeldingMigrering(receivedSykmelding: ReceivedSykmelding, veileder: Veileder, datoFerdigstilt: LocalDateTime?) {
-        val dao = mapToDao(receivedSykmelding, veileder, datoFerdigstilt)
+    fun lagreSykmeldingMigrering(receivedSykmelding: ReceivedSykmelding, veileder: Veileder, datoFerdigstilt: LocalDateTime?, time: OffsetDateTime) {
+        val dao = mapToDao(receivedSykmelding, veileder, datoFerdigstilt, time)
         nasjonalSykmeldingRepository.save(dao)
     }
 
@@ -224,6 +224,7 @@ class NasjonalSykmeldingService(
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
         datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
+        timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
@@ -253,7 +254,7 @@ class NasjonalSykmeldingService(
                     signaturDato = receivedSykmelding.sykmelding.signaturDato,
                     navnFastlege = receivedSykmelding.sykmelding.navnFastlege,
                 ),
-                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                timestamp = timestamp,
                 ferdigstiltAv = veileder.veilederIdent,
                 datoFerdigstilt = datoFerdigstilt,
             )
