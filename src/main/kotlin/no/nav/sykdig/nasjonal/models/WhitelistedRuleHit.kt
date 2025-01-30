@@ -2,12 +2,11 @@ package no.nav.sykdig.nasjonal.models
 
 enum class WhitelistedRuleHit {
     INNTIL_8_DAGER,
-    INNTIL_30_DAGER, //fjerne etter prodsetting av regler.
-    INNTIL_1_MAANED,
-    INNTIL_1_MAANED_MED_BEGRUNNELSE,
+    INNTIL_1_MAANED, //fjernes
+    MINDRE_ENN_1_MAANED,
+    INNTIL_1_MAANED_MED_BEGRUNNELSE, //fjernes
+    MINDRE_ENN_1_MAANED_MED_BEGRUNNELSE,
     OVER_1_MAANED,
-    INNTIL_30_DAGER_MED_BEGRUNNELSE, //fjerne
-    OVER_30_DAGER, //fjerne
     FREMDATERT,
     PASIENTEN_HAR_KODE_6,
 }
