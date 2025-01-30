@@ -134,39 +134,51 @@ class SmregistreringClient(
     @Retryable
     fun getSykmeldingRequestWithoutAuth(
         sykmeldingId: String,
-    ): ResponseEntity<List<SendtSykmeldingHistory>> {
-        if(!isValidOppgaveId(sykmeldingId))
-            throw IllegalArgumentException("Invalid sykmeldingId does not contain only alphanumerical characters. SykmeldingId: $sykmeldingId")
+    ): List<SendtSykmeldingHistory>? {
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+        }
 
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        val uri =
-            UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelding/sykDig/{sykmeldingId}")
-                .buildAndExpand(sykmeldingId)
-                .toUri()
+        val uri = UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelding/sykDig/{sykmeldingId}")
+            .buildAndExpand(sykmeldingId)
+            .toUri()
+
         return try {
             val responseType = object : ParameterizedTypeReference<List<SendtSykmeldingHistory>>() {}
 
-            val res =
-                smregM2mRestTemplate.exchange(
-                    uri,
-                    HttpMethod.GET,
-                    HttpEntity<String>(headers),
-                    responseType
-                )
+            val res = smregM2mRestTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                HttpEntity<String>(headers),
+                responseType
+            )
+
             val body = res.body
             if (body.isNullOrEmpty()) {
-                log.warn("No sykmelding found for sykmeldingId $sykmeldingId")
-                ResponseEntity.noContent().build()
+                log.warn("No oppgave found for sykmeldingId $sykmeldingId")
+                null
             } else {
-                log.info("sykmelding with sykmeldingId ${body.first().sykmeldingId} fetched from smreg")
-                res
+                log.info("Oppgave with sykmeldingId ${body.first().sykmeldingId} fetched from smreg")
+                body
             }
+        } catch (e: ClassCastException) {
+            log.error("Caught ClassCastException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
+        } catch (e: HttpStatusCodeException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                log.warn("No oppgave found for sykmeldingId $sykmeldingId: ${e.statusCode}")
+                null
+            } else {
+                log.error("Caught HttpStatusCodeException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+                null
+            }
+        } catch (e: RestClientException) {
+            log.error("Caught RestClientException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
         } catch (e: Exception) {
-            log.error("Caught exception while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message} ${e.stackTrace}", e)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            log.error("Caught exception while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
         }
-
     }
 
     @Retryable

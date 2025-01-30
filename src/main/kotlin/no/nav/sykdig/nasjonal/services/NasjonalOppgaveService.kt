@@ -42,41 +42,20 @@ class NasjonalOppgaveService(
     val auditLogger = auditlog()
     val mapper = jacksonObjectMapper()
 
-    // TODO: Fjern parameterne etter ferdigstilt når migreringen er fullført
     fun lagreOppgave(
         papirManuellOppgave: PapirManuellOppgave,
         ferdigstilt: Boolean = false,
-        journalpostId: String? = null,
-        aktorId: String? = null,
-        dokumentInfoId: String? = null,
-        datoOpprettet: LocalDateTime? = null,
-        utfall: String? = null,
-        ferdigstiltAv: String? = null,
-        datoFerdigstilt: LocalDateTime? = null,
-        avvisningsgrunn: String? = null
     ): NasjonalManuellOppgaveDAO {
-
         val eksisterendeOppgave = nasjonalOppgaveRepository.findBySykmeldingId(papirManuellOppgave.sykmeldingId)
-
         securelog.info("Henter oppgave med sykmeldingId=${papirManuellOppgave.sykmeldingId}. Funnet: $eksisterendeOppgave")
-
         return if (eksisterendeOppgave != null) {
             log.info("Oppdaterer oppgave med sykmeldingId=${papirManuellOppgave.sykmeldingId}, database-id=${eksisterendeOppgave.id}")
-
             nasjonalOppgaveRepository.save(
                 mapToDao(
                     papirManuellOppgave,
                     eksisterendeOppgave.id,
                     ferdigstilt,
-                    journalpostId,
-                    aktorId,
-                    dokumentInfoId,
-                    datoOpprettet,
-                    utfall,
-                    ferdigstiltAv,
-                    datoFerdigstilt,
-                    avvisningsgrunn
-                )
+                ),
             )
         } else {
             val nyOppgave = nasjonalOppgaveRepository.save(
@@ -84,14 +63,44 @@ class NasjonalOppgaveService(
                     papirManuellOppgave,
                     null,
                     ferdigstilt,
-                )
+                ),
             )
-
             log.info("Lagret ny oppgave med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
             securelog.info("Detaljer om lagret oppgave: $nyOppgave")
 
             nyOppgave
         }
+    }
+
+    fun lagreOppgaveMigrering(
+        papirManuellOppgave: PapirManuellOppgave,
+        ferdigstilt: Boolean,
+        journalpostId: String?,
+        aktorId: String?,
+        dokumentInfoId: String?,
+        datoOpprettet: LocalDateTime?,
+        utfall: String?,
+        ferdigstiltAv: String?,
+        datoFerdigstilt: LocalDateTime?,
+        avvisningsgrunn: String?,
+    ): NasjonalManuellOppgaveDAO {
+
+        log.info("lagrer oppgave med sykmeldingId=${papirManuellOppgave.sykmeldingId} fra $datoOpprettet")
+        val nyOppgave = nasjonalOppgaveRepository.save(
+            mapToDaoMigrering(
+                papirManuellOppgave,
+                ferdigstilt,
+                journalpostId,
+                aktorId,
+                dokumentInfoId,
+                datoOpprettet,
+                utfall,
+                ferdigstiltAv,
+                datoFerdigstilt,
+                avvisningsgrunn
+            ),
+        )
+        return nyOppgave
     }
 
     fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, smRegistreringManuell: SmRegistreringManuell?): NasjonalManuellOppgaveDAO? {
@@ -260,15 +269,76 @@ class NasjonalOppgaveService(
         papirManuellOppgave: PapirManuellOppgave,
         existingId: UUID?,
         ferdigstilt: Boolean = false,
-        // TODO alle etter er del av migrering
-        journalpostId: String? = null,
-        aktorId: String? = null,
-        dokumentInfoId: String? = null,
-        datoOpprettet: LocalDateTime? = null,
-        utfall: String? = null,
-        ferdigstiltAv: String? = null,
-        datoFerdigstilt: LocalDateTime? = null,
-        avvisningsgrunn: String? = null
+    ): NasjonalManuellOppgaveDAO {
+        mapper.registerModules(JavaTimeModule())
+        securelog.info("Mapper til DAO: $papirManuellOppgave")
+
+        //TODO: papirsmregistrering gjøres non nullable etter migrering
+        // grunn: det er ca 20 sykmeldinger fra 2020 med papirsmregistrering null
+        // den skal aldri være null på tidspuntket her
+        val papirSmRegistering = papirManuellOppgave.papirSmRegistering!!
+
+        val nasjonalManuellOppgaveDAO =
+            NasjonalManuellOppgaveDAO(
+                sykmeldingId = papirManuellOppgave.sykmeldingId,
+                journalpostId = papirSmRegistering.journalpostId,
+                fnr = papirManuellOppgave.fnr,
+                aktorId = papirSmRegistering.aktorId,
+                dokumentInfoId = papirSmRegistering.dokumentInfoId,
+                datoOpprettet = papirSmRegistering.datoOpprettet?.toLocalDateTime(),
+                oppgaveId = papirManuellOppgave.oppgaveid,
+                ferdigstilt = ferdigstilt,
+                papirSmRegistrering =
+                    PapirSmRegistering(
+                        journalpostId = papirSmRegistering.journalpostId,
+                        oppgaveId = papirSmRegistering.oppgaveId,
+                        fnr = papirSmRegistering.fnr,
+                        aktorId = papirSmRegistering.aktorId,
+                        dokumentInfoId = papirSmRegistering.dokumentInfoId,
+                        datoOpprettet = papirSmRegistering.datoOpprettet,
+                        sykmeldingId = papirSmRegistering.sykmeldingId,
+                        syketilfelleStartDato = papirSmRegistering.syketilfelleStartDato,
+                        arbeidsgiver = papirSmRegistering.arbeidsgiver,
+                        medisinskVurdering = papirSmRegistering.medisinskVurdering,
+                        skjermesForPasient = papirSmRegistering.skjermesForPasient,
+                        perioder = papirSmRegistering.perioder,
+                        prognose = papirSmRegistering.prognose,
+                        utdypendeOpplysninger = papirSmRegistering.utdypendeOpplysninger,
+                        tiltakNAV = papirSmRegistering.tiltakNAV,
+                        tiltakArbeidsplassen = papirSmRegistering.tiltakArbeidsplassen,
+                        andreTiltak = papirSmRegistering.andreTiltak,
+                        meldingTilNAV = papirSmRegistering.meldingTilNAV,
+                        meldingTilArbeidsgiver = papirSmRegistering.meldingTilArbeidsgiver,
+                        kontaktMedPasient = papirSmRegistering.kontaktMedPasient,
+                        behandletTidspunkt = papirSmRegistering.behandletTidspunkt,
+                        behandler = papirSmRegistering.behandler,
+                    ),
+                utfall = null,
+                ferdigstiltAv = null,
+                datoFerdigstilt = null,
+                avvisningsgrunn = null,
+            )
+
+        if (existingId != null) {
+            nasjonalManuellOppgaveDAO.apply {
+                id = existingId
+            }
+        }
+        return nasjonalManuellOppgaveDAO
+
+    }
+
+    fun mapToDaoMigrering(
+        papirManuellOppgave: PapirManuellOppgave,
+        ferdigstilt: Boolean,
+        journalpostId: String?,
+        aktorId: String?,
+        dokumentInfoId: String?,
+        datoOpprettet: LocalDateTime?,
+        utfall: String?,
+        ferdigstiltAv: String?,
+        datoFerdigstilt: LocalDateTime?,
+        avvisningsgrunn: String?,
     ): NasjonalManuellOppgaveDAO {
         mapper.registerModules(JavaTimeModule())
         securelog.info("Mapper til DAO: $papirManuellOppgave")
@@ -290,19 +360,13 @@ class NasjonalOppgaveService(
                 ferdigstilt = ferdigstilt,
                 papirSmRegistrering = PapirSmRegistering(
                     journalpostId, papirManuellOppgave.oppgaveid.toString(), papirManuellOppgave.fnr, aktorId, dokumentInfoId, datoOpprettet!!.atOffset(ZoneOffset.ofHours(1)), papirManuellOppgave.sykmeldingId, null, null, null, null, null, null, null, null, null,
-                    null, null, null, null, null, null
+                    null, null, null, null, null, null,
                 ),
                 utfall = utfall,
                 ferdigstiltAv = ferdigstiltAv,
                 datoFerdigstilt = datoFerdigstilt,
                 avvisningsgrunn = avvisningsgrunn,
             )
-            if (existingId != null) {
-                nasjonalManuellOppgaveDAO.apply {
-                    id = existingId
-                }
-            }
-
             return nasjonalManuellOppgaveDAO
         } else {
             val nasjonalManuellOppgaveDAO =
@@ -345,13 +409,6 @@ class NasjonalOppgaveService(
                     datoFerdigstilt = datoFerdigstilt,
                     avvisningsgrunn = avvisningsgrunn,
                 )
-
-            if (existingId != null) {
-                nasjonalManuellOppgaveDAO.apply {
-                    id = existingId
-                }
-            }
-
             return nasjonalManuellOppgaveDAO
         }
     }
