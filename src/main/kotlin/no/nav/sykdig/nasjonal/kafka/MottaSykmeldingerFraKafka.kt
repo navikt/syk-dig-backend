@@ -96,7 +96,7 @@ class MottaSykmeldingerFraKafka(
         )
 
         logger.info("lagrer oppgave med sykmeldingId i nasjonal_manuelloppgave ${oppgaveSmreg.sykmeldingId}")
-        nasjonalOppgaveService.lagreOppgaveMigrering(
+    /*    nasjonalOppgaveService.lagreOppgaveMigrering(
             papirManuellOppgave = papirManuellOppgave,
             journalpostId = oppgaveSmreg.journalpostId,
             ferdigstilt = oppgaveSmreg.ferdigstilt,
@@ -107,16 +107,18 @@ class MottaSykmeldingerFraKafka(
             ferdigstiltAv = oppgaveSmreg.ferdigstiltAv,
             datoFerdigstilt = oppgaveSmreg.datoFerdigstilt,
             avvisningsgrunn = oppgaveSmreg.avvisningsgrunn,
-        )
+        )*/
 
         logger.info("henter sykmelding fra sendt_sykmelding og sendt_sykmelding_history tabell i smreg ${oppgaveSmreg.sykmeldingId}")
         val sykmeldingerResponse = smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId)
+        logger.info("sykmelding fra smreg ${oppgaveSmreg.sykmeldingId}: $sykmeldingerResponse")
         sykmeldingerResponse?.forEach { sykmelding ->
             val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isBlank()) oppgaveSmreg.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
             nasjonalSykmeldingService.lagreSykmeldingMigrering(
                 sykmelding.receivedSykmelding,
                 Veileder(ferdigstiltAv),
-                datoFerdigstilt = oppgaveSmreg.datoFerdigstilt,
+                datoFerdigstilt = sykmelding.datoFerdigstilt?.toLocalDateTime(),
+                time = sykmelding.timestamp
             )
         }
         //behandleNasjonalOppgave(papirsmregistrering)

@@ -191,6 +191,16 @@ data class SendtSykmeldingHistory(
     val ferdigstiltAv: String,
     val datoFerdigstilt: OffsetDateTime?,
     val receivedSykmelding: ReceivedSykmelding,
+    val timestamp: OffsetDateTime,
+)
+
+data class SendtSykmeldingHistorySykDig(
+    val id: String,
+    val sykmeldingId: String,
+    val ferdigstiltAv: String,
+    val datoFerdigstilt: OffsetDateTime?,
+    val timestamp: OffsetDateTime,
+    val receivedSykmelding: ReceivedSykmelding,
 )
 
 
