@@ -85,7 +85,7 @@ class MottaSykmeldingerFraKafka(
                     )
                 )
                 logger.info("lagrer oppgave med sykmeldingId ${oppgaveSmreg.sykmeldingId}")
-                nasjonalOppgaveService.lagreOppgave(papirManuellOppgave, journalpostId =  oppgaveSmreg.journalpostId, ferdigstilt = oppgaveSmreg.ferdigstilt)
+                nasjonalOppgaveService.lagreOppgave(papirManuellOppgave, journalpostId =  oppgaveSmreg.journalpostId, ferdigstilt = oppgaveSmreg.ferdigstilt, aktorId = oppgaveSmreg.aktorId, dokumentInfoId = oppgaveSmreg.dokumentInfoId, datoOpprettet = oppgaveSmreg.datoOpprettet?.toLocalDateTime(), utfall = oppgaveSmreg.utfall, ferdigstiltAv = oppgaveSmreg.ferdigstiltAv, datoFerdigstilt = oppgaveSmreg.datoFerdigstilt, avvisningsgrunn = oppgaveSmreg.avvisningsgrunn)
                 val sykmeldingerResponse = smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId)
                 val sykmeldinger = sykmeldingerResponse.body
                 sykmeldinger?.forEach { sykmelding ->
