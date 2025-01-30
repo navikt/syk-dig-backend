@@ -35,7 +35,7 @@ class MottaSykmeldingerFraKafka(
         if (eksisterendeOppgave != null) {
             logger.warn(
                 "Papirsykmelding med sykmeldingId {} er allerede lagret i databasen. Ingen ny oppgave opprettes.",
-                papirSmRegistering.sykmeldingId
+                papirSmRegistering.sykmeldingId,
             )
             return
         }
@@ -46,7 +46,7 @@ class MottaSykmeldingerFraKafka(
             logger.info(
                 "Manuell papirsykmeldingoppgave lagret i databasen med oppgaveId: {}, {}",
                 StructuredArguments.keyValue("oppgaveId", oppgave.id),
-                StructuredArguments.fields(loggingMeta)
+                StructuredArguments.fields(loggingMeta),
             )
             metricRegister.message_stored_in_db_counter.increment()
         } catch (ex: Exception) {
@@ -54,7 +54,7 @@ class MottaSykmeldingerFraKafka(
                 "Feil ved oppretting av nasjonal oppgave for sykmeldingId: {}. Feilmelding: {}",
                 papirSmRegistering.sykmeldingId,
                 ex.message,
-                ex
+                ex,
             )
         }
     }
@@ -62,42 +62,63 @@ class MottaSykmeldingerFraKafka(
     // TODO: kun migrering
     fun lagreISykDig(papirsmregistrering: PapirSmRegistering) {
         val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSykDig(papirsmregistrering.sykmeldingId, "")
-        logger.info("henter eksisterende oppgave fra db for å se om den ligger der ${papirsmregistrering.sykmeldingId}, oppgaveId: ${papirsmregistrering.oppgaveId}, eksisterende: ${eksisterendeOppgave?.sykmeldingId}")
-        if (eksisterendeOppgave == null) {
-            logger.info("gjør kall mot smreg for å hente oppgave der ${papirsmregistrering.sykmeldingId}")
-            val oppgaveSmregResponse = smregistreringClient.getOppgaveRequestWithoutAuth(papirsmregistrering.sykmeldingId)
+        logger.info("hentet eksisterende oppgave fra db for å se om den ligger der ${papirsmregistrering.sykmeldingId}, oppgaveId: ${papirsmregistrering.oppgaveId}, eksisterende: ${eksisterendeOppgave?.sykmeldingId}")
 
-            logger.info("hentet respons fra smreg med sykmeldingId ${papirsmregistrering.sykmeldingId}, respons fra smreg: ${oppgaveSmregResponse?.first()?.sykmeldingId}")
-            val oppgaveSmreg = oppgaveSmregResponse?.firstOrNull()
-            if (oppgaveSmreg != null) {
-                logger.info("respons smreg med sykmeldingId ${papirsmregistrering.sykmeldingId}, oppgaveSmreg er ikke null")
-                val papirManuellOppgave = PapirManuellOppgave(
-                    fnr = oppgaveSmreg.fnr,
-                    sykmeldingId = oppgaveSmreg.sykmeldingId,
-                    oppgaveid = oppgaveSmreg.oppgaveid,
-                    pdfPapirSykmelding = oppgaveSmreg.pdfPapirSykmelding ?: ByteArray(0),
-                    papirSmRegistering = oppgaveSmreg.papirSmRegistering,
-                    documents = listOf(
-                        Document(
-                            dokumentInfoId = oppgaveSmreg.dokumentInfoId ?: "",
-                            tittel = "papirsykmelding"
-                        )
-                    )
-                )
-                logger.info("lagrer oppgave med sykmeldingId ${oppgaveSmreg.sykmeldingId}")
-                nasjonalOppgaveService.lagreOppgave(papirManuellOppgave, journalpostId =  oppgaveSmreg.journalpostId, ferdigstilt = oppgaveSmreg.ferdigstilt, aktorId = oppgaveSmreg.aktorId, dokumentInfoId = oppgaveSmreg.dokumentInfoId, datoOpprettet = oppgaveSmreg.datoOpprettet?.toLocalDateTime(), utfall = oppgaveSmreg.utfall, ferdigstiltAv = oppgaveSmreg.ferdigstiltAv, datoFerdigstilt = oppgaveSmreg.datoFerdigstilt, avvisningsgrunn = oppgaveSmreg.avvisningsgrunn)
-                val sykmeldingerResponse = smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId)
-                val sykmeldinger = sykmeldingerResponse.body
-                sykmeldinger?.forEach { sykmelding ->
-                    val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isBlank()) oppgaveSmreg.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
-                    nasjonalSykmeldingService.lagreSykmelding(
-                        sykmelding.receivedSykmelding,
-                        Veileder(ferdigstiltAv),
-                        datoFerdigstilt = oppgaveSmreg.datoFerdigstilt
-                    )
-                }
-            }
+        if (eksisterendeOppgave != null) {
+            logger.info("Sykmelding med id ${papirsmregistrering.sykmeldingId} ligger allerede i syk-dig-db")
+            return
         }
-        behandleNasjonalOppgave(papirsmregistrering)
+        logger.info("gjør kall mot smreg for å hente oppgaven der ${papirsmregistrering.sykmeldingId}")
+        val oppgaveSmregResponse = smregistreringClient.getOppgaveRequestWithoutAuth(papirsmregistrering.sykmeldingId)
+
+        if (oppgaveSmregResponse == null) {
+            logger.info("Ingen sykmelding i Smreg på sykmeldingId ${papirsmregistrering.sykmeldingId} $papirsmregistrering")
+            //behandleNasjonalOppgave(papirsmregistrering)
+            return
+        }
+
+        logger.info("hentet respons fra smreg med sykmeldingId ${papirsmregistrering.sykmeldingId}, respons fra smreg: ${oppgaveSmregResponse?.first()?.sykmeldingId}")
+        val oppgaveSmreg = oppgaveSmregResponse.first()
+
+        logger.info("respons smreg med sykmeldingId ${papirsmregistrering.sykmeldingId}, oppgaveSmreg er ikke null")
+        val papirManuellOppgave = PapirManuellOppgave(
+            fnr = oppgaveSmreg.fnr,
+            sykmeldingId = oppgaveSmreg.sykmeldingId,
+            oppgaveid = oppgaveSmreg.oppgaveid,
+            pdfPapirSykmelding = oppgaveSmreg.pdfPapirSykmelding ?: ByteArray(0),
+            papirSmRegistering = oppgaveSmreg.papirSmRegistering,
+            documents = listOf(
+                Document(
+                    dokumentInfoId = oppgaveSmreg.dokumentInfoId ?: "",
+                    tittel = "papirsykmelding",
+                ),
+            ),
+        )
+
+        logger.info("lagrer oppgave med sykmeldingId i nasjonal_manuelloppgave ${oppgaveSmreg.sykmeldingId}")
+        nasjonalOppgaveService.lagreOppgaveMigrering(
+            papirManuellOppgave = papirManuellOppgave,
+            journalpostId = oppgaveSmreg.journalpostId,
+            ferdigstilt = oppgaveSmreg.ferdigstilt,
+            aktorId = oppgaveSmreg.aktorId,
+            dokumentInfoId = oppgaveSmreg.dokumentInfoId,
+            datoOpprettet = oppgaveSmreg.datoOpprettet?.toLocalDateTime(),
+            utfall = oppgaveSmreg.utfall,
+            ferdigstiltAv = oppgaveSmreg.ferdigstiltAv,
+            datoFerdigstilt = oppgaveSmreg.datoFerdigstilt,
+            avvisningsgrunn = oppgaveSmreg.avvisningsgrunn,
+        )
+
+        logger.info("henter sykmelding fra sendt_sykmelding og sendt_sykmelding_history tabell i smreg ${oppgaveSmreg.sykmeldingId}")
+        val sykmeldingerResponse = smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId)
+        sykmeldingerResponse?.forEach { sykmelding ->
+            val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isBlank()) oppgaveSmreg.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
+            nasjonalSykmeldingService.lagreSykmeldingMigrering(
+                sykmelding.receivedSykmelding,
+                Veileder(ferdigstiltAv),
+                datoFerdigstilt = oppgaveSmreg.datoFerdigstilt,
+            )
+        }
+        //behandleNasjonalOppgave(papirsmregistrering)
     }
 }
