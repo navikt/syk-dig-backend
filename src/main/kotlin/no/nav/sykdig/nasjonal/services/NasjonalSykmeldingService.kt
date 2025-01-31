@@ -214,9 +214,11 @@ class NasjonalSykmeldingService(
 
     fun deleteSykmelding(sykmeldingId: String): Int {
         val id = nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
+        log.info("found Ids for sykmeldingId $sykmeldingId: $id")
         id.forEach {
             it.id?.let { id -> nasjonalSykmeldingRepository.deleteById(id) }
         }
+        log.info("Sykmelding with sykmeldingId $sykmeldingId deleted")
         return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId).count()
     }
 
