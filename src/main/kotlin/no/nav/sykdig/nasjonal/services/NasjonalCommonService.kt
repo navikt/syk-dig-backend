@@ -100,7 +100,6 @@ class NasjonalCommonService(
 
     }
 
-
     private fun createMerknad(sykmelding: Sykmelding): List<Merknad>? {
         val behandletTidspunkt = sykmelding.behandletTidspunkt.toLocalDate()
         val terskel = sykmelding.perioder.map { it.fom }.minOrNull()?.plusDays(7)

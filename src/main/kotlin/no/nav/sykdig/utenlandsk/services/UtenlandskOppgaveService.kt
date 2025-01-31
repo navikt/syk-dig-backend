@@ -10,6 +10,7 @@ import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.OppdatertSykmeldingStatus
 import no.nav.sykdig.generated.types.OppdatertSykmeldingStatusEnum
+import no.nav.sykdig.gosys.GosysService
 import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.shared.utils.getLoggingMeta
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel

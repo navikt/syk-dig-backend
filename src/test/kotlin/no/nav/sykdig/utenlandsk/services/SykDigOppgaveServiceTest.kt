@@ -2,7 +2,7 @@ package no.nav.sykdig.utenlandsk.services
 
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
 import no.nav.sykdig.pdl.Navn

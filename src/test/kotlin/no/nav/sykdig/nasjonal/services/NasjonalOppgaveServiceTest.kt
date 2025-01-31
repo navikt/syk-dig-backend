@@ -9,8 +9,8 @@ import no.nav.sykdig.dokarkiv.DokarkivClient
 import no.nav.sykdig.dokarkiv.DocumentService
 import no.nav.sykdig.shared.Adresse
 import no.nav.sykdig.shared.Behandler
-import no.nav.sykdig.oppgave.models.NasjonalOppgaveResponse
-import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
+import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
@@ -65,9 +65,6 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     val mapper = jacksonObjectMapper()
 
     @MockitoBean
-    lateinit var sykdigOppgaveService: SykDigOppgaveService
-
-    @MockitoBean
     lateinit var personService: PersonService
 
     @MockitoBean
@@ -113,8 +110,6 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         val oppgaveId = "123"
         val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
         val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
-
-        Mockito.`when`(sykdigOppgaveService.getOppgave(anyString())).thenReturn(testDataOppgaveDbModel(oppgaveId))
 
         Mockito.`when`(nasjonaCommonService.getNavEmail()).thenReturn("navEmail")
         Mockito.`when`(nasjonaCommonService.getNavIdent()).thenReturn(Veileder("navIdent"))

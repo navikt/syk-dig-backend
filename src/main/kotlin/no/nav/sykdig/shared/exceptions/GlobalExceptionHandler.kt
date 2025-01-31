@@ -45,6 +45,12 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(e.statusCode).body("Internal server error occurred.")
     }
 
+    @ExceptionHandler(RuntimeException::class)
+    fun handleRuntimeException(e: RuntimeException): ResponseEntity<String> {
+        log.error("Runtime exception: ${e.message}", e)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Runtime error occurred.")
+    }
+
     @ExceptionHandler(IOException::class)
     fun handleIOException(e: IOException): ResponseEntity<String> {
         return if (e.message?.contains("Broken pipe") == true) {

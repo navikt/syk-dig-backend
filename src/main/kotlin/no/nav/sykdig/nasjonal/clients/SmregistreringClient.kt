@@ -3,24 +3,28 @@ package no.nav.sykdig.nasjonal.clients
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
+import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.services.isValidOppgaveId
+import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
+import org.apache.kafka.common.network.Send
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.*
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpStatusCodeException
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Component
 class SmregistreringClient(
     @Value("\${smregistrering.url}") private val url: String,
     val smregisteringRestTemplate: RestTemplate,
+    val smregM2mRestTemplate: RestTemplate,
 ) {
     val log = applog()
 
@@ -75,6 +79,106 @@ class SmregistreringClient(
                 PapirManuellOppgave::class.java,
             )
         return res
+    }
+
+    @Retryable
+    fun getOppgaveRequestWithoutAuth(
+        sykmeldingId: String,
+    ): List<ManuellOppgaveDTOSykDig>? {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        log.info("skal gjøre kall mot smreg for sykmeldingid $sykmeldingId")
+        val uri = UriComponentsBuilder.fromHttpUrl("$url/api/v1/oppgave/sykDig/{sykmeldingId}")
+            .buildAndExpand(sykmeldingId)
+            .toUri()
+
+        return try {
+            val responseType = object : ParameterizedTypeReference<List<ManuellOppgaveDTOSykDig>>() {}
+
+            val res = smregM2mRestTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                HttpEntity<String>(headers),
+                responseType,
+            )
+
+            val body = res.body
+            if (body.isNullOrEmpty()) {
+                log.warn("No oppgave found for sykmeldingId $sykmeldingId")
+                null
+            } else {
+                log.info("Oppgave with sykmeldingId ${body.first().sykmeldingId} fetched from smreg")
+                body
+            }
+        } catch (e: ClassCastException) {
+            log.error("Caught ClassCastException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
+        } catch (e: HttpStatusCodeException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                log.warn("No oppgave found for sykmeldingId $sykmeldingId: ${e.statusCode}")
+                null
+            } else {
+                log.error("Caught HttpStatusCodeException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+                null
+            }
+        } catch (e: RestClientException) {
+            log.error("Caught RestClientException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
+        } catch (e: Exception) {
+            log.error("Caught exception while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
+        }
+    }
+
+    @Retryable
+    fun getSykmeldingRequestWithoutAuth(
+        sykmeldingId: String,
+    ): List<SendtSykmeldingHistorySykDig>? {
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        val uri = UriComponentsBuilder.fromHttpUrl("$url/api/v1/sykmelding/sykDig/{sykmeldingId}")
+            .buildAndExpand(sykmeldingId)
+            .toUri()
+
+        return try {
+            val responseType = object : ParameterizedTypeReference<List<SendtSykmeldingHistorySykDig>>() {}
+
+            val res = smregM2mRestTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                HttpEntity<String>(headers),
+                responseType
+            )
+
+            val body = res.body
+            if (body.isNullOrEmpty()) {
+                log.warn("No oppgave found for sykmeldingId $sykmeldingId")
+                null
+            } else {
+                log.info("Oppgave with sykmeldingId ${body.first().sykmeldingId} fetched from smreg")
+                body
+            }
+        } catch (e: ClassCastException) {
+            log.error("Caught ClassCastException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
+        } catch (e: HttpStatusCodeException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                log.warn("No oppgave found for sykmeldingId $sykmeldingId: ${e.statusCode}")
+                null
+            } else {
+                log.error("Caught HttpStatusCodeException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+                null
+            }
+        } catch (e: RestClientException) {
+            log.error("Caught RestClientException while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
+        } catch (e: Exception) {
+            log.error("Caught exception while doing call to smreg for sykmeldingId $sykmeldingId: ${e.message}", e)
+            null
+        }
     }
 
     @Retryable
@@ -180,3 +284,43 @@ class SmregistreringClient(
         return authorization.removePrefix("Bearer ")
     }
 }
+
+// TODO: denne gjelder kun migrering
+data class SendtSykmeldingHistory(
+    val id: String,
+    val sykmeldingId: String,
+    val ferdigstiltAv: String,
+    val datoFerdigstilt: OffsetDateTime?,
+    val receivedSykmelding: ReceivedSykmelding,
+    val timestamp: OffsetDateTime,
+)
+
+data class SendtSykmeldingHistorySykDig(
+    val id: String,
+    val sykmeldingId: String,
+    val ferdigstiltAv: String,
+    val datoFerdigstilt: OffsetDateTime?,
+    val timestamp: OffsetDateTime,
+    val receivedSykmelding: ReceivedSykmelding,
+)
+
+
+
+// TODO: denne gjelder kun migrering
+data class ManuellOppgaveDTOSykDig(
+    val journalpostId: String,
+    val fnr: String?,
+    val aktorId: String?,
+    val dokumentInfoId: String?,
+    val datoOpprettet: OffsetDateTime?,
+    val sykmeldingId: String,
+    val oppgaveid: Int?,
+    val ferdigstilt: Boolean,
+    val papirSmRegistering: PapirSmRegistering?,
+    var pdfPapirSykmelding: ByteArray?,
+    val ferdigstiltAv: String?,
+    val utfall: String?,
+    val datoFerdigstilt: LocalDateTime?,
+    val avvisningsgrunn: String?,
+)
+

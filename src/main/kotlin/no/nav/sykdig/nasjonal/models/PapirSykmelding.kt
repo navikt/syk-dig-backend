@@ -16,7 +16,7 @@ data class PapirManuellOppgave(
     val sykmeldingId: String,
     val oppgaveid: Int?,
     var pdfPapirSykmelding: ByteArray,
-    val papirSmRegistering: PapirSmRegistering,
+    val papirSmRegistering: PapirSmRegistering?,
     val documents: List<Document>,
 )
 
@@ -49,6 +49,17 @@ data class PapirSmRegistering(
     val behandletTidspunkt: LocalDate?,
     val behandler: Behandler?,
 )
+
+fun PapirSmRegistering.toPapirManuellOppgave(oppgaveid: Int?): PapirManuellOppgave {
+    return PapirManuellOppgave(
+        fnr = fnr,
+        sykmeldingId = sykmeldingId,
+        oppgaveid = oppgaveid,
+        pdfPapirSykmelding = ByteArray(0),
+        papirSmRegistering = this,
+        documents = emptyList(),
+    )
+}
 
 data class AvvisSykmeldingRequest(
     val reason: String?,

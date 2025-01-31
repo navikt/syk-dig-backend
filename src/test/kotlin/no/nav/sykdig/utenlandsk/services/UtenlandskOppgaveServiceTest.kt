@@ -3,9 +3,10 @@ package no.nav.sykdig.utenlandsk.services
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.oppgave.models.GetOppgaveResponse
-import no.nav.sykdig.oppgave.models.OppgaveType
-import no.nav.sykdig.oppgave.models.OppgaveStatus
+import no.nav.sykdig.gosys.GosysService
+import no.nav.sykdig.gosys.models.GetOppgaveResponse
+import no.nav.sykdig.gosys.models.OppgaveType
+import no.nav.sykdig.gosys.models.OppgaveStatus
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.PersonService

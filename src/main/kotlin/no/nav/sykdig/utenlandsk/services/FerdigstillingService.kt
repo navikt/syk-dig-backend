@@ -5,7 +5,7 @@ import no.nav.sykdig.shared.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.dokarkiv.DocumentService
 import no.nav.sykdig.dokarkiv.DokarkivClient
 import no.nav.sykdig.utenlandsk.mapping.mapToReceivedSykmelding
-import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.toFormattedNameString

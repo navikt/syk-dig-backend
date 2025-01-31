@@ -3,9 +3,9 @@ package no.nav.sykdig.utenlandsk.kafka
 import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.db.OppgaveRepository
-import no.nav.sykdig.oppgave.models.GetOppgaveResponse
-import no.nav.sykdig.oppgave.models.OppdaterOppgaveRequest
-import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.gosys.models.GetOppgaveResponse
+import no.nav.sykdig.gosys.models.OppdaterOppgaveRequest
+import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.saf.SafJournalpostService
 import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.shared.utils.toOppgaveDbModel

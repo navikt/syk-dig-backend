@@ -15,6 +15,7 @@ import no.nav.sykdig.shared.MedisinskVurdering
 import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.shared.Sykmelding
 import no.nav.sykdig.nasjonal.db.models.NasjonalSykmeldingDAO
+import org.amshove.kluent.internal.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,7 +39,32 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
         val res = nasjonalSykmeldingRepository.save(dao)
 
         val nasjonalSykmelding = nasjonalSykmeldingRepository.findBySykmeldingId(res.sykmeldingId)
-        Assertions.assertTrue(nasjonalSykmelding.isPresent)
+        assertEquals(1, nasjonalSykmelding.count())
+    }
+
+    @Test
+    fun `slett en sykmelding fra db`() {
+        val dao = testData(null, "123")
+        nasjonalSykmeldingRepository.save(dao)
+        val id = nasjonalSykmeldingRepository.findBySykmeldingId("123")
+        id.forEach {
+            it.id?.let { id -> nasjonalSykmeldingRepository.deleteById(id) }
+        }
+        assertEquals(0, nasjonalSykmeldingRepository.findBySykmeldingId("123").count())
+    }
+
+    @Test
+    fun `slett flere sykmeldinger med samme sykmeldingId fra db`() {
+        val dao1 = testData(null, "123")
+        val dao2 = testData(null, "123")
+        nasjonalSykmeldingRepository.save(dao1)
+        nasjonalSykmeldingRepository.save(dao2)
+        val id = nasjonalSykmeldingRepository.findBySykmeldingId("123")
+        assertEquals(2, id.count())
+        id.forEach {
+            it.id?.let { id -> nasjonalSykmeldingRepository.deleteById(id) }
+        }
+        assertEquals(0, nasjonalSykmeldingRepository.findBySykmeldingId("123").count())
     }
 
     fun testData(id: UUID?, sykmeldingId: String): NasjonalSykmeldingDAO {

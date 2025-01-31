@@ -1,6 +1,6 @@
 package no.nav.sykdig.nasjonal.models
 
-import no.nav.sykdig.oppgave.models.NasjonalOppgaveResponse
+import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
 
 
 data class FerdigstillRegistrering(

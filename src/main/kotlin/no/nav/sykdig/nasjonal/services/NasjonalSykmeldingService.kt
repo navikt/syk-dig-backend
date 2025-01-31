@@ -43,7 +43,7 @@ class NasjonalSykmeldingService(
     private val sykmelderService: SykmelderService,
     private val nasjonalCommonService: NasjonalCommonService,
     private val nasjonalFerdigstillingsService: NasjonalFerdigstillingsService,
-    private val nasjonalRegelvalideringService: NasjonalRegelvalideringService
+    private val nasjonalRegelvalideringService: NasjonalRegelvalideringService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -160,9 +160,18 @@ class NasjonalSykmeldingService(
             throw exception
         }
         securelog.info("receivedSykmelding som skal lagres: ${receivedSykmelding}")
+        lagreSykmelding(receivedSykmelding, veileder)
+        log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
+    }
+
+    fun lagreSykmelding(receivedSykmelding: ReceivedSykmelding, veileder: Veileder) {
         val dao = mapToDao(receivedSykmelding, veileder)
         nasjonalSykmeldingRepository.save(dao)
-        log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
+    }
+
+    fun lagreSykmeldingMigrering(receivedSykmelding: ReceivedSykmelding, veileder: Veileder, datoFerdigstilt: LocalDateTime?, time: OffsetDateTime) {
+        val dao = mapToDao(receivedSykmelding, veileder, datoFerdigstilt, time)
+        nasjonalSykmeldingRepository.save(dao)
     }
 
     private fun handleBrokenRule(
@@ -203,9 +212,19 @@ class NasjonalSykmeldingService(
     }
 
 
+    fun deleteSykmelding(sykmeldingId: String): Int {
+        val id = nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
+        id.forEach {
+            it.id?.let { id -> nasjonalSykmeldingRepository.deleteById(id) }
+        }
+        return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId).count()
+    }
+
     fun mapToDao(
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
+        datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
+        timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
@@ -233,11 +252,11 @@ class NasjonalSykmeldingService(
                     avsenderSystem = receivedSykmelding.sykmelding.avsenderSystem,
                     syketilfelleStartDato = receivedSykmelding.sykmelding.syketilfelleStartDato,
                     signaturDato = receivedSykmelding.sykmelding.signaturDato,
-                    navnFastlege = receivedSykmelding.sykmelding.navnFastlege
+                    navnFastlege = receivedSykmelding.sykmelding.navnFastlege,
                 ),
-                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                timestamp = timestamp,
                 ferdigstiltAv = veileder.veilederIdent,
-                datoFerdigstilt = LocalDateTime.now(ZoneOffset.UTC),
+                datoFerdigstilt = datoFerdigstilt,
             )
         return nasjonalManuellOppgaveDAO
     }

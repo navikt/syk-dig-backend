@@ -29,6 +29,9 @@ KAFKA_KEYSTORE_PATH: ""
 oppgave:
   topic: "teamsykmelding.syk-dig-oppgave"
 
+smreg:
+  topic: "teamsykmelding.smreg-topic"
+
 nais:
   cluster: "dev-gcp"
 
