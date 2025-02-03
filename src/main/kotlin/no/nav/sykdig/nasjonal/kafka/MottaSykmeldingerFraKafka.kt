@@ -121,15 +121,14 @@ class MottaSykmeldingerFraKafka(
         logger.info("sykmelding fra smreg ${oppgaveSmreg.sykmeldingId}: $jsonResponse")
         sykmeldingerResponse?.forEach { sykmelding ->
             val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isBlank()) oppgaveSmreg.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
-            val datoFerdigstilt = sykmelding.datoFerdigstilt?.let { Instant.ofEpochSecond(it.toEpochSecond()).atZone(ZoneOffset.UTC).toLocalDateTime() }
-            val timestamp = sykmelding.timestamp.let { Instant.ofEpochSecond(it.toEpochSecond()).atZone(ZoneOffset.UTC).toOffsetDateTime() }
             nasjonalSykmeldingService.lagreSykmeldingMigrering(
                 sykmelding.receivedSykmelding,
                 Veileder(ferdigstiltAv),
-                datoFerdigstilt = datoFerdigstilt,
-                time = timestamp
+                datoFerdigstilt = sykmelding.datoFerdigstilt,
+                time = sykmelding.timestamp
             )
         }
         //behandleNasjonalOppgave(papirsmregistrering)
     }
+
 }

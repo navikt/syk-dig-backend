@@ -26,7 +26,7 @@ class NasjonalOppgaveListener(
 
     @KafkaListener(
         topics = ["\${smreg.topic}"],
-        groupId = "papir-sm-consumer-1",
+        groupId = "papir-sm-consumer-2",
         properties = ["auto.offset.reset = earliest"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
