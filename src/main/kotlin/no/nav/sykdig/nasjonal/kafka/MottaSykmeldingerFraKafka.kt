@@ -1,5 +1,7 @@
 package no.nav.sykdig.nasjonal.kafka
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.shared.applog
@@ -25,6 +27,7 @@ class MottaSykmeldingerFraKafka(
     private val nasjonalSykmeldingService: NasjonalSykmeldingService,
 ) {
     val logger = applog()
+    val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     fun behandleNasjonalOppgave(papirSmRegistering: PapirSmRegistering) {
         val loggingMeta = getLoggingMeta(papirSmRegistering.sykmeldingId, papirSmRegistering)
@@ -111,7 +114,8 @@ class MottaSykmeldingerFraKafka(
 
         logger.info("henter sykmelding fra sendt_sykmelding og sendt_sykmelding_history tabell i smreg ${oppgaveSmreg.sykmeldingId}")
         val sykmeldingerResponse = smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId)
-        logger.info("sykmelding fra smreg ${oppgaveSmreg.sykmeldingId}: $sykmeldingerResponse")
+        val jsonResponse = objectMapper.writeValueAsString(sykmeldingerResponse)
+        logger.info("sykmelding fra smreg ${oppgaveSmreg.sykmeldingId}: $jsonResponse")
         sykmeldingerResponse?.forEach { sykmelding ->
             val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isBlank()) oppgaveSmreg.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
             nasjonalSykmeldingService.lagreSykmeldingMigrering(
