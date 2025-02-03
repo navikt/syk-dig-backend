@@ -15,6 +15,9 @@ import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
 import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.utenlandsk.services.SykmeldingService
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import kotlin.math.log
 
 
@@ -118,11 +121,13 @@ class MottaSykmeldingerFraKafka(
         logger.info("sykmelding fra smreg ${oppgaveSmreg.sykmeldingId}: $jsonResponse")
         sykmeldingerResponse?.forEach { sykmelding ->
             val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isBlank()) oppgaveSmreg.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
+            val datoFerdigstilt = sykmelding.datoFerdigstilt?.let { Instant.ofEpochSecond(it.toEpochSecond()).atZone(ZoneOffset.UTC).toLocalDateTime() }
+            val timestamp = sykmelding.timestamp.let { Instant.ofEpochSecond(it.toEpochSecond()).atZone(ZoneOffset.UTC).toOffsetDateTime() }
             nasjonalSykmeldingService.lagreSykmeldingMigrering(
                 sykmelding.receivedSykmelding,
                 Veileder(ferdigstiltAv),
-                datoFerdigstilt = sykmelding.datoFerdigstilt?.toLocalDateTime(),
-                time = sykmelding.timestamp
+                datoFerdigstilt = datoFerdigstilt,
+                time = timestamp
             )
         }
         //behandleNasjonalOppgave(papirsmregistrering)
