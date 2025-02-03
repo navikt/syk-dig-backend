@@ -476,7 +476,9 @@ class NasjonalOppgaveService(
 
     fun deleteOppgave(sykmeldingId: String): Boolean {
         val id = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)?.id
-        nasjonalOppgaveRepository.deleteById(id)
+        if (id != null) {
+            nasjonalOppgaveRepository.deleteById(id)
+        }
         return nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId) == null
     }
 
