@@ -68,10 +68,11 @@ class MottaSykmeldingerFraKafka(
     // TODO: kun migrering
     fun lagreISykDig(papirsmregistrering: PapirSmRegistering) {
         val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSykDig(papirsmregistrering.sykmeldingId, "")
+        val eksisterendeSykmelding = nasjonalSykmeldingService.findBySykmeldingId(papirsmregistrering.sykmeldingId)
         logger.info("hentet eksisterende oppgave fra db for å se om den ligger der ${papirsmregistrering.sykmeldingId}, oppgaveId: ${papirsmregistrering.oppgaveId}, eksisterende: ${eksisterendeOppgave?.sykmeldingId}")
 
         if (eksisterendeOppgave != null) {
-            logger.info("Sykmelding med id ${papirsmregistrering.sykmeldingId} ligger allerede i syk-dig-db")
+            logger.info("Sykmelding med id ${papirsmregistrering.sykmeldingId} ligger allerede i syk-dig-db nasjonal_manuelloppgave tabell")
             return
         }
         logger.info("gjør kall mot smreg for å hente oppgaven der ${papirsmregistrering.sykmeldingId}")
@@ -114,6 +115,10 @@ class MottaSykmeldingerFraKafka(
             datoFerdigstilt = oppgaveSmreg.datoFerdigstilt,
             avvisningsgrunn = oppgaveSmreg.avvisningsgrunn,
         )
+        if (!eksisterendeSykmelding.isNullOrEmpty()){
+            logger.info("Sykmelding med id ${papirsmregistrering.sykmeldingId} ligger allerede i syk-dig-db nasjonal_sykmelding tabell")
+            return
+        }
 
         logger.info("henter sykmelding fra sendt_sykmelding og sendt_sykmelding_history tabell i smreg ${oppgaveSmreg.sykmeldingId}")
         val sykmeldingerResponse = smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId)
