@@ -86,7 +86,7 @@ class GosysService(
             val opprettOppgave = createOpprettOppgave(papirSmRegistering)
             val opprettetOppgave = oppgaveClient.opprettNasjonalOppgave(opprettOppgave, papirSmRegistering.sykmeldingId)
             metricRegister.opprett_nasjonal_oppgave_counter.increment()
-            log.info("Opprettet manuell papirsykmeldingoppgave med oppgaveId: $oppgaveId og sykmeldingId: ${papirSmRegistering.sykmeldingId}")
+            log.info("Opprettet manuell papirsykmeldingoppgave med oppgaveId: ${opprettetOppgave.id} og sykmeldingId: ${papirSmRegistering.sykmeldingId}")
             return opprettetOppgave
         }
         val oppgave = oppgaveClient.getNasjonalOppgave(oppgaveId.toString(), papirSmRegistering.sykmeldingId)
