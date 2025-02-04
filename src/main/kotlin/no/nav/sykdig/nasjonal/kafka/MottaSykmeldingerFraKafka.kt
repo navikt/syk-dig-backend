@@ -65,7 +65,7 @@ class MottaSykmeldingerFraKafka(
         }
     }
 
-    // TODO: kun migrering
+    // TODO: slettes etter migrering
     fun lagreISykDig(papirsmregistrering: PapirSmRegistering) {
         val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSykDig(papirsmregistrering.sykmeldingId, "")
         val eksisterendeSykmelding = nasjonalSykmeldingService.findBySykmeldingId(papirsmregistrering.sykmeldingId)

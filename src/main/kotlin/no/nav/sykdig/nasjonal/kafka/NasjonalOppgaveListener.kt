@@ -26,8 +26,8 @@ class NasjonalOppgaveListener(
 
     @KafkaListener(
         topics = ["\${smreg.topic}"],
-        groupId = "papir-sm-consumer-5",
-        properties = ["auto.offset.reset = earliest"],
+        groupId = "papir-sm-registering-consume",
+        properties = ["auto.offset.reset = none"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
     fun listen(
@@ -54,8 +54,8 @@ class NasjonalOppgaveListener(
         }
         val oppgaveRecord: PapirSmRegistering = objectMapper.readValue(cr.value())
         logger.info("migrerer sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId} and datoOpprettet ${oppgaveRecord.datoOpprettet} {}", kv("object", oppgaveRecord))
-        oppgaveKafkaService.lagreISykDig(oppgaveRecord)
-        //oppgaveKafkaService.behandleNasjonalOppgave(oppgaveRecord)
+        //oppgaveKafkaService.lagreISykDig(oppgaveRecord)
+        oppgaveKafkaService.behandleNasjonalOppgave(oppgaveRecord)
         acknowledgment.acknowledge()
     }
 }
