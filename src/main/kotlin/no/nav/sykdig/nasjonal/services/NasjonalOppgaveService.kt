@@ -71,36 +71,6 @@ class NasjonalOppgaveService(
         }
     }
 
-    fun lagreOppgaveMigrering(
-        papirManuellOppgave: PapirManuellOppgave,
-        ferdigstilt: Boolean,
-        journalpostId: String?,
-        aktorId: String?,
-        dokumentInfoId: String?,
-        datoOpprettet: LocalDateTime?,
-        utfall: String?,
-        ferdigstiltAv: String?,
-        datoFerdigstilt: LocalDateTime?,
-        avvisningsgrunn: String?,
-    ): NasjonalManuellOppgaveDAO {
-
-        log.info("lagrer oppgave med sykmeldingId=${papirManuellOppgave.sykmeldingId} fra $datoOpprettet")
-        val nyOppgave = nasjonalOppgaveRepository.save(
-            mapToDaoMigrering(
-                papirManuellOppgave,
-                ferdigstilt,
-                journalpostId,
-                aktorId,
-                dokumentInfoId,
-                datoOpprettet,
-                utfall,
-                ferdigstiltAv,
-                datoFerdigstilt,
-                avvisningsgrunn
-            ),
-        )
-        return nyOppgave
-    }
 
     fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, smRegistreringManuell: SmRegistreringManuell?): NasjonalManuellOppgaveDAO? {
         val existingOppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
@@ -272,10 +242,7 @@ class NasjonalOppgaveService(
         mapper.registerModules(JavaTimeModule())
         securelog.info("Mapper til DAO: $papirManuellOppgave")
 
-        //TODO: papirsmregistrering gjøres non nullable etter migrering
-        // grunn: det er ca 20 sykmeldinger fra 2020 med papirsmregistrering null
-        // den skal aldri være null på tidspuntket her
-        val papirSmRegistering = papirManuellOppgave.papirSmRegistering!!
+        val papirSmRegistering = papirManuellOppgave.papirSmRegistering
 
         val nasjonalManuellOppgaveDAO =
             NasjonalManuellOppgaveDAO(
@@ -325,91 +292,6 @@ class NasjonalOppgaveService(
         }
         return nasjonalManuellOppgaveDAO
 
-    }
-
-    fun mapToDaoMigrering(
-        papirManuellOppgave: PapirManuellOppgave,
-        ferdigstilt: Boolean,
-        journalpostId: String?,
-        aktorId: String?,
-        dokumentInfoId: String?,
-        datoOpprettet: LocalDateTime?,
-        utfall: String?,
-        ferdigstiltAv: String?,
-        datoFerdigstilt: LocalDateTime?,
-        avvisningsgrunn: String?,
-    ): NasjonalManuellOppgaveDAO {
-        mapper.registerModules(JavaTimeModule())
-        securelog.info("Mapper til DAO: $papirManuellOppgave")
-
-        val papirSmRegistering = papirManuellOppgave.papirSmRegistering
-
-        // TODO: denne fjernes etter migrering - papirsmregistrering skal aldri være null
-        // fordi det er sånn 20 sykmeldinger fra 2020 uten papirsmregistreringsobjekt i smreg db
-        if (papirSmRegistering == null) {
-            log.info("papirsmregistrering er null")
-            val nasjonalManuellOppgaveDAO = NasjonalManuellOppgaveDAO(
-                sykmeldingId = papirManuellOppgave.sykmeldingId,
-                journalpostId = journalpostId!!,
-                fnr = papirManuellOppgave.fnr,
-                aktorId = aktorId,
-                dokumentInfoId = dokumentInfoId,
-                datoOpprettet = datoOpprettet,
-                oppgaveId = papirManuellOppgave.oppgaveid,
-                ferdigstilt = ferdigstilt,
-                papirSmRegistrering = PapirSmRegistering(
-                    journalpostId, papirManuellOppgave.oppgaveid.toString(), papirManuellOppgave.fnr, aktorId, dokumentInfoId, datoOpprettet!!.atOffset(ZoneOffset.ofHours(1)), papirManuellOppgave.sykmeldingId, null, null, null, null, null, null, null, null, null,
-                    null, null, null, null, null, null,
-                ),
-                utfall = utfall,
-                ferdigstiltAv = ferdigstiltAv,
-                datoFerdigstilt = datoFerdigstilt,
-                avvisningsgrunn = avvisningsgrunn,
-            )
-            return nasjonalManuellOppgaveDAO
-        } else {
-            val nasjonalManuellOppgaveDAO =
-                NasjonalManuellOppgaveDAO(
-                    sykmeldingId = papirManuellOppgave.sykmeldingId,
-                    journalpostId = papirSmRegistering.journalpostId,
-                    fnr = papirManuellOppgave.fnr,
-                    aktorId = papirSmRegistering.aktorId,
-                    dokumentInfoId = papirSmRegistering.dokumentInfoId,
-                    datoOpprettet = papirSmRegistering.datoOpprettet?.toLocalDateTime(),
-                    oppgaveId = papirManuellOppgave.oppgaveid,
-                    ferdigstilt = ferdigstilt,
-                    papirSmRegistrering =
-                        PapirSmRegistering(
-                            journalpostId = papirSmRegistering.journalpostId,
-                            oppgaveId = papirSmRegistering.oppgaveId,
-                            fnr = papirSmRegistering.fnr,
-                            aktorId = papirSmRegistering.aktorId,
-                            dokumentInfoId = papirSmRegistering.dokumentInfoId,
-                            datoOpprettet = papirSmRegistering.datoOpprettet,
-                            sykmeldingId = papirSmRegistering.sykmeldingId,
-                            syketilfelleStartDato = papirSmRegistering.syketilfelleStartDato,
-                            arbeidsgiver = papirSmRegistering.arbeidsgiver,
-                            medisinskVurdering = papirSmRegistering.medisinskVurdering,
-                            skjermesForPasient = papirSmRegistering.skjermesForPasient,
-                            perioder = papirSmRegistering.perioder,
-                            prognose = papirSmRegistering.prognose,
-                            utdypendeOpplysninger = papirSmRegistering.utdypendeOpplysninger,
-                            tiltakNAV = papirSmRegistering.tiltakNAV,
-                            tiltakArbeidsplassen = papirSmRegistering.tiltakArbeidsplassen,
-                            andreTiltak = papirSmRegistering.andreTiltak,
-                            meldingTilNAV = papirSmRegistering.meldingTilNAV,
-                            meldingTilArbeidsgiver = papirSmRegistering.meldingTilArbeidsgiver,
-                            kontaktMedPasient = papirSmRegistering.kontaktMedPasient,
-                            behandletTidspunkt = papirSmRegistering.behandletTidspunkt,
-                            behandler = papirSmRegistering.behandler,
-                        ),
-                    utfall = utfall,
-                    ferdigstiltAv = ferdigstiltAv,
-                    datoFerdigstilt = datoFerdigstilt,
-                    avvisningsgrunn = avvisningsgrunn,
-                )
-            return nasjonalManuellOppgaveDAO
-        }
     }
 
     fun mapFromDao(

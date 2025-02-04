@@ -173,11 +173,6 @@ class NasjonalSykmeldingService(
         return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
     }
 
-    fun lagreSykmeldingMigrering(receivedSykmelding: ReceivedSykmelding, veileder: Veileder, datoFerdigstilt: LocalDateTime?, time: OffsetDateTime) {
-        val dao = mapToDao(receivedSykmelding, veileder, datoFerdigstilt, time)
-        nasjonalSykmeldingRepository.save(dao)
-    }
-
     private fun handleBrokenRule(
         validationResult: ValidationResult,
         oppgaveId: Int?,

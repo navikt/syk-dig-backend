@@ -53,8 +53,7 @@ class NasjonalOppgaveListener(
             return
         }
         val oppgaveRecord: PapirSmRegistering = objectMapper.readValue(cr.value())
-        logger.info("migrerer sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId} and datoOpprettet ${oppgaveRecord.datoOpprettet} {}", kv("object", oppgaveRecord))
-        //oppgaveKafkaService.lagreISykDig(oppgaveRecord)
+        logger.info("behandler sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId} and datoOpprettet ${oppgaveRecord.datoOpprettet} {}", kv("object", oppgaveRecord))
         oppgaveKafkaService.behandleNasjonalOppgave(oppgaveRecord)
         acknowledgment.acknowledge()
     }
