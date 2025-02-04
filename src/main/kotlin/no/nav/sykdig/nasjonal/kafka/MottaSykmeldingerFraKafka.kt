@@ -37,7 +37,7 @@ class MottaSykmeldingerFraKafka(
         logger.info("Behandler manuell papirsykmelding for sykmeldingId: {}", StructuredArguments.fields(loggingMeta))
         metricRegister.incoming_message_counter.increment()
 
-        val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(papirSmRegistering.sykmeldingId, "")
+        val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSykDig(papirSmRegistering.sykmeldingId, "")
         if (eksisterendeOppgave != null) {
             logger.warn(
                 "Papirsykmelding med sykmeldingId {} er allerede lagret i databasen. Ingen ny oppgave opprettes.",
