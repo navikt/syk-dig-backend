@@ -23,7 +23,6 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
 
@@ -167,7 +166,7 @@ class NasjonalOppgaveService(
         return oppgave
     }
 
-    fun getOppgaveBySykmeldingId(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {
+    fun getOppgaveBySykmeldingIdSmreg(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {
         val sykmelding = findBySykmeldingId(sykmeldingId)
 
         if (sykmelding != null) {
@@ -189,7 +188,7 @@ class NasjonalOppgaveService(
         return null
     }
 
-    fun getOppgaveBySykmeldingIdSykDig(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {
+    fun getOppgaveBySykmeldingId(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {
         val sykmelding = findBySykmeldingId(sykmeldingId)
         if (sykmelding != null) {
             log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
