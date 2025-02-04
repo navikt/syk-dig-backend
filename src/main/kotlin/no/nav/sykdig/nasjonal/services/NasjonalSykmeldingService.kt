@@ -169,6 +169,10 @@ class NasjonalSykmeldingService(
         nasjonalSykmeldingRepository.save(dao)
     }
 
+    fun findBySykmeldingId(sykmeldingId: String): List<NasjonalSykmeldingDAO>? {
+        return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
+    }
+
     fun lagreSykmeldingMigrering(receivedSykmelding: ReceivedSykmelding, veileder: Veileder, datoFerdigstilt: LocalDateTime?, time: OffsetDateTime) {
         val dao = mapToDao(receivedSykmelding, veileder, datoFerdigstilt, time)
         nasjonalSykmeldingRepository.save(dao)
@@ -214,7 +218,7 @@ class NasjonalSykmeldingService(
 
     fun deleteSykmelding(sykmeldingId: String): Int {
         val id = nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
-        if (id.isEmpty()) {
+        if (id.isNullOrEmpty()) {
             log.info("No sykmeldinger found for sykmeldingId $sykmeldingId")
             return 0
         }
