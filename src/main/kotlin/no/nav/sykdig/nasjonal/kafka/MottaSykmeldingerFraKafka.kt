@@ -10,15 +10,8 @@ import no.nav.sykdig.shared.utils.getLoggingMeta
 import no.nav.sykdig.gosys.GosysService
 import no.nav.sykdig.nasjonal.clients.SmregistreringClient
 import no.nav.sykdig.nasjonal.models.*
-import no.nav.sykdig.nasjonal.services.NasjonalCommonService
 import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
-import no.nav.sykdig.shared.LoggingMeta
-import no.nav.sykdig.utenlandsk.services.SykmeldingService
 import org.springframework.stereotype.Component
-import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import kotlin.math.log
 
 
 @Component
@@ -37,7 +30,7 @@ class MottaSykmeldingerFraKafka(
         logger.info("Behandler manuell papirsykmelding for sykmeldingId: {}", StructuredArguments.fields(loggingMeta))
         metricRegister.incoming_message_counter.increment()
 
-        val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSykDig(papirSmRegistering.sykmeldingId, "")
+        val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(papirSmRegistering.sykmeldingId, "")
         if (eksisterendeOppgave != null) {
             logger.warn(
                 "Papirsykmelding med sykmeldingId {} er allerede lagret i databasen. Ingen ny oppgave opprettes.",
@@ -45,7 +38,6 @@ class MottaSykmeldingerFraKafka(
             )
             return
         }
-
         try {
             val oppgave = gosysService.opprettNasjonalOppgave(papirSmRegistering)
             nasjonalOppgaveService.lagreOppgave(papirSmRegistering.toPapirManuellOppgave(oppgave.id))
@@ -67,7 +59,7 @@ class MottaSykmeldingerFraKafka(
 
     // TODO: slettes etter migrering
     fun lagreISykDig(papirsmregistrering: PapirSmRegistering) {
-        val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSykDig(papirsmregistrering.sykmeldingId, "")
+        val eksisterendeOppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(papirsmregistrering.sykmeldingId, "")
         val eksisterendeSykmelding = nasjonalSykmeldingService.findBySykmeldingId(papirsmregistrering.sykmeldingId)
         logger.info("hentet eksisterende oppgave fra db for å se om den ligger der ${papirsmregistrering.sykmeldingId}, oppgaveId: ${papirsmregistrering.oppgaveId}, eksisterende: ${eksisterendeOppgave?.sykmeldingId}")
 
