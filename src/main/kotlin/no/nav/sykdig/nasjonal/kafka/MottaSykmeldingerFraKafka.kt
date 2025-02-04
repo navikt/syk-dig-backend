@@ -122,9 +122,13 @@ class MottaSykmeldingerFraKafka(
 
         logger.info("henter sykmelding fra sendt_sykmelding og sendt_sykmelding_history tabell i smreg ${oppgaveSmreg.sykmeldingId}")
         val sykmeldingerResponse = smregistreringClient.getSykmeldingRequestWithoutAuth(papirsmregistrering.sykmeldingId)
+        if (sykmeldingerResponse.isNullOrEmpty()) {
+            logger.info("Ingen sykmelding i Smreg på sykmeldingId ${papirsmregistrering.sykmeldingId} $papirsmregistrering")
+            return
+        }
         val jsonResponse = objectMapper.writeValueAsString(sykmeldingerResponse)
         logger.info("sykmelding fra smreg ${oppgaveSmreg.sykmeldingId}: $jsonResponse datoferdigstil: ${sykmeldingerResponse?.first()?.datoFerdigstilt}")
-        sykmeldingerResponse?.forEach { sykmelding ->
+        sykmeldingerResponse.forEach { sykmelding ->
             val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isBlank()) oppgaveSmreg.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
             nasjonalSykmeldingService.lagreSykmeldingMigrering(
                 sykmelding.receivedSykmelding,
