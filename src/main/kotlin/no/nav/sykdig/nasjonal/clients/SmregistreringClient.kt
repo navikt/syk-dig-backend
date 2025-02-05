@@ -24,7 +24,6 @@ import java.time.OffsetDateTime
 class SmregistreringClient(
     @Value("\${smregistrering.url}") private val url: String,
     val smregisteringRestTemplate: RestTemplate,
-    val smregM2mRestTemplate: RestTemplate,
 ) {
     val log = applog()
 
