@@ -22,7 +22,6 @@ class NasjonalOppgaveListener(
     val oppgaveService: NasjonalOppgaveService
 ) {
     val logger = applog()
-    val processedRecords = ConcurrentHashMap.newKeySet<String>()
 
     @KafkaListener(
         topics = ["\${smreg.topic}"],
@@ -34,12 +33,6 @@ class NasjonalOppgaveListener(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        if (!processedRecords.add(cr.key())) {
-            logger.info("Duplicate record detected with key: ${cr.key()}, skipping processing.")
-            acknowledgment.acknowledge()
-            return
-        }
-
         logger.info("Processing record with key: ${cr.key()}")
         if (cr.value() == null){
             logger.info(
