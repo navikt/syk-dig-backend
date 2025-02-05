@@ -37,7 +37,7 @@ class NasjonalOppgaveListener(
             )
             val deletedSykmeldingRows = sykmeldingService.deleteSykmelding(cr.key())
             val deletedOppgaveRows = oppgaveService.deleteOppgave(cr.key())
-            if (deletedSykmeldingRows >0 && deletedOppgaveRows){
+            if (deletedSykmeldingRows > 0 && deletedOppgaveRows > 0){
                 logger.info("Slettet sykmelding med id ${cr.key()} og tilhørende historikk")
             }
             acknowledgment.acknowledge()

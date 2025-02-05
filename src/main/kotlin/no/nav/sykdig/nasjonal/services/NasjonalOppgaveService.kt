@@ -391,12 +391,8 @@ class NasjonalOppgaveService(
         metricRegister.sendtTilGosysNasjonal.increment()
     }
 
-    fun deleteOppgave(sykmeldingId: String): Boolean {
-        val id = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)?.id
-        if (id != null) {
-            nasjonalOppgaveRepository.deleteById(id)
-        }
-        return nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId) == null
+    fun deleteOppgave(sykmeldingId: String): Int {
+        return nasjonalOppgaveRepository.deleteBySykmeldingId(sykmeldingId)
     }
 
 }

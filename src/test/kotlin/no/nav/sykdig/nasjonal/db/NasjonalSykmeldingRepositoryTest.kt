@@ -46,11 +46,9 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
     fun `slett en sykmelding fra db`() {
         val dao = testData(null, "123")
         nasjonalSykmeldingRepository.save(dao)
-        val id = nasjonalSykmeldingRepository.findBySykmeldingId("123")
-        id.forEach {
-            it.id?.let { id -> nasjonalSykmeldingRepository.deleteById(id) }
-        }
-        assertEquals(0, nasjonalSykmeldingRepository.findBySykmeldingId("123").count())
+        val antall = nasjonalSykmeldingRepository.deleteBySykmeldingId("123")
+        assertEquals(1, antall)
+        assertEquals(0, nasjonalSykmeldingRepository.findBySykmeldingId("123").size)
     }
 
     @Test
@@ -59,12 +57,9 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
         val dao2 = testData(null, "123")
         nasjonalSykmeldingRepository.save(dao1)
         nasjonalSykmeldingRepository.save(dao2)
-        val id = nasjonalSykmeldingRepository.findBySykmeldingId("123")
-        assertEquals(2, id.count())
-        id.forEach {
-            it.id?.let { id -> nasjonalSykmeldingRepository.deleteById(id) }
-        }
-        assertEquals(0, nasjonalSykmeldingRepository.findBySykmeldingId("123").count())
+        val antall = nasjonalSykmeldingRepository.deleteBySykmeldingId("123")
+        assertEquals(2, antall)
+        assertEquals(0, nasjonalSykmeldingRepository.findBySykmeldingId("123").size)
     }
 
     fun testData(id: UUID?, sykmeldingId: String): NasjonalSykmeldingDAO {

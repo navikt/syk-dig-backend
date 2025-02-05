@@ -212,16 +212,7 @@ class NasjonalSykmeldingService(
 
 
     fun deleteSykmelding(sykmeldingId: String): Int {
-        val id = nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
-        if (id.isNullOrEmpty()) {
-            log.info("No sykmeldinger found for sykmeldingId $sykmeldingId")
-            return 0
-        }
-        id.forEach {
-            it.id?.let { id -> nasjonalSykmeldingRepository.deleteById(id) }
-        }
-        log.info("Sykmelding with sykmeldingId $sykmeldingId deleted")
-        return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId).count()
+        return nasjonalSykmeldingRepository.deleteBySykmeldingId(sykmeldingId)
     }
 
     fun mapToDao(
