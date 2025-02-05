@@ -47,7 +47,7 @@ class NasjonalOppgaveService(
 
     fun behandleNasjonalOppgaveFraKafka(papirSmRegistering: PapirSmRegistering) {
         val loggingMeta = getLoggingMeta(papirSmRegistering.sykmeldingId, papirSmRegistering)
-        logger.info("Behandler manuell papirsykmelding for sykmeldingId: {}", StructuredArguments.fields(loggingMeta))
+        logger.info("Behandler manuell papirsykmelding fra kafka for sykmeldingId: {}", StructuredArguments.fields(loggingMeta))
         metricRegister.incoming_message_counter.increment()
 
         val eksisterendeOppgave = getOppgaveBySykmeldingId(papirSmRegistering.sykmeldingId, "")
