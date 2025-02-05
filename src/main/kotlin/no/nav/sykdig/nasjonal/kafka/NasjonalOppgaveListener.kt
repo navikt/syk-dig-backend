@@ -40,6 +40,7 @@ class NasjonalOppgaveListener(
             if (deletedSykmeldingRows >0 && deletedOppgaveRows){
                 logger.info("Slettet sykmelding med id ${cr.key()} og tilhørende historikk")
             }
+            acknowledgment.acknowledge()
             return
         }
         val oppgaveRecord: PapirSmRegistering = objectMapper.readValue(cr.value())
