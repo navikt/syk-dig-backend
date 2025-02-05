@@ -3,6 +3,7 @@ package no.nav.sykdig.nasjonal.services
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.sykdig.gosys.GosysService
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.auditLogger.AuditLogger
 import no.nav.sykdig.shared.auditlog
@@ -23,7 +24,6 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.*
 
 @Service
@@ -35,11 +35,48 @@ class NasjonalOppgaveService(
     private val safClient: SafClient,
     private val nasjonalFerdigstillingsService: NasjonalFerdigstillingsService,
     private val metricRegister: MetricRegister,
+    private val gosysService: GosysService,
 ) {
     val log = applog()
     val securelog = securelog()
     val auditLogger = auditlog()
     val mapper = jacksonObjectMapper()
+
+    val logger = applog()
+    val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+
+    fun behandleNasjonalOppgaveFraKafka(papirSmRegistering: PapirSmRegistering) {
+        val loggingMeta = getLoggingMeta(papirSmRegistering.sykmeldingId, papirSmRegistering)
+        logger.info("Behandler manuell papirsykmelding for sykmeldingId: {}", StructuredArguments.fields(loggingMeta))
+        metricRegister.incoming_message_counter.increment()
+
+        val eksisterendeOppgave = getOppgaveBySykmeldingId(papirSmRegistering.sykmeldingId, "")
+        if (eksisterendeOppgave != null) {
+            logger.warn(
+                "Papirsykmelding med sykmeldingId {} er allerede lagret i databasen. Ingen ny oppgave opprettes.",
+                papirSmRegistering.sykmeldingId,
+            )
+            return
+        }
+        try {
+            val oppgave = gosysService.opprettNasjonalOppgave(papirSmRegistering)
+            lagreOppgave(papirSmRegistering.toPapirManuellOppgave(oppgave.id))
+            logger.info(
+                "Manuell papirsykmeldingoppgave lagret i databasen med oppgaveId: {}, {}",
+                StructuredArguments.keyValue("oppgaveId", oppgave.id),
+                StructuredArguments.fields(loggingMeta),
+            )
+            metricRegister.message_stored_in_db_counter.increment()
+        } catch (ex: Exception) {
+            logger.error(
+                "Feil ved oppretting av nasjonal oppgave for sykmeldingId: {}. Feilmelding: {}",
+                papirSmRegistering.sykmeldingId,
+                ex.message,
+                ex,
+            )
+            throw ex
+        }
+    }
 
     fun lagreOppgave(
         papirManuellOppgave: PapirManuellOppgave,
@@ -70,7 +107,6 @@ class NasjonalOppgaveService(
             nyOppgave
         }
     }
-
 
     fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, smRegistreringManuell: SmRegistreringManuell?): NasjonalManuellOppgaveDAO? {
         val existingOppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)

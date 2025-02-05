@@ -1,23 +1,20 @@
 package no.nav.sykdig.nasjonal.kafka
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.objectMapper
-import no.nav.sykdig.utenlandsk.services.SykmeldingService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
-import java.util.concurrent.ConcurrentHashMap
 
 
 @Component
 class NasjonalOppgaveListener(
-    val oppgaveKafkaService: MottaSykmeldingerFraKafka,
+    val nasjonalOppgaveService: NasjonalOppgaveService,
     val sykmeldingService: NasjonalSykmeldingService,
     val oppgaveService: NasjonalOppgaveService
 ) {
@@ -46,8 +43,8 @@ class NasjonalOppgaveListener(
             return
         }
         val oppgaveRecord: PapirSmRegistering = objectMapper.readValue(cr.value())
-        logger.info("behandler sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId} and datoOpprettet ${oppgaveRecord.datoOpprettet} {}", kv("object", oppgaveRecord))
-        oppgaveKafkaService.behandleNasjonalOppgave(oppgaveRecord)
+        logger.info("behandler sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId}")
+        nasjonalOppgaveService.behandleNasjonalOppgaveFraKafka(oppgaveRecord)
         acknowledgment.acknowledge()
     }
 }
