@@ -27,8 +27,7 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
             ),
             StructuredArguments.fields(loggingMeta),
         )
-        checkValidState(oppgaveId, smRegistreringManuell, sykmelder, validationResult)
-        return validationResult
+        return checkValidState(oppgaveId, smRegistreringManuell, sykmelder, validationResult) ?: validationResult
     }
 
     fun checkValidState(
@@ -36,113 +35,108 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
         smRegistreringManuell: SmRegistreringManuell,
         sykmelder: Sykmelder,
         validationResult: ValidationResult,
-    ) {
+    ): ValidationResult? {
         when {
             smRegistreringManuell.perioder.isEmpty() -> {
-                val vr =
-                    ValidationResult(
-                        status = Status.MANUAL_PROCESSING,
-                        ruleHits =
-                            listOf(
-                                RuleInfo(
-                                    ruleName = "periodeValidation",
-                                    messageForSender =
-                                        "Sykmeldingen må ha minst én periode oppgitt for å være gyldig",
-                                    messageForUser =
-                                        "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
-                                    ruleStatus = Status.MANUAL_PROCESSING,
-                                ),
+                log.info("Rule hit for oppgaveId $oppgaveId and ruleName PERIODER_MANGLER")
+                return ValidationResult(
+                    status = Status.MANUAL_PROCESSING,
+                    ruleHits =
+                        listOf(
+                            RuleInfo(
+                                ruleName = "PERIODER_MANGLER",
+                                messageForSender =
+                                    "Sykmeldingen må ha minst én periode oppgitt for å være gyldig",
+                                messageForUser =
+                                    "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
+                                ruleStatus = Status.MANUAL_PROCESSING,
                             ),
-                    )
-                throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
+                        ),
+                )
             }
             harOverlappendePerioder(smRegistreringManuell.perioder) -> {
-                val vr =
-                    ValidationResult(
-                        status = Status.MANUAL_PROCESSING,
-                        ruleHits =
-                            listOf(
-                                RuleInfo(
-                                    ruleName = "overlappendePeriodeValidation",
-                                    messageForSender = "Sykmeldingen har overlappende perioder",
-                                    messageForUser =
-                                        "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
-                                    ruleStatus = Status.MANUAL_PROCESSING,
-                                ),
+                log.info("Rule hit for oppgaveId $oppgaveId and ruleName OVERLAPPENDE_PERIODER")
+                return ValidationResult(
+                    status = Status.MANUAL_PROCESSING,
+                    ruleHits =
+                        listOf(
+                            RuleInfo(
+                                ruleName = "OVERLAPPENDE_PERIODER",
+                                messageForSender = "Sykmeldingen har overlappende perioder",
+                                messageForUser =
+                                    "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
+                                ruleStatus = Status.MANUAL_PROCESSING,
                             ),
-                    )
-                throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
+                        ),
+                )
             }
             harUlovligKombinasjonMedReisetilskudd(smRegistreringManuell.perioder) -> {
-                val vr =
-                    ValidationResult(
-                        status = Status.MANUAL_PROCESSING,
-                        ruleHits =
-                            listOf(
-                                RuleInfo(
-                                    ruleName = "reisetilskuddValidation",
-                                    messageForSender =
-                                        "Sykmeldingen inneholder periode som kombinerer reisetilskudd med annen sykmeldingstype",
-                                    messageForUser =
-                                        "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
-                                    ruleStatus = Status.MANUAL_PROCESSING,
-                                ),
+                log.info("Rule hit for oppgaveId $oppgaveId and ruleName REISETILSKUDD")
+                return ValidationResult(
+                    status = Status.MANUAL_PROCESSING,
+                    ruleHits =
+                        listOf(
+                            RuleInfo(
+                                ruleName = "REISETILSKUDD",
+                                messageForSender =
+                                    "Sykmeldingen inneholder periode som kombinerer reisetilskudd med annen sykmeldingstype",
+                                messageForUser =
+                                    "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
+                                ruleStatus = Status.MANUAL_PROCESSING,
                             ),
+                        ),
                     )
-                throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
             }
             erFremtidigDato(smRegistreringManuell.behandletDato) -> {
-                val vr =
-                    ValidationResult(
-                        status = Status.MANUAL_PROCESSING,
-                        ruleHits =
-                            listOf(
-                                RuleInfo(
-                                    ruleName = "behandletDatoValidation",
-                                    messageForSender = "Behandletdato kan ikke være frem i tid.",
-                                    messageForUser =
-                                        "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
-                                    ruleStatus = Status.MANUAL_PROCESSING,
-                                ),
+                log.info("Rule hit for oppgaveId $oppgaveId and ruleName BEHANDLET_DATO")
+                return ValidationResult(
+                    status = Status.MANUAL_PROCESSING,
+                    ruleHits =
+                        listOf(
+                            RuleInfo(
+                                ruleName = "BEHANDLET_DATO",
+                                messageForSender = "Behandletdato kan ikke være frem i tid.",
+                                messageForUser =
+                                    "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
+                                ruleStatus = Status.MANUAL_PROCESSING,
                             ),
+                        ),
                     )
-                throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
             }
             studentBehandlerUtenAutorisasjon(validationResult, sykmelder) -> {
-                val vr =
-                    ValidationResult(
-                        status = Status.MANUAL_PROCESSING,
-                        ruleHits =
-                            listOf(
-                                RuleInfo(
-                                    ruleName =
-                                        RuleHitCustomError.BEHANDLER_MANGLER_AUTORISASJON_I_HPR.name,
-                                    messageForSender =
-                                        "Studenter har ikke lov til å skrive sykmelding. Sykmelding må avvises.",
-                                    messageForUser = "Studenter har ikke lov til å skrive sykmelding.",
-                                    ruleStatus = Status.MANUAL_PROCESSING,
-                                ),
+                log.info("Rule hit for oppgaveId $oppgaveId and ruleName BEHANDLER_MANGLER_AUTORISASJON_I_HPR")
+                return ValidationResult(
+                    status = Status.MANUAL_PROCESSING,
+                    ruleHits =
+                        listOf(
+                            RuleInfo(
+                                ruleName =
+                                    RuleHitCustomError.BEHANDLER_MANGLER_AUTORISASJON_I_HPR.name,
+                                messageForSender =
+                                    "Studenter har ikke lov til å skrive sykmelding. Sykmelding må avvises.",
+                                messageForUser = "Studenter har ikke lov til å skrive sykmelding.",
+                                ruleStatus = Status.MANUAL_PROCESSING,
                             ),
+                        ),
                     )
-                throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
             }
             suspendertBehandler(validationResult) -> {
-                val vr =
-                    ValidationResult(
-                        status = Status.MANUAL_PROCESSING,
-                        ruleHits =
-                            listOf(
-                                RuleInfo(
-                                    ruleName = RuleHitCustomError.BEHANDLER_SUSPENDERT.name,
-                                    messageForSender =
-                                        "Legen har mistet retten til å skrive sykmelding.",
-                                    messageForUser = "Legen har mistet retten til å skrive sykmelding.",
-                                    ruleStatus = Status.MANUAL_PROCESSING,
-                                ),
+                log.info("Rule hit for oppgaveId $oppgaveId and ruleName BEHANDLER_SUSPENDERT")
+                return ValidationResult(
+                    status = Status.MANUAL_PROCESSING,
+                    ruleHits =
+                        listOf(
+                            RuleInfo(
+                                ruleName = RuleHitCustomError.BEHANDLER_SUSPENDERT.name,
+                                messageForSender =
+                                    "Legen har mistet retten til å skrive sykmelding.",
+                                messageForUser = "Legen har mistet retten til å skrive sykmelding.",
+                                ruleStatus = Status.MANUAL_PROCESSING,
                             ),
+                        ),
                     )
-                throw ValidationException("ValidationException thrown for oppgaveId $oppgaveId and validationresult $vr")
             }
+            else -> return null
         }
     }
 

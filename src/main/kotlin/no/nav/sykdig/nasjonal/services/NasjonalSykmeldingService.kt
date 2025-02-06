@@ -186,7 +186,7 @@ class NasjonalSykmeldingService(
         }
         if (validationResult.status == Status.OK) {
             log.info(
-                "Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
+                "Ferdigstilling av papirsykmeldinger manuell registering traff regel OK {}",
                 StructuredArguments.keyValue("oppgaveId", oppgaveId),
             )
             return ResponseEntity.badRequest().body(validationResult)
