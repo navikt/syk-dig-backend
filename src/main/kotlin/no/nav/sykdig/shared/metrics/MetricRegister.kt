@@ -37,6 +37,21 @@ class MetricRegister(private val registry: MeterRegistry) {
             "${METRICS_NS}_avvist_sendt_til_gosys_counter",
         )
 
+    val incoming_message_counter =
+        registry.counter(
+            "${METRICS_NS}_incoming_message_count",
+        )
+
+    val opprett_nasjonal_oppgave_counter =
+        registry.counter(
+            "${METRICS_NS}_opprett_oppgave_counter",
+        )
+
+    val message_stored_in_db_counter =
+        registry.counter(
+            "${METRICS_NS}_message_stored_in_db_counter",
+        )
+
     fun incrementNewSykmelding(
         type: String,
         kanal: String?,

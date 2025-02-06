@@ -38,6 +38,9 @@ management:
         base-path: /internal
         exposure.include: health,prometheus
 
+smreg:
+    topic: ${SMREG_TOPIC}
+
 oppgave:
     topic: ${OPPGAVE_TOPIC}
 

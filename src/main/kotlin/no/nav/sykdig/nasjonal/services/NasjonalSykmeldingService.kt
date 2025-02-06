@@ -43,14 +43,14 @@ class NasjonalSykmeldingService(
     private val sykmelderService: SykmelderService,
     private val nasjonalCommonService: NasjonalCommonService,
     private val nasjonalFerdigstillingsService: NasjonalFerdigstillingsService,
-    private val nasjonalRegelvalideringService: NasjonalRegelvalideringService
+    private val nasjonalRegelvalideringService: NasjonalRegelvalideringService,
 ) {
     val log = applog()
     val securelog = securelog()
     val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     suspend fun korrigerSykmelding(sykmeldingId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell, authorization: String): ResponseEntity<Any> {
-        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(sykmeldingId, authorization) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSmreg(sykmeldingId, authorization) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         log.info("Forsøker å korriger sykmelding med sykmeldingId $sykmeldingId og oppgaveId ${oppgave.oppgaveId}")
         return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave, authorization)
     }
@@ -160,9 +160,17 @@ class NasjonalSykmeldingService(
             throw exception
         }
         securelog.info("receivedSykmelding som skal lagres: ${receivedSykmelding}")
+        lagreSykmelding(receivedSykmelding, veileder)
+        log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
+    }
+
+    fun lagreSykmelding(receivedSykmelding: ReceivedSykmelding, veileder: Veileder) {
         val dao = mapToDao(receivedSykmelding, veileder)
         nasjonalSykmeldingRepository.save(dao)
-        log.info("Sykmelding saved to db, nasjonal_sykmelding table {}", receivedSykmelding.sykmelding.id)
+    }
+
+    fun findBySykmeldingId(sykmeldingId: String): List<NasjonalSykmeldingDAO>? {
+        return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
     }
 
     private fun handleBrokenRule(
@@ -203,9 +211,15 @@ class NasjonalSykmeldingService(
     }
 
 
+    fun deleteSykmelding(sykmeldingId: String): Int {
+        return nasjonalSykmeldingRepository.deleteBySykmeldingId(sykmeldingId)
+    }
+
     fun mapToDao(
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
+        datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
+        timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
@@ -233,11 +247,11 @@ class NasjonalSykmeldingService(
                     avsenderSystem = receivedSykmelding.sykmelding.avsenderSystem,
                     syketilfelleStartDato = receivedSykmelding.sykmelding.syketilfelleStartDato,
                     signaturDato = receivedSykmelding.sykmelding.signaturDato,
-                    navnFastlege = receivedSykmelding.sykmelding.navnFastlege
+                    navnFastlege = receivedSykmelding.sykmelding.navnFastlege,
                 ),
-                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                timestamp = timestamp,
                 ferdigstiltAv = veileder.veilederIdent,
-                datoFerdigstilt = LocalDateTime.now(ZoneOffset.UTC),
+                datoFerdigstilt = datoFerdigstilt,
             )
         return nasjonalManuellOppgaveDAO
     }

@@ -50,6 +50,17 @@ data class PapirSmRegistering(
     val behandler: Behandler?,
 )
 
+fun PapirSmRegistering.toPapirManuellOppgave(oppgaveid: Int?): PapirManuellOppgave {
+    return PapirManuellOppgave(
+        fnr = fnr,
+        sykmeldingId = sykmeldingId,
+        oppgaveid = oppgaveid,
+        pdfPapirSykmelding = ByteArray(0),
+        papirSmRegistering = this,
+        documents = emptyList(),
+    )
+}
+
 data class AvvisSykmeldingRequest(
     val reason: String?,
 )

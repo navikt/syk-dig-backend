@@ -118,7 +118,7 @@ class NasjonalOppgaveController(
         @PathVariable sykmeldingId: String,
         @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingId(sykmeldingId, authorization)
+        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSmreg(sykmeldingId, authorization)
         if (oppgave != null) {
             if(!oppgave.ferdigstilt) {
                 log.info("Oppgave med id $sykmeldingId er ikke ferdigstilt")

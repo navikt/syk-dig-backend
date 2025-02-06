@@ -3,19 +3,22 @@ package no.nav.sykdig.nasjonal.clients
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
+import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.services.isValidOppgaveId
+import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
+import org.apache.kafka.common.network.Send
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.*
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpStatusCodeException
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Component
 class SmregistreringClient(
@@ -180,3 +183,5 @@ class SmregistreringClient(
         return authorization.removePrefix("Bearer ")
     }
 }
+
+

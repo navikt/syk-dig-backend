@@ -7,9 +7,9 @@ import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.db.OppgaveRepository
 import no.nav.sykdig.utenlandsk.db.toSykmelding
 import no.nav.sykdig.shared.exceptions.NoOppgaveException
-import no.nav.sykdig.oppgave.models.AllOppgaveResponse
-import no.nav.sykdig.oppgave.models.AllOppgaveType
-import no.nav.sykdig.oppgave.OppgaveClient
+import no.nav.sykdig.gosys.models.AllOppgaveResponse
+import no.nav.sykdig.gosys.models.AllOppgaveType
+import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
 import no.nav.sykdig.pdl.Person
