@@ -45,7 +45,11 @@ class NasjonalOppgaveListener(
         }
         val oppgaveRecord: PapirSmRegistering = objectMapper.readValue(cr.value())
         logger.info("behandler sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId}")
-        nasjonalOppgaveService.behandleNasjonalOppgaveFraKafka(oppgaveRecord)
-        acknowledgment.acknowledge()
+        try {
+            nasjonalOppgaveService.behandleNasjonalOppgaveFraKafka(oppgaveRecord)
+            acknowledgment.acknowledge()
+        }catch (e: Exception){
+            logger.error("Feil ved behandling av sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId} ${e.message}", e)
+        }
     }
 }
