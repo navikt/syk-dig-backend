@@ -17,7 +17,7 @@ const val PDL_QUERY = """
                 mellomnavn
                 etternavn
             }
-            foedsel {
+            foedselsdato {
                 foedselsdato
             }
             bostedsadresse(historikk: false) {
@@ -100,7 +100,7 @@ data class PdlIdent(
 data class PdlPerson(
     val bostedsadresse: List<PdlBostedsadresse>,
     val navn: List<PdlNavn>,
-    val foedsel: List<Foedsel>?,
+    val foedselsdato: List<Foedsel>?,
     val oppholdsadresse: List<PdlOppholdsadresse>,
 )
 

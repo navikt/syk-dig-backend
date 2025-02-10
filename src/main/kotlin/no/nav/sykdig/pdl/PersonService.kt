@@ -39,7 +39,7 @@ class PersonService(
                     mellomnavn = navn.mellomnavn,
                     etternavn = navn.etternavn,
                 ),
-            fodselsdato = pdlResponse.hentPerson.foedsel?.first()?.foedselsdato?.let { LocalDate.parse(it) },
+            fodselsdato = pdlResponse.hentPerson.foedselsdato?.first()?.foedselsdato?.let { LocalDate.parse(it) },
             aktorId = pdlResponse.identer.identer.first { it.gruppe == "AKTORID" }.ident,
             bostedsadresse =
                 bostedsadresse?.let {
