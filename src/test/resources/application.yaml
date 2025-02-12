@@ -32,6 +32,9 @@ oppgave:
 smreg:
   topic: "teamsykmelding.smreg-topic"
 
+smregmigration:
+    topic: "teamsykmelding.smregmigration-topic"
+
 nais:
   cluster: "dev-gcp"
 
