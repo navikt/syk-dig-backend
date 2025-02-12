@@ -31,7 +31,7 @@ data class NasjonalManuellOppgaveDAO(
     @Column("ferdigstilt")
     val ferdigstilt: Boolean = false,
     @Column("papir_sm_registrering")
-    val papirSmRegistrering: PapirSmRegistering,
+    val papirSmRegistrering: PapirSmRegistering?,
     @Column("utfall")
     var utfall: String? = null,
     @Column("ferdigstilt_av")
