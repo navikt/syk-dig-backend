@@ -6,6 +6,7 @@ import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.utenlandsk.services.SykmeldingService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment

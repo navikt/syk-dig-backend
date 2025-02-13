@@ -184,4 +184,37 @@ class SmregistreringClient(
     }
 }
 
+data class SendtSykmeldingHistorySykDig(
+    val id: String,
+    val sykmeldingId: String,
+    val ferdigstiltAv: String?,
+    val datoFerdigstilt: LocalDateTime?,
+    val timestamp: OffsetDateTime,
+    val receivedSykmelding: ReceivedSykmelding,
+)
+
+
+data class ManuellOppgaveDTOSykDig(
+    val journalpostId: String,
+    val fnr: String?,
+    val aktorId: String?,
+    val dokumentInfoId: String?,
+    val datoOpprettet: OffsetDateTime?,
+    val sykmeldingId: String,
+    val oppgaveid: Int?,
+    val ferdigstilt: Boolean,
+    val papirSmRegistering: PapirSmRegistering?,
+    var pdfPapirSykmelding: ByteArray?,
+    val ferdigstiltAv: String?,
+    val utfall: String?,
+    val datoFerdigstilt: LocalDateTime?,
+    val avvisningsgrunn: String?,
+)
+
+data class MigrationObject(
+    val sykmeldingId: String,
+    val manuellOppgave: MutableList<ManuellOppgaveDTOSykDig>,
+    val sendtSykmeldingHistory: MutableList<SendtSykmeldingHistorySykDig>?,
+)
+
 
