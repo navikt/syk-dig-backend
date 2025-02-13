@@ -16,15 +16,15 @@ class NasjonalOppgaveMigrationListener(
     val nasjonalOppgaveService: NasjonalOppgaveService,
 ) {
     val logger = applog()
-
+/*
     @KafkaListener(
         topics = ["\${smregmigration.topic}"],
         groupId = "syk-dig-migration-consumer",
         properties = ["auto.offset.reset = earliest"],
         containerFactory = "aivenKafkaListenerContainerFactory",
-    )
+    )*/
 
-    fun listen(
+ /*   fun listen(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
@@ -40,5 +40,5 @@ class NasjonalOppgaveMigrationListener(
             logger.error("Feil under behandling av melding: ${cr.value()} ${e.message} ${e.stackTrace}", e)
             throw e
         }
-    }
+    }*/
 }
