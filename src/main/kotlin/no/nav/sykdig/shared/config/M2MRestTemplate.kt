@@ -28,6 +28,13 @@ class M2MRestTemplate(
     }
 
     @Bean
+    fun pdlM2mRestTemplate(): RestTemplate {
+        return restTemplateBuilder
+            .additionalInterceptors(bearerTokenInterceptor("pdl-m2m"))
+            .build()
+    }
+
+    @Bean
     fun safM2mRestTemplate(): RestTemplate {
         return restTemplateBuilder
             .additionalInterceptors(bearerTokenInterceptor("saf-m2m"))
