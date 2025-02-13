@@ -585,7 +585,7 @@ class NasjonalOppgaveService(
         logger.info("lagret oppgave med sykmeldingId i nasjonal_manuelloppgave og skal lagre sykmelding med sykmeldingId i nasjonal_sykmelding ${manuelloppgave.sykmeldingId}")
 
         migrationObject.sendtSykmeldingHistory?.forEach { sykmelding ->
-            val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isBlank()) manuelloppgave.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
+            val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isNullOrBlank()) manuelloppgave.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
             lagreSykmeldingMigrering(
                 sykmelding.receivedSykmelding,
                 Veileder(ferdigstiltAv),
