@@ -23,14 +23,22 @@ class NasjonalOppgaveMigrationListener(
         properties = ["auto.offset.reset = earliest"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
+
     fun listen(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        val oppgaveRecord: MigrationObject = objectMapper.readValue(cr.value())
-        logger.info("migrerer sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId}")
-        nasjonalOppgaveService.lagreISykDig(oppgaveRecord)
+        try {
+            logger.info("Prosesserer melding: ${cr.value()}")
+            val oppgaveRecord: MigrationObject = objectMapper.readValue(cr.value())
+            logger.info("migrerer sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId}")
+            nasjonalOppgaveService.lagreISykDig(oppgaveRecord)
 
-        acknowledgment.acknowledge()
+            acknowledgment.acknowledge()
+            acknowledgment.acknowledge()
+        } catch (e: Exception) {
+            logger.error("Feil under behandling av melding: ${cr.value()} ${e.message} ${e.stackTrace}", e)
+            throw e
+        }
     }
 }
