@@ -28,7 +28,8 @@ class NasjonalOppgaveMigrationListener(
         acknowledgment: Acknowledgment,
     ) {
         val oppgaveRecord: MigrationObject = objectMapper.readValue(cr.value())
-       nasjonalOppgaveService.lagreISykDig(oppgaveRecord)
+        logger.info("migrerer sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId}")
+        nasjonalOppgaveService.lagreISykDig(oppgaveRecord)
 
         acknowledgment.acknowledge()
     }
