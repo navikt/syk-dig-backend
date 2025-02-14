@@ -33,7 +33,7 @@ fun mapToNasjonalOppgave(oppgave: NasjonalManuellOppgaveDAO): NasjonalOppgave {
 }
 
 fun mapToNasjonalSykmelding(oppgave: NasjonalManuellOppgaveDAO): NasjonalSykmelding {
-    // TODO remove bangs after migration
+    // TODO remove papirsmreg nullability after migration
     return NasjonalSykmelding(
         sykmeldingId = oppgave.sykmeldingId,
         journalpostId = oppgave.journalpostId,

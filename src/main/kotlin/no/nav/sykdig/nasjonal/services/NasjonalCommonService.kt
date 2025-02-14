@@ -135,43 +135,6 @@ class NasjonalCommonService(
         val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         return authentication.token.claims["preferred_username"].toString()
     }
-
-/*    private fun toSykmelding(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO): Sykmelding {
-        requireNotNull(oppgave.papirSmRegistrering.aktorId) { "PapirSmRegistrering.aktorId er null" }
-        requireNotNull(oppgave.papirSmRegistrering.medisinskVurdering) { "PapirSmRegistrering.medisinskVurdering er null" }
-        requireNotNull(oppgave.papirSmRegistrering.arbeidsgiver) { "PapirSmRegistrering.arbeidsgiver er null" }
-        requireNotNull(oppgave.papirSmRegistrering.behandler) { "PapirSmRegistrering.behandler er null" }
-        return Sykmelding(
-            id = sykmeldingId,
-            msgId = sykmeldingId,
-            pasientAktoerId = oppgave.papirSmRegistrering?.aktorId,
-            medisinskVurdering = oppgave.papirSmRegistrering?.medisinskVurdering,
-            skjermesForPasient = oppgave.papirSmRegistrering?.skjermesForPasient ?: false,
-            arbeidsgiver = oppgave.papirSmRegistrering?.arbeidsgiver,
-            perioder = oppgave.papirSmRegistrering?.perioder ?: emptyList(),
-            prognose = oppgave.papirSmRegistrering?.prognose,
-            utdypendeOpplysninger = oppgave.papirSmRegistrering?.utdypendeOpplysninger ?: emptyMap(),
-            tiltakArbeidsplassen = oppgave.papirSmRegistrering?.tiltakArbeidsplassen,
-            tiltakNAV = oppgave.papirSmRegistrering?.tiltakNAV,
-            andreTiltak = oppgave.papirSmRegistrering?.andreTiltak,
-            meldingTilNAV = oppgave.papirSmRegistrering?.meldingTilNAV,
-            meldingTilArbeidsgiver = oppgave.papirSmRegistrering?.meldingTilArbeidsgiver,
-            kontaktMedPasient = KontaktMedPasient(
-                kontaktDato = oppgave.papirSmRegistrering?.kontaktMedPasient?.kontaktDato,
-                begrunnelseIkkeKontakt = oppgave.papirSmRegistrering?.kontaktMedPasient?.begrunnelseIkkeKontakt,
-            ),
-            behandletTidspunkt = LocalDateTime.from(oppgave.papirSmRegistrering?.behandletTidspunkt),
-            behandler = oppgave.papirSmRegistrering?.behandler,
-            avsenderSystem = AvsenderSystem(
-                //TODO
-                navn = "Navn avsendersystem",
-                versjon = "0.0",
-            ),
-            syketilfelleStartDato = oppgave.papirSmRegistrering?.syketilfelleStartDato,
-            signaturDato = LocalDateTime.from(oppgave.papirSmRegistrering?.behandletTidspunkt),
-            navnFastlege = "Fastlege navn", //TODO
-        )
-    }*/
 }
 
 fun isValidOppgaveId(oppgaveId: String): Boolean {
