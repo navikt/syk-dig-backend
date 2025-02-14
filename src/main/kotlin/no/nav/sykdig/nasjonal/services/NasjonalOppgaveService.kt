@@ -544,10 +544,9 @@ class NasjonalOppgaveService(
         return nasjonalOppgaveRepository.deleteBySykmeldingId(sykmeldingId)
     }
 
-    // TODO: slettes etter migrering
     fun lagreISykDig(migrationObject: MigrationObject) {
         val eksisterendeOppgave = getOppgaveBySykmeldingId(migrationObject.sykmeldingId, "")
-        val manuelloppgave = migrationObject.manuellOppgave.first()
+        val manuelloppgave = migrationObject.manuellOppgave
         logger.info("hentet eksisterende oppgave fra db for å se om den ligger der ${migrationObject.sykmeldingId}, oppgaveId: ${manuelloppgave.oppgaveid}, eksisterende: ${eksisterendeOppgave?.sykmeldingId}")
 
         if (eksisterendeOppgave != null) {
@@ -593,6 +592,5 @@ class NasjonalOppgaveService(
                 timestamp = sykmelding.timestamp,
             )
         }
-
     }
 }

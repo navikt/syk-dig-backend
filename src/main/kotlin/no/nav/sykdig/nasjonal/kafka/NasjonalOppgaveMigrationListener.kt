@@ -16,15 +16,14 @@ class NasjonalOppgaveMigrationListener(
     val nasjonalOppgaveService: NasjonalOppgaveService,
 ) {
     val logger = applog()
-/*
     @KafkaListener(
         topics = ["\${smregmigration.topic}"],
         groupId = "syk-dig-migration-consumer",
         properties = ["auto.offset.reset = earliest"],
         containerFactory = "aivenKafkaListenerContainerFactory",
-    )*/
+    )
 
- /*   fun listen(
+    fun listen(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
@@ -33,12 +32,10 @@ class NasjonalOppgaveMigrationListener(
             val oppgaveRecord: MigrationObject = objectMapper.readValue(cr.value())
             logger.info("migrerer sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId}")
             nasjonalOppgaveService.lagreISykDig(oppgaveRecord)
-
-            acknowledgment.acknowledge()
             acknowledgment.acknowledge()
         } catch (e: Exception) {
             logger.error("Feil under behandling av melding: ${cr.value()} ${e.message} ${e.stackTrace}", e)
             throw e
         }
-    }*/
+    }
 }

@@ -213,7 +213,7 @@ data class ManuellOppgaveDTOSykDig(
 
 data class MigrationObject(
     val sykmeldingId: String,
-    val manuellOppgave: MutableList<ManuellOppgaveDTOSykDig>,
+    val manuellOppgave: ManuellOppgaveDTOSykDig,
     val sendtSykmeldingHistory: MutableList<SendtSykmeldingHistorySykDig>?,
 )
 
