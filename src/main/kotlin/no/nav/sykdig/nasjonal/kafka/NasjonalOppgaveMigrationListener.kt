@@ -34,7 +34,7 @@ class NasjonalOppgaveMigrationListener(
             nasjonalOppgaveService.lagreISykDig(oppgaveRecord)
             acknowledgment.acknowledge()
         } catch (e: Exception) {
-            logger.error("Feil under behandling av melding: ${cr.value()} ${e.message} ${e.stackTrace}", e)
+            logger.error("Feil under behandling av melding: ${e.message} ${e.stackTrace}", e)
             throw e
         }
     }
