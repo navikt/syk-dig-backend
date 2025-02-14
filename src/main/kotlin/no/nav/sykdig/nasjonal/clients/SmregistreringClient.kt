@@ -185,7 +185,6 @@ class SmregistreringClient(
 }
 
 data class SendtSykmeldingHistorySykDig(
-    val id: String,
     val sykmeldingId: String,
     val ferdigstiltAv: String?,
     val datoFerdigstilt: LocalDateTime?,
