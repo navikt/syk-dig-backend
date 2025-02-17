@@ -24,11 +24,13 @@ class GraphQLContextContributor : GraphQLContextContributor {
             val decodedJWT = JWT.decode(token)
             val username = decodedJWT.claims["preferred_username"]?.asString()
             val navIdent = decodedJWT.claims["NAVident"]?.asString()
+            val authorization = decodedJWT.claims["Authorization"]?.asString()
 
             requireNotNull(username) { "preferred_username is missing in claims" }
 
             builder.put("username", username)
             builder.put("nav_ident", navIdent)
+            builder.put("authorization", authorization)
         }
     }
 }
