@@ -12,7 +12,8 @@ import java.util.*
 @Table(name = "nasjonal_sykmelding")
 open class NasjonalSykmeldingDAO(
     @Id
-    var id: UUID? = UUID.randomUUID(),
+    @GeneratedValue(generator = "UUID")
+    var id: UUID? = null,
     @Column("sykmelding_id")
     val sykmeldingId: String,
     @Column("sykmelding")

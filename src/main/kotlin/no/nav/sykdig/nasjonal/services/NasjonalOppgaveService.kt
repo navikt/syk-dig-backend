@@ -159,19 +159,23 @@ class NasjonalOppgaveService(
         datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
         timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ): NasjonalSykmeldingDAO? {
-        val toDao = mapToDaoSykmeldingMigrering(
-            receivedSykmelding,
-            veileder,
-            datoFerdigstilt,
-            timestamp,
-        )
-        if (!existingSykmelding.any { it.sykmelding == toDao.sykmelding }){
-            val nyOppgave = nasjonalSykmeldingRepository.save(
-                toDao,
+        try {
+            val toDao = mapToDaoSykmeldingMigrering(
+                receivedSykmelding,
+                veileder,
+                datoFerdigstilt,
+                timestamp,
             )
-            log.info("Lagret ny sykmelding med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
-            securelog.info("Detaljer om lagret sykmelding: $nyOppgave")
-            return nyOppgave
+            if (!existingSykmelding.any { it.sykmelding == toDao.sykmelding }){
+                val nyOppgave = nasjonalSykmeldingRepository.save(
+                    toDao,
+                )
+                log.info("Lagret ny sykmelding med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
+                securelog.info("Detaljer om lagret sykmelding: $nyOppgave")
+                return nyOppgave
+            }
+        } catch (e: Exception){
+            log.error("Noe gikk galt under oppdatering av sykmelding tabell ${e.message} ${e.stackTrace}", e)
         }
         return null
     }
