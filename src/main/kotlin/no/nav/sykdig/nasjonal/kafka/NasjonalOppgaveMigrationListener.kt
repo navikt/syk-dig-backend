@@ -28,7 +28,6 @@ class NasjonalOppgaveMigrationListener(
         acknowledgment: Acknowledgment,
     ) {
         try {
-            logger.info("Prosesserer melding: ${cr.value()}")
             val oppgaveRecord: MigrationObject = objectMapper.readValue(cr.value())
             logger.info("migrerer sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId}")
             nasjonalOppgaveService.lagreISykDig(oppgaveRecord)
