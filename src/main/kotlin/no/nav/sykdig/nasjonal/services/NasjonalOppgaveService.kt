@@ -32,6 +32,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
+import kotlin.collections.List
 
 @Service
 class NasjonalOppgaveService(
@@ -152,23 +153,27 @@ class NasjonalOppgaveService(
     }
 
     fun lagreSykmeldingMigrering(
+        existingSykmelding: List<NasjonalSykmeldingDAO>,
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
         datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
         timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
-    ): NasjonalSykmeldingDAO {
-        val nyOppgave = nasjonalSykmeldingRepository.save(
-            mapToDaoSykmeldignMigrering(
-                receivedSykmelding,
-                veileder,
-                datoFerdigstilt,
-                timestamp,
-            ),
+    ): NasjonalSykmeldingDAO? {
+        val toDao = mapToDaoSykmeldingMigrering(
+            receivedSykmelding,
+            veileder,
+            datoFerdigstilt,
+            timestamp,
         )
-        log.info("Lagret ny sykmelding med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
-        securelog.info("Detaljer om lagret sykmelding: $nyOppgave")
-
-        return nyOppgave
+        if (!existingSykmelding.any { it.sykmelding == toDao.sykmelding }){
+            val nyOppgave = nasjonalSykmeldingRepository.save(
+                toDao,
+            )
+            log.info("Lagret ny sykmelding med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
+            securelog.info("Detaljer om lagret sykmelding: $nyOppgave")
+            return nyOppgave
+        }
+        return null
     }
 
     fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, smRegistreringManuell: SmRegistreringManuell?): NasjonalManuellOppgaveDAO? {
@@ -267,6 +272,10 @@ class NasjonalOppgaveService(
             return sykmelding
         }
         return null
+    }
+
+    fun getSykmeldingBySykmeldingId(sykmeldingId: String): List<NasjonalSykmeldingDAO> {
+        return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
     }
 
     fun getOppgave(oppgaveId: String, authorization: String): NasjonalManuellOppgaveDAO? {
@@ -376,7 +385,7 @@ class NasjonalOppgaveService(
 
     }
 
-    fun mapToDaoSykmeldignMigrering(
+    fun mapToDaoSykmeldingMigrering(
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
         datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
@@ -581,11 +590,12 @@ class NasjonalOppgaveService(
             logger.info("lagret oppgave med sykmeldingId i nasjonal_manuelloppgave og skal lagre sykmelding med sykmeldingId i nasjonal_sykmelding ${manuelloppgave.sykmeldingId}")
         }
 
+        val eksisterendeSykmeldinger = getSykmeldingBySykmeldingId(migrationObject.sykmeldingId)
         migrationObject.sendtSykmeldingHistory?.forEach { sykmelding ->
-            val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isNullOrBlank()) manuelloppgave.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
             lagreSykmeldingMigrering(
+                eksisterendeSykmeldinger,
                 sykmelding.receivedSykmelding,
-                Veileder(ferdigstiltAv),
+                Veileder(sykmelding.ferdigstiltAv ?: ""),
                 datoFerdigstilt = sykmelding.datoFerdigstilt,
                 timestamp = sykmelding.timestamp,
             )
