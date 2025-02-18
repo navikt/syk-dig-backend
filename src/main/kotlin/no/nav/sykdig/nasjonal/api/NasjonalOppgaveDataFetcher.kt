@@ -28,12 +28,11 @@ class NasjonalOppgaveDataFetcher(
         val securelog = securelog()
     }
 
-    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #dfe.graphQlContext.get(\"Authorization\"), '/dgs/nasjonal/oppgave/{oppgaveId}')")
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/dgs/nasjonal/oppgave/{oppgaveId}')")
     @DgsQuery(field = DgsConstants.QUERY.NasjonalOppgave)
     fun getNasjonalOppgave(@InputArgument oppgaveId: String, dfe: DataFetchingEnvironment): NasjonalOppgaveResult? {
         log.info("Henter najsonal oppgave med id $oppgaveId")
-        val authorization: String = dfe.graphQlContext.get("authorization")
-        val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization)
+        val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId)
         if (oppgave != null) {
             if (oppgave.ferdigstilt) {
                 log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
@@ -47,11 +46,10 @@ class NasjonalOppgaveDataFetcher(
         return NasjonalOppgaveStatus(oppgaveId, NasjonalOppgaveStatusEnum.FINNES_IKKE)
     }
 
-    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, #dfe.graphQlContext.get(\"Authorization\"), '/dgs/nasjonal/sykmelding/{sykmeldingId}/ferdigstilt')")
+    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, '/dgs/nasjonal/sykmelding/{sykmeldingId}/ferdigstilt')")
     @DgsQuery(field = DgsConstants.QUERY.NasjonalFerdigstiltOppgave)
     fun getFerdigstiltNasjonalOppgave(@InputArgument sykmeldingId: String, dfe: DataFetchingEnvironment): NasjonalSykmeldingResult? {
-        val authorization: String = dfe.graphQlContext.get("authorization")
-        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSmreg(sykmeldingId, authorization)
+        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSmreg(sykmeldingId)
         if (oppgave != null) {
             if (!oppgave.ferdigstilt) {
                 log.info("Oppgave med sykmeldingId $sykmeldingId er ikke ferdigstilt")

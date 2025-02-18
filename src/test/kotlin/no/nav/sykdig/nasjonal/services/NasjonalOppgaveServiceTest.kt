@@ -142,7 +142,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
 
         assertTrue(originalOppgave.avvisningsgrunn == null)
-        val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request,  "enhet", "auth")
+        val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request,  "enhet")
         assertEquals(avvistOppgave.statusCode, HttpStatus.NO_CONTENT)
     }
 

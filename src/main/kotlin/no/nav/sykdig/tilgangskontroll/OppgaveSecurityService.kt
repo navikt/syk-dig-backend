@@ -38,10 +38,10 @@ class OppgaveSecurityService(
         return tilgang
     }
 
-    fun hasAccessToNasjonalOppgave(oppgaveId: String, authorization: String, requestPath: String): Boolean {
+    fun hasAccessToNasjonalOppgave(oppgaveId: String, requestPath: String): Boolean {
             securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
 
-            val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization)
+            val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId)
             val navEmail = nasjonalCommonService.getNavEmail()
             val fnr = oppgave?.fnr
             if (oppgave != null && fnr != null) {
@@ -65,7 +65,7 @@ class OppgaveSecurityService(
             return false
         }
 
-        fun hasAccessToNasjonalSykmelding(sykmeldingId: String, authorization: String, requestPath: String): Boolean {
+        fun hasAccessToNasjonalSykmelding(sykmeldingId: String, requestPath: String): Boolean {
             securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
             val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
             val navEmail = nasjonalCommonService.getNavEmail()
@@ -91,7 +91,7 @@ class OppgaveSecurityService(
             return false
     }
 
-    fun hasSuperUserAccessToNasjonalSykmelding(sykmeldingId: String, authorization: String, requestPath: String): Boolean {
+    fun hasSuperUserAccessToNasjonalSykmelding(sykmeldingId: String, requestPath: String): Boolean {
         securelog.info("sjekker om bruker har super bruker tilgang på sykmelding $sykmeldingId")
         val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
         val navEmail = nasjonalCommonService.getNavEmail()
