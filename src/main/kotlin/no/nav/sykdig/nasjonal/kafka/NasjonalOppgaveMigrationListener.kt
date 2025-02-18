@@ -18,8 +18,8 @@ class NasjonalOppgaveMigrationListener(
     val logger = applog()
     @KafkaListener(
         topics = ["\${smregmigration.topic}"],
-        groupId = "syk-dig-migration-consumer",
-        properties = ["auto.offset.reset = none"],
+        groupId = "syk-dig-migration-consumer-1",
+        properties = ["auto.offset.reset = earliest"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
 
