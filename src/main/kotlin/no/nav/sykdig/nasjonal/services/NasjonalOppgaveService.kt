@@ -389,7 +389,7 @@ class NasjonalOppgaveService(
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
         datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
-        timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
+        timestamp: OffsetDateTime,
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
