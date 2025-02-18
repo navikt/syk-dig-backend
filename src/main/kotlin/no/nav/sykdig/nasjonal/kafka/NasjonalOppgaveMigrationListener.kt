@@ -19,7 +19,7 @@ class NasjonalOppgaveMigrationListener(
     @KafkaListener(
         topics = ["\${smregmigration.topic}"],
         groupId = "syk-dig-migration-consumer",
-        properties = ["auto.offset.reset = earliest"],
+        properties = ["auto.offset.reset = none"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
 

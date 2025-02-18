@@ -549,39 +549,37 @@ class NasjonalOppgaveService(
         val manuelloppgave = migrationObject.manuellOppgave
         logger.info("hentet eksisterende oppgave fra db for å se om den ligger der ${migrationObject.sykmeldingId}, oppgaveId: ${manuelloppgave.oppgaveid}, eksisterende: ${eksisterendeOppgave?.sykmeldingId}")
 
-        if (eksisterendeOppgave != null) {
-            logger.info("Sykmelding med id ${migrationObject.sykmeldingId} ligger allerede i syk-dig-db nasjonal_manuelloppgave tabell")
-            return
-        }
-        val papirManuellOppgave = PapirManuellOppgave(
-            fnr = manuelloppgave.fnr,
-            sykmeldingId = migrationObject.sykmeldingId,
-            oppgaveid = manuelloppgave.oppgaveid,
-            pdfPapirSykmelding = manuelloppgave.pdfPapirSykmelding ?: ByteArray(0),
-            papirSmRegistering = manuelloppgave.papirSmRegistering,
-            documents = listOf(
-                Document(
-                    dokumentInfoId = manuelloppgave.dokumentInfoId ?: "",
-                    tittel = "papirsykmelding",
+        if (eksisterendeOppgave == null) {
+            val papirManuellOppgave = PapirManuellOppgave(
+                fnr = manuelloppgave.fnr,
+                sykmeldingId = migrationObject.sykmeldingId,
+                oppgaveid = manuelloppgave.oppgaveid,
+                pdfPapirSykmelding = manuelloppgave.pdfPapirSykmelding ?: ByteArray(0),
+                papirSmRegistering = manuelloppgave.papirSmRegistering,
+                documents = listOf(
+                    Document(
+                        dokumentInfoId = manuelloppgave.dokumentInfoId ?: "",
+                        tittel = "papirsykmelding",
+                    ),
                 ),
-            ),
-        )
+            )
 
-        logger.info("lagrer oppgave med sykmeldingId i nasjonal_manuelloppgave ${manuelloppgave.sykmeldingId}")
-        lagreOppgaveMigrering(
-            papirManuellOppgave = papirManuellOppgave,
-            ferdigstilt = manuelloppgave.ferdigstilt,
-            utfall = manuelloppgave.utfall,
-            ferdigstiltAv = manuelloppgave.ferdigstiltAv,
-            datoFerdigstilt = manuelloppgave.datoFerdigstilt,
-            avvisningsgrunn = manuelloppgave.avvisningsgrunn,
-            jounalpostId = manuelloppgave.journalpostId,
-            dokumentInfoId = manuelloppgave.dokumentInfoId,
-            datooOpprettet = manuelloppgave.datoOpprettet,
-            oppgaveId = manuelloppgave.oppgaveid,
-            aktorId = manuelloppgave.aktorId,
-        )
-        logger.info("lagret oppgave med sykmeldingId i nasjonal_manuelloppgave og skal lagre sykmelding med sykmeldingId i nasjonal_sykmelding ${manuelloppgave.sykmeldingId}")
+            logger.info("lagrer oppgave med sykmeldingId i nasjonal_manuelloppgave ${manuelloppgave.sykmeldingId}")
+            lagreOppgaveMigrering(
+                papirManuellOppgave = papirManuellOppgave,
+                ferdigstilt = manuelloppgave.ferdigstilt,
+                utfall = manuelloppgave.utfall,
+                ferdigstiltAv = manuelloppgave.ferdigstiltAv,
+                datoFerdigstilt = manuelloppgave.datoFerdigstilt,
+                avvisningsgrunn = manuelloppgave.avvisningsgrunn,
+                jounalpostId = manuelloppgave.journalpostId,
+                dokumentInfoId = manuelloppgave.dokumentInfoId,
+                datooOpprettet = manuelloppgave.datoOpprettet,
+                oppgaveId = manuelloppgave.oppgaveid,
+                aktorId = manuelloppgave.aktorId,
+            )
+            logger.info("lagret oppgave med sykmeldingId i nasjonal_manuelloppgave og skal lagre sykmelding med sykmeldingId i nasjonal_sykmelding ${manuelloppgave.sykmeldingId}")
+        }
 
         migrationObject.sendtSykmeldingHistory?.forEach { sykmelding ->
             val ferdigstiltAv = if (sykmelding.ferdigstiltAv.isNullOrBlank()) manuelloppgave.ferdigstiltAv ?: "" else sykmelding.ferdigstiltAv
