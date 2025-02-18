@@ -31,6 +31,7 @@ class NasjonalOppgaveDataFetcher(
     @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, #dfe.graphQlContext.get(\"Authorization\"), '/dgs/nasjonal/oppgave/{oppgaveId}')")
     @DgsQuery(field = DgsConstants.QUERY.NasjonalOppgave)
     fun getNasjonalOppgave(@InputArgument oppgaveId: String, dfe: DataFetchingEnvironment): NasjonalOppgaveResult? {
+        log.info("Henter najsonal oppgave med id $oppgaveId")
         val authorization: String = dfe.graphQlContext.get("authorization")
         val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization)
         if (oppgave != null) {

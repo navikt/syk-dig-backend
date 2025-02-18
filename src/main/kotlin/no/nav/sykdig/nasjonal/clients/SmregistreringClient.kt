@@ -58,8 +58,6 @@ class SmregistreringClient(
         authorization: String,
         oppgaveId: String,
     ): ResponseEntity<PapirManuellOppgave> {
-        if(!isValidOppgaveId(oppgaveId))
-            throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(removeBearerPrefix(authorization))

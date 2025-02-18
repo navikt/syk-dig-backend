@@ -2,6 +2,7 @@ package no.nav.sykdig.nasjonal.services
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.gosys.GosysService
 import no.nav.sykdig.shared.auditLogger.AuditLogger
@@ -153,10 +154,7 @@ class NasjonalOppgaveService(
 
 
     private fun findByOppgaveId(oppgaveId: String): NasjonalManuellOppgaveDAO? {
-        if (!isValidOppgaveId(oppgaveId))
-            throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
         val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt()) ?: return null
-
         return oppgave
     }
 
@@ -208,6 +206,11 @@ class NasjonalOppgaveService(
     }
 
     fun getOppgave(oppgaveId: String, authorization: String): NasjonalManuellOppgaveDAO? {
+        if(!isValidOppgaveId(oppgaveId)) {
+            log.info("Invalid oppgaveId $oppgaveId")
+            throw DgsEntityNotFoundException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
+        }
+
         val nasjonalOppgave = findByOppgaveId(oppgaveId)
         if (nasjonalOppgave != null) {
             log.info("papirsykmelding: henter oppgave med id $oppgaveId fra syk-dig-db")
