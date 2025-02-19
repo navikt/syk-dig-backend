@@ -65,7 +65,7 @@ class NasjonalOppgaveRepositoryTest : IntegrationTest() {
             fnr = "fnr",
             aktorId = "aktor",
             dokumentInfoId = "123",
-            datoOpprettet = LocalDateTime.now(),
+            datoOpprettet = OffsetDateTime.now(),
             oppgaveId = 123,
             ferdigstilt = false,
             papirSmRegistrering =

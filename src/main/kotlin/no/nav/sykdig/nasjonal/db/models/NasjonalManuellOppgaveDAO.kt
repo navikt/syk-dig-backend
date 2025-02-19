@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.util.*
 
 @Table(name = "nasjonal_manuelloppgave")
@@ -24,7 +25,7 @@ data class NasjonalManuellOppgaveDAO(
     @Column("dokument_info_id")
     val dokumentInfoId: String? = null,
     @Column("dato_opprettet")
-    val datoOpprettet: LocalDateTime? = null,
+    val datoOpprettet: OffsetDateTime? = null,
     @Column("oppgave_id")
     val oppgaveId: Int? = null,
     @Column("ferdigstilt")

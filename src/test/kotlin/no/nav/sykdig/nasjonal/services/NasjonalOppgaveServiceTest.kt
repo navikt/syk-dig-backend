@@ -242,7 +242,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
             fnr = "fnr",
             aktorId = "aktor",
             dokumentInfoId = "123",
-            datoOpprettet = LocalDateTime.now(),
+            datoOpprettet = OffsetDateTime.now(),
             oppgaveId = oppgaveId,
             ferdigstilt = false,
             papirSmRegistrering =

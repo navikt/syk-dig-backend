@@ -57,7 +57,7 @@ class NasjonalCommonService(
                 pdlPasient = pasient,
                 sykmelder = sykmelder,
                 sykmeldingId = sykmeldingId,
-                datoOpprettet = datoOpprettet,
+                datoOpprettet = datoOpprettet?.toLocalDateTime(),
                 journalpostId = journalpostId,
             )
 
@@ -85,7 +85,7 @@ class NasjonalCommonService(
             legekontorOrgName = "",
             legekontorHerId = null,
             legekontorReshId = null,
-            mottattDato = oppgave.datoOpprettet ?: getLocalDateTime(msgHead.msgInfo.genDate),
+            mottattDato = oppgave.datoOpprettet?.toLocalDateTime() ?: getLocalDateTime(msgHead.msgInfo.genDate),
             rulesetVersion = healthInformation.regelSettVersjon,
             fellesformat = fellesformatMarshaller.toString(fellesformat),
             tssid = tssId ?: "",
