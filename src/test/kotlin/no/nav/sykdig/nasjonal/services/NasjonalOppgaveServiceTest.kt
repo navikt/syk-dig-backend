@@ -3,26 +3,28 @@ package no.nav.sykdig.nasjonal.services
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.dokarkiv.DocumentService
+import no.nav.sykdig.digitalisering.papirsykmelding.mapToDaoOppgave
+import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.dokarkiv.DokarkivClient
-import no.nav.sykdig.gosys.OppgaveClient
+import no.nav.sykdig.dokarkiv.DocumentService
+import no.nav.sykdig.shared.Adresse
+import no.nav.sykdig.shared.Behandler
 import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
-import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.nasjonal.models.Veileder
+import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.nasjonal.mapping.NasjonalSykmeldingMapper
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.saf.graphql.SafJournalpost
 import no.nav.sykdig.saf.graphql.SafQueryJournalpost
-import no.nav.sykdig.shared.Adresse
-import no.nav.sykdig.shared.Behandler
-import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.shared.utils.getLoggingMeta
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import okhttp3.internal.EMPTY_BYTE_ARRAY
@@ -58,6 +60,8 @@ import java.util.UUID
 class NasjonalOppgaveServiceTest : IntegrationTest() {
     @Autowired
     lateinit var nasjonalOppgaveService: NasjonalOppgaveService
+    @Autowired
+    lateinit var nasjonalDbService: NasjonalDbService
 
     val mapper = jacksonObjectMapper()
 
@@ -80,10 +84,10 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     lateinit var documentService: DocumentService
 
     @MockitoBean
-    lateinit var nasjonaCommonService: NasjonalCommonService
+    lateinit var nasjonaCommonService: NasjonalSykmeldingMapper
 
     @MockitoBean
-    lateinit var nasjonalFerdigstillingService: NasjonalFerdigstillingsService
+    lateinit var nasjonalFerdigstillingService: NasjonalFerdigstillingService
 
     @BeforeEach
     fun setUp() = runBlocking {
@@ -102,7 +106,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     fun `avvis oppgave blir oppdatert og lagra i DB`() = runBlocking {
         val oppgaveId = "123"
         val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
-        val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
+        val originalOppgave = nasjonalDbService.saveOppgave(testDataPapirManuellOppgave())
 
         Mockito.`when`(nasjonaCommonService.getNavEmail()).thenReturn("navEmail")
         Mockito.`when`(nasjonaCommonService.getNavIdent()).thenReturn(Veileder("navIdent"))
@@ -142,7 +146,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
     @Test
     fun `mapToDao der id er null`() {
-        val dao = nasjonalOppgaveService.mapToDao(testDataPapirManuellOppgave(), null)
+        val dao = mapToDaoOppgave(testDataPapirManuellOppgave(), null)
 
         assertEquals("123", dao.sykmeldingId)
         assertEquals(null, dao.id)
@@ -151,7 +155,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     @Test
     fun `mapToDao der id ikke er null`() {
         val uuid = UUID.randomUUID()
-        val dao = nasjonalOppgaveService.mapToDao(testDataPapirManuellOppgave(), uuid)
+        val dao = mapToDaoOppgave(testDataPapirManuellOppgave(), uuid)
 
         assertEquals("123", dao.sykmeldingId)
         assertEquals(uuid, dao.id)
@@ -161,7 +165,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     fun `oppgave blir lagret`() = runBlocking {
         val uuid = UUID.randomUUID()
         val dao = testDataNasjonalManuellOppgaveDAO(uuid, "123", 123)
-        val oppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
+        val oppgave = nasjonalDbService.saveOppgave(testDataPapirManuellOppgave())
 
         assertEquals(oppgave.sykmeldingId, dao.sykmeldingId)
         val res = nasjonalOppgaveRepository.findBySykmeldingId(oppgave.sykmeldingId)

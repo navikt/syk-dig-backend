@@ -1,13 +1,14 @@
 package no.nav.sykdig.nasjonal.api
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.sykdig.digitalisering.papirsykmelding.mapFromDao
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
-import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Sykmelder
+import no.nav.sykdig.nasjonal.services.NasjonalDbService
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.shared.securelog
@@ -23,9 +24,9 @@ import java.util.*
 @RequestMapping("/api/v1/proxy")
 class NasjonalOppgaveController(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
+    private val nasjonalDbService: NasjonalDbService,
     private val sykmelderService: SykmelderService,
     private val personService: PersonService,
-    private val nasjonalSykmeldingService: NasjonalSykmeldingService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -48,18 +49,15 @@ class NasjonalOppgaveController(
     @WithSpan
     fun getPapirsykmeldingManuellOppgave(
         @PathVariable oppgaveId: String,
-        @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<Any> {
-        val papirManuellOppgave = nasjonalOppgaveService.getOppgave(oppgaveId)
-
+        val papirManuellOppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
         if (papirManuellOppgave != null) {
             if(papirManuellOppgave.ferdigstilt) {
                 log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Oppgave med id $oppgaveId er allerede ferdigstilt")
             }
-            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(papirManuellOppgave))
+            return ResponseEntity.ok(mapFromDao(papirManuellOppgave))
         }
-
         return ResponseEntity.notFound().build()
     }
 
@@ -72,7 +70,7 @@ class NasjonalOppgaveController(
         log.info("Henter person med callId $callId")
 
         val personNavn: Navn =
-            personService.hentPersonNavn(
+            personService.getPersonNavn(
                 id = fnr,
                 callId = callId,
             )
@@ -104,7 +102,8 @@ class NasjonalOppgaveController(
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<Any> {
         val callId = UUID.randomUUID().toString()
-        return nasjonalSykmeldingService.sendPapirsykmeldingOppgave(papirSykmelding, navEnhet, callId, oppgaveId)
+        return nasjonalOppgaveService.ferdigstillNasjonalOppgave(papirSykmelding, navEnhet, callId, oppgaveId)
+
     }
 
     @GetMapping("/sykmelding/{sykmeldingId}/ferdigstilt")
@@ -113,15 +112,14 @@ class NasjonalOppgaveController(
     @WithSpan
     fun getFerdigstiltSykmelding(
         @PathVariable sykmeldingId: String,
-        @RequestHeader("Authorization") authorization: String,
     ): ResponseEntity<PapirManuellOppgave> {
-        val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
+        val oppgave = nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId)
         if (oppgave != null) {
             if(!oppgave.ferdigstilt) {
                 log.info("Oppgave med id $sykmeldingId er ikke ferdigstilt")
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
             }
-            return ResponseEntity.ok(nasjonalOppgaveService.mapFromDao(oppgave))
+            return ResponseEntity.ok(mapFromDao(oppgave))
         }
         return ResponseEntity.notFound().build()
     }
@@ -150,7 +148,7 @@ class NasjonalOppgaveController(
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<Any> {
         securelog.info("Oppdaterer korrigert oppgave i syk-dig-backend db $papirSykmelding")
-        return nasjonalSykmeldingService.korrigerSykmelding(sykmeldingId, navEnhet, UUID.randomUUID().toString(), papirSykmelding)
+        return nasjonalOppgaveService.korrigerSykmelding(sykmeldingId, navEnhet, UUID.randomUUID().toString(), papirSykmelding)
     }
 
     @GetMapping("/pdf/{oppgaveId}/{dokumentInfoId}")

@@ -456,7 +456,6 @@ class FerdigstillingServiceTest : IntegrationTest() {
             dokumentInfoId = "123",
             datoOpprettet = OffsetDateTime.now(),
             oppgaveId = oppgaveId,
-            ferdigstilt = false,
             papirSmRegistrering =
             PapirSmRegistering(
                 journalpostId = "123",
