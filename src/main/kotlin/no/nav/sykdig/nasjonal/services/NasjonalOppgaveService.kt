@@ -156,8 +156,8 @@ class NasjonalOppgaveService(
         existingSykmelding: List<NasjonalSykmeldingDAO>,
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
-        datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
-        timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
+        datoFerdigstilt: LocalDateTime?,
+        timestamp: OffsetDateTime,
     ): NasjonalSykmeldingDAO? {
         try {
             val toDao = mapToDaoSykmeldingMigrering(
@@ -176,6 +176,7 @@ class NasjonalOppgaveService(
             }
         } catch (e: Exception){
             log.error("Noe gikk galt under oppdatering av sykmelding tabell ${e.message} ${e.stackTrace}", e)
+            throw e
         }
         return null
     }
@@ -392,7 +393,7 @@ class NasjonalOppgaveService(
     fun mapToDaoSykmeldingMigrering(
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
-        datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
+        datoFerdigstilt: LocalDateTime?,
         timestamp: OffsetDateTime,
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
