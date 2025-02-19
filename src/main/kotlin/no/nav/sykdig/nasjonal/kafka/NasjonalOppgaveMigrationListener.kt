@@ -18,7 +18,7 @@ class NasjonalOppgaveMigrationListener(
     val logger = applog()
     @KafkaListener(
         topics = ["\${smregmigration.topic}"],
-        groupId = "syk-dig-migration-consumer-5",
+        groupId = "syk-dig-migration-consumer-6",
         properties = ["auto.offset.reset = earliest"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
@@ -33,7 +33,7 @@ class NasjonalOppgaveMigrationListener(
             nasjonalOppgaveService.lagreISykDig(oppgaveRecord)
             acknowledgment.acknowledge()
         } catch (e: Exception) {
-            logger.error("Feil under behandling av melding: ${e.message} ${e.stackTrace}", e)
+            logger.error("Feil under behandling av melding: ${e.message}\n${e.stackTrace.joinToString("\n")}", e)
             throw e
         }
     }
