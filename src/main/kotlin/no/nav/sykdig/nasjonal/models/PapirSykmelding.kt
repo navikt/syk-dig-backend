@@ -9,8 +9,6 @@ import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.shared.Prognose
 import no.nav.sykdig.shared.SporsmalSvar
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.OffsetDateTime
 
 data class PapirManuellOppgave(
@@ -33,7 +31,7 @@ data class PapirSmRegistering(
     val fnr: String?,
     val aktorId: String?,
     val dokumentInfoId: String?,
-    val datoOpprettet: LocalDateTime?,
+    val datoOpprettet: OffsetDateTime?,
     val sykmeldingId: String,
     val syketilfelleStartDato: LocalDate?,
     val arbeidsgiver: Arbeidsgiver?,

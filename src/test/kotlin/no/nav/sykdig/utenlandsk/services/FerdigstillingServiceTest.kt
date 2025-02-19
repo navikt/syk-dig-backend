@@ -465,7 +465,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 fnr = "fnr",
                 aktorId = "aktor",
                 dokumentInfoId = "123",
-                datoOpprettet = LocalDateTime.now(),
+                datoOpprettet = OffsetDateTime.now(),
                 sykmeldingId = "123",
                 syketilfelleStartDato = LocalDate.now(),
                 arbeidsgiver = null,

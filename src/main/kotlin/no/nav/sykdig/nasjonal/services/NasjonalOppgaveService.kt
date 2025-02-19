@@ -287,7 +287,7 @@ class NasjonalOppgaveService(
                 fnr = papirManuellOppgave.fnr,
                 aktorId = papirSmRegistering.aktorId,
                 dokumentInfoId = papirSmRegistering.dokumentInfoId,
-                datoOpprettet = papirSmRegistering.datoOpprettet,
+                datoOpprettet = papirSmRegistering.datoOpprettet?.toLocalDateTime(),
                 oppgaveId = papirManuellOppgave.oppgaveid,
                 ferdigstilt = ferdigstilt,
                 papirSmRegistrering =
