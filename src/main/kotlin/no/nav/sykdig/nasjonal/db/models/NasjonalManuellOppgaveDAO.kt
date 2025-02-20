@@ -37,7 +37,7 @@ data class NasjonalManuellOppgaveDAO(
     @Column("ferdigstilt_av")
     var ferdigstiltAv: String? = null,
     @Column("dato_ferdigstilt")
-    var datoFerdigstilt: LocalDateTime? = null,
+    var datoFerdigstilt: OffsetDateTime? = null,
     @Column("avvisningsgrunn")
     var avvisningsgrunn: String? = null,
 )
