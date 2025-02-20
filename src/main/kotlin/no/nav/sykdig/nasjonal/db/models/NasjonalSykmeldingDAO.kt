@@ -11,19 +11,14 @@ import java.util.UUID
 data class NasjonalSykmeldingDAO(
     @Id
     val id: UUID? = null,
-
     @Column(name = "sykmelding_id", nullable = false)
     val sykmeldingId: String,
-
     @Column(name = "sykmelding", columnDefinition = "jsonb", nullable = false)
     val sykmelding: ReceivedSykmelding,
-
     @Column(name = "timestamp")
     val timestamp: OffsetDateTime,
-
     @Column(name = "ferdigstilt_av")
     val ferdigstiltAv: String?,
-
     @Column(name = "dato_ferdigstilt")
     val datoFerdigstilt: OffsetDateTime?
 )

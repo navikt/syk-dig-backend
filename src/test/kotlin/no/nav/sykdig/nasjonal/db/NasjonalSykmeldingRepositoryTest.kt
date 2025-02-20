@@ -27,8 +27,7 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
     @Test
     fun `legg til og hent ny sykmelding`() {
         val dao = testData(null, "123")
-        println("Sykmelding før lagring: ${dao.sykmelding}")
-        println("Sykmelding JSON: ${ObjectMapper().writeValueAsString(dao.sykmelding)}")
+        println(dao.sykmelding)
         Assertions.assertNotNull(dao.sykmelding)
         val res = nasjonalSykmeldingRepository.save(dao)
 
