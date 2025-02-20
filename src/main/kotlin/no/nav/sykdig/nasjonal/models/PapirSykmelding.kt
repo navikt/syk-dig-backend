@@ -26,7 +26,6 @@ data class PapirSmRegistering(
     val fnr: String?,
     val aktorId: String?,
     val dokumentInfoId: String?,
-    @JsonDeserialize(using = LocalDateTimeToOffsetDateTimeDeserializer::class)
     val datoOpprettet: OffsetDateTime?,
     val sykmeldingId: String,
     val syketilfelleStartDato: LocalDate?,
