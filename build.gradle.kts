@@ -59,7 +59,7 @@ dependencies {
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutineReactorVersion")
-//    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("com.vladmihalcea:hibernate-types-52:2.21.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonDatatypeJsr310Version")

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sykdig.shared.Sykmelding
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
+import no.nav.sykdig.shared.JsonToReceivedSykmeldingConverter
+import no.nav.sykdig.shared.ReceivedSykmeldingToJsonConverter
 import no.nav.sykdig.shared.objectMapper
 import org.postgresql.util.PGobject
 import org.springframework.context.annotation.Bean
@@ -80,8 +82,11 @@ class JdbcConfiguration {
                 PapirSmRegistreringReadingConverter(),
                 SykmeldingWritingConverter(),
                 SykmeldingReadingConverter(),
+                ReceivedSykmeldingToJsonConverter(objectMapper),
+                JsonToReceivedSykmeldingConverter(objectMapper)
             ),
         )
     }
+
 }
 

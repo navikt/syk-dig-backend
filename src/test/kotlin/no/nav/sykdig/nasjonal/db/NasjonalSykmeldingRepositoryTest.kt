@@ -1,26 +1,19 @@
 package no.nav.sykdig.nasjonal.db
 
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.shared.Adresse
 import no.nav.sykdig.shared.AktivitetIkkeMulig
-import no.nav.sykdig.shared.Arbeidsgiver
 import no.nav.sykdig.shared.ArbeidsrelatertArsak
 import no.nav.sykdig.shared.ArbeidsrelatertArsakType
-import no.nav.sykdig.shared.AvsenderSystem
-import no.nav.sykdig.shared.Behandler
-import no.nav.sykdig.shared.Diagnose
-import no.nav.sykdig.shared.HarArbeidsgiver
-import no.nav.sykdig.shared.KontaktMedPasient
-import no.nav.sykdig.shared.MedisinskVurdering
 import no.nav.sykdig.shared.Periode
-import no.nav.sykdig.shared.Sykmelding
 import no.nav.sykdig.nasjonal.db.models.NasjonalSykmeldingDAO
+import no.nav.sykdig.nasjonal.util.getReceivedSykmelding
+import no.nav.sykdig.shared.ReceivedSykmelding
 import org.amshove.kluent.internal.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -34,7 +27,8 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
     @Test
     fun `legg til og hent ny sykmelding`() {
         val dao = testData(null, "123")
-        println(dao.sykmelding)
+        println("Sykmelding før lagring: ${dao.sykmelding}")
+        println("Sykmelding JSON: ${ObjectMapper().writeValueAsString(dao.sykmelding)}")
         Assertions.assertNotNull(dao.sykmelding)
         val res = nasjonalSykmeldingRepository.save(dao)
 
@@ -66,75 +60,15 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
         return NasjonalSykmeldingDAO(
             id = id,
             sykmeldingId = sykmeldingId,
-            sykmelding = sykmeldingTestData(sykmeldingId) ,
+            sykmelding = sykmeldingTestData(sykmeldingId),
             timestamp = OffsetDateTime.now(),
             ferdigstiltAv = "the saksbehandler",
-            datoFerdigstilt = LocalDateTime.now()
+            datoFerdigstilt = OffsetDateTime.now()
         )
     }
 
-    fun sykmeldingTestData(sykmeldingId: String): Sykmelding {
-        return Sykmelding(
-            id = sykmeldingId,
-            msgId = sykmeldingId,
-            pasientAktoerId = "123",
-            medisinskVurdering = MedisinskVurdering(
-                hovedDiagnose = Diagnose(
-                    system = "foo",
-                    kode = "bar",
-                    tekst = null
-                ),
-                biDiagnoser = emptyList(),
-                svangerskap = false,
-                yrkesskade = false,
-                yrkesskadeDato = null,
-                annenFraversArsak = null
-            ),
-            skjermesForPasient = false,
-            arbeidsgiver = Arbeidsgiver(
-                harArbeidsgiver = HarArbeidsgiver.EN_ARBEIDSGIVER,
-                navn = null,
-                yrkesbetegnelse = null,
-                stillingsprosent = null
-            ),
-            perioder = perioderTestData(),
-            prognose = null,
-            utdypendeOpplysninger = emptyMap(),
-            tiltakArbeidsplassen = null,
-            tiltakNAV = null,
-            andreTiltak = null,
-            meldingTilNAV = null,
-            meldingTilArbeidsgiver = null,
-            kontaktMedPasient = KontaktMedPasient(
-                kontaktDato = null,
-                begrunnelseIkkeKontakt = null
-            ),
-            behandletTidspunkt = LocalDateTime.now(),
-            behandler = Behandler(
-                fornavn = "fornavn",
-                mellomnavn = null,
-                etternavn = "etternavn",
-                aktoerId = "456456456",
-                fnr = "98765432101",
-                hpr = null,
-                her = null,
-                adresse = Adresse(
-                    gate = null,
-                    postnummer = null,
-                    kommune = null,
-                    postboks = null,
-                    land = null
-                ),
-                tlf = null
-            ),
-            avsenderSystem = AvsenderSystem(
-                navn = "avsenderSystem",
-                versjon = "1.0"
-            ),
-            syketilfelleStartDato = LocalDate.now(),
-            signaturDato = LocalDateTime.now(),
-            navnFastlege = "fastlegen"
-        )
+    fun sykmeldingTestData(sykmeldingId: String): ReceivedSykmelding {
+        return getReceivedSykmelding(fnrPasient = "123", sykmelderFnr = "456", sykmeldingId = sykmeldingId)
     }
 
     fun perioderTestData(): List<Periode> {

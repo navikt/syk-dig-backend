@@ -20,17 +20,15 @@ import no.nav.sykdig.nasjonal.db.models.Utfall
 import no.nav.sykdig.saf.SafClient
 import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.nasjonal.models.*
-import no.nav.sykdig.shared.Sykmelding
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.shared.utils.getLoggingMeta
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
+import no.nav.sykdig.shared.ReceivedSykmelding
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
 import java.util.*
 import kotlin.collections.List
 
@@ -156,7 +154,7 @@ class NasjonalOppgaveService(
         existingSykmelding: List<NasjonalSykmeldingDAO>,
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
-        datoFerdigstilt: LocalDateTime?,
+        datoFerdigstilt: OffsetDateTime?,
         timestamp: OffsetDateTime,
     ): NasjonalSykmeldingDAO? {
         try {
@@ -375,7 +373,7 @@ class NasjonalOppgaveService(
                 fnr = papirManuellOppgave.fnr,
                 aktorId = aktorId,
                 dokumentInfoId = dokumentInfoId,
-                datoOpprettet = datooOpprettet?.toLocalDateTime(),
+                datoOpprettet = datooOpprettet,
                 oppgaveId = papirManuellOppgave.oppgaveid,
                 ferdigstilt = ferdigstilt,
                 papirSmRegistrering =
@@ -393,7 +391,7 @@ class NasjonalOppgaveService(
     fun mapToDaoSykmeldingMigrering(
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
-        datoFerdigstilt: LocalDateTime?,
+        datoFerdigstilt: OffsetDateTime?,
         timestamp: OffsetDateTime,
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
@@ -401,29 +399,7 @@ class NasjonalOppgaveService(
         val nasjonalManuellOppgaveDAO =
             NasjonalSykmeldingDAO(
                 sykmeldingId = receivedSykmelding.sykmelding.id,
-                sykmelding = Sykmelding(
-                    id = receivedSykmelding.sykmelding.id,
-                    msgId = receivedSykmelding.sykmelding.msgId,
-                    pasientAktoerId = receivedSykmelding.sykmelding.pasientAktoerId,
-                    medisinskVurdering = receivedSykmelding.sykmelding.medisinskVurdering,
-                    skjermesForPasient = receivedSykmelding.sykmelding.skjermesForPasient,
-                    arbeidsgiver = receivedSykmelding.sykmelding.arbeidsgiver,
-                    perioder = receivedSykmelding.sykmelding.perioder,
-                    prognose = receivedSykmelding.sykmelding.prognose,
-                    utdypendeOpplysninger = receivedSykmelding.sykmelding.utdypendeOpplysninger,
-                    tiltakArbeidsplassen = receivedSykmelding.sykmelding.tiltakArbeidsplassen,
-                    tiltakNAV = receivedSykmelding.sykmelding.tiltakNAV,
-                    andreTiltak = receivedSykmelding.sykmelding.andreTiltak,
-                    meldingTilNAV = receivedSykmelding.sykmelding.meldingTilNAV,
-                    meldingTilArbeidsgiver = receivedSykmelding.sykmelding.meldingTilArbeidsgiver,
-                    kontaktMedPasient = receivedSykmelding.sykmelding.kontaktMedPasient,
-                    behandletTidspunkt = receivedSykmelding.sykmelding.behandletTidspunkt,
-                    behandler = receivedSykmelding.sykmelding.behandler,
-                    avsenderSystem = receivedSykmelding.sykmelding.avsenderSystem,
-                    syketilfelleStartDato = receivedSykmelding.sykmelding.syketilfelleStartDato,
-                    signaturDato = receivedSykmelding.sykmelding.signaturDato,
-                    navnFastlege = receivedSykmelding.sykmelding.navnFastlege,
-                ),
+                sykmelding = receivedSykmelding,
                 timestamp = timestamp,
                 ferdigstiltAv = veileder.veilederIdent,
                 datoFerdigstilt = datoFerdigstilt,

@@ -8,7 +8,6 @@ import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
-import no.nav.sykdig.shared.Sykmelding
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.clients.RegelClient
 import no.nav.sykdig.nasjonal.models.FerdigstillRegistrering
@@ -18,7 +17,7 @@ import no.nav.sykdig.nasjonal.models.Veileder
 import no.nav.sykdig.nasjonal.db.NasjonalSykmeldingRepository
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.nasjonal.db.models.NasjonalSykmeldingDAO
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
+import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.Status
 import no.nav.sykdig.shared.ValidationResult
 import no.nav.sykdig.utenlandsk.services.JournalpostService
@@ -29,9 +28,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 @Service
 class NasjonalSykmeldingService(
@@ -165,7 +162,11 @@ class NasjonalSykmeldingService(
     }
 
     fun lagreSykmelding(receivedSykmelding: ReceivedSykmelding, veileder: Veileder) {
-        val dao = mapToDao(receivedSykmelding, veileder)
+        val dao = mapToDao(
+            receivedSykmelding = receivedSykmelding, veileder = veileder,
+            datoFerdigstilt = OffsetDateTime.now(),
+            timestamp = OffsetDateTime.now(),
+        )
         nasjonalSykmeldingRepository.save(dao)
     }
 
@@ -218,37 +219,15 @@ class NasjonalSykmeldingService(
     fun mapToDao(
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
-        datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
-        timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
+        datoFerdigstilt: OffsetDateTime?,
+        timestamp: OffsetDateTime,
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
         val nasjonalManuellOppgaveDAO =
             NasjonalSykmeldingDAO(
                 sykmeldingId = receivedSykmelding.sykmelding.id,
-                sykmelding = Sykmelding(
-                    id = receivedSykmelding.sykmelding.id,
-                    msgId = receivedSykmelding.sykmelding.msgId,
-                    pasientAktoerId = receivedSykmelding.sykmelding.pasientAktoerId,
-                    medisinskVurdering = receivedSykmelding.sykmelding.medisinskVurdering,
-                    skjermesForPasient = receivedSykmelding.sykmelding.skjermesForPasient,
-                    arbeidsgiver = receivedSykmelding.sykmelding.arbeidsgiver,
-                    perioder = receivedSykmelding.sykmelding.perioder,
-                    prognose = receivedSykmelding.sykmelding.prognose,
-                    utdypendeOpplysninger = receivedSykmelding.sykmelding.utdypendeOpplysninger,
-                    tiltakArbeidsplassen = receivedSykmelding.sykmelding.tiltakArbeidsplassen,
-                    tiltakNAV = receivedSykmelding.sykmelding.tiltakNAV,
-                    andreTiltak = receivedSykmelding.sykmelding.andreTiltak,
-                    meldingTilNAV = receivedSykmelding.sykmelding.meldingTilNAV,
-                    meldingTilArbeidsgiver = receivedSykmelding.sykmelding.meldingTilArbeidsgiver,
-                    kontaktMedPasient = receivedSykmelding.sykmelding.kontaktMedPasient,
-                    behandletTidspunkt = receivedSykmelding.sykmelding.behandletTidspunkt,
-                    behandler = receivedSykmelding.sykmelding.behandler,
-                    avsenderSystem = receivedSykmelding.sykmelding.avsenderSystem,
-                    syketilfelleStartDato = receivedSykmelding.sykmelding.syketilfelleStartDato,
-                    signaturDato = receivedSykmelding.sykmelding.signaturDato,
-                    navnFastlege = receivedSykmelding.sykmelding.navnFastlege,
-                ),
+                sykmelding = receivedSykmelding,
                 timestamp = timestamp,
                 ferdigstiltAv = veileder.veilederIdent,
                 datoFerdigstilt = datoFerdigstilt,

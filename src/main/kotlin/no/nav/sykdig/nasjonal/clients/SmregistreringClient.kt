@@ -6,15 +6,11 @@ import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.services.isValidOppgaveId
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
-import org.apache.kafka.common.network.Send
+import no.nav.sykdig.shared.ReceivedSykmelding
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpStatusCodeException
-import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDateTime
@@ -187,7 +183,7 @@ class SmregistreringClient(
 data class SendtSykmeldingHistorySykDig(
     val sykmeldingId: String,
     val ferdigstiltAv: String?,
-    val datoFerdigstilt: LocalDateTime?,
+    val datoFerdigstilt: OffsetDateTime?,
     val timestamp: OffsetDateTime,
     val receivedSykmelding: ReceivedSykmelding,
 )
