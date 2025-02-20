@@ -9,14 +9,10 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
-class OffsetDateTimeDeserializer : JsonDeserializer<OffsetDateTime>() {
+class LocalDateTimeToOffsetDateTimeDeserializer : JsonDeserializer<OffsetDateTime>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): OffsetDateTime {
-        val text = p.text
-        return if (text.contains("Z") || text.contains("+") || text.contains("-")) {
-            OffsetDateTime.parse(text)
-        } else {
-            LocalDateTime.parse(text).atOffset(ZoneOffset.UTC)
-        }
+        val localDateTime = LocalDateTime.parse(p.valueAsString) // Konverter fra String til LocalDateTime
+        return localDateTime.atOffset(ZoneOffset.UTC) // Legger til UTC offset
     }
 }
 
@@ -24,11 +20,6 @@ val objectMapper: ObjectMapper =
     ObjectMapper().apply {
         registerKotlinModule()
         registerModule(JavaTimeModule())
-        registerModule(
-                SimpleModule().apply {
-                    addDeserializer(OffsetDateTime::class.java, OffsetDateTimeDeserializer())
-                }
-            )
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     }
