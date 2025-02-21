@@ -178,14 +178,14 @@ class NasjonalSykmeldingService(
                 "Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
                 StructuredArguments.keyValue("oppgaveId", oppgaveId),
             )
-            return ResponseEntity.badRequest().body(validationResult)
+            return ResponseEntity.ok().body(validationResult)
         }
         if (validationResult.status == Status.OK) {
             log.info(
                 "Ferdigstilling av papirsykmeldinger manuell registering traff regel OK {}",
                 StructuredArguments.keyValue("oppgaveId", oppgaveId),
             )
-            return ResponseEntity.badRequest().body(validationResult)
+            return ResponseEntity.ok().body(validationResult)
         }
         log.error("Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING")
         return ResponseEntity.internalServerError().body("En uforutsett feil oppsto ved validering av oppgaven")
