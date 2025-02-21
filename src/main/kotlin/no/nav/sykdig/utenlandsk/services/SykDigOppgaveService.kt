@@ -66,7 +66,7 @@ class SykDigOppgaveService(
         val oppgave = oppgaveRepository.getOppgaveBySykmeldingId(sykmeldingId)
         val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
         if (oppgave == null) {
-            log.warn("Fant ikke oppgave {}", StructuredArguments.fields(loggingMeta))
+            log.warn("Fant ikke oppgave med sykmeldingId $sykmeldingId")
             throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
         log.info("Hentet oppgave {}", StructuredArguments.fields(loggingMeta))
@@ -77,7 +77,7 @@ class SykDigOppgaveService(
         val oppgave = oppgaveRepository.getOppgave(oppgaveId)
         val loggingMeta = oppgave?.sykmelding?.sykmelding?.id?.let { getLoggingMeta(it, oppgave) }
         if (oppgave == null) {
-            log.warn("Fant ikke oppgave {} ", StructuredArguments.fields(loggingMeta))
+            log.warn("Fant ikke oppgave med id $oppgaveId")
             throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
         log.info("Hentet oppgave {} ", StructuredArguments.fields(loggingMeta))

@@ -8,12 +8,8 @@ import no.nav.sykdig.gosys.GosysService
 import no.nav.sykdig.shared.auditLogger.AuditLogger
 import no.nav.sykdig.utenlandsk.api.getPdfResult
 import no.nav.sykdig.gosys.OppgaveClient
-import no.nav.sykdig.nasjonal.clients.MigrationObject
-import no.nav.sykdig.nasjonal.clients.SmregistreringClient
 import no.nav.sykdig.nasjonal.db.NasjonalOppgaveRepository
-import no.nav.sykdig.nasjonal.db.NasjonalSykmeldingRepository
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.nasjonal.db.models.NasjonalSykmeldingDAO
 import no.nav.sykdig.nasjonal.db.models.Utfall
 import no.nav.sykdig.saf.SafClient
 import no.nav.sykdig.shared.metrics.MetricRegister
@@ -26,13 +22,11 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 import java.util.*
-import kotlin.collections.List
 
 @Service
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
     private val oppgaveClient: OppgaveClient,
-    private val smregistreringClient: SmregistreringClient,
     private val nasjonalCommonService: NasjonalCommonService,
     private val safClient: SafClient,
     private val nasjonalFerdigstillingsService: NasjonalFerdigstillingsService,

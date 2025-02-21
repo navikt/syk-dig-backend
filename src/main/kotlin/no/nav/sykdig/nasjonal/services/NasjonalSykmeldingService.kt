@@ -34,7 +34,6 @@ import java.time.OffsetDateTime
 class NasjonalSykmeldingService(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val nasjonalSykmeldingRepository: NasjonalSykmeldingRepository,
-    private val regelClient: RegelClient,
     private val journalpostService: JournalpostService,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val sykmelderService: SykmelderService,
@@ -168,10 +167,6 @@ class NasjonalSykmeldingService(
             timestamp = OffsetDateTime.now(),
         )
         nasjonalSykmeldingRepository.save(dao)
-    }
-
-    fun findBySykmeldingId(sykmeldingId: String): List<NasjonalSykmeldingDAO>? {
-        return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
     }
 
     private fun handleBrokenRule(
