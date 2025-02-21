@@ -13,15 +13,18 @@ import org.springframework.core.convert.converter.Converter
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
 import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import kotlin.math.log
 
 
 @ReadingConverter
 class OffsetDateTimeReadingConverter : Converter<Any, OffsetDateTime> {
     override fun convert(source: Any): OffsetDateTime {
         return when (source) {
-            is java.sql.Timestamp -> source.toInstant().atOffset(ZoneOffset.UTC)
+            is Timestamp -> source.toInstant().atOffset(ZoneOffset.UTC)
             is OffsetDateTime -> source // If already OffsetDateTime, return as-is
             else -> throw IllegalArgumentException("Unexpected source type: ${source::class}")
         }
@@ -81,16 +84,44 @@ class ReceivedSykmeldingToJsonConverter(private val objectMapper: ObjectMapper) 
     }
 }
 
-
 @ReadingConverter
 class JsonToReceivedSykmeldingConverter(private val objectMapper: ObjectMapper) : Converter<PGobject, ReceivedSykmelding> {
     val log = applog()
     override fun convert(source: PGobject): ReceivedSykmelding {
-        log.info("Deserializing JSONB:${source.value} ")
-        if (source.value.isNullOrEmpty()) {
-            throw IllegalStateException("Feil: PGobject har en null eller tom verdi!")
+        return try {
+            objectMapper.readValue(source.value!!, ReceivedSykmelding::class.java)
+        } catch (e: Exception) {
+            val gammelSykmelding = objectMapper.readValue(source.value!!, Sykmelding::class.java)
+            log.info("Migrerer gammel Sykmelding til ReceivedSykmelding: ${gammelSykmelding.id}")
+
+            konverterTilReceivedSykmelding(gammelSykmelding)
         }
-        return objectMapper.readValue(source.value, ReceivedSykmelding::class.java)
+    }
+
+    private fun konverterTilReceivedSykmelding(sykmelding: Sykmelding): ReceivedSykmelding {
+        return ReceivedSykmelding(
+            sykmelding = sykmelding,
+            personNrPasient = "UKJENT",
+            personNrLege = "UKJENT",
+            legeHprNr = sykmelding.behandler.hpr ?: "UKJENT",
+            msgId = sykmelding.id,
+            navLogId = sykmelding.id,
+            mottattDato = LocalDateTime.now(),
+            tlfPasient = "UKJENT",
+            legeHelsepersonellkategori = "UKJENT",
+            legekontorOrgNr = "UKJENT",
+            legekontorHerId = "UKJENT",
+            legekontorReshId = "UKJENT",
+            legekontorOrgName = "UKJENT",
+            rulesetVersion = "UKJENT",
+            merknader = null,
+            partnerreferanse = "UKJENT",
+            vedlegg = null,
+            utenlandskSykmelding = null,
+            fellesformat = "UKJENT",
+            tssid = "UKJENT",
+            validationResult = null,
+        )
     }
 }
 

@@ -159,18 +159,33 @@ class NasjonalOppgaveService(
     ): NasjonalSykmeldingDAO? {
         try {
             val toDao = mapToDaoSykmeldingMigrering(
+                null,
                 receivedSykmelding,
                 veileder,
                 datoFerdigstilt,
                 timestamp,
             )
-            if (!existingSykmelding.any { it.sykmelding == toDao.sykmelding }){
+            if (!existingSykmelding.any { it.sykmelding.sykmelding == toDao.sykmelding.sykmelding }){
                 val nyOppgave = nasjonalSykmeldingRepository.save(
                     toDao,
                 )
                 log.info("Lagret ny sykmelding med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
                 securelog.info("Detaljer om lagret sykmelding: $nyOppgave")
                 return nyOppgave
+            }
+            val existing = existingSykmelding.filter { it.sykmelding.sykmelding.pasientAktoerId == "UKJENT" }
+            existing.forEach {
+                val toDao2 = mapToDaoSykmeldingMigrering(
+                        it.id,
+                        receivedSykmelding,
+                        veileder,
+                        datoFerdigstilt,
+                        timestamp)
+                val nyOppgave = nasjonalSykmeldingRepository.save(
+                    toDao2,
+                )
+                log.info("Overskrev sykmelding med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
+                securelog.info("Detaljer om lagret sykmelding: $nyOppgave")
             }
         } catch (e: Exception){
             log.error("Noe gikk galt under oppdatering av sykmelding tabell ${e.message} ${e.stackTrace}", e)
@@ -389,6 +404,7 @@ class NasjonalOppgaveService(
     }
 
     fun mapToDaoSykmeldingMigrering(
+        existingId: UUID?,
         receivedSykmelding: ReceivedSykmelding,
         veileder: Veileder,
         datoFerdigstilt: OffsetDateTime?,
@@ -396,8 +412,21 @@ class NasjonalOppgaveService(
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
+        if (existingId != null){
+            val nasjonalManuellOppgaveDAO =
+                NasjonalSykmeldingDAO(
+                    id = existingId,
+                    sykmeldingId = receivedSykmelding.sykmelding.id,
+                    sykmelding = receivedSykmelding,
+                    timestamp = timestamp,
+                    ferdigstiltAv = veileder.veilederIdent,
+                    datoFerdigstilt = datoFerdigstilt,
+                )
+            return nasjonalManuellOppgaveDAO
+        }
         val nasjonalManuellOppgaveDAO =
             NasjonalSykmeldingDAO(
+                id = existingId,
                 sykmeldingId = receivedSykmelding.sykmelding.id,
                 sykmelding = receivedSykmelding,
                 timestamp = timestamp,
@@ -405,6 +434,7 @@ class NasjonalOppgaveService(
                 datoFerdigstilt = datoFerdigstilt,
             )
         return nasjonalManuellOppgaveDAO
+
     }
 
     fun mapToDao(
