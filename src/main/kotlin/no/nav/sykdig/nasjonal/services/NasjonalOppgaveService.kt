@@ -571,7 +571,9 @@ class NasjonalOppgaveService(
             logger.info("lagret oppgave med sykmeldingId i nasjonal_manuelloppgave og skal lagre sykmelding med sykmeldingId i nasjonal_sykmelding ${manuelloppgave.sykmeldingId}")
         }
 
+        logger.info("Henter eksisterende Sykmelding id ${migrationObject.sykmeldingId}")
         val eksisterendeSykmeldinger = getSykmeldingBySykmeldingId(migrationObject.sykmeldingId)
+        logger.info("Hentet eksisterende Sykmelding id ${migrationObject.sykmeldingId} $eksisterendeSykmeldinger")
         migrationObject.sendtSykmeldingHistory?.forEach { sykmelding ->
             lagreSykmeldingMigrering(
                 eksisterendeSykmeldinger,

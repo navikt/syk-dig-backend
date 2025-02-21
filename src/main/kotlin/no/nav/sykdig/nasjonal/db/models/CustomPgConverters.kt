@@ -105,6 +105,8 @@ class JdbcConfiguration {
                 PapirSmRegistreringReadingConverter(),
                 SykmeldingWritingConverter(),
                 SykmeldingReadingConverter(),
+                ReceivedSykmeldingToJsonConverter(objectMapper),
+                JsonToReceivedSykmeldingConverter(objectMapper)
             ),
         )
     }
