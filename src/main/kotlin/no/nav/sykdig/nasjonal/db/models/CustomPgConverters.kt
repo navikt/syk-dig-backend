@@ -1,12 +1,11 @@
 package no.nav.sykdig.nasjonal.db.models
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.sykdig.shared.Sykmelding
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
-import no.nav.sykdig.shared.JsonToReceivedSykmeldingConverter
-import no.nav.sykdig.shared.ReceivedSykmeldingToJsonConverter
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.*
 import org.postgresql.util.PGobject
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -68,6 +67,24 @@ class SykmeldingReadingConverter : Converter<PGobject, Sykmelding> {
     override fun convert(source: PGobject): Sykmelding {
         objectMapper.registerModule(JavaTimeModule())
         return objectMapper.readValue(source.value!!, Sykmelding::class.java) // bedre håndtering enn !!
+    }
+}
+
+@WritingConverter
+class ReceivedSykmeldingToJsonConverter(private val objectMapper: ObjectMapper) : Converter<ReceivedSykmelding, PGobject> {
+    override fun convert(source: ReceivedSykmelding): PGobject {
+        val json = objectMapper.writeValueAsString(source)
+        return PGobject().apply {
+            type = "jsonb"
+            value = json
+        }
+    }
+}
+
+@ReadingConverter
+class JsonToReceivedSykmeldingConverter(private val objectMapper: ObjectMapper) : Converter<PGobject, ReceivedSykmelding> {
+    override fun convert(source: PGobject): ReceivedSykmelding {
+        return objectMapper.readValue(source.value!!)
     }
 }
 
