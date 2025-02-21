@@ -81,9 +81,12 @@ class ReceivedSykmeldingToJsonConverter(private val objectMapper: ObjectMapper) 
     }
 }
 
+
 @ReadingConverter
 class JsonToReceivedSykmeldingConverter(private val objectMapper: ObjectMapper) : Converter<PGobject, ReceivedSykmelding> {
+    val log = applog()
     override fun convert(source: PGobject): ReceivedSykmelding {
+        log.info("Deserializing JSONB:${source.value} ")
         if (source.value.isNullOrEmpty()) {
             throw IllegalStateException("Feil: PGobject har en null eller tom verdi!")
         }
