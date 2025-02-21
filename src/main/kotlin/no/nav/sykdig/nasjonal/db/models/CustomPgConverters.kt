@@ -84,7 +84,10 @@ class ReceivedSykmeldingToJsonConverter(private val objectMapper: ObjectMapper) 
 @ReadingConverter
 class JsonToReceivedSykmeldingConverter(private val objectMapper: ObjectMapper) : Converter<PGobject, ReceivedSykmelding> {
     override fun convert(source: PGobject): ReceivedSykmelding {
-        return objectMapper.readValue(source.value!!)
+        if (source.value.isNullOrEmpty()) {
+            throw IllegalStateException("Feil: PGobject har en null eller tom verdi!")
+        }
+        return objectMapper.readValue(source.value, ReceivedSykmelding::class.java)
     }
 }
 
