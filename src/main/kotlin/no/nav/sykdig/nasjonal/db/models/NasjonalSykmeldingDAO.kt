@@ -1,5 +1,7 @@
 package no.nav.sykdig.nasjonal.db.models
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import no.nav.sykdig.shared.ReceivedSykmelding
 import org.springframework.data.annotation.Id
@@ -13,7 +15,7 @@ data class NasjonalSykmeldingDAO(
     val id: UUID? = null,
     @Column(name = "sykmelding_id", nullable = false)
     val sykmeldingId: String,
-    @Column(name = "sykmelding", columnDefinition = "jsonb", nullable = false)
+    @Column(name = "sykmelding", nullable = false)
     val sykmelding: ReceivedSykmelding,
     @Column(name = "timestamp")
     val timestamp: OffsetDateTime,
