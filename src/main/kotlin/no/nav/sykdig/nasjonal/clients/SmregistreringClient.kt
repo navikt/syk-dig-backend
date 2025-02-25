@@ -187,6 +187,7 @@ data class SendtSykmeldingHistorySykDig(
     val ferdigstiltAv: String?,
     @JsonDeserialize(using = FlexibleOffsetDateTimeDeserializer::class)
     val datoFerdigstilt: OffsetDateTime?,
+    @JsonDeserialize(using = FlexibleOffsetDateTimeDeserializer::class)
     val timestamp: OffsetDateTime,
     val receivedSykmelding: ReceivedSykmelding,
 )

@@ -25,7 +25,7 @@ class OffsetDateTimeReadingConverter : Converter<Any, OffsetDateTime> {
     override fun convert(source: Any): OffsetDateTime {
         return when (source) {
             is Timestamp -> source.toInstant().atOffset(ZoneOffset.UTC)
-            is OffsetDateTime -> source // If already OffsetDateTime, return as-is
+            is OffsetDateTime -> source
             else -> throw IllegalArgumentException("Unexpected source type: ${source::class}")
         }
     }
