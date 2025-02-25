@@ -23,5 +23,5 @@ open class NasjonalSykmeldingDAO(
     @Column("ferdigstilt_av")
     val ferdigstiltAv: String?,
     @Column("dato_ferdigstilt")
-    val datoFerdigstilt: LocalDateTime?,
+    val datoFerdigstilt: OffsetDateTime?,
 )

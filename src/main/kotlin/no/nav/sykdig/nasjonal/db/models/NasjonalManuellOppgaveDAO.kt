@@ -31,13 +31,13 @@ data class NasjonalManuellOppgaveDAO(
     @Column("ferdigstilt")
     val ferdigstilt: Boolean = false,
     @Column("papir_sm_registrering")
-    val papirSmRegistrering: PapirSmRegistering,
+    val papirSmRegistrering: PapirSmRegistering?,
     @Column("utfall")
     var utfall: String? = null,
     @Column("ferdigstilt_av")
     var ferdigstiltAv: String? = null,
     @Column("dato_ferdigstilt")
-    var datoFerdigstilt: LocalDateTime? = null,
+    var datoFerdigstilt: OffsetDateTime? = null,
     @Column("avvisningsgrunn")
     var avvisningsgrunn: String? = null,
 )

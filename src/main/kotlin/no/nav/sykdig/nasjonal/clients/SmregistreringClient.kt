@@ -1,20 +1,18 @@
 package no.nav.sykdig.nasjonal.clients
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.services.isValidOppgaveId
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
-import org.apache.kafka.common.network.Send
+import no.nav.sykdig.shared.FlexibleOffsetDateTimeDeserializer
+import no.nav.sykdig.shared.ReceivedSykmelding
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpStatusCodeException
-import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDateTime
@@ -183,5 +181,41 @@ class SmregistreringClient(
         return authorization.removePrefix("Bearer ")
     }
 }
+
+data class SendtSykmeldingHistorySykDig(
+    val sykmeldingId: String,
+    val ferdigstiltAv: String?,
+    @JsonDeserialize(using = FlexibleOffsetDateTimeDeserializer::class)
+    val datoFerdigstilt: OffsetDateTime?,
+    @JsonDeserialize(using = FlexibleOffsetDateTimeDeserializer::class)
+    val timestamp: OffsetDateTime,
+    val receivedSykmelding: ReceivedSykmelding,
+)
+
+
+data class ManuellOppgaveDTOSykDig(
+    val journalpostId: String,
+    val fnr: String?,
+    val aktorId: String?,
+    val dokumentInfoId: String?,
+    @JsonDeserialize(using = FlexibleOffsetDateTimeDeserializer::class)
+    val datoOpprettet: OffsetDateTime?,
+    val sykmeldingId: String,
+    val oppgaveid: Int?,
+    val ferdigstilt: Boolean,
+    val papirSmRegistering: PapirSmRegistering?,
+    var pdfPapirSykmelding: ByteArray?,
+    val ferdigstiltAv: String?,
+    val utfall: String?,
+    @JsonDeserialize(using = FlexibleOffsetDateTimeDeserializer::class)
+    val datoFerdigstilt: OffsetDateTime?,
+    val avvisningsgrunn: String?,
+)
+
+data class MigrationObject(
+    val sykmeldingId: String,
+    val manuellOppgave: ManuellOppgaveDTOSykDig,
+    val sendtSykmeldingHistory: MutableList<SendtSykmeldingHistorySykDig>?,
+)
 
 

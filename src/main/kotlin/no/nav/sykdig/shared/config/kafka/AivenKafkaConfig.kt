@@ -1,7 +1,7 @@
 package no.nav.sykdig.shared.config.kafka
 
 import no.nav.sykdig.utenlandsk.models.CreateSykmeldingKafkaMessage
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
+import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.utils.JacksonKafkaSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG

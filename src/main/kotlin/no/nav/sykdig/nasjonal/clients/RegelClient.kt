@@ -2,7 +2,7 @@ package no.nav.sykdig.nasjonal.clients
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
+import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.shared.ValidationResult
 import org.springframework.beans.factory.annotation.Value

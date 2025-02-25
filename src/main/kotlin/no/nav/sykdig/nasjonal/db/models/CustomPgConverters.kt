@@ -1,10 +1,11 @@
 package no.nav.sykdig.nasjonal.db.models
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.sykdig.shared.Sykmelding
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.*
 import org.postgresql.util.PGobject
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -12,16 +13,19 @@ import org.springframework.core.convert.converter.Converter
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
 import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import kotlin.math.log
 
 
 @ReadingConverter
 class OffsetDateTimeReadingConverter : Converter<Any, OffsetDateTime> {
     override fun convert(source: Any): OffsetDateTime {
         return when (source) {
-            is java.sql.Timestamp -> source.toInstant().atOffset(ZoneOffset.UTC)
-            is OffsetDateTime -> source // If already OffsetDateTime, return as-is
+            is Timestamp -> source.toInstant().atOffset(ZoneOffset.UTC)
+            is OffsetDateTime -> source
             else -> throw IllegalArgumentException("Unexpected source type: ${source::class}")
         }
     }
@@ -69,6 +73,7 @@ class SykmeldingReadingConverter : Converter<PGobject, Sykmelding> {
     }
 }
 
+
 @Configuration
 class JdbcConfiguration {
     @Bean
@@ -83,5 +88,6 @@ class JdbcConfiguration {
             ),
         )
     }
+
 }
 

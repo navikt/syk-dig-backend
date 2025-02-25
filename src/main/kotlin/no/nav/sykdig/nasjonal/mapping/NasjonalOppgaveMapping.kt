@@ -33,28 +33,30 @@ fun mapToNasjonalOppgave(oppgave: NasjonalManuellOppgaveDAO): NasjonalOppgave {
 }
 
 fun mapToNasjonalSykmelding(oppgave: NasjonalManuellOppgaveDAO): NasjonalSykmelding {
+    // TODO remove papirsmreg nullability after migration
     return NasjonalSykmelding(
         sykmeldingId = oppgave.sykmeldingId,
         journalpostId = oppgave.journalpostId,
         fnr = oppgave.fnr,
         datoOpprettet = oppgave.datoOpprettet.toString(),
-        syketilfelleStartDato = oppgave.papirSmRegistrering.syketilfelleStartDato.toString(),
+        syketilfelleStartDato = oppgave.papirSmRegistrering?.syketilfelleStartDato.toString(),
         arbeidsgiver = mapToArbeidsgiver(oppgave),
         medisinskVurdering = mapToMedisinskVurdering(oppgave),
-        skjermesForPasient = oppgave.papirSmRegistrering.skjermesForPasient,
-        perioder = oppgave.papirSmRegistrering.perioder?.map { mapToPerioder(it) } ?: emptyList(),
-        meldingTilNAV = mapTilMeldingTilNAV(oppgave.papirSmRegistrering.meldingTilNAV),
-        meldingTilArbeidsgiver = oppgave.papirSmRegistrering.meldingTilArbeidsgiver,
-        kontaktMedPasient = mapToKontaktMedPasient(oppgave.papirSmRegistrering.kontaktMedPasient),
-        behandletTidspunkt = oppgave.papirSmRegistrering.behandletTidspunkt,
-        behandler = mapToBehandler(oppgave.papirSmRegistrering.behandler),
+        skjermesForPasient = oppgave.papirSmRegistrering?.skjermesForPasient,
+        perioder = oppgave.papirSmRegistrering?.perioder?.map { mapToPerioder(it) } ?: emptyList(),
+        meldingTilNAV = mapTilMeldingTilNAV(oppgave.papirSmRegistrering?.meldingTilNAV),
+        meldingTilArbeidsgiver = oppgave.papirSmRegistrering?.meldingTilArbeidsgiver,
+        kontaktMedPasient = mapToKontaktMedPasient(oppgave.papirSmRegistrering?.kontaktMedPasient),
+        behandletTidspunkt = oppgave.papirSmRegistrering?.behandletTidspunkt,
+        behandler = mapToBehandler(oppgave.papirSmRegistrering?.behandler),
     )
 }
 
 
 fun mapToArbeidsgiver(oppgave: NasjonalManuellOppgaveDAO): Arbeidsgiver {
+    // TODO remove bangs after migration
     return Arbeidsgiver(
-        navn = oppgave.papirSmRegistrering.arbeidsgiver?.navn,
+        navn = oppgave.papirSmRegistrering!!.arbeidsgiver?.navn,
         stillingsprosent = oppgave.papirSmRegistrering.arbeidsgiver?.stillingsprosent,
         yrkesbetegnelse = oppgave.papirSmRegistrering.arbeidsgiver?.yrkesbetegnelse,
         harArbeidsgiver = mapToHarArbeidsGiver(oppgave),
@@ -62,7 +64,8 @@ fun mapToArbeidsgiver(oppgave: NasjonalManuellOppgaveDAO): Arbeidsgiver {
 }
 
 fun mapToHarArbeidsGiver(oppgave: NasjonalManuellOppgaveDAO): HarArbeidsgiver? {
-    return when (oppgave.papirSmRegistrering.arbeidsgiver?.harArbeidsgiver) {
+    // TODO remove bangs after migration
+    return when (oppgave.papirSmRegistrering!!.arbeidsgiver?.harArbeidsgiver) {
         null -> null
         no.nav.sykdig.shared.HarArbeidsgiver.EN_ARBEIDSGIVER -> HarArbeidsgiver.EN_ARBEIDSGIVER
         no.nav.sykdig.shared.HarArbeidsgiver.FLERE_ARBEIDSGIVERE -> HarArbeidsgiver.FLERE_ARBEIDSGIVERE
@@ -71,7 +74,8 @@ fun mapToHarArbeidsGiver(oppgave: NasjonalManuellOppgaveDAO): HarArbeidsgiver? {
 }
 
 fun mapToMedisinskVurdering(oppgave: NasjonalManuellOppgaveDAO): MedisinskVurdering {
-    val oppgaveMedisinskVurdering = oppgave.papirSmRegistrering.medisinskVurdering
+    // TODO remove bangs after migration
+    val oppgaveMedisinskVurdering = oppgave.papirSmRegistrering!!.medisinskVurdering
     return MedisinskVurdering(
         hovedDiagnose = oppgaveMedisinskVurdering?.hovedDiagnose?.let { mapToDiagnoseSchema(it) },
         biDiagnoser = oppgaveMedisinskVurdering?.biDiagnoser?.map { mapToDiagnoseSchema(it) } ?: emptyList(),

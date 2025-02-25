@@ -28,7 +28,7 @@ import no.nav.sykdig.saf.graphql.Journalstatus
 import no.nav.sykdig.saf.graphql.SafJournalpost
 import no.nav.sykdig.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.saf.graphql.TEMA_SYKMELDING
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
+import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
@@ -46,7 +46,6 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Month
 import java.time.OffsetDateTime
 import java.time.ZoneOffset

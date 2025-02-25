@@ -2,7 +2,7 @@ package no.nav.sykdig.utenlandsk.mapping
 
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.pdl.Person
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
+import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.Status
 import no.nav.sykdig.utenlandsk.models.UtenlandskSykmelding
 import no.nav.sykdig.shared.ValidationResult

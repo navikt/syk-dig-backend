@@ -10,7 +10,7 @@ import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.toFormattedNameString
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
+import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import no.nav.sykdig.shared.objectMapper
 import no.nav.sykdig.shared.securelog

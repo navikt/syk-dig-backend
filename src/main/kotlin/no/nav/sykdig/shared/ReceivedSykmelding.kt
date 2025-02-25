@@ -1,7 +1,7 @@
-package no.nav.sykdig.utenlandsk.models
+package no.nav.sykdig.shared
 
-import no.nav.sykdig.shared.Sykmelding
-import no.nav.sykdig.shared.ValidationResult
+import no.nav.sykdig.utenlandsk.models.Merknad
+import no.nav.sykdig.utenlandsk.models.UtenlandskSykmelding
 import java.time.LocalDateTime
 
 data class ReceivedSykmelding(

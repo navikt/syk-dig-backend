@@ -1,14 +1,9 @@
 package no.nav.sykdig.nasjonal.models
 
-import no.nav.sykdig.shared.Arbeidsgiver
-import no.nav.sykdig.shared.Behandler
-import no.nav.sykdig.shared.KontaktMedPasient
-import no.nav.sykdig.shared.MedisinskVurdering
-import no.nav.sykdig.shared.MeldingTilNAV
-import no.nav.sykdig.shared.Periode
-import no.nav.sykdig.shared.Prognose
-import no.nav.sykdig.shared.SporsmalSvar
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import no.nav.sykdig.shared.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 data class PapirManuellOppgave(
@@ -16,7 +11,7 @@ data class PapirManuellOppgave(
     val sykmeldingId: String,
     val oppgaveid: Int?,
     var pdfPapirSykmelding: ByteArray,
-    val papirSmRegistering: PapirSmRegistering,
+    val papirSmRegistering: PapirSmRegistering?,
     val documents: List<Document>,
 )
 
@@ -31,6 +26,7 @@ data class PapirSmRegistering(
     val fnr: String?,
     val aktorId: String?,
     val dokumentInfoId: String?,
+    @JsonDeserialize(using = FlexibleOffsetDateTimeDeserializer::class)
     val datoOpprettet: OffsetDateTime?,
     val sykmeldingId: String,
     val syketilfelleStartDato: LocalDate?,
