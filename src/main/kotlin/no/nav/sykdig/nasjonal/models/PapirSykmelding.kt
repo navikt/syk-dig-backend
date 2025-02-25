@@ -11,7 +11,7 @@ data class PapirManuellOppgave(
     val sykmeldingId: String,
     val oppgaveid: Int?,
     var pdfPapirSykmelding: ByteArray,
-    val papirSmRegistering: PapirSmRegistering?,
+    val papirSmRegistering: PapirSmRegistering,
     val documents: List<Document>,
 )
 

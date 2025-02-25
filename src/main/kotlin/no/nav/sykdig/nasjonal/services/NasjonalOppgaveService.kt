@@ -31,8 +31,6 @@ import kotlin.collections.List
 @Service
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
-    // TODO remove after migration
-    private val nasjonalSykmeldingRepository: NasjonalSykmeldingRepository,
     private val oppgaveClient: OppgaveClient,
     private val smregistreringClient: SmregistreringClient,
     private val nasjonalCommonService: NasjonalCommonService,
@@ -112,69 +110,6 @@ class NasjonalOppgaveService(
         }
     }
 
-    fun lagreOppgaveMigrering(
-        papirManuellOppgave: PapirManuellOppgave,
-        ferdigstilt: Boolean,
-        utfall: String?,
-        ferdigstiltAv: String?,
-        datoFerdigstilt: OffsetDateTime?,
-        avvisningsgrunn: String?,
-        jounalpostId: String,
-        dokumentInfoId: String?,
-        datooOpprettet: OffsetDateTime?,
-        oppgaveId: Int?,
-        aktorId: String?,
-    ): NasjonalManuellOppgaveDAO {
-        val nyOppgave = nasjonalOppgaveRepository.save(
-            mapToDaoMigrering(
-                papirManuellOppgave,
-                ferdigstilt,
-                utfall,
-                ferdigstiltAv,
-                datoFerdigstilt,
-                avvisningsgrunn,
-                jounalpostId,
-                dokumentInfoId,
-                datooOpprettet,
-                oppgaveId,
-                aktorId,
-            ),
-        )
-        log.info("Lagret ny oppgave med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
-        securelog.info("Detaljer om lagret oppgave: $nyOppgave")
-
-        return nyOppgave
-    }
-
-    fun lagreSykmeldingMigrering(
-        existingSykmelding: List<NasjonalSykmeldingDAO>,
-        receivedSykmelding: Sykmelding,
-        veileder: Veileder,
-        datoFerdigstilt: OffsetDateTime?,
-        timestamp: OffsetDateTime,
-    ): NasjonalSykmeldingDAO? {
-        try {
-            val toDao = mapToDaoSykmeldingMigrering(
-                receivedSykmelding,
-                veileder,
-                datoFerdigstilt,
-                timestamp,
-            )
-            if (!existingSykmelding.any { it.sykmelding == toDao.sykmelding }){
-                val nyOppgave = nasjonalSykmeldingRepository.save(
-                    toDao,
-                )
-                log.info("Lagret ny sykmelding med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
-                securelog.info("Detaljer om lagret sykmelding: $nyOppgave")
-                return nyOppgave
-            }
-        } catch (e: Exception){
-            log.error("Noe gikk galt under oppdatering av sykmelding tabell ${e.message} ${e.stackTrace}", e)
-            throw e
-        }
-        return null
-    }
-
     fun oppdaterOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, smRegistreringManuell: SmRegistreringManuell?): NasjonalManuellOppgaveDAO? {
         val existingOppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
 
@@ -197,9 +132,8 @@ class NasjonalOppgaveService(
     }
 
 
-    // TODO: nullability can be removed after migration
-    private fun mapToUpdatedPapirSmRegistrering(existingOppgave: NasjonalManuellOppgaveDAO, smRegistreringManuell: SmRegistreringManuell?): PapirSmRegistering? {
-        val updatedPapirSmRegistrering = existingOppgave.papirSmRegistrering?.copy(
+    private fun mapToUpdatedPapirSmRegistrering(existingOppgave: NasjonalManuellOppgaveDAO, smRegistreringManuell: SmRegistreringManuell?): PapirSmRegistering {
+        val updatedPapirSmRegistrering = existingOppgave.papirSmRegistrering.copy(
             meldingTilArbeidsgiver = smRegistreringManuell?.meldingTilArbeidsgiver
                 ?: existingOppgave.papirSmRegistrering.meldingTilArbeidsgiver,
             medisinskVurdering = smRegistreringManuell?.medisinskVurdering ?: existingOppgave.papirSmRegistrering.medisinskVurdering,
@@ -273,10 +207,6 @@ class NasjonalOppgaveService(
         return null
     }
 
-    fun getSykmeldingBySykmeldingId(sykmeldingId: String): List<NasjonalSykmeldingDAO> {
-        return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
-    }
-
     fun getOppgave(oppgaveId: String, authorization: String): NasjonalManuellOppgaveDAO? {
         val nasjonalOppgave = findByOppgaveId(oppgaveId)
         if (nasjonalOppgave != null) {
@@ -343,66 +273,6 @@ class NasjonalOppgaveService(
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
 
-    fun mapToDaoMigrering(
-        papirManuellOppgave: PapirManuellOppgave,
-        ferdigstilt: Boolean = false,
-        utfall: String?,
-        ferdigstiltAv: String?,
-        datoFerdigstilt: OffsetDateTime?,
-        avvisningsgrunn: String?,
-        jounalpostId: String,
-        dokumentInfoId: String?,
-        datooOpprettet: OffsetDateTime?,
-        oppgaveId: Int?,
-        aktorId: String?,
-
-        ): NasjonalManuellOppgaveDAO {
-        mapper.registerModules(JavaTimeModule())
-        securelog.info("Mapper til DAO migrering: $papirManuellOppgave")
-
-        val papirSmRegistering = papirManuellOppgave.papirSmRegistering
-
-        val nasjonalManuellOppgaveDAO =
-            NasjonalManuellOppgaveDAO(
-                sykmeldingId = papirManuellOppgave.sykmeldingId,
-                journalpostId = jounalpostId,
-                fnr = papirManuellOppgave.fnr,
-                aktorId = aktorId,
-                dokumentInfoId = dokumentInfoId,
-                datoOpprettet = datooOpprettet,
-                oppgaveId = papirManuellOppgave.oppgaveid,
-                ferdigstilt = ferdigstilt,
-                papirSmRegistrering =
-                    papirSmRegistering,
-                utfall = utfall,
-                ferdigstiltAv = ferdigstiltAv,
-                datoFerdigstilt = datoFerdigstilt,
-                avvisningsgrunn = avvisningsgrunn,
-            )
-
-        return nasjonalManuellOppgaveDAO
-
-    }
-
-    fun mapToDaoSykmeldingMigrering(
-        sykmelding: Sykmelding,
-        veileder: Veileder,
-        datoFerdigstilt: OffsetDateTime?,
-        timestamp: OffsetDateTime,
-    ): NasjonalSykmeldingDAO {
-        val mapper = jacksonObjectMapper()
-        mapper.registerModules(JavaTimeModule())
-        val nasjonalManuellOppgaveDAO =
-            NasjonalSykmeldingDAO(
-                sykmeldingId = sykmelding.id,
-                sykmelding = sykmelding,
-                timestamp = timestamp,
-                ferdigstiltAv = veileder.veilederIdent,
-                datoFerdigstilt = datoFerdigstilt,
-            )
-        return nasjonalManuellOppgaveDAO
-    }
-
     fun mapToDao(
         papirManuellOppgave: PapirManuellOppgave,
         existingId: UUID?,
@@ -411,8 +281,7 @@ class NasjonalOppgaveService(
         mapper.registerModules(JavaTimeModule())
         securelog.info("Mapper til DAO: $papirManuellOppgave")
 
-        // TODO remove bangs after migration
-        val papirSmRegistering = papirManuellOppgave.papirSmRegistering!!
+        val papirSmRegistering = papirManuellOppgave.papirSmRegistering
 
         val nasjonalManuellOppgaveDAO =
             NasjonalManuellOppgaveDAO(
@@ -467,8 +336,7 @@ class NasjonalOppgaveService(
     fun mapFromDao(
         nasjonalManuellOppgaveDAO: NasjonalManuellOppgaveDAO,
     ): PapirManuellOppgave {
-        //TODO remove bangs after migration
-        val papirSmRegistering = nasjonalManuellOppgaveDAO.papirSmRegistrering!!
+        val papirSmRegistering = nasjonalManuellOppgaveDAO.papirSmRegistrering
 
         requireNotNull(nasjonalManuellOppgaveDAO.oppgaveId)
         requireNotNull(nasjonalManuellOppgaveDAO.dokumentInfoId)
@@ -528,56 +396,5 @@ class NasjonalOppgaveService(
 
     fun deleteOppgave(sykmeldingId: String): Int {
         return nasjonalOppgaveRepository.deleteBySykmeldingId(sykmeldingId)
-    }
-
-    fun lagreISykDig(migrationObject: MigrationObject) {
-        val eksisterendeOppgave = getOppgaveBySykmeldingId(migrationObject.sykmeldingId, "")
-        val manuelloppgave = migrationObject.manuellOppgave
-        logger.info("hentet eksisterende oppgave fra db for å se om den ligger der ${migrationObject.sykmeldingId}, oppgaveId: ${manuelloppgave.oppgaveid}, eksisterende: ${eksisterendeOppgave?.sykmeldingId}")
-
-        if (eksisterendeOppgave == null) {
-            val papirManuellOppgave = PapirManuellOppgave(
-                fnr = manuelloppgave.fnr,
-                sykmeldingId = migrationObject.sykmeldingId,
-                oppgaveid = manuelloppgave.oppgaveid,
-                pdfPapirSykmelding = manuelloppgave.pdfPapirSykmelding ?: ByteArray(0),
-                papirSmRegistering = manuelloppgave.papirSmRegistering,
-                documents = listOf(
-                    Document(
-                        dokumentInfoId = manuelloppgave.dokumentInfoId ?: "",
-                        tittel = "papirsykmelding",
-                    ),
-                ),
-            )
-
-            logger.info("lagrer oppgave med sykmeldingId i nasjonal_manuelloppgave ${manuelloppgave.sykmeldingId}")
-            lagreOppgaveMigrering(
-                papirManuellOppgave = papirManuellOppgave,
-                ferdigstilt = manuelloppgave.ferdigstilt,
-                utfall = manuelloppgave.utfall,
-                ferdigstiltAv = manuelloppgave.ferdigstiltAv,
-                datoFerdigstilt = manuelloppgave.datoFerdigstilt,
-                avvisningsgrunn = manuelloppgave.avvisningsgrunn,
-                jounalpostId = manuelloppgave.journalpostId,
-                dokumentInfoId = manuelloppgave.dokumentInfoId,
-                datooOpprettet = manuelloppgave.datoOpprettet,
-                oppgaveId = manuelloppgave.oppgaveid,
-                aktorId = manuelloppgave.aktorId,
-            )
-            logger.info("lagret oppgave med sykmeldingId i nasjonal_manuelloppgave og skal lagre sykmelding med sykmeldingId i nasjonal_sykmelding ${manuelloppgave.sykmeldingId}")
-        }
-
-        logger.info("Henter eksisterende Sykmelding id ${migrationObject.sykmeldingId}")
-        val eksisterendeSykmeldinger = getSykmeldingBySykmeldingId(migrationObject.sykmeldingId)
-        logger.info("Hentet eksisterende Sykmelding id ${migrationObject.sykmeldingId} $eksisterendeSykmeldinger")
-        migrationObject.sendtSykmeldingHistory?.forEach { sykmelding ->
-            lagreSykmeldingMigrering(
-                eksisterendeSykmeldinger,
-                sykmelding.receivedSykmelding.sykmelding,
-                Veileder(sykmelding.ferdigstiltAv ?: ""),
-                datoFerdigstilt = sykmelding.datoFerdigstilt,
-                timestamp = sykmelding.timestamp,
-            )
-        }
     }
 }
