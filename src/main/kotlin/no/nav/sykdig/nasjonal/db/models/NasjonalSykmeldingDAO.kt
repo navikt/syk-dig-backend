@@ -1,26 +1,27 @@
 package no.nav.sykdig.nasjonal.db.models
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-import jakarta.persistence.Column
-import no.nav.sykdig.shared.ReceivedSykmelding
+import jakarta.persistence.GeneratedValue
+import no.nav.sykdig.shared.Sykmelding
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 
 @Table(name = "nasjonal_sykmelding")
-data class NasjonalSykmeldingDAO(
+open class NasjonalSykmeldingDAO(
     @Id
-    val id: UUID? = null,
-    @Column(name = "sykmelding_id", nullable = false)
+    @GeneratedValue(generator = "UUID")
+    var id: UUID? = null,
+    @Column("sykmelding_id")
     val sykmeldingId: String,
-    @Column(name = "sykmelding", nullable = false)
-    val sykmelding: ReceivedSykmelding,
-    @Column(name = "timestamp")
+    @Column("sykmelding")
+    val sykmelding: Sykmelding,
+    @Column("timestamp")
     val timestamp: OffsetDateTime,
-    @Column(name = "ferdigstilt_av")
+    @Column("ferdigstilt_av")
     val ferdigstiltAv: String?,
-    @Column(name = "dato_ferdigstilt")
-    val datoFerdigstilt: OffsetDateTime?
+    @Column("dato_ferdigstilt")
+    val datoFerdigstilt: OffsetDateTime?,
 )

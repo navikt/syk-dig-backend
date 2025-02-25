@@ -4,9 +4,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.gosys.GosysService
-import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.auditLogger.AuditLogger
-import no.nav.sykdig.shared.auditlog
 import no.nav.sykdig.utenlandsk.api.getPdfResult
 import no.nav.sykdig.shared.exceptions.NoOppgaveException
 import no.nav.sykdig.gosys.OppgaveClient
@@ -20,14 +18,12 @@ import no.nav.sykdig.nasjonal.db.models.Utfall
 import no.nav.sykdig.saf.SafClient
 import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.nasjonal.models.*
-import no.nav.sykdig.shared.securelog
+import no.nav.sykdig.shared.*
 import no.nav.sykdig.shared.utils.getLoggingMeta
-import no.nav.sykdig.shared.ReceivedSykmelding
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 import kotlin.collections.List
@@ -152,40 +148,25 @@ class NasjonalOppgaveService(
 
     fun lagreSykmeldingMigrering(
         existingSykmelding: List<NasjonalSykmeldingDAO>,
-        receivedSykmelding: ReceivedSykmelding,
+        receivedSykmelding: Sykmelding,
         veileder: Veileder,
         datoFerdigstilt: OffsetDateTime?,
         timestamp: OffsetDateTime,
     ): NasjonalSykmeldingDAO? {
         try {
             val toDao = mapToDaoSykmeldingMigrering(
-                null,
                 receivedSykmelding,
                 veileder,
                 datoFerdigstilt,
                 timestamp,
             )
-            if (!existingSykmelding.any { it.sykmelding.sykmelding == toDao.sykmelding.sykmelding }){
+            if (!existingSykmelding.any { it.sykmelding == toDao.sykmelding }){
                 val nyOppgave = nasjonalSykmeldingRepository.save(
                     toDao,
                 )
                 log.info("Lagret ny sykmelding med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
                 securelog.info("Detaljer om lagret sykmelding: $nyOppgave")
                 return nyOppgave
-            }
-            val existing = existingSykmelding.filter { it.sykmelding.sykmelding.pasientAktoerId == "UKJENT" }
-            existing.forEach {
-                val toDao2 = mapToDaoSykmeldingMigrering(
-                        it.id,
-                        receivedSykmelding,
-                        veileder,
-                        datoFerdigstilt,
-                        timestamp)
-                val nyOppgave = nasjonalSykmeldingRepository.save(
-                    toDao2,
-                )
-                log.info("Overskrev sykmelding med sykmeldingId=${nyOppgave.sykmeldingId}, database-id=${nyOppgave.id}")
-                securelog.info("Detaljer om lagret sykmelding: $nyOppgave")
             }
         } catch (e: Exception){
             log.error("Noe gikk galt under oppdatering av sykmelding tabell ${e.message} ${e.stackTrace}", e)
@@ -404,37 +385,22 @@ class NasjonalOppgaveService(
     }
 
     fun mapToDaoSykmeldingMigrering(
-        existingId: UUID?,
-        receivedSykmelding: ReceivedSykmelding,
+        sykmelding: Sykmelding,
         veileder: Veileder,
         datoFerdigstilt: OffsetDateTime?,
         timestamp: OffsetDateTime,
     ): NasjonalSykmeldingDAO {
         val mapper = jacksonObjectMapper()
         mapper.registerModules(JavaTimeModule())
-        if (existingId != null){
-            val nasjonalManuellOppgaveDAO =
-                NasjonalSykmeldingDAO(
-                    id = existingId,
-                    sykmeldingId = receivedSykmelding.sykmelding.id,
-                    sykmelding = receivedSykmelding,
-                    timestamp = timestamp,
-                    ferdigstiltAv = veileder.veilederIdent,
-                    datoFerdigstilt = datoFerdigstilt,
-                )
-            return nasjonalManuellOppgaveDAO
-        }
         val nasjonalManuellOppgaveDAO =
             NasjonalSykmeldingDAO(
-                id = existingId,
-                sykmeldingId = receivedSykmelding.sykmelding.id,
-                sykmelding = receivedSykmelding,
+                sykmeldingId = sykmelding.id,
+                sykmelding = sykmelding,
                 timestamp = timestamp,
                 ferdigstiltAv = veileder.veilederIdent,
                 datoFerdigstilt = datoFerdigstilt,
             )
         return nasjonalManuellOppgaveDAO
-
     }
 
     fun mapToDao(
@@ -607,7 +573,7 @@ class NasjonalOppgaveService(
         migrationObject.sendtSykmeldingHistory?.forEach { sykmelding ->
             lagreSykmeldingMigrering(
                 eksisterendeSykmeldinger,
-                sykmelding.receivedSykmelding,
+                sykmelding.receivedSykmelding.sykmelding,
                 Veileder(sykmelding.ferdigstiltAv ?: ""),
                 datoFerdigstilt = sykmelding.datoFerdigstilt,
                 timestamp = sykmelding.timestamp,

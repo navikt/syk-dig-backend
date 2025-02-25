@@ -73,57 +73,6 @@ class SykmeldingReadingConverter : Converter<PGobject, Sykmelding> {
     }
 }
 
-@WritingConverter
-class ReceivedSykmeldingToJsonConverter(private val objectMapper: ObjectMapper) : Converter<ReceivedSykmelding, PGobject> {
-    override fun convert(source: ReceivedSykmelding): PGobject {
-        val json = objectMapper.writeValueAsString(source)
-        return PGobject().apply {
-            type = "jsonb"
-            value = json
-        }
-    }
-}
-
-@ReadingConverter
-class JsonToReceivedSykmeldingConverter(private val objectMapper: ObjectMapper) : Converter<PGobject, ReceivedSykmelding> {
-    val log = applog()
-    override fun convert(source: PGobject): ReceivedSykmelding {
-        return try {
-            objectMapper.readValue(source.value!!, ReceivedSykmelding::class.java)
-        } catch (e: Exception) {
-            val gammelSykmelding = objectMapper.readValue(source.value!!, Sykmelding::class.java)
-            log.info("Migrerer gammel Sykmelding til ReceivedSykmelding: ${gammelSykmelding.id}")
-
-            konverterTilReceivedSykmelding(gammelSykmelding)
-        }
-    }
-
-    private fun konverterTilReceivedSykmelding(sykmelding: Sykmelding): ReceivedSykmelding {
-        return ReceivedSykmelding(
-            sykmelding = sykmelding,
-            personNrPasient = "UKJENT",
-            personNrLege = "UKJENT",
-            legeHprNr = sykmelding.behandler.hpr ?: "UKJENT",
-            msgId = sykmelding.id,
-            navLogId = sykmelding.id,
-            mottattDato = LocalDateTime.now(),
-            tlfPasient = "UKJENT",
-            legeHelsepersonellkategori = "UKJENT",
-            legekontorOrgNr = "UKJENT",
-            legekontorHerId = "UKJENT",
-            legekontorReshId = "UKJENT",
-            legekontorOrgName = "UKJENT",
-            rulesetVersion = "UKJENT",
-            merknader = null,
-            partnerreferanse = "UKJENT",
-            vedlegg = null,
-            utenlandskSykmelding = null,
-            fellesformat = "UKJENT",
-            tssid = "UKJENT",
-            validationResult = null,
-        )
-    }
-}
 
 @Configuration
 class JdbcConfiguration {
@@ -136,8 +85,6 @@ class JdbcConfiguration {
                 PapirSmRegistreringReadingConverter(),
                 SykmeldingWritingConverter(),
                 SykmeldingReadingConverter(),
-                ReceivedSykmeldingToJsonConverter(objectMapper),
-                JsonToReceivedSykmeldingConverter(objectMapper)
             ),
         )
     }

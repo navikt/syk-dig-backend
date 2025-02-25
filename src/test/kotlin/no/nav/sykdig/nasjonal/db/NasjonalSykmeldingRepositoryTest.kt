@@ -1,13 +1,9 @@
 package no.nav.sykdig.nasjonal.db
 
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.shared.AktivitetIkkeMulig
-import no.nav.sykdig.shared.ArbeidsrelatertArsak
-import no.nav.sykdig.shared.ArbeidsrelatertArsakType
-import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.nasjonal.db.models.NasjonalSykmeldingDAO
-import no.nav.sykdig.nasjonal.util.getReceivedSykmelding
-import no.nav.sykdig.shared.ReceivedSykmelding
+import no.nav.sykdig.nasjonal.util.*
+import no.nav.sykdig.shared.*
 import org.amshove.kluent.internal.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -66,8 +62,17 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
         )
     }
 
-    fun sykmeldingTestData(sykmeldingId: String): ReceivedSykmelding {
-        return getReceivedSykmelding(fnrPasient = "123", sykmelderFnr = "456", sykmeldingId = sykmeldingId)
+    fun sykmeldingTestData(sykmeldingId: String): Sykmelding {
+        val datoOpprettet = OffsetDateTime.now()
+        val manuell = getSmRegistreringManuell("fnrPasient", "fnrLege")
+        val fellesformat = getXmleiFellesformat(manuell, sykmeldingId, datoOpprettet.toLocalDateTime())
+        val sykmelding =
+            getSykmelding(
+                extractHelseOpplysningerArbeidsuforhet(fellesformat),
+                fellesformat.get(),
+                sykmeldingId = sykmeldingId
+            )
+        return sykmelding
     }
 
     fun perioderTestData(): List<Periode> {

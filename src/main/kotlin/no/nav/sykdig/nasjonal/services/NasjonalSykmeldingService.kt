@@ -227,7 +227,7 @@ class NasjonalSykmeldingService(
         val nasjonalManuellOppgaveDAO =
             NasjonalSykmeldingDAO(
                 sykmeldingId = receivedSykmelding.sykmelding.id,
-                sykmelding = receivedSykmelding,
+                sykmelding = receivedSykmelding.sykmelding,
                 timestamp = timestamp,
                 ferdigstiltAv = veileder.veilederIdent,
                 datoFerdigstilt = datoFerdigstilt,
