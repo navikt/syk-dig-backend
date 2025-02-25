@@ -41,9 +41,6 @@ management:
 smreg:
     topic: ${SMREG_TOPIC}
 
-smregmigration:
-    topic: ${SMREGMIGRATION_TOPIC}
-
 oppgave:
     topic: ${OPPGAVE_TOPIC}
 

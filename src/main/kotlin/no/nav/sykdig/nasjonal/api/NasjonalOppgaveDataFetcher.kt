@@ -34,8 +34,7 @@ class NasjonalOppgaveDataFetcher(
                 return NasjonalOppgaveStatus(oppgaveId, NasjonalOppgaveStatusEnum.FERDIGSTILT)
             }
             requireNotNull(oppgave.fnr)
-            // TODO remove bangs after migration
-            val sykmelderFnr = oppgave.papirSmRegistrering!!.behandler?.fnr
+            val sykmelderFnr = oppgave.papirSmRegistrering.behandler?.fnr
             requireNotNull(sykmelderFnr)
             return mapToNasjonalOppgave(oppgave)
         }
@@ -53,8 +52,7 @@ class NasjonalOppgaveDataFetcher(
                 return NasjonalOppgaveStatus(oppgave.oppgaveId.toString(), NasjonalOppgaveStatusEnum.IKKE_FERDIGSTILT)
             }
             requireNotNull(oppgave.fnr)
-            // TODO remove bangs after migration
-            val sykmelderFnr = oppgave.papirSmRegistrering!!.behandler?.fnr
+            val sykmelderFnr = oppgave.papirSmRegistrering.behandler?.fnr
             requireNotNull(sykmelderFnr)
             return mapToNasjonalOppgave(oppgave)
         }

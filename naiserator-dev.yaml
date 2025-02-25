@@ -143,6 +143,4 @@ spec:
       value: dev-gcp.teamsykmelding.syfosmpapirregler
     - name: SMREG_TOPIC
       value: teamsykmelding.papir-sm-registering
-    - name: SMREGMIGRATION_TOPIC
-      value: teamsykmelding.smreg-migration
 
