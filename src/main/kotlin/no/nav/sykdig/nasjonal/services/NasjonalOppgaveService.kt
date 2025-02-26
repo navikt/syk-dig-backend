@@ -76,7 +76,7 @@ class NasjonalOppgaveService(
         return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(papirSykmelding, navEnhet, callId, oppgave)
     }
 
-    suspend fun ferdigstillNasjonalOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): ResponseEntity<Any> {
+    suspend fun sendNasjonalOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): ResponseEntity<Any> {
         val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         if (oppgave.ferdigstilt) {
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")

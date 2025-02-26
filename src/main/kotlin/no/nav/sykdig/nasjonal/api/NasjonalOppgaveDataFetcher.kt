@@ -20,7 +20,6 @@ import org.springframework.security.access.prepost.PostAuthorize
 
 @DgsComponent
 class NasjonalOppgaveDataFetcher(
-    private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val nasjonalDbService: NasjonalDbService,
 ) {
 

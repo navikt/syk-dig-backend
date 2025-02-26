@@ -13,7 +13,6 @@ import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.shared.*
 import no.nav.sykdig.utenlandsk.services.JournalpostService
 import no.nav.sykdig.shared.utils.getLoggingMeta
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service

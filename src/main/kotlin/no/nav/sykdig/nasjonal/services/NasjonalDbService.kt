@@ -12,11 +12,12 @@ import no.nav.sykdig.nasjonal.mapping.isValidOppgaveId
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Veileder
+import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.securelog
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 
 @Service
@@ -77,7 +78,7 @@ class NasjonalDbService(
             utfall = utfall,
             ferdigstiltAv = ferdigstiltAv,
             avvisningsgrunn = avvisningsgrunn,
-            datoFerdigstilt = LocalDateTime.now(),
+            datoFerdigstilt = OffsetDateTime.now(ZoneOffset.UTC),
             ferdigstilt = true,
             papirSmRegistrering = mapToUpdatedPapirSmRegistrering(existingOppgave, smRegistreringManuell),
         )

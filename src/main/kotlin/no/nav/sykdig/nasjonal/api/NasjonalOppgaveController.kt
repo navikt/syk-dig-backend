@@ -1,10 +1,8 @@
 package no.nav.sykdig.nasjonal.api
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.sykdig.digitalisering.papirsykmelding.mapFromDao
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
-import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Sykmelder
@@ -12,10 +10,8 @@ import no.nav.sykdig.nasjonal.services.NasjonalDbService
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.shared.securelog
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -24,7 +20,6 @@ import java.util.*
 @RequestMapping("/api/v1/proxy")
 class NasjonalOppgaveController(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
-    private val nasjonalDbService: NasjonalDbService,
     private val sykmelderService: SykmelderService,
     private val personService: PersonService,
 ) {
@@ -102,26 +97,7 @@ class NasjonalOppgaveController(
         @RequestBody papirSykmelding: SmRegistreringManuell,
     ): ResponseEntity<Any> {
         val callId = UUID.randomUUID().toString()
-        return nasjonalOppgaveService.ferdigstillNasjonalOppgave(papirSykmelding, navEnhet, callId, oppgaveId)
-
-    }
-
-    @GetMapping("/sykmelding/{sykmeldingId}/ferdigstilt")
-    @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, '/sykmelding/{sykmeldingId}/ferdigstilt')")
-    @ResponseBody
-    @WithSpan
-    fun getFerdigstiltSykmelding(
-        @PathVariable sykmeldingId: String,
-    ): ResponseEntity<PapirManuellOppgave> {
-        val oppgave = nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId)
-        if (oppgave != null) {
-            if(!oppgave.ferdigstilt) {
-                log.info("Oppgave med id $sykmeldingId er ikke ferdigstilt")
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-            }
-            return ResponseEntity.ok(mapFromDao(oppgave))
-        }
-        return ResponseEntity.notFound().build()
+        return nasjonalOppgaveService.sendNasjonalOppgave(papirSykmelding, navEnhet, callId, oppgaveId)
     }
 
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")

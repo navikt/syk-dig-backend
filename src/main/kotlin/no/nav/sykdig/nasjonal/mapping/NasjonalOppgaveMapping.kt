@@ -27,12 +27,7 @@ import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Veileder
-import no.nav.sykdig.shared.AnnenFraverGrunn
-import no.nav.sykdig.shared.Diagnose
-import no.nav.sykdig.shared.MedisinskArsak
-import no.nav.sykdig.shared.Sykmelding
-import no.nav.sykdig.utenlandsk.models.ReceivedSykmelding
-import java.time.LocalDateTime
+import no.nav.sykdig.shared.*
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -265,7 +260,7 @@ fun mapToDaoOppgave(
             fnr = papirManuellOppgave.fnr,
             aktorId = papirSmRegistering.aktorId,
             dokumentInfoId = papirSmRegistering.dokumentInfoId,
-            datoOpprettet = papirSmRegistering.datoOpprettet?.toLocalDateTime(),
+            datoOpprettet = papirSmRegistering.datoOpprettet,
             oppgaveId = papirManuellOppgave.oppgaveid,
             ferdigstilt = ferdigstilt,
             papirSmRegistrering =
@@ -353,7 +348,7 @@ fun mapFromDao(
 fun mapToDaoSykmelding(
     receivedSykmelding: ReceivedSykmelding,
     veileder: Veileder,
-    datoFerdigstilt: LocalDateTime? = LocalDateTime.now(ZoneOffset.UTC),
+    datoFerdigstilt: OffsetDateTime? = OffsetDateTime.now(ZoneOffset.UTC),
     timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
 ): NasjonalSykmeldingDAO {
     val mapper = jacksonObjectMapper()
