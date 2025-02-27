@@ -34,7 +34,6 @@ import java.time.OffsetDateTime
 class NasjonalSykmeldingService(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val nasjonalSykmeldingRepository: NasjonalSykmeldingRepository,
-    private val regelClient: RegelClient,
     private val journalpostService: JournalpostService,
     private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
     private val sykmelderService: SykmelderService,
@@ -46,25 +45,25 @@ class NasjonalSykmeldingService(
     val securelog = securelog()
     val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
-    suspend fun korrigerSykmelding(sykmeldingId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell, authorization: String): ResponseEntity<Any> {
-        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSmreg(sykmeldingId, authorization) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+    suspend fun korrigerSykmelding(sykmeldingId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell): ResponseEntity<Any> {
+        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSmreg(sykmeldingId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         log.info("Forsøker å korriger sykmelding med sykmeldingId $sykmeldingId og oppgaveId ${oppgave.oppgaveId}")
-        return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave, authorization)
+        return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave)
     }
 
-    suspend fun sendPapirsykmeldingOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String, authorization: String): ResponseEntity<Any> {
+    suspend fun sendPapirsykmeldingOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): ResponseEntity<Any> {
         securelog.info("sender papirsykmelding med oppgaveId $oppgaveId {}", kv("smregistreringManuell", objectMapper.writeValueAsString(papirSykmelding)))
-        val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId, authorization) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         if (oppgave.ferdigstilt) {
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
         log.info("Forsøker å sende inn papirsykmelding med sykmeldingId ${oppgave.sykmeldingId} oppgaveId ${oppgave.oppgaveId}")
-        return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave, authorization, oppgaveId.toInt())
+        return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgaveId.toInt())
 
     }
 
-    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgave: NasjonalManuellOppgaveDAO, authorization: String, oppgaveId: Int? = null): ResponseEntity<Any> {
+    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgave: NasjonalManuellOppgaveDAO, oppgaveId: Int? = null): ResponseEntity<Any> {
         val sykmeldingId = oppgave.sykmeldingId
         log.info("Forsøker å ferdigstille papirsykmelding med sykmeldingId $sykmeldingId")
 
@@ -170,10 +169,6 @@ class NasjonalSykmeldingService(
         nasjonalSykmeldingRepository.save(dao)
     }
 
-    fun findBySykmeldingId(sykmeldingId: String): List<NasjonalSykmeldingDAO>? {
-        return nasjonalSykmeldingRepository.findBySykmeldingId(sykmeldingId)
-    }
-
     private fun handleBrokenRule(
         validationResult: ValidationResult,
         oppgaveId: Int?,
@@ -183,14 +178,14 @@ class NasjonalSykmeldingService(
                 "Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
                 StructuredArguments.keyValue("oppgaveId", oppgaveId),
             )
-            return ResponseEntity.badRequest().body(validationResult)
+            return ResponseEntity.ok().body(validationResult)
         }
         if (validationResult.status == Status.OK) {
             log.info(
                 "Ferdigstilling av papirsykmeldinger manuell registering traff regel OK {}",
                 StructuredArguments.keyValue("oppgaveId", oppgaveId),
             )
-            return ResponseEntity.badRequest().body(validationResult)
+            return ResponseEntity.ok().body(validationResult)
         }
         log.error("Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING")
         return ResponseEntity.internalServerError().body("En uforutsett feil oppsto ved validering av oppgaven")

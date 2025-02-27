@@ -1,6 +1,6 @@
 union NasjonalOppgaveResult = NasjonalOppgave | NasjonalOppgaveStatus
 
-union NasjonalSykmeldingResult = NasjonalSykmelding | NasjonalSykmeldingStatus
+union NasjonalSykmeldingResult = NasjonalOppgave | NasjonalSykmeldingStatus
 
 type NasjonalOppgave {
     oppgaveId: String!

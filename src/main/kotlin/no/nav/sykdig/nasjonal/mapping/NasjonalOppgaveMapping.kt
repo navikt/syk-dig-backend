@@ -37,8 +37,8 @@ fun mapToNasjonalSykmelding(oppgave: NasjonalManuellOppgaveDAO): NasjonalSykmeld
         sykmeldingId = oppgave.sykmeldingId,
         journalpostId = oppgave.journalpostId,
         fnr = oppgave.fnr,
-        datoOpprettet = oppgave.datoOpprettet.toString(),
-        syketilfelleStartDato = oppgave.papirSmRegistrering.syketilfelleStartDato.toString(),
+        datoOpprettet = oppgave.datoOpprettet?.toString(),
+        syketilfelleStartDato = oppgave.papirSmRegistrering.syketilfelleStartDato?.toString(),
         arbeidsgiver = mapToArbeidsgiver(oppgave),
         medisinskVurdering = mapToMedisinskVurdering(oppgave),
         skjermesForPasient = oppgave.papirSmRegistrering.skjermesForPasient,
@@ -77,7 +77,7 @@ fun mapToMedisinskVurdering(oppgave: NasjonalManuellOppgaveDAO): MedisinskVurder
         biDiagnoser = oppgaveMedisinskVurdering?.biDiagnoser?.map { mapToDiagnoseSchema(it) } ?: emptyList(),
         svangerskap = oppgaveMedisinskVurdering?.svangerskap ?: false,
         yrkesskade = oppgaveMedisinskVurdering?.yrkesskade ?: false,
-        yrkesskadeDato = oppgaveMedisinskVurdering?.yrkesskadeDato.toString(),
+        yrkesskadeDato = oppgaveMedisinskVurdering?.yrkesskadeDato?.toString(),
         annenFraversArsak = mapToAnnenFraversArsak(oppgaveMedisinskVurdering?.annenFraversArsak),
     )
 }
@@ -152,7 +152,7 @@ fun mapToMedisinskArsak(medisinskArsak: MedisinskArsak?): no.nav.sykdig.generate
 
     return no.nav.sykdig.generated.types.MedisinskArsak(
         beskrivelse = medisinskArsak.beskrivelse,
-        arsak = medisinskArsak.arsak.mapNotNull { mapToMedisinskArsakType(it) },
+        arsak = medisinskArsak.arsak.map { mapToMedisinskArsakType(it) },
     )
 }
 
@@ -170,7 +170,7 @@ fun mapToArbeidsrelatertArsak(arbeidsrelatertArsak: no.nav.sykdig.shared.Arbeids
 
     return ArbeidsrelatertArsak(
         beskrivelse = arbeidsrelatertArsak.beskrivelse,
-        arsak = arbeidsrelatertArsak.arsak.mapNotNull { mapToArbeidsrelatertArsakType(it) },
+        arsak = arbeidsrelatertArsak.arsak.map { mapToArbeidsrelatertArsakType(it) },
     )
 }
 
@@ -196,7 +196,7 @@ fun mapToKontaktMedPasient(kontaktMedPasient: no.nav.sykdig.shared.KontaktMedPas
     if (kontaktMedPasient == null) return null
 
     return KontaktMedPasient(
-        kontaktDato = kontaktMedPasient.kontaktDato.toString(),
+        kontaktDato = kontaktMedPasient.kontaktDato?.toString(),
         begrunnelseIkkeKontakt = kontaktMedPasient.begrunnelseIkkeKontakt,
     )
 }

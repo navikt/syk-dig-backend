@@ -2,18 +2,14 @@ package no.nav.sykdig.nasjonal.services
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.gosys.GosysService
 import no.nav.sykdig.shared.auditLogger.AuditLogger
 import no.nav.sykdig.utenlandsk.api.getPdfResult
-import no.nav.sykdig.shared.exceptions.NoOppgaveException
 import no.nav.sykdig.gosys.OppgaveClient
-import no.nav.sykdig.nasjonal.clients.MigrationObject
-import no.nav.sykdig.nasjonal.clients.SmregistreringClient
 import no.nav.sykdig.nasjonal.db.NasjonalOppgaveRepository
-import no.nav.sykdig.nasjonal.db.NasjonalSykmeldingRepository
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.nasjonal.db.models.NasjonalSykmeldingDAO
 import no.nav.sykdig.nasjonal.db.models.Utfall
 import no.nav.sykdig.saf.SafClient
 import no.nav.sykdig.shared.metrics.MetricRegister
@@ -26,13 +22,11 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 import java.util.*
-import kotlin.collections.List
 
 @Service
 class NasjonalOppgaveService(
     private val nasjonalOppgaveRepository: NasjonalOppgaveRepository,
     private val oppgaveClient: OppgaveClient,
-    private val smregistreringClient: SmregistreringClient,
     private val nasjonalCommonService: NasjonalCommonService,
     private val safClient: SafClient,
     private val nasjonalFerdigstillingsService: NasjonalFerdigstillingsService,
@@ -153,10 +147,7 @@ class NasjonalOppgaveService(
 
 
     private fun findByOppgaveId(oppgaveId: String): NasjonalManuellOppgaveDAO? {
-        if (!isValidOppgaveId(oppgaveId))
-            throw IllegalArgumentException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
         val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId.toInt()) ?: return null
-
         return oppgave
     }
 
@@ -165,31 +156,13 @@ class NasjonalOppgaveService(
         return oppgave
     }
 
-    fun getNasjonalOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO {
-        val oppgave = findByOppgaveId(oppgaveId)
-        if (oppgave == null) {
-            log.warn("Fant ikke oppgave med id $oppgaveId Den kan kanskje være ferdigstilt fra før")
-            throw NoOppgaveException("Fant ikke oppgave")
-        }
-        log.info("Hentet oppgave med id $oppgaveId")
-        return oppgave
-    }
-
-    fun getOppgaveBySykmeldingIdSmreg(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {
+    fun getOppgaveBySykmeldingIdSmreg(sykmeldingId: String): NasjonalManuellOppgaveDAO? {
         val sykmelding = findBySykmeldingId(sykmeldingId)
 
         if (sykmelding != null) {
             log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
             securelog.info("hentet nasjonalOppgave fra db $sykmelding")
             return sykmelding
-        }
-        log.info("papirsykmelding: henter ferdigstilt sykmelding med id $sykmeldingId gjennom syk-dig proxy")
-        val ferdigstiltSykmeldingRequest = smregistreringClient.getFerdigstiltSykmeldingRequest(authorization, sykmeldingId)
-        val papirManuellOppgave = ferdigstiltSykmeldingRequest.body
-        if (papirManuellOppgave != null) {
-            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
-            val lagretOppgave = lagreOppgave(papirManuellOppgave, ferdigstilt = true)
-            return lagretOppgave
         }
         log.info(
             "Fant ingen ferdigstilte sykmeldinger med sykmeldingId $sykmeldingId",
@@ -207,22 +180,16 @@ class NasjonalOppgaveService(
         return null
     }
 
-    fun getOppgave(oppgaveId: String, authorization: String): NasjonalManuellOppgaveDAO? {
+    fun getOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO? {
+        if(!isValidOppgaveId(oppgaveId)) {
+            log.info("Invalid oppgaveId $oppgaveId")
+            throw DgsEntityNotFoundException("Invalid oppgaveId does not contain only alphanumerical characters. oppgaveId: $oppgaveId")
+        }
+
         val nasjonalOppgave = findByOppgaveId(oppgaveId)
         if (nasjonalOppgave != null) {
             log.info("papirsykmelding: henter oppgave med id $oppgaveId fra syk-dig-db")
             return nasjonalOppgave
-        }
-        log.info("papirsykmelding: henter oppgave med id $oppgaveId gjennom syk-dig proxy")
-        val oppgave = smregistreringClient.getOppgaveRequest(authorization, oppgaveId)
-        log.info("har hentet papirManuellOppgave via syk-dig proxy")
-
-        val papirManuellOppgave = oppgave.body
-        if (papirManuellOppgave != null) {
-            log.info("har hentet papirManuellOppgave via syk-dig proxy og oppgaven er ikke null")
-            securelog.info("lagrer nasjonalOppgave i db $papirManuellOppgave")
-            val lagretOppgave = lagreOppgave(papirManuellOppgave)
-            return lagretOppgave
         }
         log.info("Finner ikke uløst oppgave med id $oppgaveId")
         return null
@@ -232,9 +199,8 @@ class NasjonalOppgaveService(
         oppgaveId: String,
         request: String,
         navEnhet: String,
-        authorization: String,
     ): ResponseEntity<HttpStatusCode> {
-        val lokalOppgave = getOppgave(oppgaveId, authorization)
+        val lokalOppgave = getOppgave(oppgaveId)
         if (lokalOppgave == null) {
             log.info("Fant ikke oppgave som skulle avvises: $oppgaveId")
             return ResponseEntity(HttpStatus.NOT_FOUND)
@@ -373,18 +339,18 @@ class NasjonalOppgaveService(
         )
     }
 
-    fun getRegisterPdf(oppgaveId: String, authorization: String, dokumentInfoId: String): ResponseEntity<Any> {
-        val oppgave = getOppgave(oppgaveId, authorization)
+    fun getRegisterPdf(oppgaveId: String, dokumentInfoId: String): ResponseEntity<Any> {
+        val oppgave = getOppgave(oppgaveId)
         requireNotNull(oppgave)
-        val pdfResult = safClient.getPdfFraSaf(oppgave.journalpostId, dokumentInfoId, authorization)
+        val pdfResult = safClient.getPdfFraSaf(oppgave.journalpostId, dokumentInfoId, oppgaveId)
         return getPdfResult(pdfResult)
     }
 
-    fun oppgaveTilGosys(oppgaveId: String, authorization: String) {
-        val eksisterendeOppgave = getOppgave(oppgaveId, authorization) ?: return
+    fun oppgaveTilGosys(oppgaveId: String) {
+        val eksisterendeOppgave = getOppgave(oppgaveId) ?: return
         val navIdent = nasjonalCommonService.getNavIdent()
         val loggingMeta = getLoggingMeta(eksisterendeOppgave.sykmeldingId, eksisterendeOppgave)
-        nasjonalFerdigstillingsService.ferdigstillOgSendOppgaveTilGosys(oppgaveId, authorization, eksisterendeOppgave)
+        nasjonalFerdigstillingsService.ferdigstillOgSendOppgaveTilGosys(oppgaveId, eksisterendeOppgave)
         oppdaterOppgave(eksisterendeOppgave.sykmeldingId, Utfall.SENDT_TIL_GOSYS.toString(), navIdent.veilederIdent, null, null)
 
         log.info(

@@ -101,7 +101,7 @@ class NasjonalFerdigstillingsService(
     }
 
 
-    fun ferdigstillOgSendOppgaveTilGosys(oppgaveId: String, authorization: String, eksisterendeOppgave: NasjonalManuellOppgaveDAO) {
+    fun ferdigstillOgSendOppgaveTilGosys(oppgaveId: String, eksisterendeOppgave: NasjonalManuellOppgaveDAO) {
         val sykmeldingId = eksisterendeOppgave.sykmeldingId
         val loggingMeta = getLoggingMeta(sykmeldingId, eksisterendeOppgave)
         log.info(

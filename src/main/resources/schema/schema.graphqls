@@ -3,12 +3,11 @@ scalar DateTime
 scalar UUID
 
 type Query {
-
     oppgave(oppgaveId: String!): DigitaliseringsoppgaveResult
     journalpost(id: String!): JournalpostResult!
     digitalisertSykmelding(sykmeldingId: String!) : DigitalisertSykmeldingResult
     nasjonalOppgave(oppgaveId: String!): NasjonalOppgaveResult
-    nasjonalFerdigstiltOppgave(sykmeldingId: String!): NasjonalOppgaveResult
+    nasjonalFerdigstiltOppgave(sykmeldingId: String!): NasjonalSykmeldingResult
 }
 
 type Mutation {
