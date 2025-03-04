@@ -42,52 +42,45 @@ class DocumentController(
     ): ResponseEntity<Any> {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
 
-        if (oppgave != null) {
-            if (
-                dokumentInfoId == "primary"
-            ) {
-                if (oppgave.dokumentInfoId == null) {
-                    log.error("oppgave: $oppgaveId mangler dokumentInfoId")
-                    return ResponseEntity.badRequest()
-                        .body(toHtml("oppgave: $oppgaveId mangler dokumentInfoId"))
-                }
-                return getPdfResult(
-                    safClient.getPdfFraSaf(
-                        dokumentInfoId = oppgave.dokumentInfoId,
-                        journalpostId = oppgave.journalpostId,
-                        callId = oppgave.sykmeldingId.toString(),
-                    ),
-                )
-            }
-
-            val dokumentInfoIdInDokumenter = oppgave.dokumenter.firstOrNull { it.dokumentInfoId == dokumentInfoId }
-
-            if (dokumentInfoIdInDokumenter == null && oppgave.dokumentInfoId != dokumentInfoId) {
-                log.error("$dokumentInfoId er ikke en del av oppgave $oppgaveId")
+        if (
+            dokumentInfoId == "primary"
+        ) {
+            if (oppgave.dokumentInfoId == null) {
+                log.error("oppgave: $oppgaveId mangler dokumentInfoId")
                 return ResponseEntity.badRequest()
-                    .header("Content-Type", "text/html")
-                    .body(toHtml("dokumentInfoId: $dokumentInfoId er ikke gyldig for oppgaven"))
+                    .body(toHtml("oppgave: $oppgaveId mangler dokumentInfoId"))
             }
+            return getPdfResult(
+                safClient.getPdfFraSaf(
+                    dokumentInfoId = oppgave.dokumentInfoId,
+                    journalpostId = oppgave.journalpostId,
+                    callId = oppgave.sykmeldingId.toString(),
+                ),
+            )
+        }
 
-            try {
-                return getPdfResult(
-                    safClient.getPdfFraSaf(
-                        dokumentInfoId = dokumentInfoId,
-                        journalpostId = oppgave.journalpostId,
-                        callId = oppgave.sykmeldingId.toString(),
-                    ),
-                )
-            } catch (e: Exception) {
-                log.error("Noe gikk galt ved henting av pdf for oppgave med id $oppgaveId")
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .header("Content-Type", "text/html")
-                    .body(toHtml("Noe gikk galt ved henting av pdf for oppgave med id $oppgaveId"))
-            }
-        } else {
-            log.warn("Fant ikke oppgave med id $oppgaveId ved henting av pdf")
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        val dokumentInfoIdInDokumenter = oppgave.dokumenter.firstOrNull { it.dokumentInfoId == dokumentInfoId }
+
+        if (dokumentInfoIdInDokumenter == null && oppgave.dokumentInfoId != dokumentInfoId) {
+            log.error("$dokumentInfoId er ikke en del av oppgave $oppgaveId")
+            return ResponseEntity.badRequest()
                 .header("Content-Type", "text/html")
-                .body(toHtml("Fant ikke oppgave med id $oppgaveId ved henting av pdf"))
+                .body(toHtml("dokumentInfoId: $dokumentInfoId er ikke gyldig for oppgaven"))
+        }
+
+        try {
+            return getPdfResult(
+                safClient.getPdfFraSaf(
+                    dokumentInfoId = dokumentInfoId,
+                    journalpostId = oppgave.journalpostId,
+                    callId = oppgave.sykmeldingId.toString(),
+                ),
+            )
+        } catch (e: Exception) {
+            log.error("Noe gikk galt ved henting av pdf for oppgave med id $oppgaveId")
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .header("Content-Type", "text/html")
+                .body(toHtml("Noe gikk galt ved henting av pdf for oppgave med id $oppgaveId"))
         }
     }
 

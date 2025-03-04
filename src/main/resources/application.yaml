@@ -57,7 +57,6 @@ pdl.url: ${PDL_URL}
 kodeverk.url: ${KODEVERK_URL}
 dokarkiv.url: ${DOKARKIV_URL}
 oppgave.url: ${OPPGAVE_URL}
-smregistrering.url: ${SMREGISTRERING_URL}
 helsenett.url: ${HELSENETT_URL}
 smtss.url: ${SMTSS_URL}
 regel.url: ${SYFOSMPAPIRREGLER_URL}
@@ -158,15 +157,6 @@ no.nav.security.jwt:
                     client-id: ${AZURE_APP_CLIENT_ID}
                     client-secret: ${AZURE_APP_CLIENT_SECRET}
                     client-auth-method: client_secret_basic
-            onbehalfof-smreg:
-                token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
-                grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-                scope: api://${SMREGISTRERING_CLIENT_ID}/.default
-                authentication:
-                    client-id: ${AZURE_APP_CLIENT_ID}
-                    client-secret: ${AZURE_APP_CLIENT_SECRET}
-                    client-auth-method: client_secret_basic
-
 
 
 logging.config: "classpath:logback.xml"
