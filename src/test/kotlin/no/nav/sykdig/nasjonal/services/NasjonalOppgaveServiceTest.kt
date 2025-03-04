@@ -3,27 +3,26 @@ package no.nav.sykdig.nasjonal.services
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.shared.LoggingMeta
-import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
-import no.nav.sykdig.dokarkiv.DokarkivClient
 import no.nav.sykdig.dokarkiv.DocumentService
-import no.nav.sykdig.shared.Adresse
-import no.nav.sykdig.shared.Behandler
-import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
+import no.nav.sykdig.dokarkiv.DokarkivClient
 import no.nav.sykdig.gosys.OppgaveClient
+import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
+import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
 import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.nasjonal.models.Veileder
-import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.saf.graphql.SafJournalpost
 import no.nav.sykdig.saf.graphql.SafQueryJournalpost
+import no.nav.sykdig.shared.Adresse
+import no.nav.sykdig.shared.Behandler
+import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.shared.utils.getLoggingMeta
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import okhttp3.internal.EMPTY_BYTE_ARRAY
@@ -36,7 +35,6 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -51,11 +49,11 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.support.RestGatewaySupport
 import reactor.core.publisher.Mono
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
 class NasjonalOppgaveServiceTest : IntegrationTest() {
@@ -88,14 +86,11 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     @MockitoBean
     lateinit var nasjonalFerdigstillingService: NasjonalFerdigstillingsService
 
-    @Autowired
-    @Qualifier("smregisteringRestTemplate")
-    private lateinit var restTemplate: RestTemplate
 
     @BeforeEach
     fun setUp() = runBlocking {
         mockJwtAuthentication()
-        val mockServer = MockRestServiceServer.createServer(restTemplate)
+        val mockServer = MockRestServiceServer.createServer(RestGatewaySupport())
 
         mockServer.expect(requestTo("http://localhost:8081/azureator/token"))
             .andExpect(method(HttpMethod.POST))

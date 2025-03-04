@@ -77,9 +77,6 @@ spec:
         - application: istilgangskontroll
           namespace: teamsykefravr
           cluster: dev-gcp
-        - application: smregistrering-backend
-          namespace: teamsykmelding
-          cluster: dev-gcp
         - application: syfohelsenettproxy
           namespace: teamsykmelding
           cluster: dev-gcp
@@ -125,10 +122,6 @@ spec:
       value: dev-fss.oppgavehandtering.oppgave-q1
     - name: OPPGAVE_TOPIC
       value: oppgavehandtering.oppgavehendelse-q1-v1
-    - name: SMREGISTRERING_URL
-      value: http://smregistrering-backend
-    - name: SMREGISTRERING_CLIENT_ID
-      value: dev-gcp.teamsykmelding.smregistrering-backend
     - name: HELSENETT_URL
       value: http://syfohelsenettproxy
     - name: HELSENETT_CLIENT_ID

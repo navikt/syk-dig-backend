@@ -77,9 +77,6 @@ spec:
         - application: kodeverk-api
           namespace: team-rocket
           cluster: prod-gcp
-        - application: smregistrering-backend
-          namespace: teamsykmelding
-          cluster: prod-gcp
         - application: syfohelsenettproxy
           namespace: teamsykmelding
           cluster: prod-gcp
@@ -122,10 +119,6 @@ spec:
       value: prod-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_TOPIC
       value: oppgavehandtering.oppgavehendelse-v1
-    - name: SMREGISTRERING_URL
-      value: http://smregistrering-backend
-    - name: SMREGISTRERING_CLIENT_ID
-      value: prod-gcp.teamsykmelding.smregistrering-backend
     - name: HELSENETT_URL
       value: http://syfohelsenettproxy
     - name: HELSENETT_CLIENT_ID

@@ -50,7 +50,7 @@ class NasjonalFerdigstillingsService(
         val oppgaveId = lokalOppgave.oppgaveId
         val loggingMeta = getLoggingMeta(lokalOppgave.sykmeldingId, lokalOppgave)
         requireNotNull(lokalOppgave.oppgaveId)
-        val sykmelder = sykmelderService.getSykmelderForAvvistOppgave(lokalOppgave.papirSmRegistrering?.behandler?.hpr, lokalOppgave.sykmeldingId, lokalOppgave.oppgaveId)
+        val sykmelder = sykmelderService.getSykmelderForAvvistOppgave(lokalOppgave.papirSmRegistrering.behandler?.hpr, lokalOppgave.sykmeldingId, lokalOppgave.oppgaveId)
 
 
         requireNotNull(lokalOppgave.fnr)
@@ -67,7 +67,7 @@ class NasjonalFerdigstillingsService(
                 avvist = true,
                 oppgave = eksternOppgave,
             )
-        journalpostService.ferdigstillNasjonalJournalpost(ferdigstillRegistrering, lokalOppgave.papirSmRegistrering?.perioder, loggingMeta)
+        journalpostService.ferdigstillNasjonalJournalpost(ferdigstillRegistrering, lokalOppgave.papirSmRegistrering.perioder, loggingMeta)
         ferdigstillOppgave(
             ferdigstillRegistrering = ferdigstillRegistrering,
             beskrivelse = lagAvvisOppgavebeskrivelse(

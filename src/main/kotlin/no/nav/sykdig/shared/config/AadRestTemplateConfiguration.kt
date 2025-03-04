@@ -104,19 +104,6 @@ class AadRestTemplateConfiguration {
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
 
-    @Bean
-    fun smregisteringRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
-        clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate {
-        return downstreamRestTemplate(
-            registrationName = "onbehalfof-smreg",
-            restTemplateBuilder = restTemplateBuilder,
-            clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
-        )
-    }
 
     private fun downstreamRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
