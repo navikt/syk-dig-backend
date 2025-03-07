@@ -1,0 +1,17 @@
+type ValidationResult {
+    status: Status!
+    ruleHits: [RuleInfo!]!
+}
+
+type RuleInfo {
+    ruleName: String!
+    messageForSender: String!
+    messageForUser: String!
+    ruleStatus: Status!
+}
+
+enum Status {
+    OK
+    MANUAL_PROCESSING
+    INVALID
+}
