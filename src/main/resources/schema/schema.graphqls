@@ -11,7 +11,6 @@ type Query {
 }
 
 type Mutation {
-
     lagre(
         oppgaveId: String!
         enhetId: String!
@@ -46,4 +45,11 @@ type Mutation {
         enhetId: String!
         values: SykmeldingUnderArbeidValues!
     ): OppdatertSykmeldingStatus
+
+    lagreNasjonalOppgave(
+        oppgaveId: String!
+        navEnhet: String!
+        sykmeldingValues: NasjonalSykmeldingValues!
+        status: SykmeldingUnderArbeidStatus
+    ): LagreOppgaveResult
 }

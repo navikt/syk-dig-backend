@@ -15,7 +15,7 @@ const val HPR_GODKJENNING_KODE = 7704
 @Service
 class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
     val log = applog()
-    fun validerNasjonalSykmelding(receivedSykmelding: ReceivedSykmelding, smRegistreringManuell: SmRegistreringManuell, sykmeldingId: String, loggingMeta: LoggingMeta, oppgaveId: Int?, sykmelder: Sykmelder): ValidationResult {
+    fun validerNasjonalSykmelding(receivedSykmelding: ReceivedSykmelding, smRegistreringManuell: SmRegistreringManuell, sykmeldingId: String, loggingMeta: LoggingMeta, oppgaveId: String, sykmelder: Sykmelder): ValidationResult {
         val validationResult = regelClient.valider(receivedSykmelding, sykmeldingId)
         log.info(
             "Resultat: {}, {}, {}",
@@ -30,7 +30,7 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
     }
 
     fun checkValidState(
-        oppgaveId: Int?,
+        oppgaveId: String,
         smRegistreringManuell: SmRegistreringManuell,
         sykmelder: Sykmelder,
         validationResult: ValidationResult,
