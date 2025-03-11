@@ -46,7 +46,7 @@ class NasjonalOppgaveService(
         logger.info("Behandler manuell papirsykmelding fra kafka for sykmeldingId: {}", StructuredArguments.fields(loggingMeta))
         metricRegister.incoming_message_counter.increment()
 
-        val eksisterendeOppgave = getOppgaveBySykmeldingId(papirSmRegistering.sykmeldingId, "")
+        val eksisterendeOppgave = findBySykmeldingId(papirSmRegistering.sykmeldingId)
         if (eksisterendeOppgave != null) {
             logger.warn(
                 "Papirsykmelding med sykmeldingId {} er allerede lagret i databasen. Ingen ny oppgave opprettes.",
@@ -152,32 +152,15 @@ class NasjonalOppgaveService(
     }
 
     fun findBySykmeldingId(sykmeldingId: String): NasjonalManuellOppgaveDAO? {
-        val oppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId) ?: return null
+        val oppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
+
+        if (oppgave == null) {
+            log.info("Fant ingen sykmelding med sykmeldingId $sykmeldingId")
+            return null
+        }
+        log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
+        securelog.info("hentet nasjonalOppgave fra db $oppgave")
         return oppgave
-    }
-
-    fun getOppgaveBySykmeldingIdSmreg(sykmeldingId: String): NasjonalManuellOppgaveDAO? {
-        val sykmelding = findBySykmeldingId(sykmeldingId)
-
-        if (sykmelding != null) {
-            log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
-            securelog.info("hentet nasjonalOppgave fra db $sykmelding")
-            return sykmelding
-        }
-        log.info(
-            "Fant ingen ferdigstilte sykmeldinger med sykmeldingId $sykmeldingId",
-        )
-        return null
-    }
-
-    fun getOppgaveBySykmeldingId(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {
-        val sykmelding = findBySykmeldingId(sykmeldingId)
-        if (sykmelding != null) {
-            log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
-            securelog.info("hentet nasjonalOppgave fra db $sykmelding")
-            return sykmelding
-        }
-        return null
     }
 
     fun getOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO? {

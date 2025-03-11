@@ -49,7 +49,7 @@ class NasjonalOppgaveDataFetcher(
     @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, '/dgs/nasjonal/sykmelding/{sykmeldingId}/ferdigstilt')")
     @DgsQuery(field = DgsConstants.QUERY.NasjonalFerdigstiltOppgave)
     fun getFerdigstiltNasjonalOppgave(@InputArgument sykmeldingId: String, dfe: DataFetchingEnvironment): NasjonalSykmeldingResult? {
-        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSmreg(sykmeldingId)
+        val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId)
         if (oppgave != null) {
             if (!oppgave.ferdigstilt) {
                 log.info("Oppgave med sykmeldingId $sykmeldingId er ikke ferdigstilt")

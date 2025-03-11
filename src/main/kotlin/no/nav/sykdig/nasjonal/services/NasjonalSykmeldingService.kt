@@ -45,7 +45,7 @@ class NasjonalSykmeldingService(
     val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     suspend fun korrigerSykmelding(sykmeldingId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell): ResponseEntity<Any> {
-        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSmreg(sykmeldingId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         log.info("Forsøker å korriger sykmelding med sykmeldingId $sykmeldingId og oppgaveId ${oppgave.oppgaveId}")
         return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave)
     }
