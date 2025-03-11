@@ -438,7 +438,7 @@ class DokarkivClient(
 
     private fun getAvsenderMottakerRequest(sykmelder: Sykmelder): AvsenderMottakerRequest {
         return AvsenderMottakerRequest(
-            id = padHpr(sykmelder.hprNummer),
+            id = padHpr(sykmelder.hprNummer) ?: " ",
             navn = finnNavn(sykmelder),
             land = null,
             idType = IdType.HPRNR,
