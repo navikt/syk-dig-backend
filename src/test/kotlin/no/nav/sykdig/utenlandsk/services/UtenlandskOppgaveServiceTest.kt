@@ -35,9 +35,6 @@ import java.util.UUID
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 class UtenlandskOppgaveServiceTest : IntegrationTest() {
     @Autowired
-    lateinit var sykDigOppgaveService: SykDigOppgaveService
-
-    @Autowired
     lateinit var journalpostSykmeldingRepository: JournalpostSykmeldingRepository
 
     @MockitoBean

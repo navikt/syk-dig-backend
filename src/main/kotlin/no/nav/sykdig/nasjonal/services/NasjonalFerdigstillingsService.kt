@@ -11,7 +11,6 @@ import no.nav.sykdig.nasjonal.models.Veileder
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.gosys.GosysService
 import no.nav.sykdig.utenlandsk.services.JournalpostService
-import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.shared.utils.getLoggingMeta
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -27,8 +26,6 @@ class NasjonalFerdigstillingsService(
 ) {
 
     val log = applog()
-    val securelog = securelog()
-
 
     suspend fun ferdigstillOppgave(
         ferdigstillRegistrering: FerdigstillRegistrering,

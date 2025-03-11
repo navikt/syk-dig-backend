@@ -14,7 +14,6 @@ import no.nav.sykdig.generated.types.NasjonalSykmeldingStatus
 import no.nav.sykdig.generated.types.NasjonalOppdatertSykmeldingStatusEnum
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.securelog
 import org.springframework.security.access.prepost.PostAuthorize
 
 
@@ -25,7 +24,6 @@ class NasjonalOppgaveDataFetcher(
 
     companion object {
         val log = applog()
-        val securelog = securelog()
     }
 
     @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/dgs/nasjonal/oppgave/{oppgaveId}')")

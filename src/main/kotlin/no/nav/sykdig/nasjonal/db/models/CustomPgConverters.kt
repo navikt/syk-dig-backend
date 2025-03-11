@@ -1,9 +1,7 @@
 package no.nav.sykdig.nasjonal.db.models
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.shared.*
 import org.postgresql.util.PGobject
@@ -14,11 +12,8 @@ import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
 import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
 import java.sql.Timestamp
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import kotlin.math.log
-
 
 @ReadingConverter
 class OffsetDateTimeReadingConverter : Converter<Any, OffsetDateTime> {
