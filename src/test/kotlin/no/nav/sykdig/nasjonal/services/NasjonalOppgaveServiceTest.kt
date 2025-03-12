@@ -48,7 +48,6 @@ import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.support.RestGatewaySupport
 import reactor.core.publisher.Mono
 import java.time.LocalDate
@@ -85,7 +84,6 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
     @MockitoBean
     lateinit var nasjonalFerdigstillingService: NasjonalFerdigstillingsService
-
 
     @BeforeEach
     fun setUp() = runBlocking {
@@ -207,7 +205,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
     private fun testDataOppgaveDbModel(oppgaveId: String): OppgaveDbModel {
         return OppgaveDbModel(
-            oppgaveId = oppgaveId.toString(),
+            oppgaveId = oppgaveId,
             fnr = "fnr",
             journalpostId = "jpdId",
             dokumentInfoId = "DokInfoId",

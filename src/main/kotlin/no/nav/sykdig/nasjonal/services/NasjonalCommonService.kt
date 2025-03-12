@@ -18,7 +18,6 @@ import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.utenlandsk.models.Merknad
 import no.nav.sykdig.shared.ReceivedSykmelding
-import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.shared.utils.getLocalDateTime
 import no.nav.sykdig.shared.utils.mapsmRegistreringManuelltTilFellesformat
 import org.springframework.security.core.context.SecurityContextHolder
@@ -32,8 +31,6 @@ class NasjonalCommonService(
 ) {
 
     val log = applog()
-    val securelog = securelog()
-
 
     suspend fun createReceivedSykmelding(sykmeldingId: String, oppgave: NasjonalManuellOppgaveDAO, loggingMeta: LoggingMeta, smRegistreringManuell: SmRegistreringManuell, callId: String, sykmelder: Sykmelder): ReceivedSykmelding {
         log.info("Henter pasient fra PDL {} ", loggingMeta)

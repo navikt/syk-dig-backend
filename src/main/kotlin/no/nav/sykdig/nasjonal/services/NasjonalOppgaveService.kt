@@ -46,7 +46,7 @@ class NasjonalOppgaveService(
         logger.info("Behandler manuell papirsykmelding fra kafka for sykmeldingId: {}", StructuredArguments.fields(loggingMeta))
         metricRegister.incoming_message_counter.increment()
 
-        val eksisterendeOppgave = getOppgaveBySykmeldingId(papirSmRegistering.sykmeldingId, "")
+        val eksisterendeOppgave = findBySykmeldingId(papirSmRegistering.sykmeldingId)
         if (eksisterendeOppgave != null) {
             logger.warn(
                 "Papirsykmelding med sykmeldingId {} er allerede lagret i databasen. Ingen ny oppgave opprettes.",
@@ -152,32 +152,15 @@ class NasjonalOppgaveService(
     }
 
     fun findBySykmeldingId(sykmeldingId: String): NasjonalManuellOppgaveDAO? {
-        val oppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId) ?: return null
+        val oppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
+
+        if (oppgave == null) {
+            log.info("Fant ingen sykmelding med sykmeldingId $sykmeldingId")
+            return null
+        }
+        log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
+        securelog.info("hentet nasjonalOppgave fra db $oppgave")
         return oppgave
-    }
-
-    fun getOppgaveBySykmeldingIdSmreg(sykmeldingId: String): NasjonalManuellOppgaveDAO? {
-        val sykmelding = findBySykmeldingId(sykmeldingId)
-
-        if (sykmelding != null) {
-            log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
-            securelog.info("hentet nasjonalOppgave fra db $sykmelding")
-            return sykmelding
-        }
-        log.info(
-            "Fant ingen ferdigstilte sykmeldinger med sykmeldingId $sykmeldingId",
-        )
-        return null
-    }
-
-    fun getOppgaveBySykmeldingId(sykmeldingId: String, authorization: String): NasjonalManuellOppgaveDAO? {
-        val sykmelding = findBySykmeldingId(sykmeldingId)
-        if (sykmelding != null) {
-            log.info("papirsykmelding: henter sykmelding med id $sykmeldingId fra syk-dig-db")
-            securelog.info("hentet nasjonalOppgave fra db $sykmelding")
-            return sykmelding
-        }
-        return null
     }
 
     fun getOppgave(oppgaveId: String): NasjonalManuellOppgaveDAO? {
@@ -259,31 +242,7 @@ class NasjonalOppgaveService(
                 datoOpprettet = papirSmRegistering.datoOpprettet,
                 oppgaveId = papirManuellOppgave.oppgaveid,
                 ferdigstilt = ferdigstilt,
-                papirSmRegistrering =
-                    PapirSmRegistering(
-                        journalpostId = papirSmRegistering.journalpostId,
-                        oppgaveId = papirSmRegistering.oppgaveId,
-                        fnr = papirSmRegistering.fnr,
-                        aktorId = papirSmRegistering.aktorId,
-                        dokumentInfoId = papirSmRegistering.dokumentInfoId,
-                        datoOpprettet = papirSmRegistering.datoOpprettet,
-                        sykmeldingId = papirSmRegistering.sykmeldingId,
-                        syketilfelleStartDato = papirSmRegistering.syketilfelleStartDato,
-                        arbeidsgiver = papirSmRegistering.arbeidsgiver,
-                        medisinskVurdering = papirSmRegistering.medisinskVurdering,
-                        skjermesForPasient = papirSmRegistering.skjermesForPasient,
-                        perioder = papirSmRegistering.perioder,
-                        prognose = papirSmRegistering.prognose,
-                        utdypendeOpplysninger = papirSmRegistering.utdypendeOpplysninger,
-                        tiltakNAV = papirSmRegistering.tiltakNAV,
-                        tiltakArbeidsplassen = papirSmRegistering.tiltakArbeidsplassen,
-                        andreTiltak = papirSmRegistering.andreTiltak,
-                        meldingTilNAV = papirSmRegistering.meldingTilNAV,
-                        meldingTilArbeidsgiver = papirSmRegistering.meldingTilArbeidsgiver,
-                        kontaktMedPasient = papirSmRegistering.kontaktMedPasient,
-                        behandletTidspunkt = papirSmRegistering.behandletTidspunkt,
-                        behandler = papirSmRegistering.behandler,
-                    ),
+                papirSmRegistrering = mapToPapirSmRegistering(papirSmRegistering),
                 utfall = null,
                 ferdigstiltAv = null,
                 datoFerdigstilt = null,
@@ -310,32 +269,36 @@ class NasjonalOppgaveService(
             sykmeldingId = nasjonalManuellOppgaveDAO.sykmeldingId,
             fnr = nasjonalManuellOppgaveDAO.fnr,
             oppgaveid = nasjonalManuellOppgaveDAO.oppgaveId,
-            papirSmRegistering = PapirSmRegistering(
-                journalpostId = papirSmRegistering.journalpostId,
-                oppgaveId = papirSmRegistering.oppgaveId,
-                fnr = papirSmRegistering.fnr,
-                aktorId = papirSmRegistering.aktorId,
-                dokumentInfoId = papirSmRegistering.dokumentInfoId,
-                datoOpprettet = papirSmRegistering.datoOpprettet,
-                sykmeldingId = papirSmRegistering.sykmeldingId,
-                syketilfelleStartDato = papirSmRegistering.syketilfelleStartDato,
-                arbeidsgiver = papirSmRegistering.arbeidsgiver,
-                medisinskVurdering = papirSmRegistering.medisinskVurdering,
-                skjermesForPasient = papirSmRegistering.skjermesForPasient,
-                perioder = papirSmRegistering.perioder,
-                prognose = papirSmRegistering.prognose,
-                utdypendeOpplysninger = papirSmRegistering.utdypendeOpplysninger,
-                tiltakNAV = papirSmRegistering.tiltakNAV,
-                tiltakArbeidsplassen = papirSmRegistering.tiltakArbeidsplassen,
-                andreTiltak = papirSmRegistering.andreTiltak,
-                meldingTilNAV = papirSmRegistering.meldingTilNAV,
-                meldingTilArbeidsgiver = papirSmRegistering.meldingTilArbeidsgiver,
-                kontaktMedPasient = papirSmRegistering.kontaktMedPasient,
-                behandletTidspunkt = papirSmRegistering.behandletTidspunkt,
-                behandler = papirSmRegistering.behandler,
-            ),
+            papirSmRegistering = mapToPapirSmRegistering(papirSmRegistering),
             pdfPapirSykmelding = byteArrayOf(),
             documents = listOf(Document(dokumentInfoId = nasjonalManuellOppgaveDAO.dokumentInfoId, tittel = "papirsykmelding")),
+        )
+    }
+
+    fun mapToPapirSmRegistering(papirSmRegistering: PapirSmRegistering): PapirSmRegistering {
+        return PapirSmRegistering(
+            journalpostId = papirSmRegistering.journalpostId,
+            oppgaveId = papirSmRegistering.oppgaveId,
+            fnr = papirSmRegistering.fnr,
+            aktorId = papirSmRegistering.aktorId,
+            dokumentInfoId = papirSmRegistering.dokumentInfoId,
+            datoOpprettet = papirSmRegistering.datoOpprettet,
+            sykmeldingId = papirSmRegistering.sykmeldingId,
+            syketilfelleStartDato = papirSmRegistering.syketilfelleStartDato,
+            arbeidsgiver = papirSmRegistering.arbeidsgiver,
+            medisinskVurdering = papirSmRegistering.medisinskVurdering,
+            skjermesForPasient = papirSmRegistering.skjermesForPasient,
+            perioder = papirSmRegistering.perioder,
+            prognose = papirSmRegistering.prognose,
+            utdypendeOpplysninger = papirSmRegistering.utdypendeOpplysninger,
+            tiltakNAV = papirSmRegistering.tiltakNAV,
+            tiltakArbeidsplassen = papirSmRegistering.tiltakArbeidsplassen,
+            andreTiltak = papirSmRegistering.andreTiltak,
+            meldingTilNAV = papirSmRegistering.meldingTilNAV,
+            meldingTilArbeidsgiver = papirSmRegistering.meldingTilArbeidsgiver,
+            kontaktMedPasient = papirSmRegistering.kontaktMedPasient,
+            behandletTidspunkt = papirSmRegistering.behandletTidspunkt,
+            behandler = papirSmRegistering.behandler,
         )
     }
 

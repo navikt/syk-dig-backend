@@ -45,7 +45,7 @@ class NasjonalSykmeldingService(
     val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     suspend fun korrigerSykmelding(sykmeldingId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell): ResponseEntity<Any> {
-        val oppgave = nasjonalOppgaveService.getOppgaveBySykmeldingIdSmreg(sykmeldingId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         log.info("Forsøker å korriger sykmelding med sykmeldingId $sykmeldingId og oppgaveId ${oppgave.oppgaveId}")
         return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave)
     }
@@ -93,7 +93,7 @@ class NasjonalSykmeldingService(
             return handleBrokenRule(validationResult, oppgave.oppgaveId)
         }
 
-        return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta, null, smRegistreringManuell)
+        return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta, smRegistreringManuell)
     }
 
     private suspend fun handleOK(
@@ -101,7 +101,6 @@ class NasjonalSykmeldingService(
         receivedSykmelding: ReceivedSykmelding,
         ferdigstillRegistrering: FerdigstillRegistrering,
         loggingMeta: LoggingMeta,
-        avvisningsgrunn: String?,
         smRegistreringManuell: SmRegistreringManuell,
     ): ResponseEntity<Any> {
         if (validationResult.status == Status.OK || validationResult.status == Status.MANUAL_PROCESSING) {
@@ -125,7 +124,7 @@ class NasjonalSykmeldingService(
                 sykmeldingId = receivedSykmelding.sykmelding.id,
                 utfall = validationResult.status.toString(),
                 ferdigstiltAv = veileder.veilederIdent,
-                avvisningsgrunn = avvisningsgrunn,
+                avvisningsgrunn = null,
                 smRegistreringManuell = smRegistreringManuell,
             )
             log.info("Ferdigstilt papirsykmelding med sykmelding id ${receivedSykmelding.sykmelding.id}")

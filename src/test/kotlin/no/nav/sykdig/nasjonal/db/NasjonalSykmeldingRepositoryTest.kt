@@ -74,24 +74,4 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
             )
         return sykmelding
     }
-
-    fun perioderTestData(): List<Periode> {
-        return listOf(
-            Periode(
-            fom = LocalDate.now(),
-            tom = LocalDate.now().plusDays(3),
-            aktivitetIkkeMulig = AktivitetIkkeMulig(
-                medisinskArsak = null,
-                arbeidsrelatertArsak = ArbeidsrelatertArsak(
-                    beskrivelse = "Datt i trappa",
-                    arsak = listOf(ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING)
-                )
-            ),
-            avventendeInnspillTilArbeidsgiver = null,
-            behandlingsdager = null,
-            gradert = null,
-            reisetilskudd = false
-        )
-        )
-    }
 }
