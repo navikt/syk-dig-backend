@@ -4,6 +4,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.sykdig.generated.types.NasjonalOppgaveStatus
+import no.nav.sykdig.generated.types.NasjonalOppgaveStatusEnum
+import no.nav.sykdig.generated.types.LagreSykmeldingResult
+import no.nav.sykdig.generated.types.ValidationResult
+import no.nav.sykdig.generated.types.Status
+import no.nav.sykdig.generated.types.RuleInfo
 import no.nav.sykdig.nasjonal.db.NasjonalSykmeldingRepository
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.nasjonal.db.models.NasjonalSykmeldingDAO
@@ -14,8 +20,6 @@ import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.nasjonal.models.Veileder
 import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.shared.ReceivedSykmelding
-import no.nav.sykdig.shared.Status
-import no.nav.sykdig.shared.ValidationResult
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.config.kafka.OK_SYKMELDING_TOPIC
 import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
@@ -44,12 +48,78 @@ class NasjonalSykmeldingService(
     val securelog = securelog()
     val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
+    suspend fun korrigerSykmeldingMedOppgaveId(oppgaveId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell): LagreSykmeldingResult {
+        val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId) ?: return NasjonalOppgaveStatus(
+            oppgaveId,
+            status = NasjonalOppgaveStatusEnum.FINNES_IKKE,
+        )
+        log.info("Forsøker å korrigere sykmelding med oppgaveId $oppgaveId, graphql")
+        return sendPapirsykmeldingGraphql(papirSykmelding, navEnhet, callId, oppgave, oppgaveId)
+    }
+
+    suspend fun sendPapirsykmeldingOppgaveGraphql(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): LagreSykmeldingResult {
+        securelog.info("sender papirsykmelding med oppgaveId $oppgaveId {}", kv("smregistreringManuell", objectMapper.writeValueAsString(papirSykmelding)))
+        val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId) ?: return NasjonalOppgaveStatus(
+            oppgaveId,
+            status = NasjonalOppgaveStatusEnum.FINNES_IKKE,
+        )
+        if (oppgave.ferdigstilt) {
+            log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
+            return NasjonalOppgaveStatus(
+                oppgaveId,
+                status = NasjonalOppgaveStatusEnum.FERDIGSTILT,
+            )
+        }
+        log.info("Forsøker å sende inn papirsykmelding med sykmeldingId ${oppgave.sykmeldingId} oppgaveId ${oppgave.oppgaveId}, graphql")
+        return sendPapirsykmeldingGraphql(papirSykmelding, navEnhet, callId, oppgave, oppgaveId)
+    }
+
+    suspend fun sendPapirsykmeldingGraphql(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgave: NasjonalManuellOppgaveDAO, oppgaveId: String): LagreSykmeldingResult {
+        val sykmeldingId = oppgave.sykmeldingId
+        log.info("Forsøker å ferdigstille papirsykmelding med sykmeldingId $sykmeldingId, graphql")
+
+        val loggingMeta = getLoggingMeta(sykmeldingId, oppgave)
+        val sykmelder = getSykmelder(smRegistreringManuell, loggingMeta, callId)
+        val receivedSykmelding = nasjonalCommonService.createReceivedSykmelding(sykmeldingId, oppgave, loggingMeta, smRegistreringManuell, callId, sykmelder)
+        securelog.info("sender oppgave med id $oppgaveId og navenhet $navEnhet og callId $callId og sykmelder $sykmelder")
+        val validationResult = nasjonalRegelvalideringService.validerNasjonalSykmelding(receivedSykmelding, smRegistreringManuell, sykmeldingId, loggingMeta, oppgaveId, sykmelder)
+
+        val dokumentInfoId = oppgave.dokumentInfoId
+        val journalpostId = oppgave.journalpostId
+
+        val ferdigstillRegistrering =
+            FerdigstillRegistrering(
+                oppgaveId = oppgave.oppgaveId,
+                journalpostId = journalpostId,
+                dokumentInfoId = dokumentInfoId,
+                pasientFnr = receivedSykmelding.personNrPasient,
+                sykmeldingId = sykmeldingId,
+                sykmelder = sykmelder,
+                navEnhet = navEnhet,
+                veileder = nasjonalCommonService.getNavIdent(),
+                avvist = false,
+                oppgave = null,
+            )
+
+        if (!validationResult.ruleHits.isWhitelisted()) {
+            return mapToValidationResult(handleBrokenRule(validationResult, oppgave.oppgaveId))
+        }
+
+        handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta, smRegistreringManuell)
+        return NasjonalOppgaveStatus(
+            oppgaveId,
+            status = NasjonalOppgaveStatusEnum.FERDIGSTILT,
+        )
+    }
+
+    //TODO: remove after merge
     suspend fun korrigerSykmelding(sykmeldingId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell): ResponseEntity<Any> {
         val oppgave = nasjonalOppgaveService.findBySykmeldingId(sykmeldingId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         log.info("Forsøker å korriger sykmelding med sykmeldingId $sykmeldingId og oppgaveId ${oppgave.oppgaveId}")
-        return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave)
+        return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgave.oppgaveId.toString())
     }
 
+    //TODO: remove after merge
     suspend fun sendPapirsykmeldingOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): ResponseEntity<Any> {
         securelog.info("sender papirsykmelding med oppgaveId $oppgaveId {}", kv("smregistreringManuell", objectMapper.writeValueAsString(papirSykmelding)))
         val oppgave = nasjonalOppgaveService.getOppgave(oppgaveId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
@@ -58,11 +128,11 @@ class NasjonalSykmeldingService(
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
         log.info("Forsøker å sende inn papirsykmelding med sykmeldingId ${oppgave.sykmeldingId} oppgaveId ${oppgave.oppgaveId}")
-        return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgaveId.toInt())
-
+        return sendPapirsykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgaveId)
     }
 
-    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgave: NasjonalManuellOppgaveDAO, oppgaveId: Int? = null): ResponseEntity<Any> {
+    //TODO: remove after merge
+    suspend fun sendPapirsykmelding(smRegistreringManuell: SmRegistreringManuell, navEnhet: String, callId: String, oppgave: NasjonalManuellOppgaveDAO, oppgaveId: String): ResponseEntity<Any> {
         val sykmeldingId = oppgave.sykmeldingId
         log.info("Forsøker å ferdigstille papirsykmelding med sykmeldingId $sykmeldingId")
 
@@ -90,20 +160,19 @@ class NasjonalSykmeldingService(
             )
 
         if (!validationResult.ruleHits.isWhitelisted()) {
-            return handleBrokenRule(validationResult, oppgave.oppgaveId)
+            return ResponseEntity.ok().body(handleBrokenRule(validationResult, oppgave.oppgaveId))
         }
-
-        return handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta, smRegistreringManuell)
+        return ResponseEntity.ok().body(handleOK(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta, smRegistreringManuell))
     }
 
-    private suspend fun handleOK(
-        validationResult: ValidationResult,
+    suspend fun handleOK(
+        validationResult: no.nav.sykdig.shared.ValidationResult,
         receivedSykmelding: ReceivedSykmelding,
         ferdigstillRegistrering: FerdigstillRegistrering,
         loggingMeta: LoggingMeta,
         smRegistreringManuell: SmRegistreringManuell,
-    ): ResponseEntity<Any> {
-        if (validationResult.status == Status.OK || validationResult.status == Status.MANUAL_PROCESSING) {
+    ): Unit? {
+        if (validationResult.status == no.nav.sykdig.shared.Status.OK || validationResult.status == no.nav.sykdig.shared.Status.MANUAL_PROCESSING) {
             val veileder = nasjonalCommonService.getNavIdent()
             log.info("oppgave er ok, skal ferdigstille i dokarkiv og oppgave {}", StructuredArguments.fields(loggingMeta))
             if (ferdigstillRegistrering.oppgaveId != null) {
@@ -128,12 +197,12 @@ class NasjonalSykmeldingService(
                 smRegistreringManuell = smRegistreringManuell,
             )
             log.info("Ferdigstilt papirsykmelding med sykmelding id ${receivedSykmelding.sykmelding.id}")
-            return ResponseEntity(HttpStatus.OK)
+            return null
         }
         log.error(
             "Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING",
         )
-        return ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
+        throw Exception("Ukjent status: ${validationResult.status}")
     }
 
     private fun insertSykmeldingAndSendToKafka(
@@ -168,28 +237,28 @@ class NasjonalSykmeldingService(
     }
 
     private fun handleBrokenRule(
-        validationResult: ValidationResult,
+        validationResult: no.nav.sykdig.shared.ValidationResult,
         oppgaveId: Int?,
-    ): ResponseEntity<Any> {
-        if (validationResult.status == Status.MANUAL_PROCESSING) {
+    ): no.nav.sykdig.shared.ValidationResult {
+        if (validationResult.status == no.nav.sykdig.shared.Status.MANUAL_PROCESSING) {
             log.info(
-                "Ferdigstilling av papirsykmeldinger manuell registering traff regel MANUAL_PROCESSING {}",
+                "Ferdigstilling av nasjonal sykmelding traff regel MANUAL_PROCESSING {}",
                 StructuredArguments.keyValue("oppgaveId", oppgaveId),
             )
-            return ResponseEntity.ok().body(validationResult)
+            return validationResult
         }
-        if (validationResult.status == Status.OK) {
+        if (validationResult.status == no.nav.sykdig.shared.Status.OK) {
             log.info(
-                "Ferdigstilling av papirsykmeldinger manuell registering traff regel OK {}",
+                "Ferdigstilling av nasjonal sykmelding traff regel OK {}",
                 StructuredArguments.keyValue("oppgaveId", oppgaveId),
             )
-            return ResponseEntity.ok().body(validationResult)
+            return validationResult
         }
-        log.error("Ukjent status: ${validationResult.status} , papirsykmeldinger manuell registering kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING")
-        return ResponseEntity.internalServerError().body("En uforutsett feil oppsto ved validering av oppgaven")
+        log.error("Ukjent status: ${validationResult.status}, nasjonal sykmelding kan kun ha ein av to typer statuser enten OK eller MANUAL_PROCESSING")
+        throw Exception("En uforutsett feil oppsto ved validering av oppgaven med oppgaveId: $oppgaveId")
     }
 
-    private suspend fun getSykmelder(smRegistreringManuell: SmRegistreringManuell, loggingMeta: LoggingMeta, callId: String): Sykmelder {
+    private fun getSykmelder(smRegistreringManuell: SmRegistreringManuell, loggingMeta: LoggingMeta, callId: String): Sykmelder {
         val sykmelderHpr = smRegistreringManuell.behandler.hpr
         if (sykmelderHpr.isNullOrEmpty() || sykmelderHpr.isBlank()) {
             log.error("HPR-nummer mangler {}", StructuredArguments.fields(loggingMeta))
@@ -203,7 +272,6 @@ class NasjonalSykmeldingService(
         )
         return sykmelder
     }
-
 
     fun deleteSykmelding(sykmeldingId: String): Int {
         return nasjonalSykmeldingRepository.deleteBySykmeldingId(sykmeldingId)
@@ -226,5 +294,31 @@ class NasjonalSykmeldingService(
                 datoFerdigstilt = datoFerdigstilt,
             )
         return nasjonalManuellOppgaveDAO
+    }
+
+    fun mapToValidationResult(validationResult: no.nav.sykdig.shared.ValidationResult): ValidationResult {
+        return ValidationResult(
+            status = mapToStatus(validationResult.status),
+            ruleHits = validationResult.ruleHits.map { mapToRuleInfo(it) }
+        )
+    }
+
+    fun mapToStatus(status: no.nav.sykdig.shared.Status): Status {
+        return when (status) {
+            no.nav.sykdig.shared.Status.MANUAL_PROCESSING -> Status.MANUAL_PROCESSING
+            no.nav.sykdig.shared.Status.OK -> Status.OK
+            no.nav.sykdig.shared.Status.INVALID -> Status.INVALID
+        }
+    }
+
+    fun mapToRuleInfo(
+        ruleInfo: no.nav.sykdig.shared.RuleInfo,
+    ): RuleInfo {
+        return RuleInfo(
+            ruleName = ruleInfo.ruleName,
+            messageForSender = ruleInfo.messageForSender,
+            messageForUser = ruleInfo.messageForUser,
+            ruleStatus = mapToStatus(ruleInfo.ruleStatus),
+        )
     }
 }

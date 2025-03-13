@@ -1,6 +1,7 @@
 package no.nav.sykdig.nasjonal.api
 
 import com.netflix.graphql.dgs.DgsComponent
+import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 import graphql.schema.DataFetchingEnvironment
@@ -12,14 +13,22 @@ import no.nav.sykdig.generated.types.NasjonalOppgaveStatusEnum
 import no.nav.sykdig.generated.types.NasjonalSykmeldingResult
 import no.nav.sykdig.generated.types.NasjonalSykmeldingStatus
 import no.nav.sykdig.generated.types.NasjonalOppdatertSykmeldingStatusEnum
+import no.nav.sykdig.generated.types.NasjonalSykmeldingValues
+import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
+import no.nav.sykdig.generated.types.LagreSykmeldingResult
+import no.nav.sykdig.nasjonal.mapping.mapToSmRegistreringManuell
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
+import no.nav.sykdig.nasjonal.services.NasjonalSykmeldingService
 import no.nav.sykdig.shared.applog
 import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.access.prepost.PreAuthorize
+import java.util.UUID
 
 
 @DgsComponent
 class NasjonalOppgaveDataFetcher(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
+    private val nasjonalSykmeldingService: NasjonalSykmeldingService
 ) {
 
     companion object {
@@ -59,5 +68,50 @@ class NasjonalOppgaveDataFetcher(
             return mapToNasjonalOppgave(oppgave)
         }
         return NasjonalSykmeldingStatus(sykmeldingId, NasjonalOppdatertSykmeldingStatusEnum.FINNES_IKKE)
+    }
+
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/dgs/nasjonal/oppgave/{oppgaveId}/lagre')")
+    @DgsMutation(field = DgsConstants.MUTATION.LagreNasjonalOppgave)
+    suspend fun lagreNasjonalOppgave(
+        @InputArgument oppgaveId: String,
+        @InputArgument navEnhet: String,
+        @InputArgument sykmeldingValues: NasjonalSykmeldingValues,
+        @InputArgument status: SykmeldingUnderArbeidStatus,
+        dfe: DataFetchingEnvironment): LagreSykmeldingResult? {
+        val callId = UUID.randomUUID().toString()
+
+        when (status) {
+            SykmeldingUnderArbeidStatus.UNDER_ARBEID -> {
+                val uferdigSykmeldingValues = mapToSmRegistreringManuell(sykmeldingValues)
+                nasjonalSykmeldingService.sendPapirsykmeldingOppgaveGraphql(
+                    uferdigSykmeldingValues,
+                    navEnhet,
+                    callId,
+                    oppgaveId
+                )
+                log.info("Registrert nasjonal sykmelding med oppgaveId $oppgaveId")
+
+                return NasjonalOppgaveStatus(
+                    oppgaveId,
+                    status = NasjonalOppgaveStatusEnum.FERDIGSTILT,
+                )
+            }
+
+            SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
+                val ferdigstiltSykmeldingValues = mapToSmRegistreringManuell(sykmeldingValues)
+                nasjonalSykmeldingService.korrigerSykmeldingMedOppgaveId(
+                    oppgaveId,
+                    navEnhet,
+                    callId,
+                    ferdigstiltSykmeldingValues
+                )
+                log.info("Korrigert nasjonal sykmelding med oppgaveId $oppgaveId")
+
+                return NasjonalOppgaveStatus(
+                    oppgaveId, //sykmeldingId
+                    status = NasjonalOppgaveStatusEnum.FERDIGSTILT,
+                )
+            }
+        }
     }
 }
