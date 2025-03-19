@@ -43,7 +43,7 @@ class NasjonalOppgaveRepositoryTest : IntegrationTest() {
         nasjonalOppgaveRepository.save(testData(null, "3"))
         nasjonalOppgaveRepository.save(testData(null, "4"))
         val id = nasjonalOppgaveRepository.findBySykmeldingId("3")?.id
-        nasjonalOppgaveRepository.deleteById(id)
+        nasjonalOppgaveRepository.deleteById(id!!)
         assertEquals(null, nasjonalOppgaveRepository.findBySykmeldingId("3"))
         assertEquals("4", nasjonalOppgaveRepository.findBySykmeldingId("4")?.sykmeldingId)
     }
