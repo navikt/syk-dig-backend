@@ -1,4 +1,4 @@
-package no.nav.sykdig.nasjonal.services
+package no.nav.sykdig.nasjonal.mapping
 
 import no.nav.helse.msgHead.XMLMsgHead
 import no.nav.syfo.service.toSykmelding
@@ -25,7 +25,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service
 
 @Service
-class NasjonalCommonService(
+class NasjonalSykmeldingMapper(
     private val sykmelderService: SykmelderService,
     private val personService: PersonService,
 ) {

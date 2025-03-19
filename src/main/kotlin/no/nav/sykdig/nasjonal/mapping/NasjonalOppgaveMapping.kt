@@ -1,5 +1,7 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sykdig.generated.types.AktivitetIkkeMulig
 import no.nav.sykdig.generated.types.AnnenFraversArsak
 import no.nav.sykdig.generated.types.AnnenFraversArsakGrunn
@@ -18,10 +20,17 @@ import no.nav.sykdig.generated.types.MeldingTilNAV
 import no.nav.sykdig.generated.types.NasjonalOppgave
 import no.nav.sykdig.generated.types.NasjonalSykmelding
 import no.nav.sykdig.generated.types.Periode
+import no.nav.sykdig.nasjonal.api.NasjonalOppgaveDataFetcher.Companion.securelog
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.shared.AnnenFraverGrunn
-import no.nav.sykdig.shared.Diagnose
-import no.nav.sykdig.shared.MedisinskArsak
+import no.nav.sykdig.nasjonal.db.models.NasjonalSykmeldingDAO
+import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
+import no.nav.sykdig.nasjonal.models.PapirSmRegistering
+import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
+import no.nav.sykdig.nasjonal.models.Veileder
+import no.nav.sykdig.shared.*
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.util.*
 
 fun mapToNasjonalOppgave(oppgave: NasjonalManuellOppgaveDAO): NasjonalOppgave {
     requireNotNull(oppgave.dokumentInfoId)
@@ -212,4 +221,120 @@ fun mapToBehandler(behandler: no.nav.sykdig.shared.Behandler?): Behandler? {
         hpr = behandler.hpr,
         tlf = behandler.tlf,
     )
+}
+
+
+fun mapToUpdatedPapirSmRegistrering(existingOppgave: NasjonalManuellOppgaveDAO, smRegistreringManuell: SmRegistreringManuell?): PapirSmRegistering {
+    val updatedPapirSmRegistrering = existingOppgave.papirSmRegistrering.copy(
+        meldingTilArbeidsgiver = smRegistreringManuell?.meldingTilArbeidsgiver
+            ?: existingOppgave.papirSmRegistrering.meldingTilArbeidsgiver,
+        medisinskVurdering = smRegistreringManuell?.medisinskVurdering ?: existingOppgave.papirSmRegistrering.medisinskVurdering,
+        meldingTilNAV = smRegistreringManuell?.meldingTilNAV ?: existingOppgave.papirSmRegistrering.meldingTilNAV,
+        arbeidsgiver = smRegistreringManuell?.arbeidsgiver ?: existingOppgave.papirSmRegistrering.arbeidsgiver,
+        kontaktMedPasient = smRegistreringManuell?.kontaktMedPasient ?: existingOppgave.papirSmRegistrering.kontaktMedPasient,
+        perioder = smRegistreringManuell?.perioder ?: existingOppgave.papirSmRegistrering.perioder,
+        behandletTidspunkt = smRegistreringManuell?.behandletDato ?: existingOppgave.papirSmRegistrering.behandletTidspunkt,
+        syketilfelleStartDato = smRegistreringManuell?.syketilfelleStartDato ?: existingOppgave.papirSmRegistrering.syketilfelleStartDato,
+        behandler = smRegistreringManuell?.behandler ?: existingOppgave.papirSmRegistrering.behandler,
+        skjermesForPasient = smRegistreringManuell?.skjermesForPasient ?: existingOppgave.papirSmRegistrering.skjermesForPasient,
+    )
+
+    securelog.info("Updated papirSmRegistrering: $updatedPapirSmRegistrering to be saved in syk-dig-backend db nasjonal_manuellOppgave")
+    return updatedPapirSmRegistrering
+}
+
+
+fun mapToDaoOppgave(
+    papirManuellOppgave: PapirManuellOppgave,
+    existingId: UUID?,
+    ferdigstilt: Boolean = false,
+): NasjonalManuellOppgaveDAO {
+    securelog.info("Mapper til DAO: $papirManuellOppgave")
+
+    val papirSmRegistering = papirManuellOppgave.papirSmRegistering
+
+    val nasjonalManuellOppgaveDAO =
+        NasjonalManuellOppgaveDAO(
+            sykmeldingId = papirManuellOppgave.sykmeldingId,
+            journalpostId = papirSmRegistering.journalpostId,
+            fnr = papirManuellOppgave.fnr,
+            aktorId = papirSmRegistering.aktorId,
+            dokumentInfoId = papirSmRegistering.dokumentInfoId,
+            datoOpprettet = papirSmRegistering.datoOpprettet,
+            oppgaveId = papirManuellOppgave.oppgaveid,
+            ferdigstilt = ferdigstilt,
+            papirSmRegistrering = papirSmRegistering,
+            utfall = null,
+            ferdigstiltAv = null,
+            datoFerdigstilt = null,
+            avvisningsgrunn = null,
+        )
+
+    if (existingId != null) {
+        nasjonalManuellOppgaveDAO.apply {
+            id = existingId
+        }
+    }
+    return nasjonalManuellOppgaveDAO
+
+}
+
+fun mapFromDao(
+    nasjonalManuellOppgaveDAO: NasjonalManuellOppgaveDAO,
+): PapirManuellOppgave {
+    val papirSmRegistering = nasjonalManuellOppgaveDAO.papirSmRegistrering
+
+    requireNotNull(nasjonalManuellOppgaveDAO.oppgaveId)
+    requireNotNull(nasjonalManuellOppgaveDAO.dokumentInfoId)
+    return PapirManuellOppgave(
+        sykmeldingId = nasjonalManuellOppgaveDAO.sykmeldingId,
+        fnr = nasjonalManuellOppgaveDAO.fnr,
+        oppgaveid = nasjonalManuellOppgaveDAO.oppgaveId,
+        papirSmRegistering = papirSmRegistering,
+        pdfPapirSykmelding = byteArrayOf(),
+        documents = listOf(no.nav.sykdig.nasjonal.models.Document(dokumentInfoId = nasjonalManuellOppgaveDAO.dokumentInfoId, tittel = "papirsykmelding")),
+    )
+}
+
+
+
+fun mapToDaoSykmelding(
+    receivedSykmelding: ReceivedSykmelding,
+    veileder: Veileder,
+    datoFerdigstilt: OffsetDateTime? = OffsetDateTime.now(ZoneOffset.UTC),
+    timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
+): NasjonalSykmeldingDAO {
+    val mapper = jacksonObjectMapper()
+    mapper.registerModules(JavaTimeModule())
+    val nasjonalManuellOppgaveDAO =
+        NasjonalSykmeldingDAO(
+            sykmeldingId = receivedSykmelding.sykmelding.id,
+            sykmelding = Sykmelding(
+                id = receivedSykmelding.sykmelding.id,
+                msgId = receivedSykmelding.sykmelding.msgId,
+                pasientAktoerId = receivedSykmelding.sykmelding.pasientAktoerId,
+                medisinskVurdering = receivedSykmelding.sykmelding.medisinskVurdering,
+                skjermesForPasient = receivedSykmelding.sykmelding.skjermesForPasient,
+                arbeidsgiver = receivedSykmelding.sykmelding.arbeidsgiver,
+                perioder = receivedSykmelding.sykmelding.perioder,
+                prognose = receivedSykmelding.sykmelding.prognose,
+                utdypendeOpplysninger = receivedSykmelding.sykmelding.utdypendeOpplysninger,
+                tiltakArbeidsplassen = receivedSykmelding.sykmelding.tiltakArbeidsplassen,
+                tiltakNAV = receivedSykmelding.sykmelding.tiltakNAV,
+                andreTiltak = receivedSykmelding.sykmelding.andreTiltak,
+                meldingTilNAV = receivedSykmelding.sykmelding.meldingTilNAV,
+                meldingTilArbeidsgiver = receivedSykmelding.sykmelding.meldingTilArbeidsgiver,
+                kontaktMedPasient = receivedSykmelding.sykmelding.kontaktMedPasient,
+                behandletTidspunkt = receivedSykmelding.sykmelding.behandletTidspunkt,
+                behandler = receivedSykmelding.sykmelding.behandler,
+                avsenderSystem = receivedSykmelding.sykmelding.avsenderSystem,
+                syketilfelleStartDato = receivedSykmelding.sykmelding.syketilfelleStartDato,
+                signaturDato = receivedSykmelding.sykmelding.signaturDato,
+                navnFastlege = receivedSykmelding.sykmelding.navnFastlege,
+            ),
+            timestamp = timestamp,
+            ferdigstiltAv = veileder.veilederIdent,
+            datoFerdigstilt = datoFerdigstilt,
+        )
+    return nasjonalManuellOppgaveDAO
 }

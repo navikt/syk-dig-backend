@@ -6,7 +6,7 @@ import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.dokarkiv.DokarkivClient
 import no.nav.sykdig.shared.Periode
-import no.nav.sykdig.nasjonal.services.NasjonalCommonService
+import no.nav.sykdig.nasjonal.mapping.NasjonalSykmeldingMapper
 import no.nav.sykdig.nasjonal.models.FerdigstillRegistrering
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.saf.SafJournalpostService
@@ -33,7 +33,7 @@ class JournalpostService(
     private val metricRegister: MetricRegister,
     private val safJournalpostService: SafJournalpostService,
     private val dokarkivClient: DokarkivClient,
-    private val nasjonalCommonService: NasjonalCommonService,
+    private val nasjonalSykmeldingMapper: NasjonalSykmeldingMapper,
 ) {
     companion object {
         private val securelog = securelog()
@@ -76,7 +76,7 @@ class JournalpostService(
                 )
         val fnr = personService.getPerson(fnrEllerAktorId, journalpostId).fnr
         val aktorId = personService.getPerson(fnrEllerAktorId, journalpostId).aktorId
-        val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr, aktorId, nasjonalCommonService.getNavEmail())
+        val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr, aktorId, nasjonalSykmeldingMapper.getNavEmail())
 
         securelog.info(
             "oppretter sykmelding fra journalpost {} {} {} {}",

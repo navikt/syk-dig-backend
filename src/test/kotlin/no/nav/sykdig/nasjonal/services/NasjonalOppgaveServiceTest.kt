@@ -3,29 +3,28 @@ package no.nav.sykdig.nasjonal.services
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.dokarkiv.DocumentService
+import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.dokarkiv.DokarkivClient
-import no.nav.sykdig.gosys.OppgaveClient
+import no.nav.sykdig.dokarkiv.DocumentService
+import no.nav.sykdig.gosys.GosysService
 import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
-import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
-import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.nasjonal.models.Veileder
+import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.nasjonal.mapping.NasjonalSykmeldingMapper
+import no.nav.sykdig.nasjonal.util.testDataPapirManuellOppgave
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
-import no.nav.sykdig.saf.graphql.SafJournalpost
-import no.nav.sykdig.saf.graphql.SafQueryJournalpost
-import no.nav.sykdig.shared.Adresse
-import no.nav.sykdig.shared.Behandler
-import no.nav.sykdig.shared.LoggingMeta
+import no.nav.sykdig.saf.graphql.*
+import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.shared.utils.getLoggingMeta
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
-import okhttp3.internal.EMPTY_BYTE_ARRAY
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -58,11 +57,16 @@ import java.util.UUID
 class NasjonalOppgaveServiceTest : IntegrationTest() {
     @Autowired
     lateinit var nasjonalOppgaveService: NasjonalOppgaveService
+    @Autowired
+    lateinit var nasjonalDbService: NasjonalDbService
 
     val mapper = jacksonObjectMapper()
 
     @MockitoBean
     lateinit var personService: PersonService
+
+    @MockitoBean
+    lateinit var gosysService: GosysService
 
     @MockitoBean
     lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
@@ -80,10 +84,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     lateinit var documentService: DocumentService
 
     @MockitoBean
-    lateinit var nasjonaCommonService: NasjonalCommonService
-
-    @MockitoBean
-    lateinit var nasjonalFerdigstillingService: NasjonalFerdigstillingsService
+    lateinit var nasjonalSykmeldingMapper: NasjonalSykmeldingMapper
 
     @BeforeEach
     fun setUp() = runBlocking {
@@ -102,10 +103,10 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     fun `avvis oppgave blir oppdatert og lagra i DB`() = runBlocking {
         val oppgaveId = "123"
         val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
-        val originalOppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
+        val originalOppgave = nasjonalDbService.saveOppgave(testDataPapirManuellOppgave(123))
 
-        Mockito.`when`(nasjonaCommonService.getNavEmail()).thenReturn("navEmail")
-        Mockito.`when`(nasjonaCommonService.getNavIdent()).thenReturn(Veileder("navIdent"))
+        Mockito.`when`(nasjonalSykmeldingMapper.getNavEmail()).thenReturn("navEmail")
+        Mockito.`when`(nasjonalSykmeldingMapper.getNavIdent()).thenReturn(Veileder("navIdent"))
 
         Mockito.`when`(personService.getPerson(anyString(), anyString())).thenReturn(testDataPerson())
 
@@ -126,9 +127,9 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         val loggingMeta = getLoggingMeta("sykmeldingId", testDataOppgaveDbModel("oppgaveId"))
         assertEquals(testDataLoggingMeta(), loggingMeta)
         Mockito.`when`(sykmelderService.getSykmelderForAvvistOppgave(any(),any(),any())).thenReturn(testDataSykmelder())
-        Mockito.`when`(safJournalpostGraphQlClient.getJournalpostM2m(any())).thenReturn(
-            SafQueryJournalpost(
-                SafJournalpost("tittel", null, null, null, emptyList(), null, null)
+        Mockito.`when`(safJournalpostGraphQlClient.getJournalpostNasjonal(any())).thenReturn(
+            SafQueryJournalpostNasjonal(
+                SafJournalpostNasjonal(Journalstatus.MOTTATT)
             )
         )
         Mockito.`when`(oppgaveClient.getNasjonalOppgave(any(), any())).thenReturn(NasjonalOppgaveResponse(prioritet = "", aktivDato = LocalDate.now(), oppgavetype = ""))
@@ -139,69 +140,6 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
         assertEquals(avvistOppgave.statusCode, HttpStatus.NO_CONTENT)
     }
 
-
-    @Test
-    fun `mapToDao der id er null`() {
-        val dao = nasjonalOppgaveService.mapToDao(testDataPapirManuellOppgave(), null)
-
-        assertEquals("123", dao.sykmeldingId)
-        assertEquals(null, dao.id)
-    }
-
-    @Test
-    fun `mapToDao der id ikke er null`() {
-        val uuid = UUID.randomUUID()
-        val dao = nasjonalOppgaveService.mapToDao(testDataPapirManuellOppgave(), uuid)
-
-        assertEquals("123", dao.sykmeldingId)
-        assertEquals(uuid, dao.id)
-    }
-
-    @Test
-    fun `oppgave blir lagret`() = runBlocking {
-        val uuid = UUID.randomUUID()
-        val dao = testDataNasjonalManuellOppgaveDAO(uuid, "123", 123)
-        val oppgave = nasjonalOppgaveService.lagreOppgave(testDataPapirManuellOppgave())
-
-        assertEquals(oppgave.sykmeldingId, dao.sykmeldingId)
-        val res = nasjonalOppgaveRepository.findBySykmeldingId(oppgave.sykmeldingId)
-        println(res)
-    }
-
-    fun testDataPapirManuellOppgave(): PapirManuellOppgave {
-        return PapirManuellOppgave(
-            sykmeldingId = "123",
-            fnr = "fnr",
-            oppgaveid = 123,
-            pdfPapirSykmelding = EMPTY_BYTE_ARRAY,
-            papirSmRegistering =
-            PapirSmRegistering(
-                journalpostId = "123",
-                oppgaveId = "123",
-                fnr = "fnr",
-                aktorId = "aktor",
-                dokumentInfoId = "123",
-                datoOpprettet = OffsetDateTime.now(),
-                sykmeldingId = "123",
-                syketilfelleStartDato = LocalDate.now(),
-                arbeidsgiver = null,
-                medisinskVurdering = null,
-                skjermesForPasient = null,
-                perioder = null,
-                prognose = null,
-                utdypendeOpplysninger = null,
-                tiltakNAV = null,
-                tiltakArbeidsplassen = null,
-                andreTiltak = null,
-                meldingTilNAV = null,
-                meldingTilArbeidsgiver = null,
-                kontaktMedPasient = null,
-                behandletTidspunkt = null,
-                behandler = Behandler("fornavn", "mellomnavn", "etternavn", "", "", "", null, Adresse(null, null, null, null, null), null),
-            ),
-            documents = emptyList(),
-        )
-    }
 
     private fun testDataOppgaveDbModel(oppgaveId: String): OppgaveDbModel {
         return OppgaveDbModel(

@@ -10,7 +10,7 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
@@ -43,7 +43,7 @@ abstract class IntegrationTest {
     companion object {
         init {
 
-            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0")).also {
+            ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0")).also {
                 it.start()
                 System.setProperty("KAFKA_BROKERS", it.bootstrapServers)
             }

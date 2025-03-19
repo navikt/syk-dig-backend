@@ -6,6 +6,9 @@ import no.nav.helse.eiFellesformat.XMLEIFellesformat
 import no.nav.helse.msgHead.XMLMsgHead
 import no.nav.helse.sm2013.HelseOpplysningerArbeidsuforhet
 import no.nav.syfo.service.toSykmelding
+import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
+import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
+import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.pdl.Navn
@@ -13,7 +16,11 @@ import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.shared.*
 import no.nav.sykdig.shared.utils.getLocalDateTime
 import no.nav.sykdig.shared.utils.mapsmRegistreringManuelltTilFellesformat
+import no.nav.sykdig.utils.TestHelper.Companion.januar
+import okhttp3.internal.EMPTY_BYTE_ARRAY
 import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.util.UUID
 
 fun getXmleiFellesformat(
     smRegistreringManuell: SmRegistreringManuell,
@@ -127,6 +134,80 @@ fun getSmRegistreringManuell(
                 ""
             ),
         harUtdypendeOpplysninger = harUtdypendeOpplysninger,
+    )
+}
+
+
+fun testDataPapirManuellOppgave(oppgaveId: Int, perioder: List<Periode>? = null): PapirManuellOppgave {
+    return PapirManuellOppgave(
+        sykmeldingId = "123",
+        fnr = "fnr",
+        oppgaveid = oppgaveId,
+        pdfPapirSykmelding = EMPTY_BYTE_ARRAY,
+        papirSmRegistering =
+            PapirSmRegistering(
+                journalpostId = "123",
+                oppgaveId = "123",
+                fnr = "fnr",
+                aktorId = "aktor",
+                dokumentInfoId = "123",
+                datoOpprettet = OffsetDateTime.now(),
+                sykmeldingId = "123",
+                syketilfelleStartDato = LocalDate.now(),
+                arbeidsgiver = null,
+                medisinskVurdering = null,
+                skjermesForPasient = null,
+                perioder = perioder,
+                prognose = null,
+                utdypendeOpplysninger = null,
+                tiltakNAV = null,
+                tiltakArbeidsplassen = null,
+                andreTiltak = null,
+                meldingTilNAV = null,
+                meldingTilArbeidsgiver = null,
+                kontaktMedPasient = null,
+                behandletTidspunkt = null,
+                behandler = Behandler("fornavn", "mellomnavn", "etternavn", "", "", "", null, Adresse(null, null, null, null, null), null),
+            ),
+        documents = emptyList(),
+    )
+}
+
+
+fun testDataPapirSmregistrering(oppgaveId: Int, perioder: List<Periode>? = null): PapirSmRegistering {
+    return PapirSmRegistering(
+        journalpostId = "123",
+        oppgaveId = oppgaveId.toString(),
+        fnr = "123",
+        aktorId = "123",
+        dokumentInfoId = "123",
+        datoOpprettet = OffsetDateTime.now(),
+        sykmeldingId = "123",
+        syketilfelleStartDato = 1.januar(2023),
+        arbeidsgiver = null,
+        medisinskVurdering = null,
+        skjermesForPasient = false,
+        perioder = null,
+        prognose = null,
+        utdypendeOpplysninger = null,
+        tiltakNAV = null,
+        tiltakArbeidsplassen = null,
+        andreTiltak = null,
+        meldingTilNAV = null,
+        meldingTilArbeidsgiver = null,
+        kontaktMedPasient = null,
+        behandletTidspunkt = null,
+        behandler = null
+    )
+}
+
+
+fun testDataNasjonalOppgaveResponse(oppgaveId: Int): NasjonalOppgaveResponse {
+    return NasjonalOppgaveResponse(
+        id = oppgaveId,
+        oppgavetype = "TYPE",
+        aktivDato = 1.januar(2023),
+        prioritet = ""
     )
 }
 

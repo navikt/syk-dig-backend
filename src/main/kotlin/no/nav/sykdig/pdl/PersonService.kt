@@ -123,7 +123,7 @@ class PersonService(
         )
     }
 
-    fun hentPersonNavn(
+    fun getPersonNavn(
         id: String,
         callId: String,
     ): Navn {

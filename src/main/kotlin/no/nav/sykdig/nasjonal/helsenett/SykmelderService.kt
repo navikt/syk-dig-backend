@@ -1,5 +1,6 @@
 package no.nav.sykdig.nasjonal.helsenett
 
+import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
@@ -7,6 +8,7 @@ import no.nav.sykdig.nasjonal.helsenett.client.HelsenettClient
 import no.nav.sykdig.nasjonal.helsenett.client.SmtssClient
 import no.nav.sykdig.nasjonal.models.Godkjenning
 import no.nav.sykdig.nasjonal.models.Kode
+import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.shared.securelog
@@ -48,6 +50,21 @@ class SykmelderService(
             etternavn = pdlPerson.navn.etternavn,
             godkjenninger = godkjenninger,
         )
+    }
+
+    suspend fun checkHprAndGetSykmelder(smRegistreringManuell: SmRegistreringManuell, loggingMeta: LoggingMeta, callId: String): Sykmelder {
+        val sykmelderHpr = smRegistreringManuell.behandler.hpr
+        if (sykmelderHpr.isNullOrEmpty() || sykmelderHpr.isBlank()) {
+            log.error("HPR-nummer mangler {}", StructuredArguments.fields(loggingMeta))
+            throw SykmelderNotFoundException("HPR-nummer mangler")
+        }
+
+        log.info("Henter sykmelder fra HPR og PDL med hpr: $sykmelderHpr {}", StructuredArguments.fields(loggingMeta))
+        val sykmelder = getSykmelder(
+            sykmelderHpr,
+            callId,
+        )
+        return sykmelder
     }
 
     fun getSykmelderForAvvistOppgave(
