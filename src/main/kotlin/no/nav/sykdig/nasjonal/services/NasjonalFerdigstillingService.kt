@@ -117,14 +117,13 @@ class NasjonalFerdigstillingService(
 
     suspend fun ferdigstillNasjonalAvvistOppgave(
         lokalOppgave: NasjonalManuellOppgaveDAO,
-        oppgaveId: String,
+        oppgaveId: Int,
         navEnhet: String,
         avvisningsgrunn: String?,
         veilederIdent: String,
     ) {
-        val eksternOppgave = oppgaveClient.getNasjonalOppgave(oppgaveId, lokalOppgave.sykmeldingId)
+        val eksternOppgave = oppgaveClient.getNasjonalOppgave(oppgaveId.toString(), lokalOppgave.sykmeldingId)
         val sykmeldingId = lokalOppgave.sykmeldingId
-        val oppgaveId = lokalOppgave.oppgaveId
         val loggingMeta = getLoggingMeta(lokalOppgave.sykmeldingId, lokalOppgave)
         requireNotNull(lokalOppgave.oppgaveId)
         val sykmelder = sykmelderService.getSykmelderForAvvistOppgave(lokalOppgave.papirSmRegistrering.behandler?.hpr, lokalOppgave.sykmeldingId, lokalOppgave.oppgaveId)

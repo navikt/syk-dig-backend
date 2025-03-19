@@ -104,7 +104,7 @@ class NasjonalOppgaveService(
         val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
         log.info("Avviser oppgave med oppgaveId: $oppgaveId. Avvisningsgrunn: $avvisningsgrunn")
         val veilederIdent = nasjonalSykmeldingMapper.getNavIdent().veilederIdent
-        nasjonalFerdigstillingService.ferdigstillNasjonalAvvistOppgave(lokalOppgave, oppgaveId, navEnhet, avvisningsgrunn, veilederIdent)
+        nasjonalFerdigstillingService.ferdigstillNasjonalAvvistOppgave(lokalOppgave, oppgaveId.toInt(), navEnhet, avvisningsgrunn, veilederIdent)
 
         nasjonalDbService.updateOppgave(
             lokalOppgave.sykmeldingId,
