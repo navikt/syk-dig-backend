@@ -15,6 +15,7 @@ import no.nav.sykdig.generated.types.NasjonalSykmeldingStatus
 import no.nav.sykdig.generated.types.NasjonalOppdatertSykmeldingStatusEnum
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.securelog
 import org.springframework.security.access.prepost.PostAuthorize
 
 
@@ -25,13 +26,14 @@ class NasjonalOppgaveDataFetcher(
 
     companion object {
         val log = applog()
+        val securelog = securelog()
     }
 
     @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/dgs/nasjonal/oppgave/{oppgaveId}')")
     @DgsQuery(field = DgsConstants.QUERY.NasjonalOppgave)
     fun getNasjonalOppgave(@InputArgument oppgaveId: String, dfe: DataFetchingEnvironment): NasjonalOppgaveResult? {
         log.info("Henter najsonal oppgave med id $oppgaveId")
-        val oppgave = nasjonalDbService.getOppgave(oppgaveId)
+        val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
         if (oppgave != null) {
             if (oppgave.ferdigstilt) {
                 log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
@@ -48,7 +50,7 @@ class NasjonalOppgaveDataFetcher(
     @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, '/dgs/nasjonal/sykmelding/{sykmeldingId}/ferdigstilt')")
     @DgsQuery(field = DgsConstants.QUERY.NasjonalFerdigstiltOppgave)
     fun getFerdigstiltNasjonalOppgave(@InputArgument sykmeldingId: String, dfe: DataFetchingEnvironment): NasjonalSykmeldingResult? {
-        val oppgave = nasjonalDbService.getOppgaveBySykmeldingIdSmreg(sykmeldingId)
+        val oppgave = nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId)
         if (oppgave != null) {
             if (!oppgave.ferdigstilt) {
                 log.info("Oppgave med sykmeldingId $sykmeldingId er ikke ferdigstilt")

@@ -1,6 +1,7 @@
 package no.nav.sykdig.nasjonal.api
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.sykdig.digitalisering.papirsykmelding.mapFromDao
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
@@ -10,8 +11,10 @@ import no.nav.sykdig.nasjonal.services.NasjonalDbService
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.shared.securelog
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -22,6 +25,7 @@ class NasjonalOppgaveController(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val sykmelderService: SykmelderService,
     private val personService: PersonService,
+    private val nasjonalDbService: NasjonalDbService
 ) {
     val log = applog()
     val securelog = securelog()
