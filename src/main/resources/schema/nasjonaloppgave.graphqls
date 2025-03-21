@@ -1,5 +1,4 @@
 union NasjonalOppgaveResult = NasjonalOppgave | NasjonalOppgaveStatus
-
 union NasjonalSykmeldingResult = NasjonalOppgave | NasjonalSykmeldingStatus
 
 type NasjonalOppgave {
@@ -25,11 +24,6 @@ type NasjonalSykmelding {
     behandler: Behandler,
 }
 
-type NasjonalSykmeldingStatus {
-    sykmeldingId: String
-    status: NasjonalOppdatertSykmeldingStatusEnum
-}
-
 type Periode {
     fom: Date!,
     tom: Date!,
@@ -39,10 +33,12 @@ type Periode {
     gradert: Gradert,
     reisetilskudd: Boolean,
 }
+
 type AktivitetIkkeMulig {
     medisinskArsak: MedisinskArsak,
     arbeidsrelatertArsak: ArbeidsrelatertArsak,
 }
+
 type ArbeidsrelatertArsak {
     beskrivelse: String,
     arsak: [ArbeidsrelatertArsakType!]!,
@@ -74,6 +70,7 @@ type MeldingTilNAV {
     bistandUmiddelbart: Boolean!,
     beskrivBistand: String,
 }
+
 type KontaktMedPasient {
     kontaktDato: String,
     begrunnelseIkkeKontakt: String,
@@ -106,11 +103,12 @@ enum AnnenFraversArsakGrunn {
     BEHANDLING_STERILISERING,
 }
 
-type DiagnoseSchema{
+type DiagnoseSchema {
     system: String,
     kode: String,
     tekst: String,
 }
+
 type Behandler {
     fornavn: String!,
     mellomnavn: String,
@@ -143,6 +141,11 @@ enum NasjonalOppgaveStatusEnum {
     IKKE_FERDIGSTILT
     FINNES_IKKE
     AVVIST
+}
+
+type NasjonalSykmeldingStatus {
+    sykmeldingId: String!
+    status: NasjonalOppdatertSykmeldingStatusEnum!
 }
 
 enum NasjonalOppdatertSykmeldingStatusEnum {
