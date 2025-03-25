@@ -23,6 +23,7 @@ type NasjonalSykmelding {
     kontaktMedPasient: KontaktMedPasient,
     behandletTidspunkt: Date,
     behandler: Behandler,
+    harUtdypendeOpplysninger: Boolean
 }
 
 type NasjonalSykmeldingStatus {

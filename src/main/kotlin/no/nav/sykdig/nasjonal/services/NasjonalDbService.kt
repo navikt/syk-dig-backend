@@ -13,6 +13,7 @@ import no.nav.sykdig.nasjonal.models.PapirManuellOppgave
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Veileder
 import no.nav.sykdig.shared.ReceivedSykmelding
+import no.nav.sykdig.shared.SporsmalSvar
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.securelog
 import org.springframework.stereotype.Service
@@ -66,7 +67,7 @@ class NasjonalDbService(
         nasjonalSykmeldingRepository.save(dao)
     }
 
-    fun updateOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, smRegistreringManuell: SmRegistreringManuell?): NasjonalManuellOppgaveDAO? {
+    fun updateOppgave(sykmeldingId: String, utfall: String, ferdigstiltAv: String, avvisningsgrunn: String?, smRegistreringManuell: SmRegistreringManuell?, utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?): NasjonalManuellOppgaveDAO? {
         val existingOppgave = nasjonalOppgaveRepository.findBySykmeldingId(sykmeldingId)
 
         if (existingOppgave == null) {
@@ -80,7 +81,7 @@ class NasjonalDbService(
             avvisningsgrunn = avvisningsgrunn,
             datoFerdigstilt = OffsetDateTime.now(ZoneOffset.UTC),
             ferdigstilt = true,
-            papirSmRegistrering = mapToUpdatedPapirSmRegistrering(existingOppgave, smRegistreringManuell),
+            papirSmRegistrering = mapToUpdatedPapirSmRegistrering(existingOppgave, smRegistreringManuell, utdypendeOpplysninger),
         )
 
         securelog.info("Lagret oppgave med sykmeldingId ${updatedOppgave.sykmeldingId} og med database id ${updatedOppgave.id} som dette objektet: $updatedOppgave")

@@ -104,6 +104,7 @@ class NasjonalFerdigstillingService(
                 ferdigstiltAv = veileder.veilederIdent,
                 avvisningsgrunn = avvisningsgrunn,
                 smRegistreringManuell = smRegistreringManuell,
+                utdypendeOpplysninger = receivedSykmelding.sykmelding.utdypendeOpplysninger,
             )
             log.info("Ferdigstilt papirsykmelding med sykmelding id ${receivedSykmelding.sykmelding.id}")
             return ResponseEntity(HttpStatus.OK)
