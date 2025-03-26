@@ -112,6 +112,7 @@ class NasjonalOppgaveService(
             ferdigstiltAv = veilederIdent,
             avvisningsgrunn = avvisningsgrunn,
             null,
+            null,
         )
         auditLogger.info(
             AuditLogger()
@@ -142,7 +143,7 @@ class NasjonalOppgaveService(
         val navIdent = nasjonalSykmeldingMapper.getNavIdent()
         val loggingMeta = getLoggingMeta(eksisterendeOppgave.sykmeldingId, eksisterendeOppgave)
         nasjonalFerdigstillingService.ferdigstillOgSendOppgaveTilGosys(oppgaveId, eksisterendeOppgave)
-        nasjonalDbService.updateOppgave(eksisterendeOppgave.sykmeldingId, Utfall.SENDT_TIL_GOSYS.toString(), navIdent.veilederIdent, null, null)
+        nasjonalDbService.updateOppgave(eksisterendeOppgave.sykmeldingId, Utfall.SENDT_TIL_GOSYS.toString(), navIdent.veilederIdent, null, null, null)
 
         log.info(
             "Ferdig å sende oppgave med id $oppgaveId til Gosys {}",

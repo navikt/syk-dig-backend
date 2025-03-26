@@ -57,6 +57,7 @@ fun mapToNasjonalSykmelding(oppgave: NasjonalManuellOppgaveDAO): NasjonalSykmeld
         kontaktMedPasient = mapToKontaktMedPasient(oppgave.papirSmRegistrering.kontaktMedPasient),
         behandletTidspunkt = oppgave.papirSmRegistrering.behandletTidspunkt,
         behandler = mapToBehandler(oppgave.papirSmRegistrering.behandler),
+        harUtdypendeOpplysninger = !oppgave.papirSmRegistrering.utdypendeOpplysninger.isNullOrEmpty(),
     )
 }
 
@@ -224,7 +225,7 @@ fun mapToBehandler(behandler: no.nav.sykdig.shared.Behandler?): Behandler? {
 }
 
 
-fun mapToUpdatedPapirSmRegistrering(existingOppgave: NasjonalManuellOppgaveDAO, smRegistreringManuell: SmRegistreringManuell?): PapirSmRegistering {
+fun mapToUpdatedPapirSmRegistrering(existingOppgave: NasjonalManuellOppgaveDAO, smRegistreringManuell: SmRegistreringManuell?, utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?): PapirSmRegistering {
     val updatedPapirSmRegistrering = existingOppgave.papirSmRegistrering.copy(
         meldingTilArbeidsgiver = smRegistreringManuell?.meldingTilArbeidsgiver
             ?: existingOppgave.papirSmRegistrering.meldingTilArbeidsgiver,
@@ -237,12 +238,12 @@ fun mapToUpdatedPapirSmRegistrering(existingOppgave: NasjonalManuellOppgaveDAO, 
         syketilfelleStartDato = smRegistreringManuell?.syketilfelleStartDato ?: existingOppgave.papirSmRegistrering.syketilfelleStartDato,
         behandler = smRegistreringManuell?.behandler ?: existingOppgave.papirSmRegistrering.behandler,
         skjermesForPasient = smRegistreringManuell?.skjermesForPasient ?: existingOppgave.papirSmRegistrering.skjermesForPasient,
+        utdypendeOpplysninger = utdypendeOpplysninger
     )
 
     securelog.info("Updated papirSmRegistrering: $updatedPapirSmRegistrering to be saved in syk-dig-backend db nasjonal_manuellOppgave")
     return updatedPapirSmRegistrering
 }
-
 
 fun mapToDaoOppgave(
     papirManuellOppgave: PapirManuellOppgave,
