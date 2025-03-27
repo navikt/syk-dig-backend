@@ -4,7 +4,6 @@ import no.nav.sykdig.shared.auditLogger.AuditLogger
 import no.nav.sykdig.shared.auditlog
 import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
 import no.nav.sykdig.nasjonal.mapping.NasjonalSykmeldingMapper
-import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.saf.graphql.Type
@@ -23,7 +22,6 @@ class OppgaveSecurityService(
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val safGraphQlClient: SafJournalpostGraphQlClient,
     private val personService: PersonService,
-    private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val nasjonalSykmeldingMapper: NasjonalSykmeldingMapper,
     private val nasjonalDbService: NasjonalDbService,
 ) {
@@ -78,9 +76,10 @@ class OppgaveSecurityService(
         return false
     }
 
-    fun hasSuperUserAccessToNasjonalSykmelding(sykmeldingId: String, requestPath: String): Boolean {
+    //TODO: remove sykmeldingId after merge
+    fun hasSuperUserAccessToNasjonalSykmelding(sykmeldingId: String?, oppgaveId: String?, requestPath: String): Boolean {
         securelog.info("sjekker om bruker har super bruker tilgang på sykmelding $sykmeldingId")
-        val oppgave = nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId)
+        val oppgave = if (sykmeldingId != null) nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId) else if (oppgaveId != null) nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) else null
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val fnr = oppgave?.fnr
         if (oppgave != null && fnr != null) {

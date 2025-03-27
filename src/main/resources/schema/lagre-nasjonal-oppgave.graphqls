@@ -1,0 +1,113 @@
+union LagreOppgaveResult = LagreNasjonalOppgaveStatus | ValidationResult
+
+type SykmeldingStatus {
+    oppgaveId: String!
+    status: DigitaliseringsoppgaveStatusEnum!
+}
+
+input NasjonalSykmeldingValues {
+    pasientFnr: String!
+    sykmelderFnr: String!
+    perioder: [PeriodeValues!]!
+    medisinskVurdering: MedisinskVurderingValues!
+    arbeidsgiver: ArbeidsgiverValues!
+    behandletDato: Date!
+    skjermesForPasient: Boolean!
+    behandler: BehandlerValues!
+    kontaktMedPasient: KontaktMedPasientValues!
+    meldingTilNAV: MeldingTilNAVValues
+    meldingTilArbeidsgiver: String
+    harUtdypendeOpplysninger: Boolean!
+}
+
+input PeriodeValues {
+    fom: Date!
+    tom: Date!
+    aktivitetIkkeMulig: AktivitetIkkeMuligValues
+    avventendeInnspillTilArbeidsgiver: String
+    behandlingsdager: Int
+    gradert: GradertValues
+    reisetilskudd: Boolean
+}
+
+input AktivitetIkkeMuligValues {
+    medisinskArsak: MedisinskArsakValues,
+    arbeidsrelatertArsak: ArbeidsrelatertArsakValues,
+}
+
+input MedisinskArsakValues {
+    beskrivelse: String,
+    arsak: [MedisinskArsakType!]!,
+}
+
+input ArbeidsrelatertArsakValues {
+    beskrivelse: String,
+    arsak: [ArbeidsrelatertArsakType!]!,
+}
+
+input GradertValues {
+    reisetilskudd: Boolean!,
+    grad: Int!,
+}
+
+input MedisinskVurderingValues {
+    hovedDiagnose: DiagnoseValues
+    biDiagnoser: [DiagnoseValues!]!
+    svangerskap: Boolean!
+    yrkesskade: Boolean!
+    yrkesskadeDato: Date
+    annenFraversArsak: AnnenFraversArsakValues
+}
+
+input DiagnoseValues {
+    system: String!
+    kode: String!
+    tekst: String
+}
+
+input AnnenFraversArsakValues {
+    beskrivelse: String,
+    grunn: [AnnenFraversArsakGrunn!]!
+}
+
+input HarArbeidsgiverInfo {
+    codeValue: String!
+    text: String!
+    value: HarArbeidsgiver!
+}
+
+input ArbeidsgiverValues {
+    harArbeidsgiver: HarArbeidsgiver!,
+    navn: String,
+    yrkesbetegnelse: String,
+    stillingsprosent: Int
+}
+
+input BehandlerValues {
+    hpr: String,
+    tlf: String,
+}
+
+input KontaktMedPasientValues {
+    kontaktDato: Date,
+    begrunnelseIkkeKontakt: String,
+}
+
+input MeldingTilNAVValues {
+    bistandUmiddelbart: Boolean!,
+    beskrivBistand: String,
+}
+
+type LagreNasjonalOppgaveStatus {
+    oppgaveId: String!
+    status: LagreNasjonalOppgaveStatusEnum!
+}
+
+enum LagreNasjonalOppgaveStatusEnum {
+    OPPDATERT
+    IKKE_FERDIGSTILT
+    FERDIGSTILT
+    FINNES_IKKE
+    AVVIST
+    IKKE_EN_SYKMELDING
+}
