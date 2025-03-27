@@ -76,15 +76,14 @@ class OppgaveSecurityService(
         return false
     }
 
-    //TODO: remove sykmeldingId after merge
-    fun hasSuperUserAccessToNasjonalSykmelding(sykmeldingId: String?, oppgaveId: String?, requestPath: String): Boolean {
-        securelog.info("sjekker om bruker har super bruker tilgang på sykmelding $sykmeldingId")
-        val oppgave = if (sykmeldingId != null) nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId) else if (oppgaveId != null) nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) else null
+    fun hasSuperUserAccessToNasjonalSykmelding(oppgaveId: String, requestPath: String): Boolean {
+        securelog.info("sjekker om bruker har super bruker tilgang på sykmelding med oppgaveId $oppgaveId")
+        val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val fnr = oppgave?.fnr
         if (oppgave != null && fnr != null) {
             val tilgang = hasSuperUserAccess(fnr, navEmail, requestPath)
-            securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId")
+            securelog.info("Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId")
             auditlog.info(
                 AuditLogger().createcCefMessage(
                     fnr = fnr,
