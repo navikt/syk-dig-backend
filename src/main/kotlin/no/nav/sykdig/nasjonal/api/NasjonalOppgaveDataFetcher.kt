@@ -92,7 +92,7 @@ class NasjonalOppgaveDataFetcher(
             }
 
             SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
-                if (oppgaveSecurityService.hasSuperUserAccessToNasjonalSykmelding(null, oppgaveId, "/dgs/nasjonal/sykmelding/korriger")) {
+                if (oppgaveSecurityService.hasSuperUserAccessToNasjonalSykmelding(oppgaveId, "/dgs/nasjonal/sykmelding/korriger")) {
                     val oppdatertSykmeldingValues = mapToSmRegistreringManuell(sykmeldingValues)
                     return nasjonalOppgaveService.korrigerSykmeldingMedOppgaveId(
                         oppgaveId,

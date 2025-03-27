@@ -75,31 +75,13 @@ class NasjonalOppgaveService(
         }
     }
 
-    //TODO: remove after merge
-    suspend fun korrigerSykmelding(sykmeldingId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell): ResponseEntity<Any> {
-        val oppgave = nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
-        log.info("Forsøker å korrigere sykmelding med sykmeldingId $sykmeldingId og oppgaveId ${oppgave.oppgaveId}")
-        return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgave.oppgaveId.toString())
-    }
-
-    //TODO: remove after merge
-    suspend fun sendNasjonalOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): ResponseEntity<Any> {
-        val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
-        if (oppgave.ferdigstilt) {
-            log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
-            return ResponseEntity(HttpStatus.NO_CONTENT)
-        }
-        log.info("Forsøker å ferdigstille papirsykmelding med sykmeldingId ${oppgave.sykmeldingId} oppgaveId ${oppgave.oppgaveId}")
-        return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgaveId)
-    }
-
     suspend fun korrigerSykmeldingMedOppgaveId(oppgaveId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell): LagreOppgaveResult {
         val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) ?: return LagreNasjonalOppgaveStatus(
             oppgaveId,
             status = LagreNasjonalOppgaveStatusEnum.FINNES_IKKE,
         )
-        log.info("Forsøker å korrigere sykmelding med oppgaveId $oppgaveId, graphql")
-        return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmeldingGraphql(papirSykmelding, navEnhet, callId, oppgave, oppgave.oppgaveId.toString(), LagreNasjonalOppgaveStatusEnum.OPPDATERT)
+        log.info("Forsøker å korrigere sykmelding med oppgaveId $oppgaveId")
+        return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgave.oppgaveId.toString(), LagreNasjonalOppgaveStatusEnum.OPPDATERT)
     }
 
     suspend fun sendOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): LagreOppgaveResult {
@@ -112,8 +94,8 @@ class NasjonalOppgaveService(
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
             throw DgsEntityNotFoundException("Oppgave med id $oppgaveId er allerede ferdigstilt")
         }
-        log.info("Forsøker å sende inn papirsykmelding med sykmeldingId ${oppgave.sykmeldingId} oppgaveId ${oppgave.oppgaveId}, graphql")
-        return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmeldingGraphql(papirSykmelding, navEnhet, callId, oppgave, oppgaveId, LagreNasjonalOppgaveStatusEnum.FERDIGSTILT)
+        log.info("Forsøker å sende inn papirsykmelding med sykmeldingId ${oppgave.sykmeldingId} oppgaveId ${oppgave.oppgaveId}")
+        return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgaveId, LagreNasjonalOppgaveStatusEnum.FERDIGSTILT)
     }
 
     suspend fun avvisOppgave(
