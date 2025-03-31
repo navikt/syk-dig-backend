@@ -123,6 +123,7 @@ class PersonService(
         )
     }
 
+    //TODO: remove after merge
     fun getPersonNavn(
         id: String,
         callId: String,
@@ -131,6 +132,7 @@ class PersonService(
         return mapPdlResponseTilPersonNavn(id, pdlResponse)
     }
 
+    //TODO: remove after merge
     fun mapPdlResponseTilPersonNavn(
         ident: String,
         pdlResponse: PdlResponse,
