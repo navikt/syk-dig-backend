@@ -5,9 +5,6 @@ import no.nav.sykdig.shared.applog
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.nasjonal.models.Sykmelder
-import no.nav.sykdig.nasjonal.services.NasjonalDbService
-import no.nav.sykdig.pdl.Navn
-import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.shared.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
@@ -20,7 +17,6 @@ import java.util.*
 class NasjonalOppgaveController(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val sykmelderService: SykmelderService,
-    private val personService: PersonService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -35,22 +31,6 @@ class NasjonalOppgaveController(
     ): ResponseEntity<HttpStatusCode> {
         log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
         return nasjonalOppgaveService.avvisOppgave(oppgaveId, avvisSykmeldingRequest, navEnhet)
-    }
-
-    @GetMapping("/pasient")
-    @ResponseBody
-    fun getPasientNavn(
-        @RequestHeader("X-Pasient-Fnr") fnr: String,
-    ): ResponseEntity<Navn> {
-        val callId = UUID.randomUUID().toString()
-        log.info("Henter person med callId $callId")
-
-        val personNavn: Navn =
-            personService.getPersonNavn(
-                id = fnr,
-                callId = callId,
-            )
-        return ResponseEntity.ok().body(personNavn)
     }
 
     @GetMapping("/sykmelder/{hprNummer}")
