@@ -122,27 +122,4 @@ class PersonService(
                 },
         )
     }
-
-    //TODO: remove after merge
-    fun getPersonNavn(
-        id: String,
-        callId: String,
-    ): Navn {
-        val pdlResponse = pdlClient.getPerson(id, callId)
-        return mapPdlResponseTilPersonNavn(id, pdlResponse)
-    }
-
-    //TODO: remove after merge
-    fun mapPdlResponseTilPersonNavn(
-        ident: String,
-        pdlResponse: PdlResponse,
-    ): Navn {
-        val navn = pdlResponse.hentPerson!!.navn.first()
-
-        return Navn(
-            fornavn = navn.fornavn,
-            mellomnavn = navn.mellomnavn,
-            etternavn = navn.etternavn,
-        )
-    }
 }
