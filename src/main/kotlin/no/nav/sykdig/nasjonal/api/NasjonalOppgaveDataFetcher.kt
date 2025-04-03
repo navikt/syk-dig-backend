@@ -11,6 +11,7 @@ import no.nav.sykdig.generated.types.*
 import no.nav.sykdig.nasjonal.services.NasjonalDbService
 import no.nav.sykdig.nasjonal.mapping.mapToSmRegistreringManuell
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
+import no.nav.sykdig.nasjonal.services.PasientNavnService
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.exceptions.IkkeTilgangException
 import no.nav.sykdig.shared.securelog
@@ -18,12 +19,12 @@ import no.nav.sykdig.tilgangskontroll.OppgaveSecurityService
 import org.springframework.security.access.prepost.PostAuthorize
 import java.util.UUID
 
-
 @DgsComponent
 class NasjonalOppgaveDataFetcher(
     private val nasjonalDbService: NasjonalDbService,
     private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val oppgaveSecurityService: OppgaveSecurityService,
+    private val pasientNavnService: PasientNavnService,
 ) {
 
     companion object {
@@ -106,5 +107,19 @@ class NasjonalOppgaveDataFetcher(
                 }
             }
         }
+    }
+
+    @DgsQuery(field = DgsConstants.QUERY.PasientNavn)
+    fun getPasientNavn(dfe: DataFetchingEnvironment): Navn {
+        val callId = UUID.randomUUID().toString()
+        log.info("Henter person med callId $callId")
+
+        val fnr: String = dfe.graphQlContext.get("pasient_fnr")
+        val personNavn =
+            pasientNavnService.getPersonNavn(
+                id = fnr,
+                callId = callId,
+            )
+        return personNavn
     }
 }

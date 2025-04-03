@@ -24,6 +24,8 @@ class GraphQLContextContributor : GraphQLContextContributor {
             val decodedJWT = JWT.decode(token)
             val username = decodedJWT.claims["preferred_username"]?.asString()
             val navIdent = decodedJWT.claims["NAVident"]?.asString()
+            val pasientFnr = requestData.headers?.getFirst("X-Pasient-Fnr")
+            pasientFnr?.let { builder.put("pasient_fnr", it) }
 
             requireNotNull(username) { "preferred_username is missing in claims" }
 
