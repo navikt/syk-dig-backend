@@ -1,0 +1,20 @@
+type Sykmelder {
+    hprNummer: String
+    fnr: String
+    aktorId: String
+    fornavn: String
+    mellomnavn: String
+    etternavn: String
+    godkjenninger: [Godkjenning!]
+}
+
+type Godkjenning {
+    helsepersonellkategori: Kode
+    autorisasjon: Kode
+}
+
+type Kode {
+    aktiv: Boolean!
+    oid: Int!
+    verdi: String
+}
