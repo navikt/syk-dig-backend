@@ -4,10 +4,13 @@ import com.netflix.graphql.dgs.DgsComponent
 import com.netflix.graphql.dgs.DgsMutation
 import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
+import com.netflix.graphql.dgs.exceptions.DgsInvalidInputArgumentException
 import graphql.schema.DataFetchingEnvironment
 import no.nav.sykdig.digitalisering.papirsykmelding.mapToNasjonalOppgave
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.*
+import no.nav.sykdig.nasjonal.helsenett.SykmelderService
+import no.nav.sykdig.nasjonal.mapping.mapSykmelder
 import no.nav.sykdig.nasjonal.services.NasjonalDbService
 import no.nav.sykdig.nasjonal.mapping.mapToSmRegistreringManuell
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
@@ -25,6 +28,7 @@ class NasjonalOppgaveDataFetcher(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val oppgaveSecurityService: OppgaveSecurityService,
     private val pasientNavnService: PasientNavnService,
+    private val sykmelderService: SykmelderService
 ) {
 
     companion object {
@@ -121,5 +125,17 @@ class NasjonalOppgaveDataFetcher(
                 callId = callId,
             )
         return personNavn
+    }
+
+    @DgsQuery(field = DgsConstants.QUERY.Sykmelder)
+    fun getSykmelder(@InputArgument hprNummer: String, dfe: DataFetchingEnvironment): Sykmelder {
+        if (hprNummer.isBlank() || !hprNummer.all { it.isDigit() }) {
+            log.info("Ugyldig path parameter: hprNummer")
+            throw DgsInvalidInputArgumentException("Ugyldig path parameter: hprNummer")
+        }
+        val callId = UUID.randomUUID().toString()
+        securelog.info("Henter sykmelder med callId $callId and hprNummer = $hprNummer")
+        val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
+        return mapSykmelder(sykmelder)
     }
 }
