@@ -48,6 +48,7 @@ oppgave.url: http://oppgave
 helsenett.url: http://syfohelsenettproxy
 smtss.url: http://smtss
 regel.url: http://regel
+ny-regel.url: http://ny-regel
 
 mock-oauth2-server:
   port: 8081
