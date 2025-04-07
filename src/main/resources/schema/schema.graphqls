@@ -9,6 +9,7 @@ type Query {
     nasjonalOppgave(oppgaveId: String!): NasjonalOppgaveResult
     nasjonalFerdigstiltOppgave(sykmeldingId: String!): NasjonalSykmeldingResult
     pasientNavn: Navn
+    sykmelder(hprNummer: String!): Sykmelder
 }
 
 type Mutation {
