@@ -6,6 +6,7 @@ import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 import com.netflix.graphql.dgs.exceptions.DgsInvalidInputArgumentException
 import graphql.schema.DataFetchingEnvironment
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sykdig.digitalisering.papirsykmelding.mapToNasjonalOppgave
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.*
@@ -20,6 +21,7 @@ import no.nav.sykdig.shared.exceptions.IkkeTilgangException
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.tilgangskontroll.OppgaveSecurityService
 import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.access.prepost.PreAuthorize
 import java.util.UUID
 
 @DgsComponent
@@ -38,6 +40,7 @@ class NasjonalOppgaveDataFetcher(
 
     @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/dgs/nasjonal/oppgave/{oppgaveId}')")
     @DgsQuery(field = DgsConstants.QUERY.NasjonalOppgave)
+    @WithSpan
     fun getNasjonalOppgave(@InputArgument oppgaveId: String, dfe: DataFetchingEnvironment): NasjonalOppgaveResult? {
         log.info("Henter najsonal oppgave med id $oppgaveId")
         val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
@@ -56,6 +59,7 @@ class NasjonalOppgaveDataFetcher(
 
     @PostAuthorize("@oppgaveSecurityService.hasAccessToNasjonalSykmelding(#sykmeldingId, '/dgs/nasjonal/sykmelding/{sykmeldingId}/ferdigstilt')")
     @DgsQuery(field = DgsConstants.QUERY.NasjonalFerdigstiltOppgave)
+    @WithSpan
     fun getFerdigstiltNasjonalOppgave(@InputArgument sykmeldingId: String, dfe: DataFetchingEnvironment): NasjonalSykmeldingResult? {
         val oppgave = nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId)
         if (oppgave != null) {
@@ -72,6 +76,7 @@ class NasjonalOppgaveDataFetcher(
     }
 
     @DgsMutation(field = DgsConstants.MUTATION.LagreNasjonalOppgave)
+    @WithSpan
     suspend fun lagreNasjonalOppgave(
         @InputArgument oppgaveId: String,
         @InputArgument navEnhet: String,
@@ -137,5 +142,21 @@ class NasjonalOppgaveDataFetcher(
         securelog.info("Henter sykmelder med callId $callId and hprNummer = $hprNummer")
         val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
         return mapSykmelder(sykmelder)
+    }
+
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/dgs/oppgave/{oppgaveId}/tilgosys')")
+    @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosysNasjonal)
+    @WithSpan
+    fun sendOppgaveTilGosys(@InputArgument oppgaveId: String, dfe: DataFetchingEnvironment): LagreNasjonalOppgaveStatus {
+        if (oppgaveId.isBlank()) {
+            log.info("Mangler oppgaveId for å kunne sende nasjonal oppgave til Gosys")
+            throw DgsInvalidInputArgumentException("Mangler oppgaveId for å kunne sende nasjonal oppgave til Gosys")
+        }
+        log.info("Sender nasjonal oppgave med id $oppgaveId til Gosys")
+        nasjonalOppgaveService.oppgaveTilGosys(oppgaveId)
+        return LagreNasjonalOppgaveStatus(
+            oppgaveId = oppgaveId,
+            status = LagreNasjonalOppgaveStatusEnum.IKKE_EN_SYKMELDING
+        )
     }
 }
