@@ -2,21 +2,17 @@ package no.nav.sykdig.nasjonal.api
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
-import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.shared.securelog
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
-import java.util.*
 
 @RestController
 @RequestMapping("/api/v1/proxy")
 class NasjonalOppgaveController(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
-    private val sykmelderService: SykmelderService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -31,21 +27,6 @@ class NasjonalOppgaveController(
     ): ResponseEntity<HttpStatusCode> {
         log.info("Forsøker å avvise oppgave med oppgaveId: $oppgaveId")
         return nasjonalOppgaveService.avvisOppgave(oppgaveId, avvisSykmeldingRequest, navEnhet)
-    }
-
-    @GetMapping("/sykmelder/{hprNummer}")
-    @ResponseBody
-    suspend fun getSykmelder(
-        @PathVariable hprNummer: String,
-    ): ResponseEntity<Sykmelder> {
-        if (hprNummer.isBlank() || !hprNummer.all { it.isDigit() }) {
-            log.info("Ugyldig path parameter: hprNummer")
-            return ResponseEntity.badRequest().build()
-        }
-        val callId = UUID.randomUUID().toString()
-        securelog.info("Henter person med callId $callId and hprNummer = $hprNummer")
-        val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
-        return ResponseEntity.ok(sykmelder)
     }
 
     @PostMapping("/oppgave/{oppgaveId}/tilgosys")
