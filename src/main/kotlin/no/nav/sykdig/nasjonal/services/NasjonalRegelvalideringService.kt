@@ -1,6 +1,8 @@
 package no.nav.sykdig.nasjonal.services
 
 import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.fields
+import no.nav.sykdig.nasjonal.clients.NyRegelClient
 import no.nav.sykdig.shared.*
 import no.nav.sykdig.nasjonal.clients.RegelClient
 import no.nav.sykdig.nasjonal.models.RuleHitCustomError
@@ -12,8 +14,12 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 const val HPR_GODKJENNING_KODE = 7704
+
 @Service
-class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
+class NasjonalRegelvalideringService(
+    private val regelClient: RegelClient,
+    private val nyRegelClient: NyRegelClient,
+) {
     val log = applog()
     fun validerNasjonalSykmelding(receivedSykmelding: ReceivedSykmelding, smRegistreringManuell: SmRegistreringManuell, sykmeldingId: String, loggingMeta: LoggingMeta, oppgaveId: String, sykmelder: Sykmelder): ValidationResult {
         val validationResult = regelClient.valider(receivedSykmelding, sykmeldingId)
@@ -26,6 +32,24 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
             ),
             StructuredArguments.fields(loggingMeta),
         )
+
+        // Regula shadow test, compare with old rules
+        try {
+            val nyValidationResult = nyRegelClient.valider(receivedSykmelding, sykmeldingId)
+            log.info(
+                """${if (validationResult == nyValidationResult) "✅ SHADOW TEST OK ✅" else "❌ SHADOW TEST DIVERGENCE ❌"}
+                            |
+                            | Gammel: ${validationResult.status}
+                            | Ny: ${nyValidationResult.status}
+                            | 
+                            | Gammel regler: ${validationResult.ruleHits.joinToString(", ", "(", ")") { it.ruleName }}
+                            | Ny regler: ${nyValidationResult.ruleHits.joinToString(", ", "(", ")") { it.ruleName }}
+                        """.trimMargin(),
+            )
+        } catch (e: Exception) {
+            log.error("❌ SHADOW TEST FAILED TO EXECUTE ❌ {}", fields(loggingMeta), e)
+        }
+
         return checkValidState(oppgaveId, smRegistreringManuell, sykmelder, validationResult) ?: validationResult
     }
 
@@ -53,6 +77,7 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
                         ),
                 )
             }
+
             harOverlappendePerioder(smRegistreringManuell.perioder) -> {
                 log.info("Rule hit for oppgaveId $oppgaveId and ruleName OVERLAPPENDE_PERIODER")
                 return ValidationResult(
@@ -69,6 +94,7 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
                         ),
                 )
             }
+
             harUlovligKombinasjonMedReisetilskudd(smRegistreringManuell.perioder) -> {
                 log.info("Rule hit for oppgaveId $oppgaveId and ruleName REISETILSKUDD")
                 return ValidationResult(
@@ -84,8 +110,9 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
                                 ruleStatus = Status.MANUAL_PROCESSING,
                             ),
                         ),
-                    )
+                )
             }
+
             erFremtidigDato(smRegistreringManuell.behandletDato) -> {
                 log.info("Rule hit for oppgaveId $oppgaveId and ruleName BEHANDLET_DATO")
                 return ValidationResult(
@@ -100,8 +127,9 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
                                 ruleStatus = Status.MANUAL_PROCESSING,
                             ),
                         ),
-                    )
+                )
             }
+
             studentBehandlerUtenAutorisasjon(validationResult, sykmelder) -> {
                 log.info("Rule hit for oppgaveId $oppgaveId and ruleName BEHANDLER_MANGLER_AUTORISASJON_I_HPR")
                 return ValidationResult(
@@ -117,8 +145,9 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
                                 ruleStatus = Status.MANUAL_PROCESSING,
                             ),
                         ),
-                    )
+                )
             }
+
             suspendertBehandler(validationResult) -> {
                 log.info("Rule hit for oppgaveId $oppgaveId and ruleName BEHANDLER_SUSPENDERT")
                 return ValidationResult(
@@ -133,8 +162,9 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
                                 ruleStatus = Status.MANUAL_PROCESSING,
                             ),
                         ),
-                    )
+                )
             }
+
             else -> return null
         }
     }
@@ -147,7 +177,7 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
 
     fun studentBehandlerUtenAutorisasjon(
         validationResult: ValidationResult,
-        sykmelder: Sykmelder
+        sykmelder: Sykmelder,
     ): Boolean {
         val behandlerManglerAutorisasjon =
             validationResult.ruleHits.any {
@@ -199,6 +229,7 @@ class NasjonalRegelvalideringService(private val regelClient: RegelClient) {
     }
 
 }
+
 fun List<RuleInfo>.isWhitelisted(): Boolean {
     return this.all { (ruleName) ->
         val isWhiteListed =

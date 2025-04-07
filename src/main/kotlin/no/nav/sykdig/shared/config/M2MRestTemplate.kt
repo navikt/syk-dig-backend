@@ -62,6 +62,13 @@ class M2MRestTemplate(
             .build()
     }
 
+    @Bean
+    fun nyRegelM2mRestTemplate(): RestTemplate {
+        return restTemplateBuilder
+            .additionalInterceptors(bearerTokenInterceptor("ny-regel-m2m"))
+            .build()
+    }
+
     private fun bearerTokenInterceptor(type: String): ClientHttpRequestInterceptor {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
             val token = m2mTokenService.getM2MToken(type)
