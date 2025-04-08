@@ -29,21 +29,6 @@ class NasjonalOppgaveController(
         return nasjonalOppgaveService.avvisOppgave(oppgaveId, avvisSykmeldingRequest, navEnhet)
     }
 
-    @PostMapping("/oppgave/{oppgaveId}/tilgosys")
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/oppgave/{oppgaveId}/tilgosys')")
-    @WithSpan
-    fun sendOppgaveTilGosys(
-        @PathVariable oppgaveId: String,
-    ): ResponseEntity<HttpStatusCode> {
-        if (oppgaveId.isBlank()) {
-            log.info("oppgaveId mangler for å kunne sende oppgave til Gosys")
-            return ResponseEntity.badRequest().build()
-        }
-        log.info("papirsykmelding: Sender oppgave med id $oppgaveId til Gosys")
-        nasjonalOppgaveService.oppgaveTilGosys(oppgaveId)
-        return ResponseEntity.noContent().build()
-    }
-
     @GetMapping("/pdf/{oppgaveId}/{dokumentInfoId}")
     @ResponseBody
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/pdf/{oppgaveId}/{dokumentInfoId}')")
