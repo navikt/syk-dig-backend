@@ -54,4 +54,8 @@ type Mutation {
         sykmeldingValues: NasjonalSykmeldingValues!
         status: SykmeldingUnderArbeidStatus
     ): LagreOppgaveResult
+
+    oppgaveTilbakeTilGosysNasjonal(
+        oppgaveId: String!
+    ): LagreNasjonalOppgaveStatus
 }
