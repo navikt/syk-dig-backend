@@ -159,4 +159,12 @@ class NasjonalOppgaveDataFetcher(
             status = LagreNasjonalOppgaveStatusEnum.IKKE_EN_SYKMELDING
         )
     }
+
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/dgs/oppgave/{oppgaveId}/avvis')")
+    @DgsMutation(field = DgsConstants.MUTATION.AvvisNasjonalOppgave)
+    @WithSpan
+    suspend fun avvisOppgave(@InputArgument oppgaveId: String, @InputArgument avvisningsgrunn: String?, @InputArgument navEnhet: String, dfe: DataFetchingEnvironment): LagreNasjonalOppgaveStatus {
+        log.info("Forsøker å avvise nasjonal oppgave med oppgaveId: $oppgaveId")
+        return nasjonalOppgaveService.avvisOppgaveGraphql(oppgaveId, avvisningsgrunn, navEnhet)
+    }
 }
