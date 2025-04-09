@@ -1,16 +1,15 @@
 package no.nav.sykdig.nasjonal.services
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.dokarkiv.DokarkivClient
 import no.nav.sykdig.dokarkiv.DocumentService
-import no.nav.sykdig.gosys.GosysService
+import no.nav.sykdig.generated.types.LagreNasjonalOppgaveStatus
+import no.nav.sykdig.generated.types.LagreNasjonalOppgaveStatusEnum
 import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
 import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
-import no.nav.sykdig.nasjonal.models.AvvisSykmeldingRequest
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.nasjonal.models.Veileder
@@ -22,7 +21,6 @@ import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.saf.graphql.*
-import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.shared.utils.getLoggingMeta
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,7 +33,6 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolder
@@ -60,13 +57,8 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     @Autowired
     lateinit var nasjonalDbService: NasjonalDbService
 
-    val mapper = jacksonObjectMapper()
-
     @MockitoBean
     lateinit var personService: PersonService
-
-    @MockitoBean
-    lateinit var gosysService: GosysService
 
     @MockitoBean
     lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
@@ -102,7 +94,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
     @Test
     fun `avvis oppgave blir oppdatert og lagra i DB`() = runBlocking {
         val oppgaveId = "123"
-        val request = mapper.writeValueAsString(AvvisSykmeldingRequest(reason = "MANGLENDE_DIAGNOSE"))
+        val avvisningsgrunn = "MANGLENDE_DIAGNOSE"
         val originalOppgave = nasjonalDbService.saveOppgave(testDataPapirManuellOppgave(123))
 
         Mockito.`when`(nasjonalSykmeldingMapper.getNavEmail()).thenReturn("navEmail")
@@ -136,8 +128,11 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
 
 
         assertTrue(originalOppgave.avvisningsgrunn == null)
-        val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, request,  "enhet")
-        assertEquals(avvistOppgave.statusCode, HttpStatus.NO_CONTENT)
+        val avvistOppgave = nasjonalOppgaveService.avvisOppgave(oppgaveId, avvisningsgrunn,  "enhet")
+        assertEquals(avvistOppgave, LagreNasjonalOppgaveStatus(
+            oppgaveId = oppgaveId,
+            status = LagreNasjonalOppgaveStatusEnum.AVVIST
+        ))
     }
 
 

@@ -20,8 +20,6 @@ import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.nasjonal.models.*
 import no.nav.sykdig.shared.*
 import no.nav.sykdig.shared.utils.getLoggingMeta
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
@@ -100,48 +98,6 @@ class NasjonalOppgaveService(
     }
 
     suspend fun avvisOppgave(
-        oppgaveId: String,
-        request: String,
-        navEnhet: String,
-    ): ResponseEntity<HttpStatusCode> {
-        val lokalOppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
-        if (lokalOppgave == null) {
-            log.info("Fant ikke oppgave som skulle avvises: $oppgaveId")
-            return ResponseEntity(HttpStatus.NOT_FOUND)
-        }
-        if (lokalOppgave.ferdigstilt) {
-            log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
-            return ResponseEntity(HttpStatus.NO_CONTENT)
-        }
-        val avvisningsgrunn = mapper.readValue(request, AvvisSykmeldingRequest::class.java).reason
-        log.info("Avviser oppgave med oppgaveId: $oppgaveId. Avvisningsgrunn: $avvisningsgrunn")
-        val veilederIdent = nasjonalSykmeldingMapper.getNavIdent().veilederIdent
-        nasjonalFerdigstillingService.ferdigstillNasjonalAvvistOppgave(lokalOppgave, oppgaveId.toInt(), navEnhet, avvisningsgrunn, veilederIdent)
-
-        nasjonalDbService.updateOppgave(
-            lokalOppgave.sykmeldingId,
-            utfall = Utfall.AVVIST.toString(),
-            ferdigstiltAv = veilederIdent,
-            avvisningsgrunn = avvisningsgrunn,
-            null,
-            null,
-        )
-        auditLogger.info(
-            AuditLogger()
-                .createcCefMessage(
-                    fnr = lokalOppgave.fnr,
-                    operation = AuditLogger.Operation.WRITE,
-                    requestPath = "/api/v1/oppgave/$oppgaveId/avvis",
-                    permit = AuditLogger.Permit.PERMIT,
-                    navEmail = nasjonalSykmeldingMapper.getNavEmail(),
-                ),
-        )
-
-        log.info("Har avvist oppgave med oppgaveId $oppgaveId")
-        return ResponseEntity(HttpStatus.NO_CONTENT)
-    }
-
-    suspend fun avvisOppgaveGraphql(
         oppgaveId: String,
         avvisningsgrunn: String?,
         navEnhet: String,
