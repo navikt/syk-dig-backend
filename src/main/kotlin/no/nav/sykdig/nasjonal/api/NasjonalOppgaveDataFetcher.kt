@@ -165,6 +165,6 @@ class NasjonalOppgaveDataFetcher(
     @WithSpan
     suspend fun avvisOppgave(@InputArgument oppgaveId: String, @InputArgument avvisningsgrunn: String?, @InputArgument navEnhet: String, dfe: DataFetchingEnvironment): LagreNasjonalOppgaveStatus {
         log.info("Forsøker å avvise nasjonal oppgave med oppgaveId: $oppgaveId")
-        return nasjonalOppgaveService.avvisOppgaveGraphql(oppgaveId, avvisningsgrunn, navEnhet)
+        return nasjonalOppgaveService.avvisOppgave(oppgaveId, avvisningsgrunn, navEnhet)
     }
 }
