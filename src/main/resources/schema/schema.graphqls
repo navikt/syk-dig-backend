@@ -58,4 +58,10 @@ type Mutation {
     oppgaveTilbakeTilGosysNasjonal(
         oppgaveId: String!
     ): LagreNasjonalOppgaveStatus
+
+    avvisNasjonalOppgave(
+        oppgaveId: String!
+        avvisningsgrunn: String
+        navEnhet: String!
+    ): LagreNasjonalOppgaveStatus
 }
