@@ -10,10 +10,8 @@ import no.nav.sykdig.generated.types.LagreNasjonalOppgaveStatusEnum
 import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
 import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
-import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.nasjonal.models.Veileder
-import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.nasjonal.mapping.NasjonalSykmeldingMapper
 import no.nav.sykdig.nasjonal.util.testDataPapirManuellOppgave
 import no.nav.sykdig.pdl.Navn
@@ -153,53 +151,6 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
             endretAv = "sakebehandler",
             timestamp = OffsetDateTime.now(),
             source = "source",
-        )
-    }
-
-    fun testDataNasjonalManuellOppgaveDAO(
-        id: UUID?,
-        sykmeldingId: String,
-        oppgaveId: Int?,
-    ): NasjonalManuellOppgaveDAO {
-        return NasjonalManuellOppgaveDAO(
-            id = id,
-            sykmeldingId = sykmeldingId,
-            journalpostId = "123",
-            fnr = "fnr",
-            aktorId = "aktor",
-            dokumentInfoId = "123",
-            datoOpprettet = OffsetDateTime.now(),
-            oppgaveId = oppgaveId,
-            ferdigstilt = false,
-            papirSmRegistrering =
-            PapirSmRegistering(
-                journalpostId = "123",
-                oppgaveId = "123",
-                fnr = "fnr",
-                aktorId = "aktor",
-                dokumentInfoId = "123",
-                datoOpprettet = OffsetDateTime.now(),
-                sykmeldingId = "123",
-                syketilfelleStartDato = LocalDate.now(),
-                arbeidsgiver = null,
-                medisinskVurdering = null,
-                skjermesForPasient = null,
-                perioder = null,
-                prognose = null,
-                utdypendeOpplysninger = null,
-                tiltakNAV = null,
-                tiltakArbeidsplassen = null,
-                andreTiltak = null,
-                meldingTilNAV = null,
-                meldingTilArbeidsgiver = null,
-                kontaktMedPasient = null,
-                behandletTidspunkt = null,
-                behandler = null,
-            ),
-            utfall = null,
-            ferdigstiltAv = null,
-            datoFerdigstilt = null,
-            avvisningsgrunn = null,
         )
     }
 
