@@ -2,6 +2,7 @@ package no.nav.sykdig.nasjonal.services
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.netflix.graphql.dgs.exceptions.DgsBadRequestException
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -138,6 +139,50 @@ class NasjonalOppgaveService(
 
         log.info("Har avvist oppgave med oppgaveId $oppgaveId")
         return ResponseEntity(HttpStatus.NO_CONTENT)
+    }
+
+    suspend fun avvisOppgaveGraphql(
+        oppgaveId: String,
+        avvisningsgrunn: String?,
+        navEnhet: String,
+    ): LagreNasjonalOppgaveStatus {
+        val lokalOppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
+        if (lokalOppgave == null) {
+            log.info("Fant ikke oppgave som skulle avvises: $oppgaveId")
+            throw DgsEntityNotFoundException("Fant ikke oppgave som skulle avvises: $oppgaveId")
+        }
+        if (lokalOppgave.ferdigstilt) {
+            log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
+            throw DgsBadRequestException("Oppgave med id $oppgaveId er allerede ferdigstilt")
+        }
+        log.info("Avviser oppgave med oppgaveId: $oppgaveId. Avvisningsgrunn: $avvisningsgrunn")
+        val veilederIdent = nasjonalSykmeldingMapper.getNavIdent().veilederIdent
+        nasjonalFerdigstillingService.ferdigstillNasjonalAvvistOppgave(lokalOppgave, oppgaveId.toInt(), navEnhet, avvisningsgrunn, veilederIdent)
+
+        nasjonalDbService.updateOppgave(
+            lokalOppgave.sykmeldingId,
+            utfall = Utfall.AVVIST.toString(),
+            ferdigstiltAv = veilederIdent,
+            avvisningsgrunn = avvisningsgrunn,
+            null,
+            null,
+        )
+        auditLogger.info(
+            AuditLogger()
+                .createcCefMessage(
+                    fnr = lokalOppgave.fnr,
+                    operation = AuditLogger.Operation.WRITE,
+                    requestPath = "/api/v1/oppgave/$oppgaveId/avvis",
+                    permit = AuditLogger.Permit.PERMIT,
+                    navEmail = nasjonalSykmeldingMapper.getNavEmail(),
+                ),
+        )
+
+        log.info("Har avvist oppgave med oppgaveId $oppgaveId")
+        return LagreNasjonalOppgaveStatus(
+            oppgaveId = oppgaveId,
+            status = LagreNasjonalOppgaveStatusEnum.AVVIST
+        )
     }
 
     fun getRegisterPdf(oppgaveId: String, dokumentInfoId: String): ResponseEntity<Any> {
