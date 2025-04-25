@@ -104,6 +104,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                         bruker = null,
                         tema = TEMA_SYKMELDING,
                         kanal = CHANNEL_SCAN_IM,
+                        journalposttype = null,
                     ),
             )
         Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }

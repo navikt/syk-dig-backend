@@ -19,4 +19,5 @@ enum JournalpostStatusEnum {
     OPPRETTET,
     FEIL_KANAL,
     MANGLENDE_JOURNALPOST,
+    FEIL_TYPE,
 }
