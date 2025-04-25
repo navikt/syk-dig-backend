@@ -35,6 +35,7 @@ class SafJournalpostServiceTest {
                     avsenderMottaker = null,
                     bruker = null,
                     tema = null,
+                    journalposttype = null,
                 ),
             )
 
@@ -70,6 +71,7 @@ class SafJournalpostServiceTest {
                     avsenderMottaker = null,
                     bruker = null,
                     tema = null,
+                    journalposttype = null,
                 ),
             )
         val result = safJournalpostService.getDokumenterM2m(journalpostId, sykmeldingId, source)
@@ -100,6 +102,7 @@ class SafJournalpostServiceTest {
                     avsenderMottaker = null,
                     bruker = null,
                     tema = null,
+                    journalposttype = null,
                 ),
             )
 

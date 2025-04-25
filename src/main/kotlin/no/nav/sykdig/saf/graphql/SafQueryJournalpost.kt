@@ -4,6 +4,7 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
     query FindJournalpost(${"$"}id: String!) {
         journalpost(journalpostId: ${"$"}id) {
             tittel
+            journalposttype
             kanal
             tema
             journalstatus
@@ -51,6 +52,7 @@ data class SafQueryJournalpost(
 
 data class SafJournalpost(
     val tittel: String?,
+    val journalposttype: Journalposttype?,
     val journalstatus: Journalstatus?,
     val avsenderMottaker: AvsenderMottaker?,
     val bruker: Bruker?,
@@ -94,6 +96,12 @@ enum class Journalstatus {
     RESERVERT,
     OPPLASTING_DOKUMENT,
     UKJENT,
+}
+
+enum class Journalposttype {
+    I,
+    U,
+    N,
 }
 
 data class DokumentInfo(
