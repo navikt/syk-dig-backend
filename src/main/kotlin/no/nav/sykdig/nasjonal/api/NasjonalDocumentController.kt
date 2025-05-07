@@ -9,22 +9,21 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/v1/proxy")
-class NasjonalOppgaveController(
+class NasjonalDocumentController(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
 ) {
     val log = applog()
     val securelog = securelog()
 
-    @GetMapping("/pdf/{oppgaveId}/{dokumentInfoId}")
+    @GetMapping("/api/document/nasjonal/{oppgaveId}/{dokumentInfoId}")
     @ResponseBody
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/pdf/{oppgaveId}/{dokumentInfoId}')")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/document/nasjonal/{oppgaveId}/{dokumentInfoId}')")
     @WithSpan
     fun registerPdf(
         @PathVariable oppgaveId: String,
         @PathVariable dokumentInfoId: String,
     ): ResponseEntity<Any> {
-        log.info("Forsøker å hente pdf for oppgaveId $oppgaveId og dokumentInfoId $dokumentInfoId")
+        log.info("Forsøker å hente nasjonal pdf for oppgaveId $oppgaveId og dokumentInfoId $dokumentInfoId")
         return nasjonalOppgaveService.getRegisterPdf(oppgaveId, dokumentInfoId)
     }
 }
