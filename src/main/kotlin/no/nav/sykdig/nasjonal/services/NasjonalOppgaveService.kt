@@ -75,23 +75,18 @@ class NasjonalOppgaveService(
     }
 
     suspend fun korrigerSykmeldingMedOppgaveId(oppgaveId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell): LagreOppgaveResult {
-        val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) ?: return LagreNasjonalOppgaveStatus(
-            oppgaveId,
-            status = LagreNasjonalOppgaveStatusEnum.FINNES_IKKE,
-        )
+        val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) ?: throw DgsEntityNotFoundException("Fant ikke oppgave som skal korrigeres, oppgaveId: $oppgaveId")
         log.info("Forsøker å korrigere sykmelding med oppgaveId $oppgaveId")
         return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgave.oppgaveId.toString(), LagreNasjonalOppgaveStatusEnum.OPPDATERT)
     }
 
     suspend fun sendOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): LagreOppgaveResult {
         securelog.info("sender papirsykmelding med oppgaveId $oppgaveId {}", kv("smregistreringManuell", objectMapper.writeValueAsString(papirSykmelding)))
-        val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) ?: return LagreNasjonalOppgaveStatus(
-            oppgaveId,
-            status = LagreNasjonalOppgaveStatusEnum.FINNES_IKKE,
-        )
+        val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) ?: throw DgsEntityNotFoundException("Fant ikke oppgave som skal sendes, oppgaveId: $oppgaveId")
+
         if (oppgave.ferdigstilt) {
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
-            throw DgsEntityNotFoundException("Oppgave med id $oppgaveId er allerede ferdigstilt")
+            throw DgsBadRequestException("Oppgave med id $oppgaveId er allerede ferdigstilt")
         }
         log.info("Forsøker å sende inn papirsykmelding med sykmeldingId ${oppgave.sykmeldingId} oppgaveId ${oppgave.oppgaveId}")
         return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgaveId, LagreNasjonalOppgaveStatusEnum.FERDIGSTILT)
