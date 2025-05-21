@@ -73,7 +73,7 @@ class JournalpostDataFetcher(
                     journalpostId = trimedJournalpostId,
                     status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
                 )
-        if (journalpost.journalposttype == Journalposttype.N) {
+        if (journalpost.journalposttype == Journalposttype.N || journalpost.journalposttype == Journalposttype.U) {
             return JournalpostStatus(
                 journalpostId = trimedJournalpostId,
                 status = JournalpostStatusEnum.FEIL_TYPE,
