@@ -14,6 +14,8 @@ import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import no.nav.sykdig.shared.objectMapper
 import no.nav.sykdig.shared.securelog
+import no.nav.sykdig.shared.utils.PROCESSING_TARGET_HEADER
+import no.nav.sykdig.shared.utils.TSM_PROCESSING_TARGET_VALUE
 import no.nav.sykdig.shared.utils.createTitle
 import no.nav.sykdig.shared.utils.createTitleNavNo
 import no.nav.sykdig.shared.utils.createTitleRina
@@ -74,13 +76,14 @@ class FerdigstillingService(
         updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
 
         try {
+            val record = ProducerRecord(OK_SYKMELDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding)
+            record.headers()
+                .add(PROCESSING_TARGET_HEADER, TSM_PROCESSING_TARGET_VALUE.toByteArray())
             sykmeldingOKProducer.send(
-                ProducerRecord(OK_SYKMELDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
+                record,
             ).get()
             log.info(
-                "Sykmelding sendt to kafka topic {} sykmelding id {}",
-                OK_SYKMELDING_TOPIC,
-                receivedSykmelding.sykmelding.id,
+                "Sykmelding sendt to kafka topic $OK_SYKMELDING_TOPIC sykmelding id ${receivedSykmelding.sykmelding.id}",
             )
         } catch (exception: Exception) {
             log.error("failed to send sykmelding to kafka result for sykmelding {}", receivedSykmelding.sykmelding.id)
@@ -166,8 +169,12 @@ class FerdigstillingService(
                 journalpostId = oppgave.journalpostId,
                 opprettet = oppgave.opprettet.toLocalDateTime(),
             )
+
+        val record = ProducerRecord(OK_SYKMELDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding)
+        record.headers()
+            .add(PROCESSING_TARGET_HEADER, TSM_PROCESSING_TARGET_VALUE.toByteArray())
         sykmeldingOKProducer.send(
-            ProducerRecord(OK_SYKMELDING_TOPIC, receivedSykmelding.sykmelding.id, receivedSykmelding),
+            record,
         ).get()
         log.info("sendt oppdatert sykmelding med id ${receivedSykmelding.sykmelding.id}")
         updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
