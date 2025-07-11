@@ -206,19 +206,7 @@ class DokarkivClient(
             "navno" -> {
                 return OppdaterJournalpostRequest(
                     tema = "SYK",
-                    avsenderMottaker =
-                        createAvsenderMottaker(
-                            orginalAvsenderMottaker = orginalAvsenderMottaker,
-                            land =
-                                if (landAlpha3 != null) {
-                                    mapFromAlpha3Toalpha2(landAlpha3)
-                                } else {
-                                    null
-                                },
-                            source = source,
-                            sykmeldtNavn = sykmeldtNavn,
-                            sykmeldtFnr = fnr,
-                        ),
+                    avsenderMottaker = null,
                     bruker =
                         DokBruker(
                             id = fnr,
