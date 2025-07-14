@@ -6,7 +6,6 @@ import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.Sykmelding
 import no.nav.sykdig.utenlandsk.mapping.extractHelseOpplysningerArbeidsuforhet
-import no.nav.sykdig.utenlandsk.mapping.fellesformatMarshaller
 import no.nav.sykdig.utenlandsk.mapping.get
 import no.nav.sykdig.utenlandsk.mapping.toString
 import no.nav.sykdig.nasjonal.helsenett.SykmelderService
@@ -20,6 +19,7 @@ import no.nav.sykdig.utenlandsk.models.Merknad
 import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.utils.getLocalDateTime
 import no.nav.sykdig.shared.utils.mapsmRegistreringManuelltTilFellesformat
+import no.nav.sykdig.utenlandsk.mapping.createMarshaller
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
@@ -80,7 +80,7 @@ class NasjonalSykmeldingMapper(
             legekontorReshId = null,
             mottattDato = oppgave.datoOpprettet?.toLocalDateTime() ?: getLocalDateTime(msgHead.msgInfo.genDate),
             rulesetVersion = healthInformation.regelSettVersjon,
-            fellesformat = fellesformatMarshaller.toString(fellesformat),
+            fellesformat = createMarshaller().toString(fellesformat),
             tssid = tssId ?: "",
             merknader = createMerknad(sykmelding),
             partnerreferanse = null,

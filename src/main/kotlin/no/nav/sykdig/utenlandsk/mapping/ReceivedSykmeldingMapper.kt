@@ -47,7 +47,7 @@ fun mapToReceivedSykmelding(
         legekontorReshId = null,
         mottattDato = opprettet,
         rulesetVersion = null,
-        fellesformat = fellesformatMarshaller.toString(fellesformat),
+        fellesformat = createMarshaller().toString(fellesformat),
         tssid = null,
         merknader = null,
         partnerreferanse = null,
