@@ -9,6 +9,8 @@ import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.dokarkiv.model.*
 import no.nav.sykdig.saf.graphql.AvsenderMottaker
 import no.nav.sykdig.saf.graphql.AvsenderMottakerIdType
+import no.nav.sykdig.saf.graphql.Journalposttype
+import no.nav.sykdig.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.shared.objectMapper
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.shared.utils.createTitle
@@ -67,7 +69,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        orginalAvsenderMottaker: AvsenderMottaker?,
+        journalPost: SafQueryJournalpost,
         sykmeldtNavn: String?,
     ) {
         oppdaterUtenlandskJournalpost(
@@ -79,7 +81,7 @@ class DokarkivClient(
             perioder = perioder,
             source = source,
             avvisningsGrunn = avvisningsGrunn,
-            orginalAvsenderMottaker = orginalAvsenderMottaker,
+            journalPost = journalPost,
             sykmeldtNavn = sykmeldtNavn,
         )
         ferdigstillJournalpost(
@@ -99,7 +101,7 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        orginalAvsenderMottaker: AvsenderMottaker?,
+        journalPost: SafQueryJournalpost,
         sykmeldtNavn: String?,
     ) {
         val body =
@@ -110,7 +112,7 @@ class DokarkivClient(
                 perioder,
                 source,
                 avvisningsGrunn,
-                orginalAvsenderMottaker,
+                journalPost,
                 sykmeldtNavn,
             )
         oppdaterJournalpostRequest(body, sykmeldingId, journalpostId)
@@ -169,25 +171,14 @@ class DokarkivClient(
         perioder: List<Periode>?,
         source: String,
         avvisningsGrunn: String?,
-        orginalAvsenderMottaker: AvsenderMottaker?,
+        journalPost: SafQueryJournalpost,
         sykmeldtNavn: String?,
     ): OppdaterJournalpostRequest {
         when (source) {
             "rina" -> {
                 return OppdaterJournalpostRequest(
                     avsenderMottaker =
-                        createAvsenderMottaker(
-                            orginalAvsenderMottaker = orginalAvsenderMottaker,
-                            land =
-                                if (landAlpha3 != null) {
-                                    mapFromAlpha3Toalpha2(landAlpha3)
-                                } else {
-                                    null
-                                },
-                            source = source,
-                            sykmeldtNavn = sykmeldtNavn,
-                            sykmeldtFnr = fnr,
-                        ),
+                        avsenderMottakerRequest(journalPost, landAlpha3, source, sykmeldtNavn, fnr),
                     bruker =
                         DokBruker(
                             id = fnr,
@@ -206,7 +197,7 @@ class DokarkivClient(
             "navno" -> {
                 return OppdaterJournalpostRequest(
                     tema = "SYK",
-                    avsenderMottaker = null,
+                    avsenderMottaker = avsenderMottakerRequest(journalPost, landAlpha3, source, sykmeldtNavn, fnr),
                     bruker =
                         DokBruker(
                             id = fnr,
@@ -225,18 +216,7 @@ class DokarkivClient(
             else -> {
                 return OppdaterJournalpostRequest(
                     avsenderMottaker =
-                        createAvsenderMottaker(
-                            orginalAvsenderMottaker = orginalAvsenderMottaker,
-                            land =
-                                if (landAlpha3 != null) {
-                                    mapFromAlpha3Toalpha2(landAlpha3)
-                                } else {
-                                    null
-                                },
-                            source = source,
-                            sykmeldtNavn = sykmeldtNavn,
-                            sykmeldtFnr = fnr,
-                        ),
+                        avsenderMottakerRequest(journalPost, landAlpha3, source, sykmeldtNavn, fnr),
                     bruker =
                         DokBruker(
                             id = fnr,
@@ -254,6 +234,30 @@ class DokarkivClient(
         }
     }
 
+    private fun avsenderMottakerRequest(
+        journalPost: SafQueryJournalpost,
+        landAlpha3: String?,
+        source: String,
+        sykmeldtNavn: String?,
+        fnr: String,
+    ): AvsenderMottakerRequest? {
+        if(journalPost.journalpost?.kanal == "NAV_NO") {
+            return null
+        }
+        return createAvsenderMottaker(
+            orginalAvsenderMottaker = journalPost.journalpost?.avsenderMottaker ?: throw RuntimeException("AvsenderMottaker er null"),
+            land =
+                if (landAlpha3 != null) {
+                    mapFromAlpha3Toalpha2(landAlpha3)
+                } else {
+                    null
+                },
+            source = source,
+            sykmeldtNavn = sykmeldtNavn,
+            sykmeldtFnr = fnr,
+        )
+    }
+
     fun createAvsenderMottaker(
         orginalAvsenderMottaker: AvsenderMottaker?,
         land: String?,
@@ -262,7 +266,7 @@ class DokarkivClient(
         sykmeldtFnr: String,
     ): AvsenderMottakerRequest {
         return AvsenderMottakerRequest(
-            navn = mapNavn(orginalAvsenderMottaker, land, source, sykmeldtNavn),
+            navn = mapNavn(orginalAvsenderMottaker, source, sykmeldtNavn),
             id = mapId(orginalAvsenderMottaker, sykmeldtFnr),
             idType = mapidType(orginalAvsenderMottaker?.type),
             land = land,
@@ -284,12 +288,11 @@ class DokarkivClient(
 
     fun mapNavn(
         orginalAvsenderMottaker: AvsenderMottaker?,
-        land: String?,
         source: String,
         sykmeldtNavn: String?,
     ): String? {
         return if (!orginalAvsenderMottaker?.navn.isNullOrBlank()) {
-            orginalAvsenderMottaker?.navn
+            orginalAvsenderMottaker.navn
         } else if (orginalAvsenderMottaker?.type == AvsenderMottakerIdType.FNR && !sykmeldtNavn.isNullOrBlank()) {
             sykmeldtNavn
         } else if (orginalAvsenderMottaker?.type == AvsenderMottakerIdType.FNR && sykmeldtNavn.isNullOrBlank()) {
@@ -376,7 +379,6 @@ class DokarkivClient(
         pasientFnr: String,
         sykmeldingId: String,
         sykmelder: Sykmelder,
-        loggingMeta: LoggingMeta,
         navEnhet: String,
         avvist: Boolean,
         perioder: List<Periode>?,

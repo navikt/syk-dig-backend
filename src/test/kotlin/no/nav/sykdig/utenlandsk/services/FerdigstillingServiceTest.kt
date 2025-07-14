@@ -185,7 +185,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
             perioder,
             "scanning",
             null,
-            journalpost.journalpost?.avsenderMottaker!!,
+            journalpost,
             "Fornavn Etternavn",
         )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())

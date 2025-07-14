@@ -106,7 +106,6 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
             pasientFnr = any(),
             sykmeldingId = any(),
             sykmelder = any(),
-            loggingMeta = any(),
             navEnhet = any(),
             avvist = any(),
             perioder = any(),

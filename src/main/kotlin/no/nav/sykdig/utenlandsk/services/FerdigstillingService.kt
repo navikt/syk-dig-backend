@@ -56,7 +56,6 @@ class FerdigstillingService(
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
             updateUtenlandskDocumentTitle(oppgave, receivedSykmelding, isAvvist = true)
         } else {
-            val hentAvvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillUtenlandskJournalpost(
                 landAlpha3 = validatedValues.skrevetLand,
                 fnr = sykmeldt.fnr,
@@ -68,7 +67,7 @@ class FerdigstillingService(
                 source = oppgave.source,
                 avvisningsGrunn = null,
                 sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
-                orginalAvsenderMottaker = hentAvvsenderMottar,
+                journalPost = journalpost,
             )
         }
 
@@ -143,7 +142,6 @@ class FerdigstillingService(
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info("Journalpost med id ${oppgave.journalpostId} er allerede ferdigstilt, sykmeldingId ${oppgave.sykmeldingId}")
         } else {
-            val hentAvsenderMottar = safJournalpostGraphQlClient.getAvsenderMottar(journalpost)
             dokarkivClient.oppdaterOgFerdigstillUtenlandskJournalpost(
                 landAlpha3 = null,
                 fnr = sykmeldt.fnr,
@@ -155,7 +153,7 @@ class FerdigstillingService(
                 source = oppgave.source,
                 avvisningsGrunn = avvisningsGrunn,
                 sykmeldtNavn = sykmeldt.navn.toFormattedNameString(),
-                orginalAvsenderMottaker = hentAvsenderMottar,
+                journalPost = journalpost,
             )
         }
     }
