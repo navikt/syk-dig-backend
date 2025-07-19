@@ -30,7 +30,9 @@ spec:
   replicas:
     min: 1
     max: 2
-    cpuThresholdPercentage: 90
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
   port: 8080
   liveness:
     path: /internal/health
@@ -54,8 +56,8 @@ spec:
     limits:
       memory: 3Gi
     requests:
-      cpu: 100m
-      memory: 900Mi
+      cpu: 50m
+      memory: 800Mi
   kafka:
     pool: nav-dev
   azure:
