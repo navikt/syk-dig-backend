@@ -146,7 +146,6 @@ class JournalpostService(
                 pasientFnr = ferdigstillRegistrering.pasientFnr,
                 sykmeldingId = ferdigstillRegistrering.sykmeldingId,
                 sykmelder = ferdigstillRegistrering.sykmelder,
-                loggingMeta = loggingMeta,
                 navEnhet = ferdigstillRegistrering.navEnhet,
                 avvist = ferdigstillRegistrering.avvist,
                 perioder = perioder
