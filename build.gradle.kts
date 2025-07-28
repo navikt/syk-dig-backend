@@ -20,7 +20,7 @@ repositories {
     }
 }
 
-val postgresVersion = "42.7.5"
+val postgresVersion = "42.7.7"
 val snakeYamlVersion = "2.4"
 val diagnosekoderVersion = "1.2025.0"
 val tokenSupportVersion = "5.0.19"
