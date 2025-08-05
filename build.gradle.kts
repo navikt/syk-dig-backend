@@ -91,7 +91,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springBootResourceVersion")
     implementation("com.squareup.okhttp3:okhttp:$okhttp3version")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    implementation("com.papertrailapp:logback-syslog4j:$logbacksyslog4jVersion")
     implementation("no.nav.security:token-support:$tokenSupportVersion")
     implementation("no.nav.security:token-validation-core:$tokenSupportVersion")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
