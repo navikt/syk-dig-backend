@@ -1,10 +1,8 @@
 package no.nav.sykdig.nasjonal.services
 
 import net.logstash.logback.argument.StructuredArguments
-import net.logstash.logback.argument.StructuredArguments.fields
 import no.nav.sykdig.nasjonal.clients.NyRegelClient
 import no.nav.sykdig.shared.*
-import no.nav.sykdig.nasjonal.clients.RegelClient
 import no.nav.sykdig.nasjonal.models.RuleHitCustomError
 import no.nav.sykdig.nasjonal.models.WhitelistedRuleHit
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
@@ -17,12 +15,11 @@ const val HPR_GODKJENNING_KODE = 7704
 
 @Service
 class NasjonalRegelvalideringService(
-    private val regelClient: RegelClient,
     private val nyRegelClient: NyRegelClient,
 ) {
     val log = applog()
     fun validerNasjonalSykmelding(receivedSykmelding: ReceivedSykmelding, smRegistreringManuell: SmRegistreringManuell, sykmeldingId: String, loggingMeta: LoggingMeta, oppgaveId: String, sykmelder: Sykmelder): ValidationResult {
-        val validationResult = regelClient.valider(receivedSykmelding, sykmeldingId)
+        val validationResult = nyRegelClient.valider(receivedSykmelding, sykmeldingId)
         log.info(
             "Resultat: {}, {}, {}",
             StructuredArguments.keyValue("ruleStatus", validationResult.status.name),
@@ -32,23 +29,6 @@ class NasjonalRegelvalideringService(
             ),
             StructuredArguments.fields(loggingMeta),
         )
-
-        // Regula shadow test, compare with old rules
-        try {
-            val nyValidationResult = nyRegelClient.valider(receivedSykmelding, sykmeldingId)
-            log.info(
-                """${if (validationResult == nyValidationResult) "✅ SHADOW TEST OK ✅" else "❌ SHADOW TEST DIVERGENCE ❌"}
-                            |
-                            | Gammel: ${validationResult.status}
-                            | Ny: ${nyValidationResult.status}
-                            | 
-                            | Gammel regler: ${validationResult.ruleHits.joinToString(", ", "(", ")") { it.ruleName }}
-                            | Ny regler: ${nyValidationResult.ruleHits.joinToString(", ", "(", ")") { it.ruleName }}
-                        """.trimMargin(),
-            )
-        } catch (e: Exception) {
-            log.error("❌ SHADOW TEST FAILED TO EXECUTE ❌ {}", fields(loggingMeta), e)
-        }
 
         return checkValidState(oppgaveId, smRegistreringManuell, sykmelder, validationResult) ?: validationResult
     }

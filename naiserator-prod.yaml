@@ -85,7 +85,6 @@ spec:
         - application: smtss
           namespace: teamsykmelding
           cluster: prod-gcp
-        - application: syfosmpapirregler
         - application: syfosmregler
       external:
         - host: saf.prod-fss-pub.nais.io
@@ -128,10 +127,6 @@ spec:
       value: http://smtss
     - name: SMTSS_CLIENT_ID
       value: prod-gcp.teamsykmelding.smtss
-    - name: SYFOSMPAPIRREGLER_URL
-      value: http://syfosmpapirregler
-    - name: SYFOSMPAPIRREGLER_CLIENT_ID
-      value: prod-gcp.teamsykmelding.syfosmpapirregler
     - name: SYFOSMREGLER_URL
       value: http://syfosmregler
     - name: SYFOSMREGLER_CLIENT_ID
