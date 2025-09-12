@@ -29,7 +29,7 @@ spec:
         tier: db-custom-1-3840
   replicas:
     min: 2
-    max: 4
+    max: 6
     scalingStrategy:
       cpu:
         thresholdPercentage: 90
@@ -57,7 +57,7 @@ spec:
       memory: 2Gi
     requests:
       cpu: 80m
-      memory: 960Mi
+      memory: 1000Mi
   kafka:
     pool: nav-prod
   azure:
