@@ -69,7 +69,7 @@ class SykDigOppgaveService(
             log.warn("Fant ikke oppgave med sykmeldingId $sykmeldingId")
             throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
-        log.info("Hentet oppgave {}", StructuredArguments.fields(loggingMeta))
+        log.info("Hentet oppgave(getOppgaveFromSykmeldingId) {}", StructuredArguments.fields(loggingMeta))
         return oppgave
     }
 
