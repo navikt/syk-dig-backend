@@ -78,7 +78,7 @@ class MottaOppgaverFraKafka(
                 }
             } else {
                 logger.warn(
-                    "Oppgaven $oppgaveId, journalpostId ${oppgave.journalpostId} er ikke tildelt $NAV_OPPFOLGNING_UTLAND",
+                    "Oppgaven $oppgaveId, journalpostId ${oppgave.journalpostId} er ikke tildelt $NAV_OPPFOLGNING_UTLAND men ${oppgave.tildeltEnhetsnr}",
                 )
             }
         }

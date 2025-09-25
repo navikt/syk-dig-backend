@@ -44,8 +44,7 @@ class NasjonalSykmeldingMapper(
 
         val datoOpprettet = oppgave.datoOpprettet
         val journalpostId = oppgave.journalpostId
-        val fellesformat =
-            mapsmRegistreringManuelltTilFellesformat(
+        val fellesformat = mapsmRegistreringManuelltTilFellesformat(
                 smRegistreringManuell = smRegistreringManuell,
                 pdlPasient = pasient,
                 sykmelder = sykmelder,

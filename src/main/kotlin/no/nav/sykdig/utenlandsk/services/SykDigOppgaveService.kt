@@ -69,7 +69,9 @@ class SykDigOppgaveService(
             log.warn("Fant ikke oppgave med sykmeldingId $sykmeldingId")
             throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
-        log.info("Hentet oppgave(getOppgaveFromSykmeldingId) {}", StructuredArguments.fields(loggingMeta))
+
+        log.info("Hentet oppgave ${oppgave.oppgaveId} fra $sykmeldingId", StructuredArguments.fields(loggingMeta))
+
         return oppgave
     }
 
@@ -80,7 +82,7 @@ class SykDigOppgaveService(
             log.warn("Fant ikke oppgave med id $oppgaveId")
             throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
-        log.info("Hentet oppgave {} ", StructuredArguments.fields(loggingMeta))
+        log.info("Hentet oppgave $oppgaveId", StructuredArguments.fields(loggingMeta))
         return oppgave
     }
 
@@ -92,11 +94,8 @@ class SykDigOppgaveService(
             "Henter eksisterende journalføringsoppgave for å ferdigstille før vi digitaliserer utenlandsk/papirsykmelding {}",
             kv("journalpostId", journalpostId),
         )
-        val existingOppgave = getExistingOppgave(journalpostId, journalpost)
-        if (existingOppgave == null) {
-            log.warn("oppgave er null, får ikke lukket oppgave {}", kv("journalpostId", journalpostId))
-            return
-        }
+        val existingOppgave = getExistingOppgave(journalpostId, journalpost) ?: return
+
         if (existingOppgave.id == null) {
             log.warn("oppgaveId er null, får ikke lukket oppgave {}", kv("journalpostId", journalpostId))
             return
