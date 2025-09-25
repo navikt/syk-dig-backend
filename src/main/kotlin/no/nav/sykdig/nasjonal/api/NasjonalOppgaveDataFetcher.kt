@@ -18,6 +18,7 @@ import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.nasjonal.services.PasientNavnService
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.exceptions.IkkeTilgangException
+import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.tilgangskontroll.OppgaveSecurityService
 import org.springframework.security.access.prepost.PostAuthorize
@@ -30,7 +31,7 @@ class NasjonalOppgaveDataFetcher(
     private val nasjonalOppgaveService: NasjonalOppgaveService,
     private val oppgaveSecurityService: OppgaveSecurityService,
     private val pasientNavnService: PasientNavnService,
-    private val sykmelderService: SykmelderService
+    private val sykmelderService: SykmelderService,
 ) {
 
     companion object {
@@ -82,7 +83,8 @@ class NasjonalOppgaveDataFetcher(
         @InputArgument navEnhet: String,
         @InputArgument sykmeldingValues: NasjonalSykmeldingValues,
         @InputArgument status: SykmeldingUnderArbeidStatus,
-        dfe: DataFetchingEnvironment): LagreOppgaveResult {
+        dfe: DataFetchingEnvironment,
+    ): LagreOppgaveResult {
         val callId = UUID.randomUUID().toString()
 
         when (status) {
@@ -93,7 +95,7 @@ class NasjonalOppgaveDataFetcher(
                         ferdigstiltSykmeldingValues,
                         navEnhet,
                         callId,
-                        oppgaveId
+                        oppgaveId,
                     ).also { log.info("Registrert nasjonal sykmelding med oppgaveId $oppgaveId") }
                 } else {
                     log.warn("Veileder har ikke tilgang til å registrere oppgave med oppgaveId $oppgaveId")
@@ -108,7 +110,7 @@ class NasjonalOppgaveDataFetcher(
                         oppgaveId,
                         navEnhet,
                         callId,
-                        oppdatertSykmeldingValues
+                        oppdatertSykmeldingValues,
                     ).also { log.info("Korrigert nasjonal sykmelding med oppgaveId $oppgaveId") }
                 } else {
                     log.warn("Veileder har ikke tilgang til å korriger sykmelding med oppgaveId $oppgaveId")
@@ -133,15 +135,22 @@ class NasjonalOppgaveDataFetcher(
     }
 
     @DgsQuery(field = DgsConstants.QUERY.Sykmelder)
-    fun getSykmelder(@InputArgument hprNummer: String, dfe: DataFetchingEnvironment): Sykmelder {
+    fun getSykmelder(@InputArgument hprNummer: String, dfe: DataFetchingEnvironment): Sykmelder? {
         if (hprNummer.isBlank() || !hprNummer.all { it.isDigit() }) {
             log.info("Ugyldig path parameter: hprNummer")
             throw DgsInvalidInputArgumentException("Ugyldig path parameter: hprNummer")
         }
         val callId = UUID.randomUUID().toString()
         securelog.info("Henter sykmelder med callId $callId and hprNummer = $hprNummer")
-        val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
-        return mapSykmelder(sykmelder)
+        try {
+            val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
+            return mapSykmelder(sykmelder)
+        } catch (_: SykmelderNotFoundException) {
+            return null
+        } catch (e: Exception) {
+            throw e
+        }
+
     }
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/dgs/oppgave/{oppgaveId}/tilgosys')")
@@ -156,7 +165,7 @@ class NasjonalOppgaveDataFetcher(
         nasjonalOppgaveService.oppgaveTilGosys(oppgaveId)
         return LagreNasjonalOppgaveStatus(
             oppgaveId = oppgaveId,
-            status = LagreNasjonalOppgaveStatusEnum.IKKE_EN_SYKMELDING
+            status = LagreNasjonalOppgaveStatusEnum.IKKE_EN_SYKMELDING,
         )
     }
 
