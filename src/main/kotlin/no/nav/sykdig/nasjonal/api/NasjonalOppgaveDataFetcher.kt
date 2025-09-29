@@ -138,6 +138,7 @@ class NasjonalOppgaveDataFetcher(
     fun getSykmelder(@InputArgument hprNummer: String, dfe: DataFetchingEnvironment): Sykmelder? {
         if (hprNummer.isBlank() || !hprNummer.all { it.isDigit() }) {
             log.info("Ugyldig path parameter: hprNummer")
+            securelog.info("Ugyldig path parameter: hprNummer: $hprNummer")
             throw DgsInvalidInputArgumentException("Ugyldig path parameter: hprNummer")
         }
         val callId = UUID.randomUUID().toString()
