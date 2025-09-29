@@ -27,7 +27,7 @@ class SykmelderService(
         hprNummer: String,
         callId: String,
     ): Sykmelder {
-        val hprPadded = padHpr(hprNummer)
+        val hprPadded = padHpr(hprNummer.trim())
         val behandler = helsenettClient.getBehandler(hprPadded, callId)
         securelog.info("hentet behandler: ${behandler.fnr} hprNummer: $hprNummer, callId=$callId")
         if (behandler.fnr == null) {

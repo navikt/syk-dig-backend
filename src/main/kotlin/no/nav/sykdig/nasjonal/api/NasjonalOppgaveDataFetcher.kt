@@ -136,22 +136,22 @@ class NasjonalOppgaveDataFetcher(
 
     @DgsQuery(field = DgsConstants.QUERY.Sykmelder)
     fun getSykmelder(@InputArgument hprNummer: String, dfe: DataFetchingEnvironment): Sykmelder? {
-        if (hprNummer.isBlank() || !hprNummer.all { it.isDigit() }) {
+        val hpr = hprNummer.trim()
+        if (hpr.isBlank() || !hpr.all { it.isDigit() }) {
             log.info("Ugyldig path parameter: hprNummer")
-            securelog.info("Ugyldig path parameter: hprNummer: $hprNummer")
+            securelog.info("Ugyldig path parameter: hprNummer: $hpr")
             throw DgsInvalidInputArgumentException("Ugyldig path parameter: hprNummer")
         }
         val callId = UUID.randomUUID().toString()
-        securelog.info("Henter sykmelder med callId $callId and hprNummer = $hprNummer")
+        securelog.info("Henter sykmelder med callId $callId and hprNummer = $hpr")
         try {
-            val sykmelder = sykmelderService.getSykmelder(hprNummer, callId)
+            val sykmelder = sykmelderService.getSykmelder(hpr, callId)
             return mapSykmelder(sykmelder)
         } catch (_: SykmelderNotFoundException) {
             return null
         } catch (e: Exception) {
             throw e
         }
-
     }
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/dgs/oppgave/{oppgaveId}/tilgosys')")
