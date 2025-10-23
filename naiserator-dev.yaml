@@ -15,8 +15,6 @@ spec:
         databases:
           - name: syk-dig-backend
             envVarPrefix: DB
-            users:
-              - name: syk-dig-oppgavelytter
         diskAutoresize: true
         highAvailability: false
         diskType: SSD
