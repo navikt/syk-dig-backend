@@ -22,7 +22,7 @@ type Mutation {
 
     oppgaveTilbakeTilGosys(
         oppgaveId: String!
-        enhetId: String!
+        enhetId: String
     ): DigitaliseringsoppgaveStatus
 
     avvis(
@@ -58,7 +58,7 @@ type Mutation {
 
     oppgaveTilbakeTilGosysNasjonal(
         oppgaveId: String!,
-        enhetId: String!
+        enhetId: String
     ): LagreNasjonalOppgaveStatus
 
     avvisNasjonalOppgave(
