@@ -22,7 +22,7 @@ type Mutation {
 
     oppgaveTilbakeTilGosys(
         oppgaveId: String!
-        enhetId: String
+        navEnhet: String
     ): DigitaliseringsoppgaveStatus
 
     avvis(
@@ -41,6 +41,7 @@ type Mutation {
     sykmeldingFraJournalpost(
         journalpostId: String!
         norsk: Boolean!
+        navEnhet: String
     ): JournalpostStatus!
 
     oppdaterDigitalisertSykmelding(
@@ -58,7 +59,7 @@ type Mutation {
 
     oppgaveTilbakeTilGosysNasjonal(
         oppgaveId: String!,
-        enhetId: String
+        navEnhet: String
     ): LagreNasjonalOppgaveStatus
 
     avvisNasjonalOppgave(
