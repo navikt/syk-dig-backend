@@ -162,14 +162,14 @@ class UtenlandskOppgaveDataFetcher(
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
     fun oppgaveTilbakeTilGosys(
         @InputArgument oppgaveId: String,
-        @InputArgument enhetId: String,
+        @InputArgument navEnhet: String,
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveStatus {
         val navEpost: String = dfe.graphQlContext.get("username")
         val navIdent: String = dfe.graphQlContext.get("nav_ident")
         utenlandskOppgaveService.ferdigstillOppgaveSendTilGosys(
             oppgaveId = oppgaveId,
-            enhetId = enhetId,
+            navEnhet = navEnhet,
             navIdent = navIdent,
             navEpost = navEpost,
         )

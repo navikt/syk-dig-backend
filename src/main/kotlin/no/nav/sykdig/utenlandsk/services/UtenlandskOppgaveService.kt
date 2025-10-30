@@ -89,7 +89,7 @@ class UtenlandskOppgaveService(
   // TODO sjekk endretAvEnhetsnr her
     fun ferdigstillOppgaveSendTilGosys(
         oppgaveId: String,
-        enhetId: String,
+        navEnhet: String,
         navIdent: String,
         navEpost: String,
     ): SykDigOppgave {
@@ -100,7 +100,7 @@ class UtenlandskOppgaveService(
                 callId = oppgave.sykmeldingId.toString(),
             )
 
-        gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, endretAvEnhetsnr = enhetId)
+        gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, endretAvEnhetsnr = navEnhet)
         sykDigOppgaveService.ferdigstillOppgaveGosys(oppgave, navEpost)
         val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
 
