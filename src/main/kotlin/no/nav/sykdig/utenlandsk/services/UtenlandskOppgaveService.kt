@@ -86,8 +86,10 @@ class UtenlandskOppgaveService(
         metricRegister.ferdigstiltOppgave.increment()
     }
 
+  // TODO sjekk endretAvEnhetsnr her
     fun ferdigstillOppgaveSendTilGosys(
         oppgaveId: String,
+        enhetId: String,
         navIdent: String,
         navEpost: String,
     ): SykDigOppgave {
@@ -98,7 +100,7 @@ class UtenlandskOppgaveService(
                 callId = oppgave.sykmeldingId.toString(),
             )
 
-        gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent)
+        gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, endretAvEnhetsnr = enhetId)
         sykDigOppgaveService.ferdigstillOppgaveGosys(oppgave, navEpost)
         val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
 
@@ -106,6 +108,7 @@ class UtenlandskOppgaveService(
         return SykDigOppgave(updatedOppgave, sykmeldt)
     }
 
+    // TODO sjekk endretAvEnhetsnr her
     @Transactional
     fun avvisOppgave(
         oppgaveId: String,
@@ -133,7 +136,7 @@ class UtenlandskOppgaveService(
                 navIdent = navIdent,
             )
 
-        gosysService.avvisOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, oppgaveBeskrivelse)
+        gosysService.avvisOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, oppgaveBeskrivelse, enhetId)
 
         val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         metricRegister.avvistSendtTilGosys.increment()

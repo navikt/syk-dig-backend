@@ -52,12 +52,13 @@ class OppgaveClient(
     fun ferdigstillOppgave(
         oppgaveId: String,
         sykmeldingId: String,
+        endretAvEnhetsnr: String?
     ) {
         val oppgave = getOppgave(oppgaveId, sykmeldingId)
         if (oppgave.status == OppgaveStatus.FERDIGSTILT || oppgave.status == OppgaveStatus.FEILREGISTRERT) {
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
         } else {
-            ferdigstillOppgave(oppgaveId, sykmeldingId, oppgave.versjon)
+            ferdigstillOppgave(oppgaveId, sykmeldingId, oppgave.versjon, endretAvEnhetsnr)
             log.info("Ferdigstilt oppgave med id $oppgaveId i Oppgave")
         }
     }
@@ -67,7 +68,8 @@ class OppgaveClient(
         sykmeldingId: String,
         ferdigstillRegistrering: FerdigstillRegistrering,
         loggingMeta: LoggingMeta,
-        beskrivelse: String?
+        beskrivelse: String?,
+        endretAvEnhetsnr: String?,
     ) {
         val oppgave = getNasjonalOppgave(oppgaveId, sykmeldingId)
         if (oppgave.status == OppgaveStatus.FERDIGSTILT.name || oppgave.status == OppgaveStatus.FEILREGISTRERT.name) {
@@ -84,6 +86,7 @@ class OppgaveClient(
             tildeltEnhetsnr = ferdigstillRegistrering.navEnhet,
             mappeId = null,
             beskrivelse = if (beskrivelse?.isNotBlank() == true) beskrivelse else oppgave.beskrivelse,
+            endretAvEnhetsnr = endretAvEnhetsnr
         )
         log.info(
             "Ferdigstiller nasjonal oppgave med {}, {}",
@@ -265,6 +268,7 @@ class OppgaveClient(
         oppgaveId: String,
         sykmeldingId: String,
         oppgaveVersjon: Int,
+        endretAvEnhetsnr: String?,
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -275,6 +279,7 @@ class OppgaveClient(
                 versjon = oppgaveVersjon,
                 status = OppgaveStatus.FERDIGSTILT,
                 id = oppgaveId.toInt(),
+                endretAvEnhetsnr = endretAvEnhetsnr
             )
         try {
             oppgaveRestTemplate.exchange(
@@ -352,6 +357,7 @@ class OppgaveClient(
         oppgaveId: Int,
         oppgaveVersjon: Int,
         journalpostId: String,
+        endretAvEnhetsnr: String?
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -362,6 +368,7 @@ class OppgaveClient(
                 versjon = oppgaveVersjon,
                 status = OppgaveStatus.FERDIGSTILT,
                 id = oppgaveId,
+                endretAvEnhetsnr = endretAvEnhetsnr
             )
         try {
             oppgaveRestTemplate.exchange(
@@ -439,6 +446,7 @@ class OppgaveClient(
         oppgaveBehandlesAvApplikasjon: String,
         oppgaveTilordnetRessurs: String,
         beskrivelse: String?,
+        endretAvEnhetsnr: String?
     ) {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -452,6 +460,7 @@ class OppgaveClient(
                 behandlesAvApplikasjon = oppgaveBehandlesAvApplikasjon,
                 tilordnetRessurs = oppgaveTilordnetRessurs,
                 beskrivelse = beskrivelse,
+                endretAvEnhetsnr = endretAvEnhetsnr
             )
 
         try {

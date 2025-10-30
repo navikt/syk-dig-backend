@@ -44,6 +44,7 @@ class JournalpostService(
         journalpost: SafJournalpost,
         journalpostId: String,
         isNorsk: Boolean,
+        navEnhet: String?,
     ): JournalpostResult {
         if (isWrongTema(journalpost)) {
             return JournalpostStatus(
@@ -51,7 +52,7 @@ class JournalpostService(
                 status = JournalpostStatusEnum.FEIL_TEMA,
             )
         }
-        sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(journalpostId, journalpost)
+        sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(journalpostId, journalpost, navEnhet)
         if (isNorsk) {
             sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
             journalpostSykmeldingRepository.insertJournalpostId(journalpostId)

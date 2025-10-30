@@ -58,6 +58,7 @@ class JournalpostDataFetcher(
     fun createSykmelding(
         @InputArgument journalpostId: String,
         @InputArgument norsk: Boolean,
+        @InputArgument navEnhet: String,
     ): JournalpostResult {
         val trimedJournalpostId = journalpostId.trim()
         if (journalpostService.isSykmeldingCreated(trimedJournalpostId)) {
@@ -79,6 +80,6 @@ class JournalpostDataFetcher(
                 status = JournalpostStatusEnum.FEIL_TYPE,
             )
         }
-        return journalpostService.createSykmeldingFromJournalpost(journalpost, trimedJournalpostId, isNorsk = norsk)
+        return journalpostService.createSykmeldingFromJournalpost(journalpost, trimedJournalpostId, isNorsk = norsk, navEnhet)
     }
 }

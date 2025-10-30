@@ -70,6 +70,7 @@ class NasjonalFerdigstillingService(
         return ferdigstillSykmeldingOk(validationResult, receivedSykmelding.copy(validationResult = validationResult), ferdigstillRegistrering, loggingMeta, null, smRegistreringManuell, oppgaveId, status)
     }
 
+    // TODO sjekk endretAvEnhetsnr her
     suspend fun ferdigstillSykmeldingOk(
         validationResult: ValidationResult,
         receivedSykmelding: ReceivedSykmelding,
@@ -162,13 +163,14 @@ class NasjonalFerdigstillingService(
         )
     }
 
+    // TODO dobbelsjekk endretAvEnhetsnr her
     private suspend fun ferdigstillOppgave(
         ferdigstillRegistrering: FerdigstillRegistrering,
         beskrivelse: String?,
         loggingMeta: LoggingMeta,
         oppgaveId: String,
     ) {
-        oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta, beskrivelse)
+        oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta, beskrivelse, ferdigstillRegistrering.navEnhet)
     }
 
     private fun handleBrokenRule(
