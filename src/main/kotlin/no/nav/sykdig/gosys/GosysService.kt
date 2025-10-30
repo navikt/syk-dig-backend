@@ -43,15 +43,16 @@ class GosysService(
         sykmeldingId: String,
         veilederNavIdent: String,
         beskrivelse: String? = null,
+        endretAvEnhetsnr: String
     ) {
         val oppgave = oppgaveClient.getNasjonalOppgave(oppgaveId, sykmeldingId)
         val oppdatertOppgave =
-            oppgave.copy(behandlesAvApplikasjon = "FS22", tilordnetRessurs = veilederNavIdent)
+            oppgave.copy(behandlesAvApplikasjon = "FS22", tilordnetRessurs = veilederNavIdent, endretAvEnhetsnr = endretAvEnhetsnr)
         oppgaveClient.oppdaterNasjonalGosysOppgave(
-            oppdatertOppgave,
-            sykmeldingId,
-            oppgaveId,
-            veilederNavIdent,
+          oppdatertOppgave = oppdatertOppgave,
+          sykmeldingId = sykmeldingId,
+          oppgaveId = oppgaveId,
+          veileder = veilederNavIdent
         )
     }
 
@@ -120,10 +121,10 @@ class GosysService(
             )
         val oppdatertOppgave =
             oppgaveClient.oppdaterNasjonalGosysOppgave(
-                patch,
-                papirSmRegistering.sykmeldingId,
-                oppgaveId.toString(),
-                null,
+              oppdatertOppgave = patch,
+              sykmeldingId = papirSmRegistering.sykmeldingId,
+              oppgaveId = oppgaveId.toString(),
+              veileder = null
             )
         return oppdatertOppgave
     }

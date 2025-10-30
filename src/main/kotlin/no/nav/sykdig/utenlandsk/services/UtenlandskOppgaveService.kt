@@ -86,7 +86,6 @@ class UtenlandskOppgaveService(
         metricRegister.ferdigstiltOppgave.increment()
     }
 
-  // TODO sjekk endretAvEnhetsnr her
     fun ferdigstillOppgaveSendTilGosys(
         oppgaveId: String,
         navEnhet: String,
@@ -108,7 +107,6 @@ class UtenlandskOppgaveService(
         return SykDigOppgave(updatedOppgave, sykmeldt)
     }
 
-    // TODO sjekk endretAvEnhetsnr her
     @Transactional
     fun avvisOppgave(
         oppgaveId: String,

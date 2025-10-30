@@ -483,6 +483,32 @@ class OppgaveClient(
         }
     }
 
+  fun oppdaterNasjonalGosysOppgave(oppdatertOppgave: NasjonalOppgaveResponse, sykmeldingId: String, oppgaveId: String, veileder: String?): NasjonalOppgaveResponse {
+    val headers = HttpHeaders()
+    headers.contentType = MediaType.APPLICATION_JSON
+    headers["X-Correlation-ID"] = oppgaveId
+
+    try {
+      val result = oppgaveM2mRestTemplate.exchange(
+        "$url/${oppdatertOppgave.id}",
+        HttpMethod.PUT,
+        HttpEntity(oppdatertOppgave, headers),
+        NasjonalOppgaveResponse::class.java,
+      )
+      log.info("OppdaterNasjonalOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
+      return result.body ?: throw NoOppgaveException("Fant ikke oppgave for oppgaveId $oppgaveId")
+    } catch (e: HttpClientErrorException) {
+      handleClientError(e, veileder, oppgaveId)
+    } catch (e: HttpServerErrorException) {
+      log.error(
+        "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
+          "fra Oppgave ved oppdaterOppgave: ${e.message}",
+        e,
+      )
+      throw e
+    }
+  }
+
     fun opprettOppgave(
         journalpostId: String,
         aktoerId: String,
@@ -544,32 +570,6 @@ class OppgaveClient(
             log.error(
                 "Kunne ikke opprette oppgave med på journalpostId $journalpostId " +
                     "ved createOppgave med correlation id $xCorrelationId: ${e.message}",
-                e,
-            )
-            throw e
-        }
-    }
-
-    fun oppdaterNasjonalGosysOppgave(oppdatertOppgave: NasjonalOppgaveResponse, sykmeldingId: String, oppgaveId: String, veileder: String?): NasjonalOppgaveResponse {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers["X-Correlation-ID"] = oppgaveId
-
-        try {
-            val result = oppgaveM2mRestTemplate.exchange(
-                "$url/${oppdatertOppgave.id}",
-                HttpMethod.PUT,
-                HttpEntity(oppdatertOppgave, headers),
-                NasjonalOppgaveResponse::class.java,
-            )
-            log.info("OppdaterNasjonalOppgave oppgave $oppgaveId for sykmelding $sykmeldingId")
-            return result.body ?: throw NoOppgaveException("Fant ikke oppgave for oppgaveId $oppgaveId")
-        } catch (e: HttpClientErrorException) {
-            handleClientError(e, veileder, oppgaveId)
-        } catch (e: HttpServerErrorException) {
-            log.error(
-                "HttpServerErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
-                        "fra Oppgave ved oppdaterOppgave: ${e.message}",
                 e,
             )
             throw e

@@ -157,13 +157,13 @@ class NasjonalOppgaveDataFetcher(
     @PreAuthorize("@oppgaveSecurityService.hasAccessToNasjonalOppgave(#oppgaveId, '/dgs/oppgave/{oppgaveId}/tilgosys')")
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosysNasjonal)
     @WithSpan
-    fun sendOppgaveTilGosys(@InputArgument oppgaveId: String, dfe: DataFetchingEnvironment): LagreNasjonalOppgaveStatus {
+    fun sendOppgaveTilGosys(@InputArgument oppgaveId: String, @InputArgument navEnhet: String, dfe: DataFetchingEnvironment): LagreNasjonalOppgaveStatus {
         if (oppgaveId.isBlank()) {
             log.info("Mangler oppgaveId for å kunne sende nasjonal oppgave til Gosys")
             throw DgsInvalidInputArgumentException("Mangler oppgaveId for å kunne sende nasjonal oppgave til Gosys")
         }
-        log.info("Sender nasjonal oppgave med id $oppgaveId til Gosys")
-        nasjonalOppgaveService.oppgaveTilGosys(oppgaveId)
+        log.info("Sender nasjonal oppgave med id $oppgaveId fra $navEnhet til Gosys")
+        nasjonalOppgaveService.oppgaveTilGosys(oppgaveId, navEnhet)
         return LagreNasjonalOppgaveStatus(
             oppgaveId = oppgaveId,
             status = LagreNasjonalOppgaveStatusEnum.IKKE_EN_SYKMELDING,

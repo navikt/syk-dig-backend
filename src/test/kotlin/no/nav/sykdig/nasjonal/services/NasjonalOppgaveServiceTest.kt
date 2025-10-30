@@ -121,7 +121,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
                 SafJournalpostNasjonal(Journalstatus.MOTTATT)
             )
         )
-        Mockito.`when`(oppgaveClient.getNasjonalOppgave(any(), any())).thenReturn(NasjonalOppgaveResponse(prioritet = "", aktivDato = LocalDate.now(), oppgavetype = ""))
+        Mockito.`when`(oppgaveClient.getNasjonalOppgave(any(), any())).thenReturn(NasjonalOppgaveResponse(prioritet = "", aktivDato = LocalDate.now(), oppgavetype = "", endretAvEnhetsnr = "2990"))
 
 
         assertTrue(originalOppgave.avvisningsgrunn == null)

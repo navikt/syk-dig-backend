@@ -80,6 +80,11 @@ class JournalpostDataFetcher(
                 status = JournalpostStatusEnum.FEIL_TYPE,
             )
         }
-        return journalpostService.createSykmeldingFromJournalpost(journalpost, trimedJournalpostId, isNorsk = norsk, navEnhet)
+        return journalpostService.createSykmeldingFromJournalpost(
+          journalpost = journalpost,
+          journalpostId = trimedJournalpostId,
+          isNorsk = norsk,
+          navEnhet = navEnhet,
+        )
     }
 }

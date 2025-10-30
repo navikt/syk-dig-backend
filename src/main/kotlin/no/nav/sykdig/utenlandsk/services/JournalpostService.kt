@@ -57,10 +57,11 @@ class JournalpostService(
             sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
             journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
             securelog.info(
-                "oppretter sykmelding fra journalpost {} {} {}",
+                "oppretter sykmelding fra journalpost {} {} {} {}",
                 kv("journalpostId", journalpostId),
                 kv("kanal", journalpost.kanal),
                 kv("type", "norsk papirsykmelding"),
+                kv("navEnhet", navEnhet ?: "ukjent")
             )
 
             metricRegister.incrementNewSykmelding("norsk", journalpost.kanal)

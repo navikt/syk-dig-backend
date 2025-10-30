@@ -157,7 +157,6 @@ class UtenlandskOppgaveDataFetcher(
         }
     }
 
-    // TODO trengs endretAvEnhetsnr her? Eller settes som null?
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
     fun oppgaveTilbakeTilGosys(
