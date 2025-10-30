@@ -1,5 +1,6 @@
 package no.nav.sykdig.shared.exceptions
 
+import java.io.IOException
 import no.nav.sykdig.shared.applog
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -7,7 +8,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
-import java.io.IOException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -16,7 +16,8 @@ class GlobalExceptionHandler {
     @ExceptionHandler(HttpClientErrorException::class)
     fun handleHttpClientErrorException(e: HttpClientErrorException): ResponseEntity<String> {
         return when (e.statusCode) {
-            HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN -> {
+            HttpStatus.UNAUTHORIZED,
+            HttpStatus.FORBIDDEN -> {
                 log.error("Access denied. Status: ${e.statusCode}. Message: ${e.message}", e)
                 ResponseEntity.status(e.statusCode).body("Veileder har ikke tilgang til oppgaven.")
             }
@@ -48,7 +49,8 @@ class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException::class)
     fun handleRuntimeException(e: RuntimeException): ResponseEntity<String> {
         log.error("Runtime exception: ${e.message}", e)
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Runtime error occurred.")
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Runtime error occurred.")
     }
 
     @ExceptionHandler(IOException::class)
@@ -56,14 +58,16 @@ class GlobalExceptionHandler {
         return if (e.message?.contains("Broken pipe") == true) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Client closed the connection.")
         } else {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error occurred.")
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Internal server error occurred.")
         }
     }
 
     @ExceptionHandler(Exception::class)
     fun handleGenericException(e: Exception): ResponseEntity<String> {
         log.error("Unhandled exception: ${e.message}", e)
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred")
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("An unexpected error occurred")
     }
 
     @ExceptionHandler(SykmelderNotFoundException::class)
@@ -72,5 +76,3 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sykmelder not found")
     }
 }
-
-

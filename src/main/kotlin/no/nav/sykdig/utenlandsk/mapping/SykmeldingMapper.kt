@@ -1,5 +1,6 @@
 package no.nav.sykdig.utenlandsk.mapping
 
+import java.time.LocalDateTime
 import no.nav.helse.sm2013.Address
 import no.nav.helse.sm2013.ArsakType
 import no.nav.helse.sm2013.CS
@@ -26,36 +27,38 @@ import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.shared.SporsmalSvar
 import no.nav.sykdig.shared.SvarRestriksjon
 import no.nav.sykdig.shared.Sykmelding
-import java.time.LocalDateTime
 
 fun HelseOpplysningerArbeidsuforhet.toSykmelding(
     sykmeldingId: String,
     pasientAktoerId: String,
     msgId: String,
     signaturDato: LocalDateTime,
-) = Sykmelding(
-    id = sykmeldingId,
-    msgId = msgId,
-    pasientAktoerId = pasientAktoerId,
-    medisinskVurdering = medisinskVurdering.toMedisinskVurdering(),
-    skjermesForPasient = medisinskVurdering?.isSkjermesForPasient ?: false,
-    arbeidsgiver = arbeidsgiver.toArbeidsgiver(),
-    perioder = aktivitet.periode.map(HelseOpplysningerArbeidsuforhet.Aktivitet.Periode::toPeriode),
-    prognose = null,
-    utdypendeOpplysninger = if (utdypendeOpplysninger != null) utdypendeOpplysninger.toMap() else emptyMap(),
-    tiltakArbeidsplassen = null,
-    tiltakNAV = null,
-    andreTiltak = null,
-    meldingTilNAV = meldingTilNav?.toMeldingTilNAV(),
-    meldingTilArbeidsgiver = meldingTilArbeidsgiver,
-    kontaktMedPasient = kontaktMedPasient.toKontaktMedPasient(),
-    behandletTidspunkt = kontaktMedPasient.behandletDato,
-    behandler = behandler.toBehandler(),
-    avsenderSystem = avsenderSystem.toAvsenderSystem(),
-    syketilfelleStartDato = syketilfelleStartDato,
-    signaturDato = signaturDato,
-    navnFastlege = pasient?.navnFastlege,
-)
+) =
+    Sykmelding(
+        id = sykmeldingId,
+        msgId = msgId,
+        pasientAktoerId = pasientAktoerId,
+        medisinskVurdering = medisinskVurdering.toMedisinskVurdering(),
+        skjermesForPasient = medisinskVurdering?.isSkjermesForPasient ?: false,
+        arbeidsgiver = arbeidsgiver.toArbeidsgiver(),
+        perioder =
+            aktivitet.periode.map(HelseOpplysningerArbeidsuforhet.Aktivitet.Periode::toPeriode),
+        prognose = null,
+        utdypendeOpplysninger =
+            if (utdypendeOpplysninger != null) utdypendeOpplysninger.toMap() else emptyMap(),
+        tiltakArbeidsplassen = null,
+        tiltakNAV = null,
+        andreTiltak = null,
+        meldingTilNAV = meldingTilNav?.toMeldingTilNAV(),
+        meldingTilArbeidsgiver = meldingTilArbeidsgiver,
+        kontaktMedPasient = kontaktMedPasient.toKontaktMedPasient(),
+        behandletTidspunkt = kontaktMedPasient.behandletDato,
+        behandler = behandler.toBehandler(),
+        avsenderSystem = avsenderSystem.toAvsenderSystem(),
+        syketilfelleStartDato = syketilfelleStartDato,
+        signaturDato = signaturDato,
+        navnFastlege = pasient?.navnFastlege,
+    )
 
 fun HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.toPeriode() =
     Periode(
@@ -69,10 +72,7 @@ fun HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.toPeriode() =
     )
 
 fun HelseOpplysningerArbeidsuforhet.Aktivitet.Periode.GradertSykmelding.toGradert() =
-    Gradert(
-        reisetilskudd = isReisetilskudd == true,
-        grad = sykmeldingsgrad,
-    )
+    Gradert(reisetilskudd = isReisetilskudd == true, grad = sykmeldingsgrad)
 
 fun HelseOpplysningerArbeidsuforhet.Arbeidsgiver.toArbeidsgiver() =
     Arbeidsgiver(
@@ -135,7 +135,9 @@ fun HelseOpplysningerArbeidsuforhet.UtdypendeOpplysninger.toMap() =
                     SporsmalSvar(
                         sporsmal = svar.spmTekst,
                         svar = svar.svarTekst,
-                        restriksjoner = svar.restriksjon?.restriksjonskode?.mapNotNull(CS::toSvarRestriksjon) ?: listOf(),
+                        restriksjoner =
+                            svar.restriksjon?.restriksjonskode?.mapNotNull(CS::toSvarRestriksjon)
+                                ?: listOf(),
                     )
             }
     }
@@ -163,22 +165,13 @@ fun ArsakType.toArbeidsrelatertArsak() =
     )
 
 fun ArsakType.toMedisinskArsak() =
-    MedisinskArsak(
-        beskrivelse = beskriv,
-        arsak = arsakskode.mapNotNull(CS::toMedisinskArsakType),
-    )
+    MedisinskArsak(beskrivelse = beskriv, arsak = arsakskode.mapNotNull(CS::toMedisinskArsakType))
 
 fun HelseOpplysningerArbeidsuforhet.MeldingTilNav.toMeldingTilNAV() =
-    MeldingTilNAV(
-        bistandUmiddelbart = isBistandNAVUmiddelbart,
-        beskrivBistand = beskrivBistandNAV,
-    )
+    MeldingTilNAV(bistandUmiddelbart = isBistandNAVUmiddelbart, beskrivBistand = beskrivBistandNAV)
 
 fun HelseOpplysningerArbeidsuforhet.KontaktMedPasient.toKontaktMedPasient() =
-    KontaktMedPasient(
-        kontaktDato = kontaktDato,
-        begrunnelseIkkeKontakt = begrunnIkkeKontakt,
-    )
+    KontaktMedPasient(kontaktDato = kontaktDato, begrunnelseIkkeKontakt = begrunnIkkeKontakt)
 
 fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler() =
     Behandler(
@@ -194,7 +187,4 @@ fun HelseOpplysningerArbeidsuforhet.Behandler.toBehandler() =
     )
 
 fun HelseOpplysningerArbeidsuforhet.AvsenderSystem.toAvsenderSystem() =
-    AvsenderSystem(
-        navn = systemNavn,
-        versjon = systemVersjon,
-    )
+    AvsenderSystem(navn = systemNavn, versjon = systemVersjon)

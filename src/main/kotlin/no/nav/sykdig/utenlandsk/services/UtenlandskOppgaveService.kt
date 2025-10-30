@@ -1,25 +1,25 @@
 package no.nav.sykdig.utenlandsk.services
 
-import net.logstash.logback.argument.StructuredArguments
-import no.nav.sykdig.shared.applog
-import no.nav.sykdig.utenlandsk.models.SykDigOppgave
-import no.nav.sykdig.shared.exceptions.ClientException
-import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
-import no.nav.sykdig.pdl.PersonService
-import no.nav.sykdig.generated.types.Avvisingsgrunn
-import no.nav.sykdig.generated.types.OppdatertSykmeldingStatus
-import no.nav.sykdig.generated.types.OppdatertSykmeldingStatusEnum
-import no.nav.sykdig.gosys.GosysService
-import no.nav.sykdig.shared.metrics.MetricRegister
-import no.nav.sykdig.shared.utils.getLoggingMeta
-import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import net.logstash.logback.argument.StructuredArguments
+import no.nav.sykdig.generated.types.Avvisingsgrunn
+import no.nav.sykdig.generated.types.OppdatertSykmeldingStatus
+import no.nav.sykdig.generated.types.OppdatertSykmeldingStatusEnum
+import no.nav.sykdig.gosys.GosysService
+import no.nav.sykdig.pdl.PersonService
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.exceptions.ClientException
+import no.nav.sykdig.shared.metrics.MetricRegister
+import no.nav.sykdig.shared.utils.getLoggingMeta
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
+import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.SykDigOppgave
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UtenlandskOppgaveService(
@@ -41,26 +41,20 @@ class UtenlandskOppgaveService(
         return sykDigOppgave(oppgave)
     }
 
-    private fun sykDigOppgave(
-        oppgave: OppgaveDbModel,
-    ): SykDigOppgave {
+    private fun sykDigOppgave(oppgave: OppgaveDbModel): SykDigOppgave {
         val sykmeldt =
-            personService.getPerson(
-                id = oppgave.fnr,
-                callId = oppgave.sykmeldingId.toString(),
-            )
+            personService.getPerson(id = oppgave.fnr, callId = oppgave.sykmeldingId.toString())
 
         val loggingMeta = oppgave.sykmelding?.sykmelding?.id?.let { getLoggingMeta(it, oppgave) }
-        log.info("Hentet oppgave og sykmeldt for oppgave, lager SykDigOppgave! {}", StructuredArguments.fields(loggingMeta))
+        log.info(
+            "Hentet oppgave og sykmeldt for oppgave, lager SykDigOppgave! {}",
+            StructuredArguments.fields(loggingMeta),
+        )
 
         return SykDigOppgave(oppgave, sykmeldt)
     }
 
-    fun updateOppgave(
-        oppgaveId: String,
-        values: RegisterOppgaveValues,
-        navEpost: String,
-    ) {
+    fun updateOppgave(oppgaveId: String, values: RegisterOppgaveValues, navEpost: String) {
         sykDigOppgaveService.updateOppgave(oppgaveId, values, navEpost)
     }
 
@@ -72,17 +66,21 @@ class UtenlandskOppgaveService(
     ) {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt =
-            personService.getPerson(
-                id = oppgave.fnr,
-                callId = oppgave.sykmeldingId.toString(),
-            )
-        val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
+            personService.getPerson(id = oppgave.fnr, callId = oppgave.sykmeldingId.toString())
+        val valideringsresultat =
+            regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
         if (valideringsresultat.isNotEmpty()) {
             log.warn("Ferdigstilling av oppgave med id $oppgaveId feilet pga regelsjekk")
             throw ClientException(valideringsresultat.joinToString())
         }
 
-        sykDigOppgaveService.ferdigstillUtenlandskAvvistOppgave(oppgave, navEpost, values, enhetId, sykmeldt)
+        sykDigOppgaveService.ferdigstillUtenlandskAvvistOppgave(
+            oppgave,
+            navEpost,
+            values,
+            enhetId,
+            sykmeldt,
+        )
         metricRegister.ferdigstiltOppgave.increment()
     }
 
@@ -94,12 +92,14 @@ class UtenlandskOppgaveService(
     ): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt =
-            personService.getPerson(
-                id = oppgave.fnr,
-                callId = oppgave.sykmeldingId.toString(),
-            )
+            personService.getPerson(id = oppgave.fnr, callId = oppgave.sykmeldingId.toString())
 
-        gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, endretAvEnhetsnr = navEnhet)
+        gosysService.sendOppgaveTilGosys(
+            oppgaveId,
+            oppgave.sykmeldingId.toString(),
+            navIdent,
+            endretAvEnhetsnr = navEnhet,
+        )
         sykDigOppgaveService.ferdigstillOppgaveGosys(oppgave, navEpost)
         val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
 
@@ -118,14 +118,19 @@ class UtenlandskOppgaveService(
     ): SykDigOppgave {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val sykmeldt =
-            personService.getPerson(
-                id = oppgave.fnr,
-                callId = oppgave.sykmeldingId.toString(),
-            )
+            personService.getPerson(id = oppgave.fnr, callId = oppgave.sykmeldingId.toString())
 
-        val opprinneligBeskrivelse = gosysService.hentOppgave(oppgaveId, oppgave.sykmeldingId.toString()).beskrivelse
+        val opprinneligBeskrivelse =
+            gosysService.hentOppgave(oppgaveId, oppgave.sykmeldingId.toString()).beskrivelse
 
-        sykDigOppgaveService.ferdigstillAvvistOppgave(oppgave, navEpost, enhetId, sykmeldt, avvisningsgrunn, avvisningsgrunnAnnet)
+        sykDigOppgaveService.ferdigstillAvvistOppgave(
+            oppgave,
+            navEpost,
+            enhetId,
+            sykmeldt,
+            avvisningsgrunn,
+            avvisningsgrunnAnnet,
+        )
 
         val oppgaveBeskrivelse =
             lagOppgavebeskrivelse(
@@ -134,7 +139,13 @@ class UtenlandskOppgaveService(
                 navIdent = navIdent,
             )
 
-        gosysService.avvisOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, oppgaveBeskrivelse, enhetId)
+        gosysService.avvisOppgaveTilGosys(
+            oppgaveId,
+            oppgave.sykmeldingId.toString(),
+            navIdent,
+            oppgaveBeskrivelse,
+            enhetId,
+        )
 
         val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         metricRegister.avvistSendtTilGosys.increment()
@@ -154,61 +165,60 @@ class UtenlandskOppgaveService(
     }
 
     fun checkOppgaveState(oppgave: OppgaveDbModel): OppdatertSykmeldingStatusEnum {
-        if(oppgave.ferdigstilt == null) {
+        if (oppgave.ferdigstilt == null) {
             return OppdatertSykmeldingStatusEnum.IKKE_FERDIGSTILT
         }
 
-        if(oppgave.tilbakeTilGosys) {
+        if (oppgave.tilbakeTilGosys) {
             return OppdatertSykmeldingStatusEnum.IKKE_EN_SYKMELDING
         }
 
-        if(oppgave.avvisingsgrunn != null) {
+        if (oppgave.avvisingsgrunn != null) {
             return OppdatertSykmeldingStatusEnum.AVVIST
         }
 
         return OppdatertSykmeldingStatusEnum.FERDIGSTILT
     }
 
-    fun oppdaterDigitalisertSykmelding(sykmeldingId: String, enhetId: String, values: FerdistilltRegisterOppgaveValues, navEmail: String): OppdatertSykmeldingStatus {
+    fun oppdaterDigitalisertSykmelding(
+        sykmeldingId: String,
+        enhetId: String,
+        values: FerdistilltRegisterOppgaveValues,
+        navEmail: String,
+    ): OppdatertSykmeldingStatus {
         val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
 
         val state = checkOppgaveState(oppgave)
-        if(state != OppdatertSykmeldingStatusEnum.FERDIGSTILT) {
-            return OppdatertSykmeldingStatus(
-                sykmeldingId,
-                state
-            )
+        if (state != OppdatertSykmeldingStatusEnum.FERDIGSTILT) {
+            return OppdatertSykmeldingStatus(sykmeldingId, state)
         }
 
         val sykmeldt =
-            personService.getPerson(
-                id = oppgave.fnr,
-                callId = oppgave.sykmeldingId.toString(),
-            )
-        val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
+            personService.getPerson(id = oppgave.fnr, callId = oppgave.sykmeldingId.toString())
+        val valideringsresultat =
+            regelvalideringService.validerUtenlandskSykmelding(sykmeldt, values)
         if (valideringsresultat.isNotEmpty()) {
-            val loggingMeta = oppgave.sykmelding?.sykmelding?.id?.let { getLoggingMeta(it, oppgave) }
-            log.warn("Oppdatering av sykmelding feilet pga regelsjekk {}", StructuredArguments.fields(loggingMeta))
+            val loggingMeta =
+                oppgave.sykmelding?.sykmelding?.id?.let { getLoggingMeta(it, oppgave) }
+            log.warn(
+                "Oppdatering av sykmelding feilet pga regelsjekk {}",
+                StructuredArguments.fields(loggingMeta),
+            )
             throw ClientException(valideringsresultat.joinToString())
         }
 
         sykDigOppgaveService.oppdaterSykmelding(oppgave, navEmail, values, enhetId, sykmeldt)
         metricRegister.oppdatertSykmeldingCounter.increment()
-        return OppdatertSykmeldingStatus(
-            sykmeldingId,
-            OppdatertSykmeldingStatusEnum.OPPDATERT
-        )
+        return OppdatertSykmeldingStatus(sykmeldingId, OppdatertSykmeldingStatusEnum.OPPDATERT)
     }
 }
 
-fun mapAvvisningsgrunn(
-    avvisningsgrunn: Avvisingsgrunn,
-    avvisningsgrunnAnnet: String?,
-): String {
+fun mapAvvisningsgrunn(avvisningsgrunn: Avvisingsgrunn, avvisningsgrunnAnnet: String?): String {
     return when (avvisningsgrunn) {
         Avvisingsgrunn.MANGLENDE_DIAGNOSE -> "Det mangler diagnose"
         Avvisingsgrunn.MANGLENDE_PERIODE_ELLER_SLUTTDATO -> "Mangler periode eller sluttdato"
-        Avvisingsgrunn.MANGLENDE_UNDERSKRIFT_ELLER_STEMPEL_FRA_SYKMELDER -> "Mangler underskrift eller stempel fra sykmelder"
+        Avvisingsgrunn.MANGLENDE_UNDERSKRIFT_ELLER_STEMPEL_FRA_SYKMELDER ->
+            "Mangler underskrift eller stempel fra sykmelder"
         Avvisingsgrunn.MANGLENDE_ORGINAL_SYKMELDING -> "Mangler original sykmelding"
         Avvisingsgrunn.TILBAKEDATERT_SYKMELDING -> "Sykmeldingen er tilbakedatert"
         Avvisingsgrunn.RISIKOSAK -> "Risikosak"
@@ -218,7 +228,8 @@ fun mapAvvisningsgrunn(
         Avvisingsgrunn.MAXDATO_OPPNAADD -> "Maksdato er oppnådd"
         Avvisingsgrunn.LOPENDE_AAP -> "Løpende AAP"
         Avvisingsgrunn.DUPLIKAT -> "Sykmeldingen er et duplikat"
-        Avvisingsgrunn.ANNET -> avvisningsgrunnAnnet ?: throw RuntimeException("Avvisningsgrunn Annet er null")
+        Avvisingsgrunn.ANNET ->
+            avvisningsgrunnAnnet ?: throw RuntimeException("Avvisningsgrunn Annet er null")
     }
 }
 

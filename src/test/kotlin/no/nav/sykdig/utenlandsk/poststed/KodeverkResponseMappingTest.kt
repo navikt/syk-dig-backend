@@ -10,7 +10,9 @@ class KodeverkResponseMappingTest {
     fun kodeverkresponseMappesRiktig() {
         val kodeverkrespons =
             objectMapper.readValue(
-                KodeverkResponseMappingTest::class.java.getResourceAsStream("/kodeverkrespons.json"),
+                KodeverkResponseMappingTest::class
+                    .java
+                    .getResourceAsStream("/kodeverkrespons.json"),
                 GetKodeverkKoderBetydningerResponse::class.java,
             )
 

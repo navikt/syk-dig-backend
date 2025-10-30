@@ -7,34 +7,37 @@ import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 
 fun getLoggingMeta(sykmeldingId: String, oppgave: Any?): LoggingMeta {
     return when (oppgave) {
-        is OppgaveDbModel -> LoggingMeta(
-            mottakId = sykmeldingId,
-            dokumentInfoId = oppgave.dokumentInfoId,
-            msgId = sykmeldingId,
-            sykmeldingId = sykmeldingId,
-            journalpostId = oppgave.journalpostId
-        )
-        is NasjonalManuellOppgaveDAO -> LoggingMeta(
-            mottakId = sykmeldingId,
-            dokumentInfoId = oppgave.dokumentInfoId,
-            msgId = sykmeldingId,
-            sykmeldingId = sykmeldingId,
-            journalpostId = oppgave.journalpostId
-        )
-        is PapirSmRegistering -> LoggingMeta(
-            mottakId = sykmeldingId,
-            dokumentInfoId = oppgave.dokumentInfoId,
-            msgId = sykmeldingId,
-            sykmeldingId = sykmeldingId,
-            journalpostId = oppgave.journalpostId
-        )
-        else -> LoggingMeta(
-            mottakId = sykmeldingId,
-            dokumentInfoId = null,
-            msgId = sykmeldingId,
-            sykmeldingId = sykmeldingId,
-            journalpostId = null
-        )
+        is OppgaveDbModel ->
+            LoggingMeta(
+                mottakId = sykmeldingId,
+                dokumentInfoId = oppgave.dokumentInfoId,
+                msgId = sykmeldingId,
+                sykmeldingId = sykmeldingId,
+                journalpostId = oppgave.journalpostId,
+            )
+        is NasjonalManuellOppgaveDAO ->
+            LoggingMeta(
+                mottakId = sykmeldingId,
+                dokumentInfoId = oppgave.dokumentInfoId,
+                msgId = sykmeldingId,
+                sykmeldingId = sykmeldingId,
+                journalpostId = oppgave.journalpostId,
+            )
+        is PapirSmRegistering ->
+            LoggingMeta(
+                mottakId = sykmeldingId,
+                dokumentInfoId = oppgave.dokumentInfoId,
+                msgId = sykmeldingId,
+                sykmeldingId = sykmeldingId,
+                journalpostId = oppgave.journalpostId,
+            )
+        else ->
+            LoggingMeta(
+                mottakId = sykmeldingId,
+                dokumentInfoId = null,
+                msgId = sykmeldingId,
+                sykmeldingId = sykmeldingId,
+                journalpostId = null,
+            )
     }
 }
-

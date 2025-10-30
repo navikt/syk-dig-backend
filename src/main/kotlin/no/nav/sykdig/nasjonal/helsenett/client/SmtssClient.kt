@@ -3,7 +3,6 @@ package no.nav.sykdig.nasjonal.helsenett.client
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.shared.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -16,8 +15,8 @@ import org.springframework.web.client.RestTemplate
 @Component
 class SmtssClient(
     @Value("\${smtss.url}") private val smtssUrl: String,
-    private val smtssM2mRestTemplate: RestTemplate
-    ) {
+    private val smtssM2mRestTemplate: RestTemplate,
+) {
 
     val log = applog()
     val securelog = securelog()
@@ -53,11 +52,6 @@ class SmtssClient(
         }
         return null
     }
-
-
-
 }
 
-data class TSSident(
-    val tssid: String,
-)
+data class TSSident(val tssid: String)

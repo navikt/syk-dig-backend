@@ -1,8 +1,8 @@
 package no.nav.sykdig.utenlandsk.models
 
+import java.time.OffsetDateTime
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
-import java.time.OffsetDateTime
 
 interface RegisterOppgaveValues {
     val fnrPasient: String

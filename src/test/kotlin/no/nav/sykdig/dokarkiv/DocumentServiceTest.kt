@@ -1,6 +1,8 @@
 package no.nav.sykdig.dokarkiv
 
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
+import java.time.OffsetDateTime
+import java.util.UUID
 import no.nav.sykdig.utenlandsk.db.OppgaveRepository
 import no.nav.sykdig.utenlandsk.models.DokumentDbModel
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
@@ -13,8 +15,6 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import java.time.OffsetDateTime
-import java.util.UUID
 
 class DocumentServiceTest {
     private val oppgaveRepository = Mockito.mock(OppgaveRepository::class.java)
@@ -35,27 +35,19 @@ class DocumentServiceTest {
         val oppgaveId = "1"
         val journalpostId = "journalpost1"
         val fnr = "fnr"
-        `when`(oppgaveRepository.getOppgave(oppgaveId)).thenReturn(
-            getOppgave(
-                oppgaveId,
-                fnr,
-                journalpostId,
-                listOf(DokumentDbModel(dokumentInfoId, gammelTittel)),
-            ),
-        )
+        `when`(oppgaveRepository.getOppgave(oppgaveId))
+            .thenReturn(
+                getOppgave(
+                    oppgaveId,
+                    fnr,
+                    journalpostId,
+                    listOf(DokumentDbModel(dokumentInfoId, gammelTittel)),
+                )
+            )
 
         documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, nyTittel)
-        val newListOfDocuments =
-            listOf(
-                DokumentDbModel(
-                    dokumentInfoId,
-                    nyTittel,
-                ),
-            )
-        verify(oppgaveRepository, times(1)).updateDocuments(
-            oppgaveId,
-            newListOfDocuments,
-        )
+        val newListOfDocuments = listOf(DokumentDbModel(dokumentInfoId, nyTittel))
+        verify(oppgaveRepository, times(1)).updateDocuments(oppgaveId, newListOfDocuments)
 
         verify(dokarkivClient, times(1)).updateDocument(journalpostId, dokumentInfoId, nyTittel)
         verify(oppgaveRepository, times(1)).updateDocuments(oppgaveId, newListOfDocuments)
@@ -83,9 +75,8 @@ class DocumentServiceTest {
                 DokumentDbModel("4", "4-ny"),
                 DokumentDbModel("5", "5"),
             )
-        `when`(oppgaveRepository.getOppgave(oppgaveId)).thenReturn(
-            getOppgave(oppgaveId, "fnr", journalpostId, documents),
-        )
+        `when`(oppgaveRepository.getOppgave(oppgaveId))
+            .thenReturn(getOppgave(oppgaveId, "fnr", journalpostId, documents))
 
         documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, "4-ny")
 
@@ -99,15 +90,10 @@ class DocumentServiceTest {
         val journalpostId = "journalpost3"
         val dokumentInfoId = "3"
 
-        val documents =
-            listOf(
-                DokumentDbModel("1", "1"),
-                DokumentDbModel("2", "2"),
-            )
+        val documents = listOf(DokumentDbModel("1", "1"), DokumentDbModel("2", "2"))
 
-        `when`(oppgaveRepository.getOppgave(oppgaveId)).thenReturn(
-            getOppgave(oppgaveId, "fnr", journalpostId, documents),
-        )
+        `when`(oppgaveRepository.getOppgave(oppgaveId))
+            .thenReturn(getOppgave(oppgaveId, "fnr", journalpostId, documents))
         assertThrows<DgsEntityNotFoundException> {
             documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, "ny-tittel")
         }
@@ -122,15 +108,10 @@ class DocumentServiceTest {
         val journalpostId = "journalpost4"
         val dokumentInfoId = "2"
 
-        val documents =
-            listOf(
-                DokumentDbModel("1", "1"),
-                DokumentDbModel("2", "2"),
-            )
+        val documents = listOf(DokumentDbModel("1", "1"), DokumentDbModel("2", "2"))
 
-        `when`(oppgaveRepository.getOppgave(oppgaveId)).thenReturn(
-            getOppgave(oppgaveId, "fnr", journalpostId, documents),
-        )
+        `when`(oppgaveRepository.getOppgave(oppgaveId))
+            .thenReturn(getOppgave(oppgaveId, "fnr", journalpostId, documents))
 
         documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, "2")
 
@@ -143,10 +124,22 @@ class DocumentServiceTest {
         fnr: String,
         journalpostId: String,
         dokumenter: List<DokumentDbModel>,
-    ) = OppgaveDbModel(
-        oppgaveId, fnr, journalpostId, null,
-        dokumenter,
-        OffsetDateTime.now(), null, false, null, UUID.randomUUID(),
-        "UTENLANDS", null, "", OffsetDateTime.now(), "test",
-    )
+    ) =
+        OppgaveDbModel(
+            oppgaveId,
+            fnr,
+            journalpostId,
+            null,
+            dokumenter,
+            OffsetDateTime.now(),
+            null,
+            false,
+            null,
+            UUID.randomUUID(),
+            "UTENLANDS",
+            null,
+            "",
+            OffsetDateTime.now(),
+            "test",
+        )
 }

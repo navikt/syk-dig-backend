@@ -1,8 +1,8 @@
 package no.nav.sykdig.shared
 
+import java.time.LocalDateTime
 import no.nav.sykdig.utenlandsk.models.Merknad
 import no.nav.sykdig.utenlandsk.models.UtenlandskSykmelding
-import java.time.LocalDateTime
 
 data class ReceivedSykmelding(
     val sykmelding: Sykmelding,
@@ -24,12 +24,11 @@ data class ReceivedSykmelding(
     val vedlegg: List<String>?,
     val utenlandskSykmelding: UtenlandskSykmelding?,
     /**
-     * Full fellesformat as a XML payload, this is only used for infotrygd compat and should be removed in thefuture
+     * Full fellesformat as a XML payload, this is only used for infotrygd compat and should be
+     * removed in thefuture
      */
     val fellesformat: String,
-    /**
-     * TSS-ident, this is only used for infotrygd compat and should be removed in thefuture
-     */
+    /** TSS-ident, this is only used for infotrygd compat and should be removed in thefuture */
     val tssid: String?,
     val validationResult: ValidationResult? = null,
 )

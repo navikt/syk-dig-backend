@@ -1,24 +1,30 @@
 package no.nav.sykdig.nasjonal.services
 
+import java.time.LocalDate
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.sykdig.nasjonal.clients.NyRegelClient
-import no.nav.sykdig.shared.*
 import no.nav.sykdig.nasjonal.models.RuleHitCustomError
-import no.nav.sykdig.nasjonal.models.WhitelistedRuleHit
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Sykmelder
+import no.nav.sykdig.nasjonal.models.WhitelistedRuleHit
+import no.nav.sykdig.shared.*
 import no.nav.sykdig.shared.ReceivedSykmelding
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 const val HPR_GODKJENNING_KODE = 7704
 
 @Service
-class NasjonalRegelvalideringService(
-    private val nyRegelClient: NyRegelClient,
-) {
+class NasjonalRegelvalideringService(private val nyRegelClient: NyRegelClient) {
     val log = applog()
-    fun validerNasjonalSykmelding(receivedSykmelding: ReceivedSykmelding, smRegistreringManuell: SmRegistreringManuell, sykmeldingId: String, loggingMeta: LoggingMeta, oppgaveId: String, sykmelder: Sykmelder): ValidationResult {
+
+    fun validerNasjonalSykmelding(
+        receivedSykmelding: ReceivedSykmelding,
+        smRegistreringManuell: SmRegistreringManuell,
+        sykmeldingId: String,
+        loggingMeta: LoggingMeta,
+        oppgaveId: String,
+        sykmelder: Sykmelder,
+    ): ValidationResult {
         val validationResult = nyRegelClient.valider(receivedSykmelding, sykmeldingId)
         log.info(
             "Resultat: {}, {}, {}",
@@ -30,7 +36,8 @@ class NasjonalRegelvalideringService(
             StructuredArguments.fields(loggingMeta),
         )
 
-        return checkValidState(oppgaveId, smRegistreringManuell, sykmelder, validationResult) ?: validationResult
+        return checkValidState(oppgaveId, smRegistreringManuell, sykmelder, validationResult)
+            ?: validationResult
     }
 
     fun checkValidState(
@@ -53,7 +60,7 @@ class NasjonalRegelvalideringService(
                                 messageForUser =
                                     "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
                                 ruleStatus = Status.MANUAL_PROCESSING,
-                            ),
+                            )
                         ),
                 )
             }
@@ -70,7 +77,7 @@ class NasjonalRegelvalideringService(
                                 messageForUser =
                                     "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
                                 ruleStatus = Status.MANUAL_PROCESSING,
-                            ),
+                            )
                         ),
                 )
             }
@@ -88,7 +95,7 @@ class NasjonalRegelvalideringService(
                                 messageForUser =
                                     "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
                                 ruleStatus = Status.MANUAL_PROCESSING,
-                            ),
+                            )
                         ),
                 )
             }
@@ -105,13 +112,15 @@ class NasjonalRegelvalideringService(
                                 messageForUser =
                                     "Sykmelder har gjort en feil i utfyllingen av sykmeldingen.",
                                 ruleStatus = Status.MANUAL_PROCESSING,
-                            ),
+                            )
                         ),
                 )
             }
 
             studentBehandlerUtenAutorisasjon(validationResult, sykmelder) -> {
-                log.info("Rule hit for oppgaveId $oppgaveId and ruleName BEHANDLER_MANGLER_AUTORISASJON_I_HPR")
+                log.info(
+                    "Rule hit for oppgaveId $oppgaveId and ruleName BEHANDLER_MANGLER_AUTORISASJON_I_HPR"
+                )
                 return ValidationResult(
                     status = Status.MANUAL_PROCESSING,
                     ruleHits =
@@ -123,7 +132,7 @@ class NasjonalRegelvalideringService(
                                     "Studenter har ikke lov til å skrive sykmelding. Sykmelding må avvises.",
                                 messageForUser = "Studenter har ikke lov til å skrive sykmelding.",
                                 ruleStatus = Status.MANUAL_PROCESSING,
-                            ),
+                            )
                         ),
                 )
             }
@@ -140,7 +149,7 @@ class NasjonalRegelvalideringService(
                                     "Legen har mistet retten til å skrive sykmelding.",
                                 messageForUser = "Legen har mistet retten til å skrive sykmelding.",
                                 ruleStatus = Status.MANUAL_PROCESSING,
-                            ),
+                            )
                         ),
                 )
             }
@@ -167,8 +176,8 @@ class NasjonalRegelvalideringService(
         val erStudent =
             sykmelder.godkjenninger?.any {
                 it.autorisasjon?.aktiv == true &&
-                        it.autorisasjon.oid == HPR_GODKJENNING_KODE &&
-                        it.autorisasjon.verdi == "3"
+                    it.autorisasjon.oid == HPR_GODKJENNING_KODE &&
+                    it.autorisasjon.verdi == "3"
             }
 
         return behandlerManglerAutorisasjon && erStudent == true
@@ -176,11 +185,13 @@ class NasjonalRegelvalideringService(
 
     fun harOverlappendePerioder(perioder: List<Periode>): Boolean {
         return harIdentiskePerioder(perioder) ||
-                perioder.any { periodA ->
-                    perioder
-                        .filter { periodB -> periodB != periodA }
-                        .any { periodB -> periodA.fom in periodB.range() || periodA.tom in periodB.range() }
-                }
+            perioder.any { periodA ->
+                perioder
+                    .filter { periodB -> periodB != periodA }
+                    .any { periodB ->
+                        periodA.fom in periodB.range() || periodA.tom in periodB.range()
+                    }
+            }
     }
 
     private fun harIdentiskePerioder(perioder: List<Periode>): Boolean {
@@ -191,7 +202,7 @@ class NasjonalRegelvalideringService(
         perioder.forEach {
             if (
                 it.reisetilskudd &&
-                (it.aktivitetIkkeMulig != null ||
+                    (it.aktivitetIkkeMulig != null ||
                         it.gradert != null ||
                         it.avventendeInnspillTilArbeidsgiver != null ||
                         it.behandlingsdager != null)
@@ -207,7 +218,6 @@ class NasjonalRegelvalideringService(
     fun erFremtidigDato(dato: LocalDate): Boolean {
         return dato.isAfter(LocalDate.now())
     }
-
 }
 
 fun List<RuleInfo>.isWhitelisted(): Boolean {

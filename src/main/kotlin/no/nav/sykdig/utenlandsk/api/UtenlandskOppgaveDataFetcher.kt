@@ -6,14 +6,8 @@ import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import graphql.schema.DataFetchingEnvironment
-import no.nav.sykdig.shared.applog
-import no.nav.sykdig.utenlandsk.services.UtenlandskOppgaveService
-import no.nav.sykdig.shared.exceptions.ClientException
-import no.nav.sykdig.utenlandsk.mapping.mapToDigitaliseringsoppgave
-import no.nav.sykdig.utenlandsk.mapping.mapToDigitalisertSykmelding
-import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
-import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 import no.nav.sykdig.generated.DgsConstants
 import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.DiagnoseInput
@@ -25,20 +19,23 @@ import no.nav.sykdig.generated.types.OppdatertSykmeldingStatus
 import no.nav.sykdig.generated.types.OppdatertSykmeldingStatusEnum
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.generated.types.SykmeldingUnderArbeidValues
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.exceptions.ClientException
 import no.nav.sykdig.shared.utils.toOffsetDateTimeAtNoon
 import no.nav.sykdig.shared.utils.validateDiagnose
+import no.nav.sykdig.utenlandsk.mapping.mapToDigitaliseringsoppgave
+import no.nav.sykdig.utenlandsk.mapping.mapToDigitalisertSykmelding
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.services.UtenlandskOppgaveService
 import org.springframework.security.access.prepost.PreAuthorize
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
 @DgsComponent
-class UtenlandskOppgaveDataFetcher(
-    val utenlandskOppgaveService: UtenlandskOppgaveService,
-) {
+class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppgaveService) {
     companion object {
         private val log = applog()
     }
-
 
     @PreAuthorize("@oppgaveSecurityService.hasAccessToSykmelding(#sykmeldingId)")
     @DgsQuery(field = DgsConstants.QUERY.DigitalisertSykmelding)
@@ -48,11 +45,8 @@ class UtenlandskOppgaveDataFetcher(
     ): DigitalisertSykmeldingResult? {
         val oppgave = utenlandskOppgaveService.getDigitalisertSykmelding(sykmeldingId)
         val state = utenlandskOppgaveService.checkOppgaveState(oppgave.oppgaveDbModel)
-        if(state != OppdatertSykmeldingStatusEnum.FERDIGSTILT) {
-            return OppdatertSykmeldingStatus(
-                sykmeldingId,
-                state
-            )
+        if (state != OppdatertSykmeldingStatusEnum.FERDIGSTILT) {
+            return OppdatertSykmeldingStatus(sykmeldingId, state)
         }
         return mapToDigitalisertSykmelding(oppgave)
     }
@@ -67,14 +61,18 @@ class UtenlandskOppgaveDataFetcher(
             val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveId)
 
             if (oppgave.oppgaveDbModel.tilbakeTilGosys) {
-                log.info("Oppgave med $oppgaveId er markert som tilbake til Gosys, returnerer status IKKE_EN_SYKMELDING")
+                log.info(
+                    "Oppgave med $oppgaveId er markert som tilbake til Gosys, returnerer status IKKE_EN_SYKMELDING"
+                )
 
                 return DigitaliseringsoppgaveStatus(
                     oppgaveId = oppgaveId,
                     status = DigitaliseringsoppgaveStatusEnum.IKKE_EN_SYKMELDING,
                 )
             } else if (oppgave.oppgaveDbModel.ferdigstilt != null) {
-                log.info("Oppgave med $oppgaveId er markert som ferdigstilt, returnerer status FERDIGSTILT")
+                log.info(
+                    "Oppgave med $oppgaveId er markert som ferdigstilt, returnerer status FERDIGSTILT"
+                )
 
                 return DigitaliseringsoppgaveStatus(
                     oppgaveId = oppgaveId,
@@ -85,7 +83,9 @@ class UtenlandskOppgaveDataFetcher(
             log.info("Oppgave med $oppgaveId er ikke ferdigstilt, returnerer oppgave")
             return mapToDigitaliseringsoppgave(oppgave)
         } catch (error: DgsEntityNotFoundException) {
-            log.info("Oppgave med $oppgaveId kastet DgsEntityNotFoundException, returnerer status FINNES_IKKE")
+            log.info(
+                "Oppgave med $oppgaveId kastet DgsEntityNotFoundException, returnerer status FINNES_IKKE"
+            )
             return DigitaliseringsoppgaveStatus(
                 oppgaveId = oppgaveId,
                 status = DigitaliseringsoppgaveStatusEnum.FINNES_IKKE,
@@ -99,6 +99,7 @@ class UtenlandskOppgaveDataFetcher(
             )
         }
     }
+
     @PreAuthorize("@oppgaveSecurityService.hasAccessToSykmelding(#sykmeldingId)")
     @DgsMutation(field = DgsConstants.MUTATION.OppdaterDigitalisertSykmelding)
     fun oppdaterSykmelding(
@@ -131,12 +132,14 @@ class UtenlandskOppgaveDataFetcher(
         when (status) {
             SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
                 val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
-                utenlandskOppgaveService.ferdigstillOppgave(
-                    oppgaveId = oppgaveId,
-                    navEpost = navEmail,
-                    values = ferdistilltRegisterOppgaveValues,
-                    enhetId = enhetId,
-                ).also { log.info("Ferdigstilt oppgave med id $oppgaveId") }
+                utenlandskOppgaveService
+                    .ferdigstillOppgave(
+                        oppgaveId = oppgaveId,
+                        navEpost = navEmail,
+                        values = ferdistilltRegisterOppgaveValues,
+                        enhetId = enhetId,
+                    )
+                    .also { log.info("Ferdigstilt oppgave med id $oppgaveId") }
 
                 return DigitaliseringsoppgaveStatus(
                     oppgaveId = oppgaveId,
@@ -146,13 +149,17 @@ class UtenlandskOppgaveDataFetcher(
 
             SykmeldingUnderArbeidStatus.UNDER_ARBEID -> {
                 val uferdigRegisterOppgaveValues = uferdigRegisterOppgaveValues(values)
-                utenlandskOppgaveService.updateOppgave(
-                    oppgaveId = oppgaveId,
-                    values = uferdigRegisterOppgaveValues,
-                    navEpost = navEmail,
-                ).also { log.info("Lagret oppgave med id $oppgaveId") }
+                utenlandskOppgaveService
+                    .updateOppgave(
+                        oppgaveId = oppgaveId,
+                        values = uferdigRegisterOppgaveValues,
+                        navEpost = navEmail,
+                    )
+                    .also { log.info("Lagret oppgave med id $oppgaveId") }
 
-                return mapToDigitaliseringsoppgave(utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveId))
+                return mapToDigitaliseringsoppgave(
+                    utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveId)
+                )
             }
         }
     }
@@ -207,7 +214,9 @@ class UtenlandskOppgaveDataFetcher(
     }
 }
 
-private fun validateRegisterOppgaveValues(values: SykmeldingUnderArbeidValues): FerdistilltRegisterOppgaveValues {
+private fun validateRegisterOppgaveValues(
+    values: SykmeldingUnderArbeidValues
+): FerdistilltRegisterOppgaveValues {
     val behandletTidspunkt = values.behandletTidspunkt.toOffsetDateTimeAtNoon()
     requireNotEmptyOrNull(values.fnrPasient) { "Fødselsnummer til pasient må være satt" }
     requireNotEmptyOrNull(behandletTidspunkt) { "Tidspunkt for behandling må være satt" }
@@ -226,7 +235,8 @@ private fun validateRegisterOppgaveValues(values: SykmeldingUnderArbeidValues): 
         perioder = values.perioder,
         hovedDiagnose = values.hovedDiagnose,
         biDiagnoser = values.biDiagnoser,
-        folkeRegistertAdresseErBrakkeEllerTilsvarende = values.folkeRegistertAdresseErBrakkeEllerTilsvarende,
+        folkeRegistertAdresseErBrakkeEllerTilsvarende =
+            values.folkeRegistertAdresseErBrakkeEllerTilsvarende,
         erAdresseUtland = values.erAdresseUtland,
     )
 }
@@ -239,33 +249,30 @@ private fun validateHovedDiagnose(hovedDiagnose: DiagnoseInput?) {
 
 private fun validateBiDiagnoser(biDiagnoser: List<DiagnoseInput>?) {
     if (!biDiagnoser.isNullOrEmpty()) {
-        biDiagnoser.forEach { biDiagnose ->
-            validateDiagnose(biDiagnose)
-        }
+        biDiagnoser.forEach { biDiagnose -> validateDiagnose(biDiagnose) }
     }
 }
 
-private fun uferdigRegisterOppgaveValues(sykmeldingUnderArbeidValues: SykmeldingUnderArbeidValues): RegisterOppgaveValues {
+private fun uferdigRegisterOppgaveValues(
+    sykmeldingUnderArbeidValues: SykmeldingUnderArbeidValues
+): RegisterOppgaveValues {
     return UferdigRegisterOppgaveValues(
         fnrPasient = sykmeldingUnderArbeidValues.fnrPasient,
-        behandletTidspunkt = sykmeldingUnderArbeidValues.behandletTidspunkt.toOffsetDateTimeAtNoon(),
+        behandletTidspunkt =
+            sykmeldingUnderArbeidValues.behandletTidspunkt.toOffsetDateTimeAtNoon(),
         skrevetLand = sykmeldingUnderArbeidValues.skrevetLand,
         perioder = sykmeldingUnderArbeidValues.perioder,
         hovedDiagnose = sykmeldingUnderArbeidValues.hovedDiagnose,
         biDiagnoser = sykmeldingUnderArbeidValues.biDiagnoser,
-        folkeRegistertAdresseErBrakkeEllerTilsvarende = sykmeldingUnderArbeidValues.folkeRegistertAdresseErBrakkeEllerTilsvarende,
+        folkeRegistertAdresseErBrakkeEllerTilsvarende =
+            sykmeldingUnderArbeidValues.folkeRegistertAdresseErBrakkeEllerTilsvarende,
         erAdresseUtland = sykmeldingUnderArbeidValues.erAdresseUtland,
     )
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun <T : Any> requireNotEmptyOrNull(
-    value: T?,
-    lazyMessage: () -> Any,
-): T {
-    contract {
-        returns() implies (value != null)
-    }
+inline fun <T : Any> requireNotEmptyOrNull(value: T?, lazyMessage: () -> Any): T {
+    contract { returns() implies (value != null) }
 
     when {
         value is String && value.isEmpty() -> {

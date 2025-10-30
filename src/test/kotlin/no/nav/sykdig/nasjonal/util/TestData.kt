@@ -1,7 +1,8 @@
 package no.nav.sykdig.nasjonal.util
 
-
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import no.nav.helse.eiFellesformat.XMLEIFellesformat
 import no.nav.helse.msgHead.XMLMsgHead
 import no.nav.helse.sm2013.HelseOpplysningerArbeidsuforhet
@@ -18,19 +19,15 @@ import no.nav.sykdig.shared.utils.getLocalDateTime
 import no.nav.sykdig.shared.utils.mapsmRegistreringManuelltTilFellesformat
 import no.nav.sykdig.utils.TestHelper.Companion.januar
 import okhttp3.internal.EMPTY_BYTE_ARRAY
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.util.UUID
 
 fun getXmleiFellesformat(
     smRegistreringManuell: SmRegistreringManuell,
     sykmeldingId: String,
-    datoOpprettet: LocalDateTime
+    datoOpprettet: LocalDateTime,
 ): XMLEIFellesformat {
     return mapsmRegistreringManuelltTilFellesformat(
         smRegistreringManuell = smRegistreringManuell,
-        pdlPasient = Person("fnr", Navn("Test", "Doctor", "Thornton"), "123", null, null, null)
-            ,
+        pdlPasient = Person("fnr", Navn("Test", "Doctor", "Thornton"), "123", null, null, null),
         sykmelder =
             Sykmelder(
                 aktorId = "aktorid",
@@ -52,7 +49,7 @@ fun getSykmelding(
     msgHead: XMLMsgHead,
     sykmeldingId: String = "1234",
     aktorId: String = "aktorId",
-    aktorIdLege: String = "aktorIdLege"
+    aktorIdLege: String = "aktorIdLege",
 ): Sykmelding {
     return healthInformation.toSykmelding(
         sykmeldingId = sykmeldingId,
@@ -66,7 +63,7 @@ fun getSykmelding(
 fun getSmRegistreringManuell(
     fnrPasient: String,
     fnrLege: String,
-    harUtdypendeOpplysninger: Boolean = false
+    harUtdypendeOpplysninger: Boolean = false,
 ): SmRegistreringManuell {
     return SmRegistreringManuell(
         pasientFnr = fnrPasient,
@@ -89,7 +86,7 @@ fun getSmRegistreringManuell(
                     behandlingsdager = 10,
                     gradert = null,
                     reisetilskudd = false,
-                ),
+                )
             ),
         medisinskVurdering =
             MedisinskVurdering(
@@ -106,7 +103,7 @@ fun getSmRegistreringManuell(
                             kode = "U070",
                             tekst =
                                 "Forstyrrelse relatert til bruk av e-sigarett «Vaping related disorder»",
-                        ),
+                        )
                     ),
                 svangerskap = false,
                 yrkesskade = false,
@@ -131,14 +128,16 @@ fun getSmRegistreringManuell(
                 "",
                 "",
                 Adresse(null, null, null, null, null),
-                ""
+                "",
             ),
         harUtdypendeOpplysninger = harUtdypendeOpplysninger,
     )
 }
 
-
-fun testDataPapirManuellOppgave(oppgaveId: Int, perioder: List<Periode>? = null): PapirManuellOppgave {
+fun testDataPapirManuellOppgave(
+    oppgaveId: Int,
+    perioder: List<Periode>? = null,
+): PapirManuellOppgave {
     return PapirManuellOppgave(
         sykmeldingId = "123",
         fnr = "fnr",
@@ -167,14 +166,27 @@ fun testDataPapirManuellOppgave(oppgaveId: Int, perioder: List<Periode>? = null)
                 meldingTilArbeidsgiver = null,
                 kontaktMedPasient = null,
                 behandletTidspunkt = null,
-                behandler = Behandler("fornavn", "mellomnavn", "etternavn", "", "", "", null, Adresse(null, null, null, null, null), null),
+                behandler =
+                    Behandler(
+                        "fornavn",
+                        "mellomnavn",
+                        "etternavn",
+                        "",
+                        "",
+                        "",
+                        null,
+                        Adresse(null, null, null, null, null),
+                        null,
+                    ),
             ),
         documents = emptyList(),
     )
 }
 
-
-fun testDataPapirSmregistrering(oppgaveId: Int, perioder: List<Periode>? = null): PapirSmRegistering {
+fun testDataPapirSmregistrering(
+    oppgaveId: Int,
+    perioder: List<Periode>? = null,
+): PapirSmRegistering {
     return PapirSmRegistering(
         journalpostId = "123",
         oppgaveId = oppgaveId.toString(),
@@ -197,10 +209,9 @@ fun testDataPapirSmregistrering(oppgaveId: Int, perioder: List<Periode>? = null)
         meldingTilArbeidsgiver = null,
         kontaktMedPasient = null,
         behandletTidspunkt = null,
-        behandler = null
+        behandler = null,
     )
 }
-
 
 fun testDataNasjonalOppgaveResponse(oppgaveId: Int): NasjonalOppgaveResponse {
     return NasjonalOppgaveResponse(
@@ -208,7 +219,7 @@ fun testDataNasjonalOppgaveResponse(oppgaveId: Int): NasjonalOppgaveResponse {
         oppgavetype = "TYPE",
         aktivDato = 1.januar(2023),
         prioritet = "",
-      endretAvEnhetsnr = "2990"
+        endretAvEnhetsnr = "2990",
     )
 }
 
@@ -216,10 +227,8 @@ fun extractHelseOpplysningerArbeidsuforhet(
     fellesformat: XMLEIFellesformat
 ): HelseOpplysningerArbeidsuforhet =
     fellesformat.get<XMLMsgHead>().document[0].refDoc.content.any[0]
-            as HelseOpplysningerArbeidsuforhet
+        as HelseOpplysningerArbeidsuforhet
 
 inline fun <reified T> XMLEIFellesformat.get() = this.any.find { it is T } as T
 
 const val journalpostId = "123"
-
-

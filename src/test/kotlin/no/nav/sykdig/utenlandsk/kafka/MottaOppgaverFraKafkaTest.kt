@@ -1,16 +1,15 @@
 package no.nav.sykdig.utenlandsk.kafka
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
 import no.nav.sykdig.IntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDate
-import java.util.UUID
 
 class MottaOppgaverFraKafkaTest : IntegrationTest() {
-    @Autowired
-    lateinit var mottaOppgaverFraKafka: MottaOppgaverFraKafka
+    @Autowired lateinit var mottaOppgaverFraKafka: MottaOppgaverFraKafka
 
     @Test
     fun testReposistory() {
@@ -54,14 +53,8 @@ class MottaOppgaverFraKafkaTest : IntegrationTest() {
                 type = "UTLAND",
                 dokumenter =
                     listOf(
-                        DokumentMedTittel(
-                            tittel = "tittel",
-                            dokumentInfoId = "id",
-                        ),
-                        DokumentMedTittel(
-                            tittel = "tittel-2",
-                            dokumentInfoId = "id-2",
-                        ),
+                        DokumentMedTittel(tittel = "tittel", dokumentInfoId = "id"),
+                        DokumentMedTittel(tittel = "tittel-2", dokumentInfoId = "id-2"),
                     ),
             )
 

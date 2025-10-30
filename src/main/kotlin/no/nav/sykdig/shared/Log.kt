@@ -1,7 +1,5 @@
 package no.nav.sykdig.shared
 
-import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
-import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -28,4 +26,3 @@ data class LoggingMeta(
     val msgId: String,
     val sykmeldingId: String,
 )
-

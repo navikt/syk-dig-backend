@@ -29,7 +29,8 @@ class SykDigTokenResolver : JwtBearerTokenResolver {
     val log = applog()
 
     override fun token(): String? {
-        val autentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        val autentication =
+            SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         return autentication.token.tokenValue
     }
 }
@@ -104,7 +105,6 @@ class AadRestTemplateConfiguration {
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
 
-
     private fun downstreamRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,
@@ -115,7 +115,9 @@ class AadRestTemplateConfiguration {
             clientConfigurationProperties.registration[registrationName]
                 ?: throw RuntimeException("Fant ikke config for $registrationName")
         return restTemplateBuilder
-            .additionalInterceptors(bearerTokenInterceptor(clientProperties, oAuth2AccessTokenService))
+            .additionalInterceptors(
+                bearerTokenInterceptor(clientProperties, oAuth2AccessTokenService)
+            )
             .build()
     }
 
@@ -123,7 +125,10 @@ class AadRestTemplateConfiguration {
         clientProperties: ClientProperties,
         oAuth2AccessTokenService: OAuth2AccessTokenService,
     ): ClientHttpRequestInterceptor {
-        return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
+        return ClientHttpRequestInterceptor {
+            request: HttpRequest,
+            body: ByteArray,
+            execution: ClientHttpRequestExecution ->
             val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
             request.headers.setBearerAuth(response.access_token!!)
             execution.execute(request, body)

@@ -26,7 +26,12 @@ class PdlGraphQlConfiguration {
             httpHeaders.contentType = MediaType.APPLICATION_JSON
 
             val response =
-                pdlM2mRestTemplate.exchange(url, HttpMethod.POST, HttpEntity(body, httpHeaders), String::class.java)
+                pdlM2mRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    HttpEntity(body, httpHeaders),
+                    String::class.java,
+                )
 
             HttpResponse(response.statusCode.value(), response.body)
         }

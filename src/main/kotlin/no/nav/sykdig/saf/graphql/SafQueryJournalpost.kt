@@ -1,6 +1,7 @@
 package no.nav.sykdig.saf.graphql
 
-const val SAF_QUERY_FIND_JOURNALPOST = """
+const val SAF_QUERY_FIND_JOURNALPOST =
+    """
     query FindJournalpost(${"$"}id: String!) {
         journalpost(journalpostId: ${"$"}id) {
             tittel
@@ -30,7 +31,8 @@ const val SAF_QUERY_FIND_JOURNALPOST = """
     }
 """
 
-const val SAF_QUERY_FIND_JOURNALPOST_NASJONAL = """
+const val SAF_QUERY_FIND_JOURNALPOST_NASJONAL =
+    """
     query FindJournalpostNasjonal(${"$"}id: String!) {
         journalpost(journalpostId: ${"$"}id) {
             journalstatus
@@ -38,17 +40,11 @@ const val SAF_QUERY_FIND_JOURNALPOST_NASJONAL = """
     }
 """
 
-data class SafQueryJournalpostNasjonal(
-    val journalpost: SafJournalpostNasjonal?
-)
+data class SafQueryJournalpostNasjonal(val journalpost: SafJournalpostNasjonal?)
 
-data class SafJournalpostNasjonal(
-    val journalstatus: Journalstatus?
-)
+data class SafJournalpostNasjonal(val journalstatus: Journalstatus?)
 
-data class SafQueryJournalpost(
-    val journalpost: SafJournalpost?,
-)
+data class SafQueryJournalpost(val journalpost: SafJournalpost?)
 
 data class SafJournalpost(
     val tittel: String?,
@@ -60,7 +56,6 @@ data class SafJournalpost(
     val tema: String?,
     val kanal: String?,
 )
-
 
 const val TEMA_SYKMELDING = "SYM"
 const val TEMA_SYKEPENGER = "SYK"
@@ -111,14 +106,9 @@ data class DokumentInfo(
     val dokumentvarianter: List<Dokumentvariant>?,
 )
 
-data class Dokumentvariant(
-    val variantformat: String,
-)
+data class Dokumentvariant(val variantformat: String)
 
-data class Bruker(
-    val id: String,
-    val type: Type,
-)
+data class Bruker(val id: String, val type: Type)
 
 enum class Type {
     FNR,

@@ -20,7 +20,7 @@ data class GetOppgaveResponse(
     val duplikat: Boolean?,
     val metadata: Map<String, String?>?,
     val behandlingstype: String?,
-    val behandlingstema: String?
+    val behandlingstema: String?,
 )
 
 data class NasjonalOppgaveResponse(
@@ -53,9 +53,7 @@ data class AllOppgaveResponse(
     val id: Int? = null,
     val tema: String? = null,
     val tildeltEnhetsnr: String,
-    val oppgavetype: String
+    val oppgavetype: String,
 )
 
-data class AllOppgaveResponses(
-    val oppgaver: List<AllOppgaveResponse>,
-)
+data class AllOppgaveResponses(val oppgaver: List<AllOppgaveResponse>)

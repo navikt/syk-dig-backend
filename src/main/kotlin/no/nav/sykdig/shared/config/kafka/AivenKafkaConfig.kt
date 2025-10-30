@@ -1,8 +1,8 @@
 package no.nav.sykdig.shared.config.kafka
 
-import no.nav.sykdig.utenlandsk.models.CreateSykmeldingKafkaMessage
 import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.utils.JacksonKafkaSerializer
+import no.nav.sykdig.utenlandsk.models.CreateSykmeldingKafkaMessage
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -47,10 +47,7 @@ class AivenKafkaConfig(
         return KafkaProducer<String, ReceivedSykmelding>(configs)
     }
 
-    fun commonConfig() =
-        mapOf(
-            BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
-        ) + securityConfig()
+    fun commonConfig() = mapOf(BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers) + securityConfig()
 
     private fun securityConfig() =
         mapOf(
@@ -68,7 +65,7 @@ class AivenKafkaConfig(
 
     @Bean
     fun aivenKafkaListenerContainerFactory(
-        aivenKafkaErrorHandler: AivenKafkaErrorHandler,
+        aivenKafkaErrorHandler: AivenKafkaErrorHandler
     ): ConcurrentKafkaListenerContainerFactory<String, String> {
         val config =
             mapOf(
@@ -78,7 +75,12 @@ class AivenKafkaConfig(
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                 ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1",
             ) + commonConfig()
-        val consumerFactory = DefaultKafkaConsumerFactory<String, String>(config, StringDeserializer(), StringDeserializer())
+        val consumerFactory =
+            DefaultKafkaConsumerFactory<String, String>(
+                config,
+                StringDeserializer(),
+                StringDeserializer(),
+            )
 
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = consumerFactory

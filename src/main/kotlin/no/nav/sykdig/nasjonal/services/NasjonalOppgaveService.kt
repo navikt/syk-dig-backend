@@ -10,16 +10,16 @@ import no.nav.sykdig.generated.types.LagreNasjonalOppgaveStatus
 import no.nav.sykdig.generated.types.LagreNasjonalOppgaveStatusEnum
 import no.nav.sykdig.generated.types.LagreOppgaveResult
 import no.nav.sykdig.gosys.GosysService
-import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.auditLogger.AuditLogger
-import no.nav.sykdig.utenlandsk.api.getPdfResult
 import no.nav.sykdig.nasjonal.db.models.Utfall
 import no.nav.sykdig.nasjonal.mapping.NasjonalSykmeldingMapper
-import no.nav.sykdig.saf.SafClient
-import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.nasjonal.models.*
+import no.nav.sykdig.saf.SafClient
 import no.nav.sykdig.shared.*
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.auditLogger.AuditLogger
+import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.shared.utils.getLoggingMeta
+import no.nav.sykdig.utenlandsk.api.getPdfResult
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
@@ -30,8 +30,7 @@ class NasjonalOppgaveService(
     private val nasjonalFerdigstillingService: NasjonalFerdigstillingService,
     private val metricRegister: MetricRegister,
     private val gosysService: GosysService,
-    private val nasjonalDbService: NasjonalDbService
-
+    private val nasjonalDbService: NasjonalDbService,
 ) {
     val log = applog()
     val securelog = securelog()
@@ -43,10 +42,14 @@ class NasjonalOppgaveService(
 
     fun behandleNasjonalOppgaveFraKafka(papirSmRegistering: PapirSmRegistering) {
         val loggingMeta = getLoggingMeta(papirSmRegistering.sykmeldingId, papirSmRegistering)
-        logger.info("Behandler manuell papirsykmelding fra kafka for sykmeldingId: {}", StructuredArguments.fields(loggingMeta))
+        logger.info(
+            "Behandler manuell papirsykmelding fra kafka for sykmeldingId: {}",
+            StructuredArguments.fields(loggingMeta),
+        )
         metricRegister.incoming_message_counter.increment()
 
-        val eksisterendeOppgave = nasjonalDbService.getOppgaveBySykmeldingId(papirSmRegistering.sykmeldingId)
+        val eksisterendeOppgave =
+            nasjonalDbService.getOppgaveBySykmeldingId(papirSmRegistering.sykmeldingId)
         if (eksisterendeOppgave != null) {
             logger.warn(
                 "Papirsykmelding med sykmeldingId {} er allerede lagret i databasen. Ingen ny oppgave opprettes.",
@@ -74,22 +77,59 @@ class NasjonalOppgaveService(
         }
     }
 
-    suspend fun korrigerSykmeldingMedOppgaveId(oppgaveId: String, navEnhet: String, callId: String, papirSykmelding: SmRegistreringManuell): LagreOppgaveResult {
-        val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) ?: throw DgsEntityNotFoundException("Fant ikke oppgave som skal korrigeres, oppgaveId: $oppgaveId")
+    suspend fun korrigerSykmeldingMedOppgaveId(
+        oppgaveId: String,
+        navEnhet: String,
+        callId: String,
+        papirSykmelding: SmRegistreringManuell,
+    ): LagreOppgaveResult {
+        val oppgave =
+            nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
+                ?: throw DgsEntityNotFoundException(
+                    "Fant ikke oppgave som skal korrigeres, oppgaveId: $oppgaveId"
+                )
         log.info("Forsøker å korrigere sykmelding med oppgaveId $oppgaveId")
-        return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgave.oppgaveId.toString(), LagreNasjonalOppgaveStatusEnum.OPPDATERT)
+        return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(
+            papirSykmelding,
+            navEnhet,
+            callId,
+            oppgave,
+            oppgave.oppgaveId.toString(),
+            LagreNasjonalOppgaveStatusEnum.OPPDATERT,
+        )
     }
 
-    suspend fun sendOppgave(papirSykmelding: SmRegistreringManuell, navEnhet: String, callId: String, oppgaveId: String): LagreOppgaveResult {
-        securelog.info("sender papirsykmelding med oppgaveId $oppgaveId {}", kv("smregistreringManuell", objectMapper.writeValueAsString(papirSykmelding)))
-        val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId) ?: throw DgsEntityNotFoundException("Fant ikke oppgave som skal sendes, oppgaveId: $oppgaveId")
+    suspend fun sendOppgave(
+        papirSykmelding: SmRegistreringManuell,
+        navEnhet: String,
+        callId: String,
+        oppgaveId: String,
+    ): LagreOppgaveResult {
+        securelog.info(
+            "sender papirsykmelding med oppgaveId $oppgaveId {}",
+            kv("smregistreringManuell", objectMapper.writeValueAsString(papirSykmelding)),
+        )
+        val oppgave =
+            nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
+                ?: throw DgsEntityNotFoundException(
+                    "Fant ikke oppgave som skal sendes, oppgaveId: $oppgaveId"
+                )
 
         if (oppgave.ferdigstilt) {
             log.info("Oppgave med id $oppgaveId er allerede ferdigstilt")
             throw DgsBadRequestException("Oppgave med id $oppgaveId er allerede ferdigstilt")
         }
-        log.info("Forsøker å sende inn papirsykmelding med sykmeldingId ${oppgave.sykmeldingId} oppgaveId ${oppgave.oppgaveId}")
-        return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(papirSykmelding, navEnhet, callId, oppgave, oppgaveId, LagreNasjonalOppgaveStatusEnum.FERDIGSTILT)
+        log.info(
+            "Forsøker å sende inn papirsykmelding med sykmeldingId ${oppgave.sykmeldingId} oppgaveId ${oppgave.oppgaveId}"
+        )
+        return nasjonalFerdigstillingService.validerOgFerdigstillNasjonalSykmelding(
+            papirSykmelding,
+            navEnhet,
+            callId,
+            oppgave,
+            oppgaveId,
+            LagreNasjonalOppgaveStatusEnum.FERDIGSTILT,
+        )
     }
 
     suspend fun avvisOppgave(
@@ -108,7 +148,13 @@ class NasjonalOppgaveService(
         }
         log.info("Avviser oppgave med oppgaveId: $oppgaveId. Avvisningsgrunn: $avvisningsgrunn")
         val veilederIdent = nasjonalSykmeldingMapper.getNavIdent().veilederIdent
-        nasjonalFerdigstillingService.ferdigstillNasjonalAvvistOppgave(lokalOppgave, oppgaveId.toInt(), navEnhet, avvisningsgrunn, veilederIdent)
+        nasjonalFerdigstillingService.ferdigstillNasjonalAvvistOppgave(
+            lokalOppgave,
+            oppgaveId.toInt(),
+            navEnhet,
+            avvisningsgrunn,
+            veilederIdent,
+        )
 
         nasjonalDbService.updateOppgave(
             lokalOppgave.sykmeldingId,
@@ -126,20 +172,21 @@ class NasjonalOppgaveService(
                     requestPath = "/api/v1/oppgave/$oppgaveId/avvis",
                     permit = AuditLogger.Permit.PERMIT,
                     navEmail = nasjonalSykmeldingMapper.getNavEmail(),
-                ),
+                )
         )
 
         log.info("Har avvist oppgave med oppgaveId $oppgaveId")
         return LagreNasjonalOppgaveStatus(
             oppgaveId = oppgaveId,
-            status = LagreNasjonalOppgaveStatusEnum.AVVIST
+            status = LagreNasjonalOppgaveStatusEnum.AVVIST,
         )
     }
 
     fun getRegisterPdf(oppgaveId: String, dokumentInfoId: String): ResponseEntity<Any> {
         val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
         requireNotNull(oppgave)
-        val pdfResult = safClient.getPdfFraSaf(oppgave.journalpostId, dokumentInfoId, oppgave.sykmeldingId)
+        val pdfResult =
+            safClient.getPdfFraSaf(oppgave.journalpostId, dokumentInfoId, oppgave.sykmeldingId)
         return getPdfResult(pdfResult)
     }
 
@@ -148,8 +195,19 @@ class NasjonalOppgaveService(
         requireNotNull(eksisterendeOppgave)
         val navIdent = nasjonalSykmeldingMapper.getNavIdent()
         val loggingMeta = getLoggingMeta(eksisterendeOppgave.sykmeldingId, eksisterendeOppgave)
-        nasjonalFerdigstillingService.ferdigstillOgSendOppgaveTilGosys(oppgaveId, navEnhet, eksisterendeOppgave)
-        nasjonalDbService.updateOppgave(eksisterendeOppgave.sykmeldingId, Utfall.SENDT_TIL_GOSYS.toString(), navIdent.veilederIdent, null, null, null)
+        nasjonalFerdigstillingService.ferdigstillOgSendOppgaveTilGosys(
+            oppgaveId,
+            navEnhet,
+            eksisterendeOppgave,
+        )
+        nasjonalDbService.updateOppgave(
+            eksisterendeOppgave.sykmeldingId,
+            Utfall.SENDT_TIL_GOSYS.toString(),
+            navIdent.veilederIdent,
+            null,
+            null,
+            null,
+        )
 
         log.info(
             "Ferdig å sende oppgave med id $oppgaveId til Gosys {}",

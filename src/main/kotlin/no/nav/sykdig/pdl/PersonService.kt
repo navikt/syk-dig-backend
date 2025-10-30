@@ -1,30 +1,22 @@
 package no.nav.sykdig.pdl
 
-import no.nav.sykdig.shared.applog
+import java.time.LocalDate
 import no.nav.sykdig.pdl.client.PdlClient
 import no.nav.sykdig.pdl.client.graphql.PdlResponse
+import no.nav.sykdig.shared.applog
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 @Component
-class PersonService(
-    private val pdlClient: PdlClient,
-) {
+class PersonService(private val pdlClient: PdlClient) {
     val log = applog()
 
-    fun getPerson(
-        id: String,
-        callId: String,
-    ): Person {
+    fun getPerson(id: String, callId: String): Person {
         val pdlResponse = pdlClient.getPerson(id, callId)
         log.info("Hentet person for callId: $callId")
         return mapPdlResponseTilPerson(id, pdlResponse)
     }
 
-    fun mapPdlResponseTilPerson(
-        ident: String,
-        pdlResponse: PdlResponse,
-    ): Person {
+    fun mapPdlResponseTilPerson(ident: String, pdlResponse: PdlResponse): Person {
         val navn = pdlResponse.hentPerson!!.navn.first()
         val bostedsadresse = pdlResponse.hentPerson.bostedsadresse.firstOrNull()
         val oppholdsadresse = pdlResponse.hentPerson.oppholdsadresse.firstOrNull()
@@ -39,7 +31,10 @@ class PersonService(
                     mellomnavn = navn.mellomnavn,
                     etternavn = navn.etternavn,
                 ),
-            fodselsdato = pdlResponse.hentPerson.foedselsdato?.first()?.foedselsdato?.let { LocalDate.parse(it) },
+            fodselsdato =
+                pdlResponse.hentPerson.foedselsdato?.first()?.foedselsdato?.let {
+                    LocalDate.parse(it)
+                },
             aktorId = pdlResponse.identer.identer.first { it.gruppe == "AKTORID" }.ident,
             bostedsadresse =
                 bostedsadresse?.let {
@@ -68,7 +63,8 @@ class PersonService(
                             it.utenlandskAdresse?.let { utenlandskAdresse ->
                                 UtenlandskAdresse(
                                     adressenavnNummer = utenlandskAdresse.adressenavnNummer,
-                                    bygningEtasjeLeilighet = utenlandskAdresse.bygningEtasjeLeilighet,
+                                    bygningEtasjeLeilighet =
+                                        utenlandskAdresse.bygningEtasjeLeilighet,
                                     postboksNummerNavn = utenlandskAdresse.postboksNummerNavn,
                                     postkode = utenlandskAdresse.postkode,
                                     bySted = utenlandskAdresse.bySted,
@@ -109,7 +105,8 @@ class PersonService(
                             it.utenlandskAdresse?.let { utenlandskAdresse ->
                                 UtenlandskAdresse(
                                     adressenavnNummer = utenlandskAdresse.adressenavnNummer,
-                                    bygningEtasjeLeilighet = utenlandskAdresse.bygningEtasjeLeilighet,
+                                    bygningEtasjeLeilighet =
+                                        utenlandskAdresse.bygningEtasjeLeilighet,
                                     postboksNummerNavn = utenlandskAdresse.postboksNummerNavn,
                                     postkode = utenlandskAdresse.postkode,
                                     bySted = utenlandskAdresse.bySted,

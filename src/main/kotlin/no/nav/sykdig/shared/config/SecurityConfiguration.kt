@@ -12,12 +12,16 @@ import org.springframework.security.web.SecurityFilterChain
 class SecurityConfiguration() {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain? {
-        return http.authorizeHttpRequests { authorizeRequests ->
-            authorizeRequests
-                .requestMatchers(HttpMethod.GET, "/internal/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/schema.json").permitAll()
-                .anyRequest().authenticated()
-        }
+        return http
+            .authorizeHttpRequests { authorizeRequests ->
+                authorizeRequests
+                    .requestMatchers(HttpMethod.GET, "/internal/**")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/schema.json")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            }
             .oauth2ResourceServer { it.jwt {} }
             .headers { headersConfigurer ->
                 headersConfigurer.frameOptions { frameOptionsCustomizer ->

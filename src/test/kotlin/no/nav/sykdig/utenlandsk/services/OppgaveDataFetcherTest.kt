@@ -1,28 +1,32 @@
 package no.nav.sykdig.utenlandsk.services
+
 import com.netflix.graphql.dgs.DgsQueryExecutor
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.util.*
 import no.nav.sykdig.TestGraphQLContextContributor
-import no.nav.sykdig.shared.config.CustomDataFetchingExceptionHandler
-import no.nav.sykdig.utenlandsk.db.PoststedRepository
-import no.nav.sykdig.utenlandsk.api.UtenlandskOppgaveDataFetcher
-import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
+import no.nav.sykdig.generated.types.DiagnoseInput
+import no.nav.sykdig.generated.types.PeriodeInput
+import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
 import no.nav.sykdig.pdl.Bostedsadresse
 import no.nav.sykdig.pdl.Matrikkeladresse
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.Vegadresse
-import no.nav.sykdig.tilgangskontroll.OppgaveSecurityService
-import no.nav.sykdig.generated.types.DiagnoseInput
-import no.nav.sykdig.generated.types.PeriodeInput
-import no.nav.sykdig.generated.types.SykmeldingUnderArbeidStatus
-import no.nav.sykdig.utenlandsk.models.DokumentDbModel
-import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
-import no.nav.sykdig.utenlandsk.models.SykmeldingUnderArbeid
-import no.nav.sykdig.utenlandsk.models.SykDigOppgave
-import no.nav.sykdig.utenlandsk.poststed.api.AdresseDataFetchers
+import no.nav.sykdig.shared.config.CustomDataFetchingExceptionHandler
 import no.nav.sykdig.shared.utils.toOffsetDateTimeAtNoon
+import no.nav.sykdig.tilgangskontroll.OppgaveSecurityService
+import no.nav.sykdig.utenlandsk.api.UtenlandskOppgaveDataFetcher
+import no.nav.sykdig.utenlandsk.db.PoststedRepository
+import no.nav.sykdig.utenlandsk.models.DokumentDbModel
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
+import no.nav.sykdig.utenlandsk.models.SykDigOppgave
+import no.nav.sykdig.utenlandsk.models.SykmeldingUnderArbeid
+import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.poststed.api.AdresseDataFetchers
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -37,34 +41,28 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.util.*
 
 @SpringBootTest(
-    classes = [
-        DgsAutoConfiguration::class,
-        DgsExtendedScalarsAutoConfiguration::class,
-        UtenlandskOppgaveDataFetcher::class,
-        AdresseDataFetchers::class,
-        CustomDataFetchingExceptionHandler::class,
-        TestGraphQLContextContributor::class,
-        OppgaveSecurityService::class,
-    ],
+    classes =
+        [
+            DgsAutoConfiguration::class,
+            DgsExtendedScalarsAutoConfiguration::class,
+            UtenlandskOppgaveDataFetcher::class,
+            AdresseDataFetchers::class,
+            CustomDataFetchingExceptionHandler::class,
+            TestGraphQLContextContributor::class,
+            OppgaveSecurityService::class,
+        ]
 )
 @EnableMethodSecurity(prePostEnabled = true)
 class OppgaveDataFetcherTest {
-    @MockitoBean
-    lateinit var poststedRepository: PoststedRepository
+    @MockitoBean lateinit var poststedRepository: PoststedRepository
 
-    @MockitoBean
-    lateinit var oppgaveService: UtenlandskOppgaveService
+    @MockitoBean lateinit var oppgaveService: UtenlandskOppgaveService
 
-    @MockitoBean
-    lateinit var securityService: OppgaveSecurityService
+    @MockitoBean lateinit var securityService: OppgaveSecurityService
 
-    @Autowired
-    lateinit var dgsQueryExecutor: DgsQueryExecutor
+    @Autowired lateinit var dgsQueryExecutor: DgsQueryExecutor
 
     @BeforeEach
     fun before() {
@@ -82,7 +80,7 @@ class OppgaveDataFetcherTest {
             SykDigOppgave(
                 oppgaveDbModel =
                     createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66")
                     ),
                 person = createPerson(),
             )
@@ -100,7 +98,8 @@ class OppgaveDataFetcherTest {
                         }
                     }
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent(),
                 "data.oppgave.values.fnrPasient",
             )
 
@@ -130,7 +129,8 @@ class OppgaveDataFetcherTest {
                         }
                     }
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent(),
                 "data.oppgave.status",
             )
 
@@ -161,7 +161,8 @@ class OppgaveDataFetcherTest {
                         }
                     }
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent(),
                 "data.oppgave.status",
             )
 
@@ -175,7 +176,7 @@ class OppgaveDataFetcherTest {
             SykDigOppgave(
                 oppgaveDbModel =
                     createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66")
                     ),
                 person = createPerson(),
             )
@@ -193,7 +194,8 @@ class OppgaveDataFetcherTest {
                         }
                     }
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent()
             )
         assertEquals(1, result.errors.size)
         assertEquals("Innlogget bruker har ikke tilgang", result.errors[0].message)
@@ -204,17 +206,15 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(oppgaveService.getDigitaiseringsoppgave("123")).thenAnswer {
             SykDigOppgave(
                 createDigitalseringsoppgaveDbModel(
-                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                    sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66")
                 ),
                 person =
                     createPerson(
-                        vegadresse = Vegadresse("7", null, null, "Gateveien", null, "1111"),
+                        vegadresse = Vegadresse("7", null, null, "Gateveien", null, "1111")
                     ),
             )
         }
-        Mockito.`when`(poststedRepository.getPoststed("1111")).thenAnswer {
-            "Oslo"
-        }
+        Mockito.`when`(poststedRepository.getPoststed("1111")).thenAnswer { "Oslo" }
         val poststed: String =
             dgsQueryExecutor.executeAndExtractJsonPath(
                 """
@@ -235,7 +235,8 @@ class OppgaveDataFetcherTest {
                         }
                     }
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent(),
                 "data.oppgave.person.bostedsadresse.poststed",
             )
         assertEquals("Oslo", poststed)
@@ -247,18 +248,17 @@ class OppgaveDataFetcherTest {
             SykDigOppgave(
                 oppgaveDbModel =
                     createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66")
                     ),
                 person =
                     createPerson(
-                        matrikkeladresse = Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222"),
+                        matrikkeladresse =
+                            Matrikkeladresse("Bruksenhetsnummer", "Tillegsnanvn", "2222")
                     ),
             )
         }
 
-        Mockito.`when`(poststedRepository.getPoststed("2222")).thenAnswer {
-            "Vestnes"
-        }
+        Mockito.`when`(poststedRepository.getPoststed("2222")).thenAnswer { "Vestnes" }
         val poststed: String =
             dgsQueryExecutor.executeAndExtractJsonPath(
                 """
@@ -279,7 +279,8 @@ class OppgaveDataFetcherTest {
                         }
                     }
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent(),
                 "data.oppgave.person.bostedsadresse.poststed",
             )
 
@@ -292,7 +293,7 @@ class OppgaveDataFetcherTest {
             SykDigOppgave(
                 oppgaveDbModel =
                     createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66")
                     ),
                 person = createPerson(),
             )
@@ -308,7 +309,8 @@ class OppgaveDataFetcherTest {
                         }
                     }
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent(),
                 mapOf(
                     "id" to "345",
                     "enhetId" to "1234",
@@ -326,14 +328,22 @@ class OppgaveDataFetcherTest {
             )
 
         assertEquals(0, result.errors.size)
-        verify(
-            oppgaveService,
-            times(1),
-        ).updateOppgave(
-            oppgaveId = "345",
-            values = UferdigRegisterOppgaveValues(fnrPasient = "20086600138", null, null, null, null, null, null, null),
-            navEpost = "fake-test-ident",
-        )
+        verify(oppgaveService, times(1))
+            .updateOppgave(
+                oppgaveId = "345",
+                values =
+                    UferdigRegisterOppgaveValues(
+                        fnrPasient = "20086600138",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                    ),
+                navEpost = "fake-test-ident",
+            )
     }
 
     @Test
@@ -343,7 +353,7 @@ class OppgaveDataFetcherTest {
             SykDigOppgave(
                 oppgaveDbModel =
                     createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66")
                     ),
                 person = createPerson(),
             )
@@ -359,7 +369,8 @@ class OppgaveDataFetcherTest {
                         }
                     }
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent(),
                 mapOf(
                     "id" to "345",
                     "enhetId" to "1234",
@@ -385,7 +396,7 @@ class OppgaveDataFetcherTest {
             SykDigOppgave(
                 oppgaveDbModel =
                     createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66")
                     ),
                 person = createPerson(),
             )
@@ -401,7 +412,8 @@ class OppgaveDataFetcherTest {
                         }
                     }
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent(),
                 mapOf(
                     "id" to "345",
                     "enhetId" to "1234",
@@ -411,11 +423,7 @@ class OppgaveDataFetcherTest {
                             "behandletTidspunkt" to "2022-10-26",
                             "skrevetLand" to "POL",
                             "perioder" to emptyList<PeriodeInput>(),
-                            "hovedDiagnose" to
-                                mapOf(
-                                    "kode" to "Z09",
-                                    "system" to "ICPC2",
-                                ),
+                            "hovedDiagnose" to mapOf("kode" to "Z09", "system" to "ICPC2"),
                             "biDiagnoser" to emptyList<DiagnoseInput>(),
                         ),
                     "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT,
@@ -423,25 +431,24 @@ class OppgaveDataFetcherTest {
             )
 
         assertEquals(0, result.errors.size)
-        verify(
-            oppgaveService,
-            times(1),
-        ).ferdigstillOppgave(
-            oppgaveId = "345",
-            navEpost = "fake-test-ident",
-            values =
-                FerdistilltRegisterOppgaveValues(
-                    fnrPasient = "20086600138",
-                    behandletTidspunkt = LocalDate.parse("2022-10-26").toOffsetDateTimeAtNoon()!!,
-                    skrevetLand = "POL",
-                    perioder = emptyList(),
-                    hovedDiagnose = DiagnoseInput(kode = "Z09", system = "ICPC2"),
-                    biDiagnoser = emptyList(),
-                    folkeRegistertAdresseErBrakkeEllerTilsvarende = null,
-                    erAdresseUtland = null,
-                ),
-            enhetId = "1234",
-        )
+        verify(oppgaveService, times(1))
+            .ferdigstillOppgave(
+                oppgaveId = "345",
+                navEpost = "fake-test-ident",
+                values =
+                    FerdistilltRegisterOppgaveValues(
+                        fnrPasient = "20086600138",
+                        behandletTidspunkt =
+                            LocalDate.parse("2022-10-26").toOffsetDateTimeAtNoon()!!,
+                        skrevetLand = "POL",
+                        perioder = emptyList(),
+                        hovedDiagnose = DiagnoseInput(kode = "Z09", system = "ICPC2"),
+                        biDiagnoser = emptyList(),
+                        folkeRegistertAdresseErBrakkeEllerTilsvarende = null,
+                        erAdresseUtland = null,
+                    ),
+                enhetId = "1234",
+            )
     }
 
     @Test
@@ -450,7 +457,7 @@ class OppgaveDataFetcherTest {
             SykDigOppgave(
                 oppgaveDbModel =
                     createDigitalseringsoppgaveDbModel(
-                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66"),
+                        sykmeldingId = UUID.fromString("555a874f-eaca-49eb-851a-2426a0798b66")
                     ),
                 person = createPerson(),
             )
@@ -466,7 +473,8 @@ class OppgaveDataFetcherTest {
                         }
                     }
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent(),
                 mapOf(
                     "id" to "345",
                     "enhetId" to "1234",
@@ -477,11 +485,7 @@ class OppgaveDataFetcherTest {
                             // empty string is not valid
                             "skrevetLand" to "",
                             "perioder" to emptyList<PeriodeInput>(),
-                            "hovedDiagnose" to
-                                mapOf(
-                                    "kode" to "Køde",
-                                    "system" to "ICDCPC12",
-                                ),
+                            "hovedDiagnose" to mapOf("kode" to "Køde", "system" to "ICDCPC12"),
                             "biDiagnoser" to emptyList<DiagnoseInput>(),
                         ),
                     "status" to SykmeldingUnderArbeidStatus.FERDIGSTILT,
@@ -508,38 +512,34 @@ fun createDigitalseringsoppgaveDbModel(
     dokumenter: List<DokumentDbModel> = emptyList(),
     endretAv: String = "A123456",
     timestamp: OffsetDateTime = OffsetDateTime.now(),
-) = OppgaveDbModel(
-    oppgaveId = oppgaveId,
-    fnr = fnr,
-    journalpostId = journalpostId,
-    dokumentInfoId = dokumentInfoId,
-    opprettet = opprettet,
-    ferdigstilt = ferdigstilt,
-    avvisingsgrunn = avvisingsgrunn,
-    tilbakeTilGosys = tilbakeTilGosys,
-    sykmeldingId = sykmeldingId,
-    type = type,
-    sykmelding = sykmelding,
-    endretAv = endretAv,
-    dokumenter = dokumenter,
-    timestamp = timestamp,
-    source = "scanning",
-)
+) =
+    OppgaveDbModel(
+        oppgaveId = oppgaveId,
+        fnr = fnr,
+        journalpostId = journalpostId,
+        dokumentInfoId = dokumentInfoId,
+        opprettet = opprettet,
+        ferdigstilt = ferdigstilt,
+        avvisingsgrunn = avvisingsgrunn,
+        tilbakeTilGosys = tilbakeTilGosys,
+        sykmeldingId = sykmeldingId,
+        type = type,
+        sykmelding = sykmelding,
+        endretAv = endretAv,
+        dokumenter = dokumenter,
+        timestamp = timestamp,
+        source = "scanning",
+    )
 
 private fun createPerson(
     vegadresse: Vegadresse? = null,
     matrikkeladresse: Matrikkeladresse? = null,
-) = Person(
-    "12345678910",
-    Navn("fornavn", null, "etternavn"),
-    "aktorid",
-    Bostedsadresse(
+) =
+    Person(
+        "12345678910",
+        Navn("fornavn", null, "etternavn"),
+        "aktorid",
+        Bostedsadresse(null, vegadresse, matrikkeladresse, null, null),
         null,
-        vegadresse,
-        matrikkeladresse,
-        null,
-        null,
-    ),
-    null,
-    LocalDate.of(1970, 1, 1),
-)
+        LocalDate.of(1970, 1, 1),
+    )

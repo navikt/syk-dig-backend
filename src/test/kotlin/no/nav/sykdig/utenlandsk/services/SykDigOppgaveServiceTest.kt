@@ -1,15 +1,18 @@
 package no.nav.sykdig.utenlandsk.services
 
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.gosys.OppgaveClient
-import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
-import no.nav.sykdig.pdl.Navn
-import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
+import no.nav.sykdig.gosys.OppgaveClient
+import no.nav.sykdig.pdl.Navn
+import no.nav.sykdig.pdl.Person
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -21,27 +24,25 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 @Transactional
 class SykDigOppgaveServiceTest : IntegrationTest() {
-    @MockitoBean
-    lateinit var ferdigstillingService: FerdigstillingService
+    @MockitoBean lateinit var ferdigstillingService: FerdigstillingService
 
     lateinit var sykDigOppgaveService: SykDigOppgaveService
 
-    @MockitoBean
-    lateinit var oppgaveClient: OppgaveClient
+    @MockitoBean lateinit var oppgaveClient: OppgaveClient
 
     @BeforeEach
     fun setup() {
-        sykDigOppgaveService = SykDigOppgaveService(oppgaveRepository, ferdigstillingService, oppgaveClient)
-        oppgaveRepository.lagreOppgave(createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910"))
+        sykDigOppgaveService =
+            SykDigOppgaveService(oppgaveRepository, ferdigstillingService, oppgaveClient)
+        oppgaveRepository.lagreOppgave(
+            createDigitalseringsoppgaveDbModel(oppgaveId = "123", fnr = "12345678910")
+        )
     }
 
     @AfterEach
@@ -87,7 +88,10 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
         assertEquals("UTLAND", oppdatertOppgave.type)
         assertEquals("12345678910", oppdatertOppgave.sykmelding?.fnrPasient)
         assertEquals("SWE", oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land)
-        assertEquals("A070", oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode)
+        assertEquals(
+            "A070",
+            oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode,
+        )
         assertEquals(null, oppdatertOppgave.ferdigstilt)
     }
 
@@ -107,7 +111,7 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
                                 PeriodeType.AKTIVITET_IKKE_MULIG,
                                 LocalDate.now().minusMonths(1),
                                 LocalDate.now().minusWeeks(2),
-                            ),
+                            )
                         ),
                     hovedDiagnose = DiagnoseInput("A070", "ICD10"),
                     biDiagnoser = emptyList(),
@@ -132,7 +136,10 @@ class SykDigOppgaveServiceTest : IntegrationTest() {
         assertEquals("UTLAND", oppdatertOppgave.type)
         assertEquals("12345678910", oppdatertOppgave.sykmelding?.fnrPasient)
         assertEquals("SWE", oppdatertOppgave.sykmelding?.utenlandskSykmelding?.land)
-        assertEquals("A070", oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode)
+        assertEquals(
+            "A070",
+            oppdatertOppgave.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.kode,
+        )
         assertNotEquals(null, oppdatertOppgave.ferdigstilt)
     }
 }

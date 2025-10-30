@@ -1,8 +1,8 @@
 package no.nav.sykdig.saf
 
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
-import no.nav.sykdig.shared.applog
 import no.nav.sykdig.saf.graphql.*
+import no.nav.sykdig.shared.applog
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 
@@ -16,12 +16,16 @@ class SafJournalpostGraphQlClient(
     @Retryable
     fun getJournalpostM2m(journalpostId: String): SafQueryJournalpost {
         try {
-            val response = safM2mGraphQlClient.executeQuery(SAF_QUERY_FIND_JOURNALPOST, mapOf("id" to journalpostId))
+            val response =
+                safM2mGraphQlClient.executeQuery(
+                    SAF_QUERY_FIND_JOURNALPOST,
+                    mapOf("id" to journalpostId),
+                )
 
             val errors = response.errors
             errors.forEach { log.error("Feilmelding fra SAF: ${it.message} for $journalpostId") }
-            val safJournalpost =  response.dataAsObject(SafQueryJournalpost::class.java)
-            if(safJournalpost.journalpost?.tittel == null) {
+            val safJournalpost = response.dataAsObject(SafQueryJournalpost::class.java)
+            if (safJournalpost.journalpost?.tittel == null) {
                 log.warn("Tittel is null for $journalpostId")
             }
             return safJournalpost
@@ -34,10 +38,14 @@ class SafJournalpostGraphQlClient(
     @Retryable
     fun getJournalpostNasjonal(journalpostId: String): SafQueryJournalpostNasjonal {
         try {
-            val response = safM2mGraphQlClient.executeQuery(SAF_QUERY_FIND_JOURNALPOST_NASJONAL, mapOf("id" to journalpostId))
+            val response =
+                safM2mGraphQlClient.executeQuery(
+                    SAF_QUERY_FIND_JOURNALPOST_NASJONAL,
+                    mapOf("id" to journalpostId),
+                )
             val errors = response.errors
             errors.forEach { log.error("Feilmelding fra SAF: ${it.message} for $journalpostId") }
-            val safJournalpost =  response.dataAsObject(SafQueryJournalpostNasjonal::class.java)
+            val safJournalpost = response.dataAsObject(SafQueryJournalpostNasjonal::class.java)
             return safJournalpost
         } catch (e: Exception) {
             log.error("Noe gikk galt ved kall til SAF for $journalpostId", e)
@@ -48,7 +56,11 @@ class SafJournalpostGraphQlClient(
     @Retryable
     fun getJournalpost(journalpostId: String): SafQueryJournalpost {
         try {
-            val response = safGraphQlClient.executeQuery(SAF_QUERY_FIND_JOURNALPOST, mapOf("id" to journalpostId))
+            val response =
+                safGraphQlClient.executeQuery(
+                    SAF_QUERY_FIND_JOURNALPOST,
+                    mapOf("id" to journalpostId),
+                )
 
             val errors = response.errors
             errors.forEach { log.error("Feilmelding fra SAF: ${it.message} for $journalpostId") }

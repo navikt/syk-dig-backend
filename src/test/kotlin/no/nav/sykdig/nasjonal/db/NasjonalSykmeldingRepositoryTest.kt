@@ -1,5 +1,7 @@
 package no.nav.sykdig.nasjonal.db
 
+import java.time.OffsetDateTime
+import java.util.*
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.nasjonal.db.models.NasjonalSykmeldingDAO
 import no.nav.sykdig.nasjonal.util.*
@@ -8,10 +10,6 @@ import org.amshove.kluent.internal.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.util.*
 
 class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
 
@@ -58,19 +56,20 @@ class NasjonalSykmeldingRepositoryTest : IntegrationTest() {
             sykmelding = sykmeldingTestData(sykmeldingId),
             timestamp = OffsetDateTime.now(),
             ferdigstiltAv = "the saksbehandler",
-            datoFerdigstilt = OffsetDateTime.now()
+            datoFerdigstilt = OffsetDateTime.now(),
         )
     }
 
     fun sykmeldingTestData(sykmeldingId: String): Sykmelding {
         val datoOpprettet = OffsetDateTime.now()
         val manuell = getSmRegistreringManuell("fnrPasient", "fnrLege")
-        val fellesformat = getXmleiFellesformat(manuell, sykmeldingId, datoOpprettet.toLocalDateTime())
+        val fellesformat =
+            getXmleiFellesformat(manuell, sykmeldingId, datoOpprettet.toLocalDateTime())
         val sykmelding =
             getSykmelding(
                 extractHelseOpplysningerArbeidsuforhet(fellesformat),
                 fellesformat.get(),
-                sykmeldingId = sykmeldingId
+                sykmeldingId = sykmeldingId,
             )
         return sykmelding
     }

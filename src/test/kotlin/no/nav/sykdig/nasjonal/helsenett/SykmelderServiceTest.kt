@@ -4,16 +4,14 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.nasjonal.helsenett.client.HelsenettClient
 import no.nav.sykdig.nasjonal.helsenett.client.SmtssClient
 import no.nav.sykdig.nasjonal.models.Godkjenning
 import no.nav.sykdig.nasjonal.models.Kode
-import no.nav.sykdig.nasjonal.helsenett.Behandler
-import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.PersonService
+import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
 import org.amshove.kluent.internal.assertFailsWith
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -32,24 +30,24 @@ class SykmelderServiceTest {
         val mellomnavn = "Mellomnavn"
         val etternavn = "Normann"
 
-        val expectedPerson = Person(
-            fnr = fnr,
-            navn = Navn(fornavn, mellomnavn, etternavn),
-            aktorId = fnr,
-            bostedsadresse = null,
-            oppholdsadresse = null,
-            fodselsdato = null
-        )
+        val expectedPerson =
+            Person(
+                fnr = fnr,
+                navn = Navn(fornavn, mellomnavn, etternavn),
+                aktorId = fnr,
+                bostedsadresse = null,
+                oppholdsadresse = null,
+                fodselsdato = null,
+            )
 
-        val expectedBehandler = Behandler(
-            godkjenninger = listOf(
-                Godkjenning(Kode(true, 1, null), Kode(true, 1, null))
-            ),
-            fnr = fnr,
-            fornavn = fornavn,
-            mellomnavn = mellomnavn,
-            etternavn = etternavn
-        )
+        val expectedBehandler =
+            Behandler(
+                godkjenninger = listOf(Godkjenning(Kode(true, 1, null), Kode(true, 1, null))),
+                fnr = fnr,
+                fornavn = fornavn,
+                mellomnavn = mellomnavn,
+                etternavn = etternavn,
+            )
 
         coEvery { personService.getPerson(any(), any()) } returns expectedPerson
         coEvery { helsenettClient.getBehandler(hprNummer, "callid") } returns expectedBehandler
@@ -74,19 +72,25 @@ class SykmelderServiceTest {
         val mellomnavn = "Mellomnavn"
         val etternavn = "Normann"
 
-        val expectedPerson = Person(
-            fnr = fnr,
-            navn = Navn(fornavn, mellomnavn, etternavn),
-            aktorId = fnr,
-            bostedsadresse = null,
-            oppholdsadresse = null,
-            fodselsdato = null
-        )
+        val expectedPerson =
+            Person(
+                fnr = fnr,
+                navn = Navn(fornavn, mellomnavn, etternavn),
+                aktorId = fnr,
+                bostedsadresse = null,
+                oppholdsadresse = null,
+                fodselsdato = null,
+            )
 
         coEvery { personService.getPerson(any(), any()) } returns expectedPerson
-        coEvery { helsenettClient.getBehandler(hprNummer, "callid") } throws SykmelderNotFoundException("Kunne ikke hente fnr for hpr $hprNummer")
+        coEvery { helsenettClient.getBehandler(hprNummer, "callid") } throws
+            SykmelderNotFoundException("Kunne ikke hente fnr for hpr $hprNummer")
 
-        val exception = runBlocking { assertFailsWith<SykmelderNotFoundException> { sykmelderService.getSykmelder(hprNummer, "callid") } }
+        val exception = runBlocking {
+            assertFailsWith<SykmelderNotFoundException> {
+                sykmelderService.getSykmelder(hprNummer, "callid")
+            }
+        }
         assertEquals("Kunne ikke hente fnr for hpr $hprNummer", exception.message)
     }
 }

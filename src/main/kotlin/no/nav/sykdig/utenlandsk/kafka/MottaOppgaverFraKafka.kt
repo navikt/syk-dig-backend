@@ -1,19 +1,19 @@
 package no.nav.sykdig.utenlandsk.kafka
 
-import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
-import no.nav.sykdig.shared.applog
-import no.nav.sykdig.utenlandsk.db.OppgaveRepository
-import no.nav.sykdig.gosys.models.GetOppgaveResponse
-import no.nav.sykdig.gosys.models.OppdaterOppgaveRequest
-import no.nav.sykdig.gosys.OppgaveClient
-import no.nav.sykdig.saf.SafJournalpostService
-import no.nav.sykdig.shared.metrics.MetricRegister
-import no.nav.sykdig.shared.utils.toOppgaveDbModel
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
+import no.nav.sykdig.gosys.OppgaveClient
+import no.nav.sykdig.gosys.models.GetOppgaveResponse
+import no.nav.sykdig.gosys.models.OppdaterOppgaveRequest
+import no.nav.sykdig.saf.SafJournalpostService
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.metrics.MetricRegister
+import no.nav.sykdig.shared.utils.toOppgaveDbModel
+import no.nav.sykdig.utenlandsk.db.OppgaveRepository
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 
 const val NAV_OPPFOLGNING_UTLAND = "0393"
 
@@ -36,14 +36,12 @@ class MottaOppgaverFraKafka(
                 sykmeldingId = sykmeldingId,
             )
         if (
-            (
-                oppgave.gjelderUtenlandskSykmeldingFraRina() ||
-                    oppgave.gjelderUtenlandskSykmeldingFraNAVNO()
-            ) &&
-            !oppgave.journalpostId.isNullOrEmpty()
+            (oppgave.gjelderUtenlandskSykmeldingFraRina() ||
+                oppgave.gjelderUtenlandskSykmeldingFraNAVNO()) &&
+                !oppgave.journalpostId.isNullOrEmpty()
         ) {
             logger.info(
-                "Utenlandsk sykmelding: OppgaveId $oppgaveId, journalpostId ${oppgave.journalpostId}",
+                "Utenlandsk sykmelding: OppgaveId $oppgaveId, journalpostId ${oppgave.journalpostId}"
             )
             if (oppgave.erTildeltNavOppfolgningUtland() || cluster == "dev-gcp") {
                 val dokumenter =
@@ -78,19 +76,16 @@ class MottaOppgaverFraKafka(
                 }
             } else {
                 logger.warn(
-                    "Oppgaven $oppgaveId, journalpostId ${oppgave.journalpostId} er ikke tildelt $NAV_OPPFOLGNING_UTLAND men ${oppgave.tildeltEnhetsnr}",
+                    "Oppgaven $oppgaveId, journalpostId ${oppgave.journalpostId} er ikke tildelt $NAV_OPPFOLGNING_UTLAND men ${oppgave.tildeltEnhetsnr}"
                 )
             }
         }
     }
 
-    fun lagre(
-        digitaliseringsoppgave: DigitaliseringsoppgaveScanning,
-        sykmeldingId: String,
-    ) {
+    fun lagre(digitaliseringsoppgave: DigitaliseringsoppgaveScanning, sykmeldingId: String) {
         val opprettet = OffsetDateTime.now(ZoneOffset.UTC)
         oppgaveRepository.lagreOppgave(
-            toOppgaveDbModel(digitaliseringsoppgave, opprettet, sykmeldingId),
+            toOppgaveDbModel(digitaliseringsoppgave, opprettet, sykmeldingId)
         )
         metricRegister.mottatOppgave.increment()
     }
@@ -124,7 +119,8 @@ class MottaOppgaverFraKafka(
         }
     }
 
-    private fun GetOppgaveResponse.erTildeltNavOppfolgningUtland() = tildeltEnhetsnr == NAV_OPPFOLGNING_UTLAND
+    private fun GetOppgaveResponse.erTildeltNavOppfolgningUtland() =
+        tildeltEnhetsnr == NAV_OPPFOLGNING_UTLAND
 }
 
 data class DigitaliseringsoppgaveScanning(

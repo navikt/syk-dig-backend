@@ -1,12 +1,12 @@
 package no.nav.sykdig.utenlandsk.mapping
 
-import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import java.time.LocalDateTime
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.Status
-import no.nav.sykdig.utenlandsk.models.UtenlandskSykmelding
 import no.nav.sykdig.shared.ValidationResult
-import java.time.LocalDateTime
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.UtenlandskSykmelding
 
 fun mapToReceivedSykmelding(
     ferdigstillteRegisterOppgaveValues: FerdistilltRegisterOppgaveValues,
@@ -25,12 +25,13 @@ fun mapToReceivedSykmelding(
         )
 
     val sykmelding =
-        extractHelseOpplysningerArbeidsuforhet(fellesformat).toSykmelding(
-            sykmeldingId = sykmeldingId,
-            pasientAktoerId = sykmeldt.aktorId,
-            msgId = sykmeldingId,
-            signaturDato = opprettet,
-        )
+        extractHelseOpplysningerArbeidsuforhet(fellesformat)
+            .toSykmelding(
+                sykmeldingId = sykmeldingId,
+                pasientAktoerId = sykmeldt.aktorId,
+                msgId = sykmeldingId,
+                signaturDato = opprettet,
+            )
 
     return ReceivedSykmelding(
         sykmelding = sykmelding,
@@ -41,7 +42,8 @@ fun mapToReceivedSykmelding(
         navLogId = sykmeldingId,
         msgId = sykmeldingId,
         legekontorOrgNr = null,
-        // Denne skal være blank siden vi ikkje har noe org name på legekontoret, men feltet er påkrevd i formatet
+        // Denne skal være blank siden vi ikkje har noe org name på legekontoret, men feltet er
+        // påkrevd i formatet
         legekontorOrgName = "",
         legekontorHerId = null,
         legekontorReshId = null,
@@ -57,13 +59,10 @@ fun mapToReceivedSykmelding(
         utenlandskSykmelding =
             UtenlandskSykmelding(
                 ferdigstillteRegisterOppgaveValues.skrevetLand,
-                ferdigstillteRegisterOppgaveValues.folkeRegistertAdresseErBrakkeEllerTilsvarende ?: false,
+                ferdigstillteRegisterOppgaveValues.folkeRegistertAdresseErBrakkeEllerTilsvarende
+                    ?: false,
                 erAdresseUtland = ferdigstillteRegisterOppgaveValues.erAdresseUtland ?: false,
             ),
-        validationResult =
-            ValidationResult(
-                status = Status.OK,
-                ruleHits = emptyList(),
-            ),
+        validationResult = ValidationResult(status = Status.OK, ruleHits = emptyList()),
     )
 }

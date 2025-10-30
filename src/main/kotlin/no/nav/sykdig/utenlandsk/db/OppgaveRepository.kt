@@ -1,33 +1,33 @@
 package no.nav.sykdig.utenlandsk.db
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.sykdig.shared.applog
-import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
-import no.nav.sykdig.shared.AktivitetIkkeMulig
-import no.nav.sykdig.shared.Diagnose
-import no.nav.sykdig.shared.Gradert
-import no.nav.sykdig.shared.MedisinskVurdering
-import no.nav.sykdig.shared.Periode
-import no.nav.sykdig.utenlandsk.models.UtenlandskSykmelding
-import no.nav.sykdig.generated.types.Avvisingsgrunn
-import no.nav.sykdig.generated.types.PeriodeInput
-import no.nav.sykdig.generated.types.PeriodeType
-import no.nav.sykdig.utenlandsk.models.DokumentDbModel
-import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
-import no.nav.sykdig.utenlandsk.models.SDSykmelding
-import no.nav.sykdig.utenlandsk.models.SykmeldingUnderArbeid
-import no.nav.sykdig.shared.objectMapper
-import no.nav.sykdig.shared.utils.getDiagnoseText
-import org.postgresql.util.PGobject
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.ZoneOffset
 import java.util.UUID
+import no.nav.sykdig.generated.types.Avvisingsgrunn
+import no.nav.sykdig.generated.types.PeriodeInput
+import no.nav.sykdig.generated.types.PeriodeType
+import no.nav.sykdig.shared.AktivitetIkkeMulig
+import no.nav.sykdig.shared.Diagnose
+import no.nav.sykdig.shared.Gradert
+import no.nav.sykdig.shared.MedisinskVurdering
+import no.nav.sykdig.shared.Periode
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.utils.getDiagnoseText
+import no.nav.sykdig.utenlandsk.models.DokumentDbModel
+import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
+import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.SDSykmelding
+import no.nav.sykdig.utenlandsk.models.SykmeldingUnderArbeid
+import no.nav.sykdig.utenlandsk.models.UtenlandskSykmelding
+import org.postgresql.util.PGobject
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 @Repository
@@ -47,7 +47,9 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 .addValue("opprettet", Timestamp.from(digitaliseringsoppgave.opprettet.toInstant()))
                 .addValue(
                     "ferdigstilt",
-                    digitaliseringsoppgave.ferdigstilt?.let { Timestamp.from(digitaliseringsoppgave.ferdigstilt.toInstant()) },
+                    digitaliseringsoppgave.ferdigstilt?.let {
+                        Timestamp.from(digitaliseringsoppgave.ferdigstilt.toInstant())
+                    },
                 )
                 .addValue("source", digitaliseringsoppgave.source),
         )
@@ -66,9 +68,11 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             ),
         )
     }
+
     fun getOppgaveBySykmeldingId(sykmeldingId: String): OppgaveDbModel? {
-        return namedParameterJdbcTemplate.query(
-            """SELECT o.oppgave_id,
+        return namedParameterJdbcTemplate
+            .query(
+                """SELECT o.oppgave_id,
                o.fnr,
                o.journalpost_id,
                o.dokumentinfo_id,
@@ -90,15 +94,17 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                              WHERE sykmelding_id = s.sykmelding_id)
         and  s.sykmelding_id = :sykmelding_id;
             """,
-            mapOf("sykmelding_id" to sykmeldingId),
-        ) { resultSet, _ ->
-            resultSet.toDigitaliseringsoppgave()
-        }.firstOrNull()
+                mapOf("sykmelding_id" to sykmeldingId),
+            ) { resultSet, _ ->
+                resultSet.toDigitaliseringsoppgave()
+            }
+            .firstOrNull()
     }
 
     fun getOppgave(oppgaveId: String): OppgaveDbModel? {
-        return namedParameterJdbcTemplate.query(
-            """SELECT o.oppgave_id,
+        return namedParameterJdbcTemplate
+            .query(
+                """SELECT o.oppgave_id,
                            fnr,
                            journalpost_id,
                            dokumentinfo_id,
@@ -120,10 +126,11 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                                            WHERE oppgave_id = o.oppgave_id)
                     WHERE o.oppgave_id = :oppgave_id;
             """,
-            mapOf("oppgave_id" to oppgaveId),
-        ) { resultSet, _ ->
-            resultSet.toDigitaliseringsoppgave()
-        }.firstOrNull()
+                mapOf("oppgave_id" to oppgaveId),
+            ) { resultSet, _ ->
+                resultSet.toDigitaliseringsoppgave()
+            }
+            .firstOrNull()
     }
 
     @Transactional
@@ -139,7 +146,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                 UPDATE oppgave
                 SET ferdigstilt = :ferdigstilt
                 WHERE oppgave_id = :oppgave_id
-                """.trimIndent(),
+                """
+                    .trimIndent(),
                 mapOf(
                     "oppgave_id" to oppgave.oppgaveId,
                     "ferdigstilt" to Timestamp.from(Instant.now()),
@@ -156,9 +164,10 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
     ) {
         namedParameterJdbcTemplate.update(
             """
-                INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
-                VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
-                """.trimIndent(),
+            INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
+            VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
+            """
+                .trimIndent(),
             mapOf(
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
                 "oppgave_id" to oppgave.oppgaveId,
@@ -180,7 +189,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             """
             INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
             VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
-            """.trimIndent(),
+            """
+                .trimIndent(),
             mapOf(
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
                 "oppgave_id" to oppgave.oppgaveId,
@@ -196,7 +206,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             SET ferdigstilt = :ferdigstilt,
                 tilbake_til_gosys = :tilbake_til_gosys
             WHERE oppgave_id = :oppgave_id
-            """.trimIndent(),
+            """
+                .trimIndent(),
             mapOf(
                 "oppgave_id" to oppgave.oppgaveId,
                 "ferdigstilt" to Timestamp.from(Instant.now()),
@@ -216,7 +227,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             """
             INSERT INTO sykmelding(sykmelding_id, oppgave_id, type, sykmelding, endret_av, timestamp)
             VALUES (:sykmelding_id, :oppgave_id, :type, :sykmelding, :endret_av, :timestamp)
-            """.trimIndent(),
+            """
+                .trimIndent(),
             mapOf(
                 "sykmelding_id" to oppgave.sykmeldingId.toString(),
                 "oppgave_id" to oppgave.oppgaveId,
@@ -232,7 +244,8 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
             SET ferdigstilt = :ferdigstilt,
                 avvisings_grunn = :avvisings_grunn
             WHERE oppgave_id = :oppgave_id
-            """.trimIndent(),
+            """
+                .trimIndent(),
             mapOf(
                 "oppgave_id" to oppgave.oppgaveId,
                 "ferdigstilt" to Timestamp.from(Instant.now()),
@@ -243,8 +256,9 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
 
     @Transactional
     fun getLastSykmelding(oppgaveId: String): SykmeldingUnderArbeid? {
-        return namedParameterJdbcTemplate.query(
-            """SELECT s.sykmelding
+        return namedParameterJdbcTemplate
+            .query(
+                """SELECT s.sykmelding
                     FROM sykmelding AS s
                              INNER JOIN oppgave AS o ON s.oppgave_id = o.oppgave_id
                         AND s.timestamp = (SELECT MAX(timestamp)
@@ -252,35 +266,27 @@ class OppgaveRepository(private val namedParameterJdbcTemplate: NamedParameterJd
                                            WHERE oppgave_id = o.oppgave_id)
                     WHERE s.oppgave_id = :oppgave_id;
             """,
-            mapOf("oppgave_id" to oppgaveId),
-        ) { resultSet, _ ->
-            resultSet.toSykmeldingUnderArbeid()
-        }.firstOrNull()
+                mapOf("oppgave_id" to oppgaveId),
+            ) { resultSet, _ ->
+                resultSet.toSykmeldingUnderArbeid()
+            }
+            .firstOrNull()
     }
 
-    fun updateDocuments(
-        oppgaveId: String,
-        dokumenter: List<DokumentDbModel>,
-    ) {
+    fun updateDocuments(oppgaveId: String, dokumenter: List<DokumentDbModel>) {
         namedParameterJdbcTemplate.update(
             """
             UPDATE oppgave
             SET dokumenter = :dokumenter
             WHERE oppgave_id = :oppgave_id
-            """.trimIndent(),
-            mapOf(
-                "oppgave_id" to oppgaveId,
-                "dokumenter" to dokumenter.toPGObject(),
-            ),
+            """
+                .trimIndent(),
+            mapOf("oppgave_id" to oppgaveId, "dokumenter" to dokumenter.toPGObject()),
         )
     }
-
 }
 
-fun toSykmelding(
-    oppgave: OppgaveDbModel,
-    values: RegisterOppgaveValues,
-): SykmeldingUnderArbeid {
+fun toSykmelding(oppgave: OppgaveDbModel, values: RegisterOppgaveValues): SykmeldingUnderArbeid {
     val sykmeldingsId = oppgave.sykmeldingId.toString()
     if (oppgave.sykmelding == null) {
         val msgId = UUID.randomUUID().toString()
@@ -342,8 +348,7 @@ private fun toUtenlandskSykmelding(
         UtenlandskSykmelding(
             land = skrevetLand,
             folkeRegistertAdresseErBrakkeEllerTilsvarende =
-                values.folkeRegistertAdresseErBrakkeEllerTilsvarende
-                    ?: false,
+                values.folkeRegistertAdresseErBrakkeEllerTilsvarende ?: false,
             erAdresseUtland = values.erAdresseUtland ?: false,
         )
     }
@@ -356,10 +361,7 @@ private fun List<PeriodeInput>?.mapToPerioder(): List<Periode>? =
             tom = it.tom,
             aktivitetIkkeMulig =
                 if (it.type == PeriodeType.AKTIVITET_IKKE_MULIG) {
-                    AktivitetIkkeMulig(
-                        medisinskArsak = null,
-                        arbeidsrelatertArsak = null,
-                    )
+                    AktivitetIkkeMulig(medisinskArsak = null, arbeidsrelatertArsak = null)
                 } else {
                     null
                 },
@@ -367,7 +369,9 @@ private fun List<PeriodeInput>?.mapToPerioder(): List<Periode>? =
             gradert =
                 if (it.type == PeriodeType.GRADERT) {
                     Gradert(
-                        grad = it.grad ?: throw IllegalStateException("Gradert periode must have grad"),
+                        grad =
+                            it.grad
+                                ?: throw IllegalStateException("Gradert periode must have grad"),
                         reisetilskudd = false,
                     )
                 } else {
@@ -420,8 +424,12 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
         avvisingsgrunn = getString("avvisings_grunn"),
         sykmeldingId = UUID.fromString(getString("sykmelding_id")),
         type = getString("type"),
-        sykmelding = getString("sykmelding")?.let { objectMapper.readValue(it, SykmeldingUnderArbeid::class.java) },
-        dokumenter = getString("dokumenter").let { objectMapper.readValue<List<DokumentDbModel>>(it) },
+        sykmelding =
+            getString("sykmelding")?.let {
+                objectMapper.readValue(it, SykmeldingUnderArbeid::class.java)
+            },
+        dokumenter =
+            getString("dokumenter").let { objectMapper.readValue<List<DokumentDbModel>>(it) },
         endretAv = getString("endret_av"),
         timestamp = getTimestamp("timestamp").toInstant().atOffset(ZoneOffset.UTC),
         source = getString("source"),

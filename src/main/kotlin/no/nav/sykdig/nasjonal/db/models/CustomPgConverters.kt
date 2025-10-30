@@ -2,6 +2,9 @@ package no.nav.sykdig.nasjonal.db.models
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.sql.Timestamp
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.shared.*
 import org.postgresql.util.PGobject
@@ -11,9 +14,6 @@ import org.springframework.core.convert.converter.Converter
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
 import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
-import java.sql.Timestamp
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 @ReadingConverter
 class OffsetDateTimeReadingConverter : Converter<Any, OffsetDateTime> {
@@ -43,7 +43,10 @@ class PapirSmRegistreringReadingConverter : Converter<PGobject, PapirSmRegisteri
 
     override fun convert(source: PGobject): PapirSmRegistering {
         objectMapper.registerModule(JavaTimeModule())
-        return objectMapper.readValue(source.value!!, PapirSmRegistering::class.java) // bedre håndtering enn !!
+        return objectMapper.readValue(
+            source.value!!,
+            PapirSmRegistering::class.java,
+        ) // bedre håndtering enn !!
     }
 }
 
@@ -64,10 +67,12 @@ class SykmeldingReadingConverter : Converter<PGobject, Sykmelding> {
 
     override fun convert(source: PGobject): Sykmelding {
         objectMapper.registerModule(JavaTimeModule())
-        return objectMapper.readValue(source.value!!, Sykmelding::class.java) // bedre håndtering enn !!
+        return objectMapper.readValue(
+            source.value!!,
+            Sykmelding::class.java,
+        ) // bedre håndtering enn !!
     }
 }
-
 
 @Configuration
 class JdbcConfiguration {
@@ -80,9 +85,7 @@ class JdbcConfiguration {
                 PapirSmRegistreringReadingConverter(),
                 SykmeldingWritingConverter(),
                 SykmeldingReadingConverter(),
-            ),
+            )
         )
     }
-
 }
-
