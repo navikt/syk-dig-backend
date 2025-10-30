@@ -22,6 +22,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
@@ -245,7 +246,7 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
             oppgaveResponseMock
         }
         Mockito.`when`(
-            gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString()),
+            gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString(), anyString()),
         ).thenThrow(RuntimeException("Real bad error"))
 
         Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {
@@ -326,7 +327,7 @@ class UtenlandskOppgaveServiceTest : IntegrationTest() {
             oppgaveResponseMock
         }
         Mockito.`when`(
-            gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString()),
+            gosysService.avvisOppgaveTilGosys(anyString(), anyString(), anyString(), anyString(), anyString()),
         ).thenThrow(RuntimeException("Real bad error"))
 
         Mockito.`when`(metricRegister.avvistSendtTilGosys).thenAnswer {

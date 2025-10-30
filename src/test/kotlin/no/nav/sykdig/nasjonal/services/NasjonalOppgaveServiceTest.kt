@@ -111,7 +111,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
             perioder = any(),
         )).thenReturn(null)
 
-        Mockito.doNothing().`when`(oppgaveClient).ferdigstillOppgave(any(), any())
+        Mockito.doNothing().`when`(oppgaveClient).ferdigstillOppgave(any(), any(), any())
         Mockito.doNothing().`when`(documentService).updateDocumentTitle(any(), any(), any())
         val loggingMeta = getLoggingMeta("sykmeldingId", testDataOppgaveDbModel("oppgaveId"))
         assertEquals(testDataLoggingMeta(), loggingMeta)
