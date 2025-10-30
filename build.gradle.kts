@@ -1,4 +1,5 @@
 import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
+import com.diffplug.gradle.spotless.SpotlessExtension
 
 plugins {
     id("org.springframework.boot") version "3.5.6"
@@ -7,6 +8,7 @@ plugins {
     kotlin("plugin.spring") version "2.2.20"
     id("com.netflix.dgs.codegen") version "5.12.4"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.diffplug.spotless") version "8.0.0"
 }
 
 group = "no.nav.sykdig"
@@ -150,5 +152,11 @@ tasks {
     jar {
         enabled = false
     }
-}
 
+    configure<SpotlessExtension> {
+        kotlin { ktfmt("0.59").kotlinlangStyle() }
+        check {
+            dependsOn("spotlessApply")
+        }
+    }
+}
