@@ -143,12 +143,12 @@ class NasjonalOppgaveService(
         return getPdfResult(pdfResult)
     }
 
-    fun oppgaveTilGosys(oppgaveId: String) {
+    fun oppgaveTilGosys(oppgaveId: String, navEnhet: String) {
         val eksisterendeOppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
         requireNotNull(eksisterendeOppgave)
         val navIdent = nasjonalSykmeldingMapper.getNavIdent()
         val loggingMeta = getLoggingMeta(eksisterendeOppgave.sykmeldingId, eksisterendeOppgave)
-        nasjonalFerdigstillingService.ferdigstillOgSendOppgaveTilGosys(oppgaveId, eksisterendeOppgave)
+        nasjonalFerdigstillingService.ferdigstillOgSendOppgaveTilGosys(oppgaveId, navEnhet, eksisterendeOppgave)
         nasjonalDbService.updateOppgave(eksisterendeOppgave.sykmeldingId, Utfall.SENDT_TIL_GOSYS.toString(), navIdent.veilederIdent, null, null, null)
 
         log.info(

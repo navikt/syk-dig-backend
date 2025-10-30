@@ -188,7 +188,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
             journalpost,
             "Fornavn Etternavn",
         )
-        verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString())
+        verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString(), "2990")
     }
 
     @Test

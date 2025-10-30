@@ -111,7 +111,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
             perioder = any(),
         )).thenReturn(null)
 
-        Mockito.doNothing().`when`(oppgaveClient).ferdigstillOppgave(any(), any())
+        Mockito.doNothing().`when`(oppgaveClient).ferdigstillOppgave(any(), any(), any())
         Mockito.doNothing().`when`(documentService).updateDocumentTitle(any(), any(), any())
         val loggingMeta = getLoggingMeta("sykmeldingId", testDataOppgaveDbModel("oppgaveId"))
         assertEquals(testDataLoggingMeta(), loggingMeta)
@@ -121,7 +121,7 @@ class NasjonalOppgaveServiceTest : IntegrationTest() {
                 SafJournalpostNasjonal(Journalstatus.MOTTATT)
             )
         )
-        Mockito.`when`(oppgaveClient.getNasjonalOppgave(any(), any())).thenReturn(NasjonalOppgaveResponse(prioritet = "", aktivDato = LocalDate.now(), oppgavetype = ""))
+        Mockito.`when`(oppgaveClient.getNasjonalOppgave(any(), any())).thenReturn(NasjonalOppgaveResponse(prioritet = "", aktivDato = LocalDate.now(), oppgavetype = "", endretAvEnhetsnr = "2990"))
 
 
         assertTrue(originalOppgave.avvisningsgrunn == null)

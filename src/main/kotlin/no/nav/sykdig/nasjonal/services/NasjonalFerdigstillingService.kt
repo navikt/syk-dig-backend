@@ -1,22 +1,21 @@
 package no.nav.sykdig.nasjonal.services
 
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.sykdig.generated.types.*
-import no.nav.sykdig.gosys.OppgaveClient
-import no.nav.sykdig.nasjonal.helsenett.SykmelderService
-import no.nav.sykdig.nasjonal.models.FerdigstillRegistrering
-import no.nav.sykdig.nasjonal.models.Veileder
-import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.generated.types.LagreNasjonalOppgaveStatus
+import no.nav.sykdig.generated.types.LagreNasjonalOppgaveStatusEnum
+import no.nav.sykdig.generated.types.LagreOppgaveResult
 import no.nav.sykdig.gosys.GosysService
+import no.nav.sykdig.gosys.OppgaveClient
+import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.nasjonal.helsenett.SykmelderService
 import no.nav.sykdig.nasjonal.kafka.NasjonalKafkaService
 import no.nav.sykdig.nasjonal.mapping.NasjonalSykmeldingMapper
+import no.nav.sykdig.nasjonal.models.FerdigstillRegistrering
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
+import no.nav.sykdig.nasjonal.models.Veileder
 import no.nav.sykdig.shared.*
-import no.nav.sykdig.shared.RuleInfo
-import no.nav.sykdig.shared.Status
-import no.nav.sykdig.shared.ValidationResult
-import no.nav.sykdig.utenlandsk.services.JournalpostService
 import no.nav.sykdig.shared.utils.getLoggingMeta
+import no.nav.sykdig.utenlandsk.services.JournalpostService
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -162,13 +161,14 @@ class NasjonalFerdigstillingService(
         )
     }
 
+    // TODO dobbelsjekk endretAvEnhetsnr her
     private suspend fun ferdigstillOppgave(
         ferdigstillRegistrering: FerdigstillRegistrering,
         beskrivelse: String?,
         loggingMeta: LoggingMeta,
         oppgaveId: String,
     ) {
-        oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta, beskrivelse)
+        oppgaveClient.ferdigstillNasjonalOppgave(oppgaveId, ferdigstillRegistrering.sykmeldingId, ferdigstillRegistrering, loggingMeta, beskrivelse, ferdigstillRegistrering.navEnhet)
     }
 
     private fun handleBrokenRule(
@@ -212,7 +212,7 @@ class NasjonalFerdigstillingService(
         return "--- $formattedTimestamp ${veileder.veilederIdent}, $navEnhet ---\n$oppdatertBeskrivelse\n\n$opprinneligBeskrivelse"
     }
 
-    fun ferdigstillOgSendOppgaveTilGosys(oppgaveId: String, eksisterendeOppgave: NasjonalManuellOppgaveDAO) {
+    fun ferdigstillOgSendOppgaveTilGosys(oppgaveId: String, navEnhet: String, eksisterendeOppgave: NasjonalManuellOppgaveDAO) {
         val sykmeldingId = eksisterendeOppgave.sykmeldingId
         val loggingMeta = getLoggingMeta(sykmeldingId, eksisterendeOppgave)
         log.info(
@@ -220,7 +220,7 @@ class NasjonalFerdigstillingService(
             StructuredArguments.fields(loggingMeta),
         )
         val navIdent = nasjonalSykmeldingMapper.getNavIdent().veilederIdent
-        gosysService.sendNasjonalOppgaveTilGosys(oppgaveId, sykmeldingId, navIdent)
+        gosysService.sendNasjonalOppgaveTilGosys(oppgaveId = oppgaveId, sykmeldingId = sykmeldingId, veilederNavIdent = navIdent, endretAvEnhetsnr = navEnhet)
     }
 
     fun mapToValidationResult(validationResult: ValidationResult): no.nav.sykdig.generated.types.ValidationResult {

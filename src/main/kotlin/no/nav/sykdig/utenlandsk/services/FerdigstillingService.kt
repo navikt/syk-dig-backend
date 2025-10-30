@@ -71,7 +71,7 @@ class FerdigstillingService(
             )
         }
 
-        oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString())
+        oppgaveClient.ferdigstillOppgave(oppgaveId = oppgave.oppgaveId, sykmeldingId = oppgave.sykmeldingId.toString(), endretAvEnhetsnr = enhet)
         updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
 
         try {

@@ -89,6 +89,7 @@ class SykDigOppgaveService(
     fun ferdigstillExistingJournalfoeringsoppgave(
         journalpostId: String,
         journalpost: SafJournalpost,
+        navEnhet: String?,
     ) {
         log.info(
             "Henter eksisterende journalføringsoppgave for å ferdigstille før vi digitaliserer utenlandsk/papirsykmelding {}",
@@ -105,17 +106,19 @@ class SykDigOppgaveService(
             kv("journalpostId", journalpostId),
             kv("oppgaveId", existingOppgave.id),
         )
-        oppgaveClient.ferdigstillJournalføringsoppgave(existingOppgave.id, existingOppgave.versjon, journalpostId)
+        oppgaveClient.ferdigstillJournalføringsoppgave(oppgaveId = existingOppgave.id, oppgaveVersjon = existingOppgave.versjon, journalpostId = journalpostId, endretAvEnhetsnr = navEnhet)
         log.info(
-            "Ferdigstilt journalføringsoppgave {} {}",
-            kv("journalpostId", journalpostId),
-            kv("oppgaveId", existingOppgave.id),
-        )
-        securelog.info(
             "Ferdigstilt journalføringsoppgave {} {} {}",
             kv("journalpostId", journalpostId),
             kv("oppgaveId", existingOppgave.id),
+            kv("navEnhet", navEnhet ?: "ukjent")
+        )
+        securelog.info(
+            "Ferdigstilt journalføringsoppgave {} {} {} {}",
+            kv("journalpostId", journalpostId),
+            kv("oppgaveId", existingOppgave.id),
             kv("aktørId", existingOppgave.aktoerId),
+            kv("navEnhet", navEnhet ?: "ukjent")
         )
     }
 

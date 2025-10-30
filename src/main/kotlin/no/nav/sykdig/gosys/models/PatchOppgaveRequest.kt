@@ -5,6 +5,7 @@ data class PatchFerdigStillOppgaveRequest(
     val status: OppgaveStatus,
     val id: Int,
     val mappeId: Int? = null,
+    val endretAvEnhetsnr: String?
 )
 
 data class PatchFerdigstillNasjonalOppgaveRequest(
@@ -15,6 +16,7 @@ data class PatchFerdigstillNasjonalOppgaveRequest(
     val tildeltEnhetsnr: String,
     val mappeId: Int?,
     val beskrivelse: String? = null,
+    val endretAvEnhetsnr: String?
 )
 
 data class PatchToGosysOppgaveRequest(
@@ -25,6 +27,7 @@ data class PatchToGosysOppgaveRequest(
     val behandlesAvApplikasjon: String?,
     val tilordnetRessurs: String?,
     val beskrivelse: String?,
+    val endretAvEnhetsnr: String?
 )
 
 data class OppdaterOppgaveRequest(

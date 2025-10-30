@@ -88,6 +88,7 @@ class UtenlandskOppgaveService(
 
     fun ferdigstillOppgaveSendTilGosys(
         oppgaveId: String,
+        navEnhet: String,
         navIdent: String,
         navEpost: String,
     ): SykDigOppgave {
@@ -98,7 +99,7 @@ class UtenlandskOppgaveService(
                 callId = oppgave.sykmeldingId.toString(),
             )
 
-        gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent)
+        gosysService.sendOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, endretAvEnhetsnr = navEnhet)
         sykDigOppgaveService.ferdigstillOppgaveGosys(oppgave, navEpost)
         val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
 
@@ -133,7 +134,7 @@ class UtenlandskOppgaveService(
                 navIdent = navIdent,
             )
 
-        gosysService.avvisOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, oppgaveBeskrivelse)
+        gosysService.avvisOppgaveTilGosys(oppgaveId, oppgave.sykmeldingId.toString(), navIdent, oppgaveBeskrivelse, enhetId)
 
         val updatedOppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         metricRegister.avvistSendtTilGosys.increment()

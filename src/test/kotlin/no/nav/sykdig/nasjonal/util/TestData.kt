@@ -207,7 +207,8 @@ fun testDataNasjonalOppgaveResponse(oppgaveId: Int): NasjonalOppgaveResponse {
         id = oppgaveId,
         oppgavetype = "TYPE",
         aktivDato = 1.januar(2023),
-        prioritet = ""
+        prioritet = "",
+      endretAvEnhetsnr = "2990"
     )
 }
 

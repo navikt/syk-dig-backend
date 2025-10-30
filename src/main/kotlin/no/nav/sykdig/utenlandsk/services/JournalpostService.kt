@@ -44,6 +44,7 @@ class JournalpostService(
         journalpost: SafJournalpost,
         journalpostId: String,
         isNorsk: Boolean,
+        navEnhet: String?,
     ): JournalpostResult {
         if (isWrongTema(journalpost)) {
             return JournalpostStatus(
@@ -51,15 +52,16 @@ class JournalpostService(
                 status = JournalpostStatusEnum.FEIL_TEMA,
             )
         }
-        sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(journalpostId, journalpost)
+        sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(journalpostId, journalpost, navEnhet)
         if (isNorsk) {
             sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
             journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
             securelog.info(
-                "oppretter sykmelding fra journalpost {} {} {}",
+                "oppretter sykmelding fra journalpost {} {} {} {}",
                 kv("journalpostId", journalpostId),
                 kv("kanal", journalpost.kanal),
                 kv("type", "norsk papirsykmelding"),
+                kv("navEnhet", navEnhet ?: "ukjent")
             )
 
             metricRegister.incrementNewSykmelding("norsk", journalpost.kanal)
