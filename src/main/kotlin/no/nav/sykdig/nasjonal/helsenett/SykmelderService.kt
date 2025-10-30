@@ -1,9 +1,6 @@
 package no.nav.sykdig.nasjonal.helsenett
 
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.sykdig.shared.LoggingMeta
-import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.nasjonal.helsenett.client.HelsenettClient
 import no.nav.sykdig.nasjonal.helsenett.client.SmtssClient
 import no.nav.sykdig.nasjonal.models.Godkjenning
@@ -11,6 +8,9 @@ import no.nav.sykdig.nasjonal.models.Kode
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.pdl.PersonService
+import no.nav.sykdig.shared.LoggingMeta
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.exceptions.SykmelderNotFoundException
 import no.nav.sykdig.shared.securelog
 import org.springframework.stereotype.Service
 
@@ -23,10 +23,7 @@ class SykmelderService(
     val log = applog()
     val securelog = securelog()
 
-    fun getSykmelder(
-        hprNummer: String,
-        callId: String,
-    ): Sykmelder {
+    fun getSykmelder(hprNummer: String, callId: String): Sykmelder {
         val hprPadded = padHpr(hprNummer.trim())
         val behandler = helsenettClient.getBehandler(hprPadded, callId)
         securelog.info("hentet behandler: ${behandler.fnr} hprNummer: $hprNummer, callId=$callId")
@@ -52,26 +49,26 @@ class SykmelderService(
         )
     }
 
-    suspend fun checkHprAndGetSykmelder(smRegistreringManuell: SmRegistreringManuell, loggingMeta: LoggingMeta, callId: String): Sykmelder {
+    suspend fun checkHprAndGetSykmelder(
+        smRegistreringManuell: SmRegistreringManuell,
+        loggingMeta: LoggingMeta,
+        callId: String,
+    ): Sykmelder {
         val sykmelderHpr = smRegistreringManuell.behandler.hpr
         if (sykmelderHpr.isNullOrEmpty() || sykmelderHpr.isBlank()) {
             log.error("HPR-nummer mangler {}", StructuredArguments.fields(loggingMeta))
             throw SykmelderNotFoundException("HPR-nummer mangler")
         }
 
-        log.info("Henter sykmelder fra HPR og PDL med hpr: $sykmelderHpr {}", StructuredArguments.fields(loggingMeta))
-        val sykmelder = getSykmelder(
-            sykmelderHpr,
-            callId,
+        log.info(
+            "Henter sykmelder fra HPR og PDL med hpr: $sykmelderHpr {}",
+            StructuredArguments.fields(loggingMeta),
         )
+        val sykmelder = getSykmelder(sykmelderHpr, callId)
         return sykmelder
     }
 
-    fun getSykmelderForAvvistOppgave(
-        hpr: String?,
-        callId: String,
-        oppgaveId: Int,
-    ): Sykmelder {
+    fun getSykmelderForAvvistOppgave(hpr: String?, callId: String, oppgaveId: Int): Sykmelder {
         try {
             log.info("Henter sykmelder fra HPR og PDL for oppgaveid $oppgaveId")
             if (hpr.isNullOrBlank()) {
@@ -95,12 +92,22 @@ class SykmelderService(
             godkjenninger = null,
         )
 
-    suspend fun getTssIdInfotrygd(samhandlerFnr: String, samhandlerOrgName: String, loggingMeta: LoggingMeta, sykmeldingId: String): String? {
-        return smtssClient.findBestTssInfotrygd(samhandlerFnr, samhandlerOrgName, loggingMeta, sykmeldingId)
+    suspend fun getTssIdInfotrygd(
+        samhandlerFnr: String,
+        samhandlerOrgName: String,
+        loggingMeta: LoggingMeta,
+        sykmeldingId: String,
+    ): String? {
+        return smtssClient.findBestTssInfotrygd(
+            samhandlerFnr,
+            samhandlerOrgName,
+            loggingMeta,
+            sykmeldingId,
+        )
     }
 
     fun changeHelsepersonellkategoriVerdiFromFAToFA1(
-        godkjenninger: List<Godkjenning>,
+        godkjenninger: List<Godkjenning>
     ): List<Godkjenning> {
         return if (godkjenninger.isNotEmpty()) {
             return godkjenninger.map {

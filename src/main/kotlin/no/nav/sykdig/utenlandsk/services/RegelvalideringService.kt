@@ -1,14 +1,14 @@
 package no.nav.sykdig.utenlandsk.services
 
-import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.pdl.Person
-import no.nav.sykdig.generated.types.DiagnoseInput
-import no.nav.sykdig.generated.types.PeriodeInput
-import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
+import no.nav.sykdig.generated.types.DiagnoseInput
+import no.nav.sykdig.generated.types.PeriodeInput
+import no.nav.sykdig.pdl.Person
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import org.springframework.stereotype.Service
 
 @Service
 class RegelvalideringService {
@@ -25,15 +25,23 @@ class RegelvalideringService {
         forsteFom?.let { resultatListe.add(sykmeldingStarterForMindreEnnTreArSiden(it)) }
         sisteTom?.let {
             if (sykmeldt.fodselsdato != null) {
-                resultatListe.add(sykmeldtErOver13Ar(sisteTom = it, fodselsdato = sykmeldt.fodselsdato))
+                resultatListe.add(
+                    sykmeldtErOver13Ar(sisteTom = it, fodselsdato = sykmeldt.fodselsdato)
+                )
             }
         }
         forsteFom?.let {
             if (sykmeldt.fodselsdato != null) {
-                resultatListe.add(sykmeldtErUnder70Ar(forsteFom = it, fodselsdato = sykmeldt.fodselsdato))
+                resultatListe.add(
+                    sykmeldtErUnder70Ar(forsteFom = it, fodselsdato = sykmeldt.fodselsdato)
+                )
             }
         }
-        forsteFom?.let { resultatListe.add(sykmeldingErIkkeFremdatertMerEnn30Dager(it, values.behandletTidspunkt)) }
+        forsteFom?.let {
+            resultatListe.add(
+                sykmeldingErIkkeFremdatertMerEnn30Dager(it, values.behandletTidspunkt)
+            )
+        }
         if (forsteFom != null && sisteTom != null) {
             resultatListe.add(totalVarighetErUnderEtAr(forsteFom = forsteFom, sisteTom = sisteTom))
         }
@@ -67,20 +75,14 @@ class RegelvalideringService {
             null
         }
 
-    private fun sykmeldtErOver13Ar(
-        sisteTom: LocalDate,
-        fodselsdato: LocalDate,
-    ): String? =
+    private fun sykmeldtErOver13Ar(sisteTom: LocalDate, fodselsdato: LocalDate): String? =
         if (sisteTom < fodselsdato.plusYears(13)) {
             "Pasienten er under 13 år. Sykmelding kan ikke benyttes."
         } else {
             null
         }
 
-    private fun sykmeldtErUnder70Ar(
-        forsteFom: LocalDate,
-        fodselsdato: LocalDate,
-    ): String? =
+    private fun sykmeldtErUnder70Ar(forsteFom: LocalDate, fodselsdato: LocalDate): String? =
         if (forsteFom > fodselsdato.plusYears(70)) {
             "Pasienten er over 70 år. Sykmelding kan ikke benyttes."
         } else {
@@ -97,10 +99,7 @@ class RegelvalideringService {
             null
         }
 
-    private fun totalVarighetErUnderEtAr(
-        forsteFom: LocalDate,
-        sisteTom: LocalDate,
-    ): String? =
+    private fun totalVarighetErUnderEtAr(forsteFom: LocalDate, sisteTom: LocalDate): String? =
         if ((forsteFom..sisteTom).daysBetween() > 365) {
             "Sykmeldingen kan ikke ha en varighet på over ett år."
         } else {
@@ -124,10 +123,7 @@ class RegelvalideringService {
     }
 
     private fun ikkeOppholdMellomPerioder(perioder: List<PeriodeInput>): String? {
-        val periodeRanges =
-            perioder
-                .sortedBy { it.fom }
-                .map { it.fom to it.tom }
+        val periodeRanges = perioder.sortedBy { it.fom }.map { it.fom to it.tom }
         var gapBetweenPeriods = false
         for (i in 1 until periodeRanges.size) {
             gapBetweenPeriods =
@@ -173,9 +169,7 @@ fun PeriodeInput.range(): ClosedRange<LocalDate> = fom.rangeTo(tom)
 
 fun ClosedRange<LocalDate>.daysBetween(): Long = ChronoUnit.DAYS.between(start, endInclusive)
 
-fun workdaysBetween(
-    a: LocalDate,
-    b: LocalDate,
-): Int =
+fun workdaysBetween(a: LocalDate, b: LocalDate): Int =
     (1 until ChronoUnit.DAYS.between(a, b))
-        .map { a.plusDays(it) }.count { it.dayOfWeek !in arrayOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }
+        .map { a.plusDays(it) }
+        .count { it.dayOfWeek !in arrayOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }

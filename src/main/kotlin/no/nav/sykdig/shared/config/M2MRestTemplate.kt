@@ -29,16 +29,12 @@ class M2MRestTemplate(
 
     @Bean
     fun pdlM2mRestTemplate(): RestTemplate {
-        return restTemplateBuilder
-            .additionalInterceptors(bearerTokenInterceptor("pdl-m2m"))
-            .build()
+        return restTemplateBuilder.additionalInterceptors(bearerTokenInterceptor("pdl-m2m")).build()
     }
 
     @Bean
     fun safM2mRestTemplate(): RestTemplate {
-        return restTemplateBuilder
-            .additionalInterceptors(bearerTokenInterceptor("saf-m2m"))
-            .build()
+        return restTemplateBuilder.additionalInterceptors(bearerTokenInterceptor("saf-m2m")).build()
     }
 
     @Bean
@@ -70,7 +66,10 @@ class M2MRestTemplate(
     }
 
     private fun bearerTokenInterceptor(type: String): ClientHttpRequestInterceptor {
-        return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
+        return ClientHttpRequestInterceptor {
+            request: HttpRequest,
+            body: ByteArray,
+            execution: ClientHttpRequestExecution ->
             val token = m2mTokenService.getM2MToken(type)
             request.headers.setBearerAuth(token)
             execution.execute(request, body)

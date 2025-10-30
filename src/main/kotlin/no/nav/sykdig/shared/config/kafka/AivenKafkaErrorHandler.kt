@@ -10,12 +10,11 @@ import org.springframework.stereotype.Component
 import org.springframework.util.backoff.ExponentialBackOff
 
 @Component
-class AivenKafkaErrorHandler : DefaultErrorHandler(
-    null,
-    ExponentialBackOff(1000L, 1.5).also {
-        it.maxInterval = 60_000L * 10
-    },
-) {
+class AivenKafkaErrorHandler :
+    DefaultErrorHandler(
+        null,
+        ExponentialBackOff(1000L, 1.5).also { it.maxInterval = 60_000L * 10 },
+    ) {
     private val log = applog()
 
     override fun handleRemaining(
@@ -27,7 +26,7 @@ class AivenKafkaErrorHandler : DefaultErrorHandler(
         records.forEach { record ->
             log.error(
                 "Feil i prosesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}.\n" +
-                        "Stacktrace:\n${thrownException.stackTrace.joinToString("\n")} message: ${thrownException.message}",
+                    "Stacktrace:\n${thrownException.stackTrace.joinToString("\n")} message: ${thrownException.message}",
                 thrownException,
             )
         }
@@ -48,7 +47,7 @@ class AivenKafkaErrorHandler : DefaultErrorHandler(
         data.forEach { record ->
             log.error(
                 "Feil i prosesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}.\n" +
-                        "Stacktrace:\n${thrownException.stackTrace.joinToString("\n")} message: ${thrownException.message}",
+                    "Stacktrace:\n${thrownException.stackTrace.joinToString("\n")} message: ${thrownException.message}",
                 thrownException,
             )
         }

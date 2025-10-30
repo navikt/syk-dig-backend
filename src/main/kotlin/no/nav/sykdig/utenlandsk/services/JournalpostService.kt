@@ -2,10 +2,12 @@ package no.nav.sykdig.utenlandsk.services
 
 import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.sykdig.shared.LoggingMeta
-import no.nav.sykdig.shared.applog
 import no.nav.sykdig.dokarkiv.DokarkivClient
-import no.nav.sykdig.shared.Periode
+import no.nav.sykdig.generated.types.Document
+import no.nav.sykdig.generated.types.Journalpost
+import no.nav.sykdig.generated.types.JournalpostResult
+import no.nav.sykdig.generated.types.JournalpostStatus
+import no.nav.sykdig.generated.types.JournalpostStatusEnum
 import no.nav.sykdig.nasjonal.mapping.NasjonalSykmeldingMapper
 import no.nav.sykdig.nasjonal.models.FerdigstillRegistrering
 import no.nav.sykdig.pdl.PersonService
@@ -14,14 +16,12 @@ import no.nav.sykdig.saf.graphql.SafJournalpost
 import no.nav.sykdig.saf.graphql.TEMA_SYKEPENGER
 import no.nav.sykdig.saf.graphql.TEMA_SYKMELDING
 import no.nav.sykdig.saf.graphql.Type
-import no.nav.sykdig.utenlandsk.db.JournalpostSykmeldingRepository
-import no.nav.sykdig.generated.types.Document
-import no.nav.sykdig.generated.types.Journalpost
-import no.nav.sykdig.generated.types.JournalpostResult
-import no.nav.sykdig.generated.types.JournalpostStatus
-import no.nav.sykdig.generated.types.JournalpostStatusEnum
+import no.nav.sykdig.shared.LoggingMeta
+import no.nav.sykdig.shared.Periode
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.shared.securelog
+import no.nav.sykdig.utenlandsk.db.JournalpostSykmeldingRepository
 import org.springframework.stereotype.Service
 
 @Service
@@ -52,7 +52,11 @@ class JournalpostService(
                 status = JournalpostStatusEnum.FEIL_TEMA,
             )
         }
-        sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(journalpostId, journalpost, navEnhet)
+        sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(
+            journalpostId,
+            journalpost,
+            navEnhet,
+        )
         if (isNorsk) {
             sykmeldingService.createSykmelding(journalpostId, journalpost.tema!!)
             journalpostSykmeldingRepository.insertJournalpostId(journalpostId)
@@ -61,7 +65,7 @@ class JournalpostService(
                 kv("journalpostId", journalpostId),
                 kv("kanal", journalpost.kanal),
                 kv("type", "norsk papirsykmelding"),
-                kv("navEnhet", navEnhet ?: "ukjent")
+                kv("navEnhet", navEnhet ?: "ukjent"),
             )
 
             metricRegister.incrementNewSykmelding("norsk", journalpost.kanal)
@@ -78,7 +82,14 @@ class JournalpostService(
                 )
         val fnr = personService.getPerson(fnrEllerAktorId, journalpostId).fnr
         val aktorId = personService.getPerson(fnrEllerAktorId, journalpostId).aktorId
-        val oppgaveId = sykDigOppgaveService.opprettOgLagreOppgave(journalpost, journalpostId, fnr, aktorId, nasjonalSykmeldingMapper.getNavEmail())
+        val oppgaveId =
+            sykDigOppgaveService.opprettOgLagreOppgave(
+                journalpost,
+                journalpostId,
+                fnr,
+                aktorId,
+                nasjonalSykmeldingMapper.getNavEmail(),
+            )
 
         securelog.info(
             "oppretter sykmelding fra journalpost {} {} {} {}",
@@ -133,13 +144,16 @@ class JournalpostService(
             fnr = fnr,
         )
     }
+
     suspend fun ferdigstillNasjonalJournalpost(
         ferdigstillRegistrering: FerdigstillRegistrering,
         perioder: List<Periode>?,
         loggingMeta: LoggingMeta,
     ) {
         if (
-            safJournalpostService.erIkkeJournalfort(journalpostId = ferdigstillRegistrering.journalpostId)
+            safJournalpostService.erIkkeJournalfort(
+                journalpostId = ferdigstillRegistrering.journalpostId
+            )
         ) {
             log.info("ferdigstiller i dokarkiv {}", StructuredArguments.fields(loggingMeta))
             dokarkivClient.oppdaterOgFerdigstillNasjonalJournalpost(
@@ -150,16 +164,15 @@ class JournalpostService(
                 sykmelder = ferdigstillRegistrering.sykmelder,
                 navEnhet = ferdigstillRegistrering.navEnhet,
                 avvist = ferdigstillRegistrering.avvist,
-                perioder = perioder
+                perioder = perioder,
             )
         } else {
             log.info(
                 "Hopper over oppdaterOgFerdigstillJournalpost, " +
-                        "journalpostId ${ferdigstillRegistrering.journalpostId} er allerede journalført",
+                    "journalpostId ${ferdigstillRegistrering.journalpostId} er allerede journalført"
             )
         }
     }
-
 
     fun isSykmeldingCreated(id: String): Boolean {
         return journalpostSykmeldingRepository.getJournalpostSykmelding(id) != null

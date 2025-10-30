@@ -10,7 +10,6 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-
 class FlexibleOffsetDateTimeDeserializer : JsonDeserializer<OffsetDateTime>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): OffsetDateTime {
         val text = p.valueAsString

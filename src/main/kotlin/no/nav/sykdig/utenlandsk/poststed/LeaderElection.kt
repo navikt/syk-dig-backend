@@ -1,5 +1,6 @@
 package no.nav.sykdig.utenlandsk.poststed
 
+import java.net.InetAddress
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.objectMapper
 import org.springframework.beans.factory.annotation.Value
@@ -8,7 +9,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
-import java.net.InetAddress
 
 @Component
 class LeaderElection(
@@ -28,17 +28,9 @@ class LeaderElection(
     private fun isPodLeader(): Boolean {
         val hostname: String = InetAddress.getLocalHost().hostName
 
-        val uriString =
-            UriComponentsBuilder.fromUriString(getHttpPath(electorPath))
-                .toUriString()
+        val uriString = UriComponentsBuilder.fromUriString(getHttpPath(electorPath)).toUriString()
         val result =
-            plainTextUtf8RestTemplate
-                .exchange(
-                    uriString,
-                    HttpMethod.GET,
-                    null,
-                    String::class.java,
-                )
+            plainTextUtf8RestTemplate.exchange(uriString, HttpMethod.GET, null, String::class.java)
         if (result.statusCode != HttpStatus.OK) {
             val message = "Kall mot elector feiler med HTTP-" + result.statusCode
             log.error(message)

@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class JournalpostSDSykmeldingRepositoryTest : IntegrationTest() {
-    @Autowired
-    lateinit var journalpostSykmeldingRepository: JournalpostSykmeldingRepository
+    @Autowired lateinit var journalpostSykmeldingRepository: JournalpostSykmeldingRepository
 
     @Test
     fun shouldGetNullWhenNotCreated() {
@@ -26,7 +25,8 @@ class JournalpostSDSykmeldingRepositoryTest : IntegrationTest() {
     fun insertAndGetJournalpost() {
         val inserted = journalpostSykmeldingRepository.insertJournalpostId("123456")
         assertEquals(1, inserted)
-        val journalpostSykmelding = journalpostSykmeldingRepository.getJournalpostSykmelding("123456")
+        val journalpostSykmelding =
+            journalpostSykmeldingRepository.getJournalpostSykmelding("123456")
         assertEquals("123456", journalpostSykmelding?.journalpostId)
         assertNotNull(journalpostSykmelding?.created)
     }

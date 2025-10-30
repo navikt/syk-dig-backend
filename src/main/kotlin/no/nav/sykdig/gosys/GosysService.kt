@@ -1,5 +1,7 @@
 package no.nav.sykdig.gosys
 
+import java.time.DayOfWeek
+import java.time.LocalDate
 import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
 import no.nav.sykdig.gosys.models.OppgaveStatus
 import no.nav.sykdig.gosys.models.OpprettNasjonalOppgave
@@ -7,8 +9,6 @@ import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.metrics.MetricRegister
 import org.springframework.stereotype.Component
-import java.time.DayOfWeek
-import java.time.LocalDate
 
 @Component
 class GosysService(
@@ -43,16 +43,20 @@ class GosysService(
         sykmeldingId: String,
         veilederNavIdent: String,
         beskrivelse: String? = null,
-        endretAvEnhetsnr: String
+        endretAvEnhetsnr: String,
     ) {
         val oppgave = oppgaveClient.getNasjonalOppgave(oppgaveId, sykmeldingId)
         val oppdatertOppgave =
-            oppgave.copy(behandlesAvApplikasjon = "FS22", tilordnetRessurs = veilederNavIdent, endretAvEnhetsnr = endretAvEnhetsnr)
+            oppgave.copy(
+                behandlesAvApplikasjon = "FS22",
+                tilordnetRessurs = veilederNavIdent,
+                endretAvEnhetsnr = endretAvEnhetsnr,
+            )
         oppgaveClient.oppdaterNasjonalGosysOppgave(
-          oppdatertOppgave = oppdatertOppgave,
-          sykmeldingId = sykmeldingId,
-          oppgaveId = oppgaveId,
-          veileder = veilederNavIdent
+            oppdatertOppgave = oppdatertOppgave,
+            sykmeldingId = sykmeldingId,
+            oppgaveId = oppgaveId,
+            veileder = veilederNavIdent,
         )
     }
 
@@ -121,10 +125,10 @@ class GosysService(
             )
         val oppdatertOppgave =
             oppgaveClient.oppdaterNasjonalGosysOppgave(
-              oppdatertOppgave = patch,
-              sykmeldingId = papirSmRegistering.sykmeldingId,
-              oppgaveId = oppgaveId.toString(),
-              veileder = null
+                oppdatertOppgave = patch,
+                sykmeldingId = papirSmRegistering.sykmeldingId,
+                oppgaveId = oppgaveId.toString(),
+                veileder = null,
             )
         return oppdatertOppgave
     }

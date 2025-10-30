@@ -1,5 +1,8 @@
 package no.nav.sykdig.utenlandsk.mapping
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import no.nav.helse.diagnosekoder.Diagnosekoder
 import no.nav.helse.eiFellesformat.XMLEIFellesformat
 import no.nav.helse.msgHead.XMLCS
@@ -20,15 +23,12 @@ import no.nav.helse.sm2013.Ident
 import no.nav.helse.sm2013.NavnType
 import no.nav.helse.sm2013.TeleCom
 import no.nav.helse.sm2013.URL
-import no.nav.sykdig.shared.exceptions.MappingException
-import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
+import no.nav.sykdig.pdl.Person
+import no.nav.sykdig.shared.exceptions.MappingException
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 
 fun mapToFellesformat(
     validatedValues: FerdistilltRegisterOppgaveValues,
@@ -48,8 +48,13 @@ fun mapToFellesformat(
                                 v = "SYKMELD"
                             }
                         miGversion = "v1.2 2006-05-24"
-                        genDate = datoOpprettet?.toString()
-                            ?: LocalDateTime.of(validatedValues.perioder.first().fom, LocalTime.NOON).toString()
+                        genDate =
+                            datoOpprettet?.toString()
+                                ?: LocalDateTime.of(
+                                        validatedValues.perioder.first().fom,
+                                        LocalTime.NOON,
+                                    )
+                                    .toString()
                         msgId = sykmeldingId
                         ack =
                             XMLCS().apply {
@@ -81,7 +86,8 @@ fun mapToFellesformat(
                                                     id = "79768"
                                                     typeId =
                                                         XMLCV().apply {
-                                                            dn = "Identifikator fra Helsetjenesteenhetsregisteret (HER-id)"
+                                                            dn =
+                                                                "Identifikator fra Helsetjenesteenhetsregisteret (HER-id)"
                                                             s = "2.16.578.1.12.4.1.1.9051"
                                                             v = "HER"
                                                         }
@@ -90,12 +96,13 @@ fun mapToFellesformat(
                                                     id = "889640782"
                                                     typeId =
                                                         XMLCV().apply {
-                                                            dn = "Organisasjonsnummeret i Enhetsregister (Brønøysund)"
+                                                            dn =
+                                                                "Organisasjonsnummeret i Enhetsregister (Brønøysund)"
                                                             s = "2.16.578.1.12.4.1.1.9051"
                                                             v = "ENH"
                                                         }
                                                 },
-                                            ),
+                                            )
                                         )
                                     }
                             }
@@ -113,26 +120,31 @@ fun mapToFellesformat(
                                     XMLRefDoc.Content().apply {
                                         any.add(
                                             HelseOpplysningerArbeidsuforhet().apply {
-                                                syketilfelleStartDato = tilSyketilfelleStartDato(validatedValues)
+                                                syketilfelleStartDato =
+                                                    tilSyketilfelleStartDato(validatedValues)
                                                 pasient =
-                                                    HelseOpplysningerArbeidsuforhet.Pasient().apply {
-                                                        navn =
-                                                            NavnType().apply {
-                                                                fornavn = person.navn.fornavn
-                                                                mellomnavn = person.navn.mellomnavn
-                                                                etternavn = person.navn.etternavn
-                                                            }
-                                                        fodselsnummer =
-                                                            Ident().apply {
-                                                                id = validatedValues.fnrPasient
-                                                                typeId =
-                                                                    CV().apply {
-                                                                        dn = "Fødselsnummer"
-                                                                        s = "2.16.578.1.12.4.1.1.8116"
-                                                                        v = "FNR"
-                                                                    }
-                                                            }
-                                                    }
+                                                    HelseOpplysningerArbeidsuforhet.Pasient()
+                                                        .apply {
+                                                            navn =
+                                                                NavnType().apply {
+                                                                    fornavn = person.navn.fornavn
+                                                                    mellomnavn =
+                                                                        person.navn.mellomnavn
+                                                                    etternavn =
+                                                                        person.navn.etternavn
+                                                                }
+                                                            fodselsnummer =
+                                                                Ident().apply {
+                                                                    id = validatedValues.fnrPasient
+                                                                    typeId =
+                                                                        CV().apply {
+                                                                            dn = "Fødselsnummer"
+                                                                            s =
+                                                                                "2.16.578.1.12.4.1.1.8116"
+                                                                            v = "FNR"
+                                                                        }
+                                                                }
+                                                        }
                                                 arbeidsgiver = tilArbeidsgiver()
                                                 medisinskVurdering =
                                                     tilMedisinskVurdering(
@@ -140,35 +152,44 @@ fun mapToFellesformat(
                                                         validatedValues.biDiagnoser,
                                                     )
                                                 aktivitet =
-                                                    HelseOpplysningerArbeidsuforhet.Aktivitet().apply {
-                                                        periode.addAll(tilPeriodeListe(validatedValues.perioder))
-                                                    }
+                                                    HelseOpplysningerArbeidsuforhet.Aktivitet()
+                                                        .apply {
+                                                            periode.addAll(
+                                                                tilPeriodeListe(
+                                                                    validatedValues.perioder
+                                                                )
+                                                            )
+                                                        }
                                                 prognose = null
                                                 utdypendeOpplysninger = null
                                                 tiltak = null
                                                 meldingTilNav = null
                                                 meldingTilArbeidsgiver = null
                                                 kontaktMedPasient =
-                                                    HelseOpplysningerArbeidsuforhet.KontaktMedPasient().apply {
-                                                        kontaktDato = null
-                                                        begrunnIkkeKontakt = null
-                                                        behandletDato = validatedValues.behandletTidspunkt.toLocalDateTime()
-                                                    }
+                                                    HelseOpplysningerArbeidsuforhet
+                                                        .KontaktMedPasient()
+                                                        .apply {
+                                                            kontaktDato = null
+                                                            begrunnIkkeKontakt = null
+                                                            behandletDato =
+                                                                validatedValues.behandletTidspunkt
+                                                                    .toLocalDateTime()
+                                                        }
                                                 behandler = tilBehandler()
                                                 avsenderSystem =
-                                                    HelseOpplysningerArbeidsuforhet.AvsenderSystem().apply {
-                                                        systemNavn = "syk-dig"
-                                                        systemVersjon =
-                                                            journalpostId
-                                                    }
+                                                    HelseOpplysningerArbeidsuforhet.AvsenderSystem()
+                                                        .apply {
+                                                            systemNavn = "syk-dig"
+                                                            systemVersjon = journalpostId
+                                                        }
                                                 strekkode = "123456789qwerty"
-                                            },
+                                            }
                                         )
                                     }
                             }
-                    },
+                    }
                 )
-            },
+            }
         )
     }
 }
@@ -189,11 +210,8 @@ fun tilBehandler(): HelseOpplysningerArbeidsuforhet.Behandler =
                         v = "HP"
                         dn = "Hovedtelefon"
                     }
-                teleAddress =
-                    URL().apply {
-                        v = ""
-                    }
-            },
+                teleAddress = URL().apply { v = "" }
+            }
         )
     }
 
@@ -201,10 +219,7 @@ fun tilMedisinskVurdering(
     hovedDiagnoseInput: DiagnoseInput,
     biDiagnoserInput: List<DiagnoseInput>,
 ): HelseOpplysningerArbeidsuforhet.MedisinskVurdering {
-    val biDiagnoseListe: List<CV> =
-        biDiagnoserInput.map {
-            toMedisinskVurderingDiagnose(it)
-        }
+    val biDiagnoseListe: List<CV> = biDiagnoserInput.map { toMedisinskVurderingDiagnose(it) }
 
     return HelseOpplysningerArbeidsuforhet.MedisinskVurdering().apply {
         hovedDiagnose =
@@ -233,10 +248,7 @@ fun toMedisinskVurderingDiagnose(diagnose: DiagnoseInput): CV =
         dn = getTextFromDiagnose(diagnose.kode, diagnose.system)
     }
 
-fun getTextFromDiagnose(
-    kode: String,
-    diagnoseSystem: String,
-): String {
+fun getTextFromDiagnose(kode: String, diagnoseSystem: String): String {
     return when (diagnoseSystem) {
         "ICD10" -> {
             Diagnosekoder.icd10[kode]!!.text
@@ -270,12 +282,14 @@ fun tilSyketilfelleStartDato(validatedValues: FerdistilltRegisterOppgaveValues):
     return validatedValues.perioder.stream().map(PeriodeInput::fom).min(LocalDate::compareTo).get()
 }
 
-fun tilPeriodeListe(perioder: List<PeriodeInput>): List<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode> =
-    perioder.map {
-        tilHelseOpplysningerArbeidsuforhetPeriode(it)
-    }
+fun tilPeriodeListe(
+    perioder: List<PeriodeInput>
+): List<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode> =
+    perioder.map { tilHelseOpplysningerArbeidsuforhetPeriode(it) }
 
-fun tilHelseOpplysningerArbeidsuforhetPeriode(periode: PeriodeInput): HelseOpplysningerArbeidsuforhet.Aktivitet.Periode =
+fun tilHelseOpplysningerArbeidsuforhetPeriode(
+    periode: PeriodeInput
+): HelseOpplysningerArbeidsuforhet.Aktivitet.Periode =
     HelseOpplysningerArbeidsuforhet.Aktivitet.Periode().apply {
         periodeFOMDato = periode.fom
         periodeTOMDato = periode.tom

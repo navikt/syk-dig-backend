@@ -18,15 +18,17 @@ fun mapSykmelder(sykmelder: no.nav.sykdig.nasjonal.models.Sykmelder): Sykmelder 
 
 fun mapGodkjenninger(godkjenninger: no.nav.sykdig.nasjonal.models.Godkjenning): Godkjenning {
     return Godkjenning(
-        helsepersonellkategori = if (godkjenninger.helsepersonellkategori != null) mapKode(godkjenninger.helsepersonellkategori) else null,
-        autorisasjon = if (godkjenninger.helsepersonellkategori != null) mapKode(godkjenninger.helsepersonellkategori) else null,
+        helsepersonellkategori =
+            if (godkjenninger.helsepersonellkategori != null)
+                mapKode(godkjenninger.helsepersonellkategori)
+            else null,
+        autorisasjon =
+            if (godkjenninger.helsepersonellkategori != null)
+                mapKode(godkjenninger.helsepersonellkategori)
+            else null,
     )
 }
 
 fun mapKode(kode: no.nav.sykdig.nasjonal.models.Kode): Kode {
-    return Kode(
-        aktiv = kode.aktiv,
-        oid = kode.oid,
-        verdi = kode.verdi,
-    )
+    return Kode(aktiv = kode.aktiv, oid = kode.oid, verdi = kode.verdi)
 }

@@ -1,10 +1,10 @@
 package no.nav.sykdig.nasjonal.mapping
 
+import java.util.*
 import no.nav.sykdig.digitalisering.papirsykmelding.mapToDaoOppgave
 import no.nav.sykdig.nasjonal.util.testDataPapirManuellOppgave
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class NasjonalMappingTest {
 

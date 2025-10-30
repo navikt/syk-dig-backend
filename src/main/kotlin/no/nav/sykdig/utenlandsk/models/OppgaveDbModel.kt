@@ -21,7 +21,4 @@ data class OppgaveDbModel(
     val source: String,
 )
 
-data class DokumentDbModel(
-    val dokumentInfoId: String,
-    val tittel: String,
-)
+data class DokumentDbModel(val dokumentInfoId: String, val tittel: String)

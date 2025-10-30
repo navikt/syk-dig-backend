@@ -2,7 +2,6 @@ package no.nav.sykdig.nasjonal.models
 
 import no.nav.sykdig.gosys.models.NasjonalOppgaveResponse
 
-
 data class FerdigstillRegistrering(
     val oppgaveId: Int?,
     val journalpostId: String,
@@ -16,7 +15,4 @@ data class FerdigstillRegistrering(
     val oppgave: NasjonalOppgaveResponse?,
 )
 
-class Veileder(
-    val veilederIdent: String,
-)
-
+class Veileder(val veilederIdent: String)

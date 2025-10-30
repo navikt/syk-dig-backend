@@ -3,7 +3,8 @@ package no.nav.sykdig.pdl.client.graphql
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sykdig.shared.objectMapper
 
-const val PDL_QUERY = """
+const val PDL_QUERY =
+    """
     query(${"$"}ident: ID!){
         identer: hentIdenter(ident: ${"$"}ident, historikk: false) {
                 identer {
@@ -79,23 +80,13 @@ const val PDL_QUERY = """
     }
 """
 
-data class Data(
-    val data: PdlResponse?,
-)
+data class Data(val data: PdlResponse?)
 
-data class PdlResponse(
-    val hentPerson: PdlPerson?,
-    val identer: PdlIdenter?,
-)
+data class PdlResponse(val hentPerson: PdlPerson?, val identer: PdlIdenter?)
 
-data class PdlIdenter(
-    val identer: List<PdlIdent>,
-)
+data class PdlIdenter(val identer: List<PdlIdent>)
 
-data class PdlIdent(
-    val ident: String,
-    val gruppe: String,
-)
+data class PdlIdent(val ident: String, val gruppe: String)
 
 data class PdlPerson(
     val bostedsadresse: List<PdlBostedsadresse>,
@@ -104,9 +95,7 @@ data class PdlPerson(
     val oppholdsadresse: List<PdlOppholdsadresse>,
 )
 
-data class Foedsel(
-    val foedselsdato: String?,
-)
+data class Foedsel(val foedselsdato: String?)
 
 data class PdlBostedsadresse(
     val coAdressenavn: String?,
@@ -144,9 +133,7 @@ data class PdlMatrikkeladresse(
     val poststed: String?,
 )
 
-data class PdlUkjentBosted(
-    val bostedskommune: String,
-)
+data class PdlUkjentBosted(val bostedskommune: String)
 
 data class PdlUtenlandskAdresse(
     val adressenavnNummer: String?,
@@ -158,10 +145,6 @@ data class PdlUtenlandskAdresse(
     val landkode: String,
 )
 
-data class PdlNavn(
-    val fornavn: String,
-    val mellomnavn: String?,
-    val etternavn: String,
-)
+data class PdlNavn(val fornavn: String, val mellomnavn: String?, val etternavn: String)
 
 fun mapToPdlResponse(json: String): PdlResponse = objectMapper.readValue<Data>(json).data!!

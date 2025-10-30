@@ -9,9 +9,7 @@ import no.nav.sykdig.generated.types.Document
 import org.springframework.security.access.prepost.PreAuthorize
 
 @DgsComponent
-class DocumentMutation(
-    private val documentService: DocumentService,
-) {
+class DocumentMutation(private val documentService: DocumentService) {
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.Dokument)
     fun oppdaterDukumentTittel(
@@ -20,9 +18,6 @@ class DocumentMutation(
         @InputArgument tittel: String,
     ): Document {
         documentService.updateDocumentTitle(oppgaveId, dokumentInfoId, tittel)
-        return Document(
-            dokumentInfoId = dokumentInfoId,
-            tittel = tittel,
-        )
+        return Document(dokumentInfoId = dokumentInfoId, tittel = tittel)
     }
 }

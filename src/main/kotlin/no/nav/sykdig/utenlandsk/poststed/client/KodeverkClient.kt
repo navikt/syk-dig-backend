@@ -1,5 +1,7 @@
 package no.nav.sykdig.utenlandsk.poststed.client
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.poststed.PostInformasjon
 import org.springframework.beans.factory.annotation.Value
@@ -10,8 +12,6 @@ import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.time.LocalDate
-import java.util.UUID
 
 @Component
 class KodeverkClient(
@@ -35,7 +35,8 @@ class KodeverkClient(
                     HttpEntity<Any>(headers),
                     GetKodeverkKoderBetydningerResponse::class.java,
                 )
-            return response.body?.toPostInformasjonListe() ?: throw RuntimeException("Ingen respons fra kodeverk")
+            return response.body?.toPostInformasjonListe()
+                ?: throw RuntimeException("Ingen respons fra kodeverk")
         } catch (e: Exception) {
             log.error("Noe gikk galt ved henting av postinformasjon fra kodeverk: ${e.message}", e)
             throw RuntimeException("Noe gikk galt ved henting av postinformasjon fra kodeverk")
@@ -43,23 +44,19 @@ class KodeverkClient(
     }
 }
 
-data class GetKodeverkKoderBetydningerResponse(
-    val betydninger: Map<String, List<Betydning>>,
-) {
+data class GetKodeverkKoderBetydningerResponse(val betydninger: Map<String, List<Betydning>>) {
     fun toPostInformasjonListe(): List<PostInformasjon> {
         return betydninger.map {
             PostInformasjon(
                 postnummer = it.key,
-                poststed = it.value.first().beskrivelser["nb"]?.term ?: throw RuntimeException("Kode ${it.key} mangler term"),
+                poststed =
+                    it.value.first().beskrivelser["nb"]?.term
+                        ?: throw RuntimeException("Kode ${it.key} mangler term"),
             )
         }
     }
 }
 
-data class Betydning(
-    val beskrivelser: Map<String, Beskrivelse>,
-)
+data class Betydning(val beskrivelser: Map<String, Beskrivelse>)
 
-data class Beskrivelse(
-    val term: String,
-)
+data class Beskrivelse(val term: String)

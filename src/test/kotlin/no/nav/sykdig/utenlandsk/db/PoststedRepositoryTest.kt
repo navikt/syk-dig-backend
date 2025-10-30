@@ -1,5 +1,6 @@
 package no.nav.sykdig.utenlandsk.db
 
+import java.util.UUID
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.utenlandsk.poststed.PostInformasjon
 import org.junit.jupiter.api.AfterEach
@@ -9,12 +10,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
 
 @Transactional
 class PoststedRepositoryTest : IntegrationTest() {
-    @Autowired
-    lateinit var poststedRepository: PoststedRepository
+    @Autowired lateinit var poststedRepository: PoststedRepository
 
     @BeforeEach
     fun before() {
@@ -25,7 +24,7 @@ class PoststedRepositoryTest : IntegrationTest() {
                 PostInformasjon("5365", "TURØY"),
                 PostInformasjon("5449", "BØMLO"),
                 PostInformasjon("9609", "NORDRE SEILAND"),
-            ),
+            )
         )
     }
 

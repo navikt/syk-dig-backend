@@ -1,9 +1,9 @@
 package no.nav.sykdig.nasjonal.models
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import no.nav.sykdig.shared.*
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import no.nav.sykdig.shared.*
 
 data class PapirManuellOppgave(
     val fnr: String?,
@@ -14,10 +14,7 @@ data class PapirManuellOppgave(
     val documents: List<Document>,
 )
 
-data class Document(
-    val dokumentInfoId: String,
-    val tittel: String,
-)
+data class Document(val dokumentInfoId: String, val tittel: String)
 
 data class PapirSmRegistering(
     val journalpostId: String,
@@ -56,9 +53,7 @@ fun PapirSmRegistering.toPapirManuellOppgave(oppgaveid: Int?): PapirManuellOppga
     )
 }
 
-data class AvvisSykmeldingRequest(
-    val reason: String?,
-)
+data class AvvisSykmeldingRequest(val reason: String?)
 
 data class Sykmelder(
     val hprNummer: String?,
@@ -70,16 +65,9 @@ data class Sykmelder(
     val godkjenninger: List<Godkjenning>?,
 )
 
-data class Godkjenning(
-    val helsepersonellkategori: Kode? = null,
-    val autorisasjon: Kode? = null,
-)
+data class Godkjenning(val helsepersonellkategori: Kode? = null, val autorisasjon: Kode? = null)
 
-data class Kode(
-    val aktiv: Boolean,
-    val oid: Int,
-    val verdi: String?,
-)
+data class Kode(val aktiv: Boolean, val oid: Int, val verdi: String?)
 
 data class SmRegistreringManuell(
     val pasientFnr: String,

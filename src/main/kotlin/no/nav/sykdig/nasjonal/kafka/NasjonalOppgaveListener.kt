@@ -11,11 +11,10 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
-
 @Component
 class NasjonalOppgaveListener(
     val nasjonalOppgaveService: NasjonalOppgaveService,
-    val nasjonalDbService: NasjonalDbService
+    val nasjonalDbService: NasjonalDbService,
 ) {
     val logger = applog()
 
@@ -25,18 +24,13 @@ class NasjonalOppgaveListener(
         properties = ["auto.offset.reset = none"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
-    fun listen(
-        cr: ConsumerRecord<String, String>,
-        acknowledgment: Acknowledgment,
-    ) {
+    fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         logger.info("Processing record with key: ${cr.key()}")
-        if (cr.value() == null){
-            logger.info(
-                "Mottatt tombstone for sykmelding med id ${cr.key()}"
-            )
+        if (cr.value() == null) {
+            logger.info("Mottatt tombstone for sykmelding med id ${cr.key()}")
             val deletedSykmeldingRows = nasjonalDbService.deleteSykmelding(cr.key())
             val deletedOppgaveRows = nasjonalDbService.deleteOppgave(cr.key())
-            if (deletedSykmeldingRows > 0 && deletedOppgaveRows > 0){
+            if (deletedSykmeldingRows > 0 && deletedOppgaveRows > 0) {
                 logger.info("Slettet sykmelding med id ${cr.key()} og tilhørende historikk")
             }
             acknowledgment.acknowledge()

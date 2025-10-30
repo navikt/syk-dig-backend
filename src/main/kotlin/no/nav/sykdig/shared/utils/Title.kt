@@ -1,13 +1,10 @@
 package no.nav.sykdig.shared.utils
 
-import no.nav.sykdig.shared.Periode
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import no.nav.sykdig.shared.Periode
 
-fun createTitleRina(
-    perioder: List<Periode>?,
-    avvisningsGrunn: String?,
-): String {
+fun createTitleRina(perioder: List<Periode>?, avvisningsGrunn: String?): String {
     return if (!avvisningsGrunn.isNullOrEmpty()) {
         "Avvist Søknad om kontantytelser: $avvisningsGrunn"
     } else if (perioder.isNullOrEmpty()) {
@@ -17,10 +14,7 @@ fun createTitleRina(
     }
 }
 
-fun createTitle(
-    perioder: List<Periode>?,
-    avvisningsGrunn: String?,
-): String {
+fun createTitle(perioder: List<Periode>?, avvisningsGrunn: String?): String {
     return if (!avvisningsGrunn.isNullOrEmpty()) {
         "Avvist utenlandsk sykmelding: $avvisningsGrunn"
     } else if (perioder.isNullOrEmpty()) {
@@ -30,12 +24,9 @@ fun createTitle(
     }
 }
 
-fun createTitleNasjonal(
-    perioder: List<Periode>?,
-    avvist: Boolean,
-): String {
+fun createTitleNasjonal(perioder: List<Periode>?, avvist: Boolean): String {
     if (avvist) {
-        if(perioder.isNullOrEmpty()) {
+        if (perioder.isNullOrEmpty()) {
             return "Avvist papirsykmelding"
         }
         return "Avvist papirsykmelding ${getFomTomTekst(perioder)}"
@@ -44,10 +35,7 @@ fun createTitleNasjonal(
     return "Papirsykmelding ${getFomTomTekst(perioder)}"
 }
 
-fun createTitleNavNo(
-    perioder: List<Periode>?,
-    avvisningsGrunn: String?,
-): String {
+fun createTitleNavNo(perioder: List<Periode>?, avvisningsGrunn: String?): String {
     return if (!avvisningsGrunn.isNullOrEmpty()) {
         "Avvist Egenerklæring for utenlandske sykemeldinger: $avvisningsGrunn"
     } else if (perioder.isNullOrEmpty()) {
@@ -59,7 +47,7 @@ fun createTitleNavNo(
 
 private fun getFomTomTekst(perioder: List<Periode>) =
     "${formaterDato(perioder.sortedSykmeldingPeriodeFOMDate().first().fom)} -" +
-            " ${formaterDato(perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
+        " ${formaterDato(perioder.sortedSykmeldingPeriodeTOMDate().last().tom)}"
 
 fun List<Periode>.sortedSykmeldingPeriodeFOMDate(): List<Periode> = sortedBy { it.fom }
 

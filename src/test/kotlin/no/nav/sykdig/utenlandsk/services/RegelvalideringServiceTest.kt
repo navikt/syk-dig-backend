@@ -1,16 +1,16 @@
 package no.nav.sykdig.utenlandsk.services
 
-import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.pdl.Navn
-import no.nav.sykdig.pdl.Person
-import no.nav.sykdig.generated.types.DiagnoseInput
-import no.nav.sykdig.generated.types.PeriodeInput
-import no.nav.sykdig.generated.types.PeriodeType
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import no.nav.sykdig.generated.types.DiagnoseInput
+import no.nav.sykdig.generated.types.PeriodeInput
+import no.nav.sykdig.generated.types.PeriodeType
+import no.nav.sykdig.pdl.Navn
+import no.nav.sykdig.pdl.Person
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class RegelvalideringServiceTest {
     private val regelvalideringService = RegelvalideringService()
@@ -35,7 +35,7 @@ class RegelvalideringServiceTest {
                         type = PeriodeType.AKTIVITET_IKKE_MULIG,
                         fom = LocalDate.now().minusWeeks(2),
                         tom = LocalDate.now().minusWeeks(1),
-                    ),
+                    )
                 ),
             hovedDiagnose = DiagnoseInput("A000", "ICD10"),
             biDiagnoser = emptyList(),
@@ -45,7 +45,8 @@ class RegelvalideringServiceTest {
 
     @Test
     fun happyCase() {
-        val valideringsresultat = regelvalideringService.validerUtenlandskSykmelding(sykmeldt, happyCaseValues)
+        val valideringsresultat =
+            regelvalideringService.validerUtenlandskSykmelding(sykmeldt, happyCaseValues)
 
         assertEquals(valideringsresultat.size, 0)
     }
@@ -74,8 +75,8 @@ class RegelvalideringServiceTest {
                                 type = PeriodeType.AKTIVITET_IKKE_MULIG,
                                 fom = LocalDate.now().minusWeeks(1),
                                 tom = LocalDate.now().minusWeeks(2),
-                            ),
-                        ),
+                            )
+                        )
                 ),
             )
 
@@ -95,13 +96,16 @@ class RegelvalideringServiceTest {
                                 type = PeriodeType.AKTIVITET_IKKE_MULIG,
                                 fom = LocalDate.now().minusYears(3).minusDays(5),
                                 tom = LocalDate.now().minusYears(3).plusDays(5),
-                            ),
-                        ),
+                            )
+                        )
                 ),
             )
 
         assertEquals(valideringsresultat.size, 1)
-        assertEquals(valideringsresultat[0], "Sykmeldingens fom-dato er mer enn 3 år tilbake i tid.")
+        assertEquals(
+            valideringsresultat[0],
+            "Sykmeldingens fom-dato er mer enn 3 år tilbake i tid.",
+        )
     }
 
     @Test
@@ -113,7 +117,10 @@ class RegelvalideringServiceTest {
             )
 
         assertEquals(valideringsresultat.size, 1)
-        assertEquals(valideringsresultat[0], "Pasienten er under 13 år. Sykmelding kan ikke benyttes.")
+        assertEquals(
+            valideringsresultat[0],
+            "Pasienten er under 13 år. Sykmelding kan ikke benyttes.",
+        )
     }
 
     @Test
@@ -125,7 +132,10 @@ class RegelvalideringServiceTest {
             )
 
         assertEquals(valideringsresultat.size, 1)
-        assertEquals(valideringsresultat[0], "Pasienten er over 70 år. Sykmelding kan ikke benyttes.")
+        assertEquals(
+            valideringsresultat[0],
+            "Pasienten er over 70 år. Sykmelding kan ikke benyttes.",
+        )
     }
 
     @Test
@@ -140,8 +150,8 @@ class RegelvalideringServiceTest {
                                 type = PeriodeType.AKTIVITET_IKKE_MULIG,
                                 fom = LocalDate.now().plusDays(31),
                                 tom = LocalDate.now().plusDays(45),
-                            ),
-                        ),
+                            )
+                        )
                 ),
             )
 
@@ -168,7 +178,7 @@ class RegelvalideringServiceTest {
                                 tom = LocalDate.now().plusMonths(8),
                                 grad = 50,
                             ),
-                        ),
+                        )
                 ),
             )
 
@@ -195,7 +205,7 @@ class RegelvalideringServiceTest {
                                 tom = LocalDate.now().plusDays(15),
                                 grad = 50,
                             ),
-                        ),
+                        )
                 ),
             )
 
@@ -222,12 +232,15 @@ class RegelvalideringServiceTest {
                                 tom = LocalDate.now().plusDays(15),
                                 grad = 50,
                             ),
-                        ),
+                        )
                 ),
             )
 
         assertEquals(valideringsresultat.size, 1)
-        assertEquals(valideringsresultat[0], "Det kan ikke være opphold mellom sykmeldingsperiodene.")
+        assertEquals(
+            valideringsresultat[0],
+            "Det kan ikke være opphold mellom sykmeldingsperiodene.",
+        )
     }
 
     @Test
@@ -243,8 +256,8 @@ class RegelvalideringServiceTest {
                                 fom = LocalDate.now().plusDays(4),
                                 tom = LocalDate.now().plusDays(15),
                                 grad = 19,
-                            ),
-                        ),
+                            )
+                        )
                 ),
             )
 
@@ -265,8 +278,8 @@ class RegelvalideringServiceTest {
                                 fom = LocalDate.now().plusDays(4),
                                 tom = LocalDate.now().plusDays(15),
                                 grad = 100,
-                            ),
-                        ),
+                            )
+                        )
                 ),
             )
 
@@ -286,7 +299,10 @@ class RegelvalideringServiceTest {
             )
 
         assertEquals(valideringsresultat.size, 1)
-        assertEquals(valideringsresultat[0], "Angitt hoveddiagnose (z-diagnose) gir ikke rett til sykepenger.")
+        assertEquals(
+            valideringsresultat[0],
+            "Angitt hoveddiagnose (z-diagnose) gir ikke rett til sykepenger.",
+        )
     }
 
     @Test
@@ -315,6 +331,9 @@ class RegelvalideringServiceTest {
 
         assertEquals(valideringsresultat.size, 2)
         assertEquals(valideringsresultat[0], "Periodene må ikke overlappe hverandre.")
-        assertEquals(valideringsresultat[1], "Angitt hoveddiagnose (z-diagnose) gir ikke rett til sykepenger.")
+        assertEquals(
+            valideringsresultat[1],
+            "Angitt hoveddiagnose (z-diagnose) gir ikke rett til sykepenger.",
+        )
     }
 }

@@ -11,11 +11,7 @@ data class Person(
     val fodselsdato: LocalDate?,
 )
 
-data class Navn(
-    val fornavn: String,
-    val mellomnavn: String?,
-    val etternavn: String,
-)
+data class Navn(val fornavn: String, val mellomnavn: String?, val etternavn: String)
 
 data class Bostedsadresse(
     val coAdressenavn: String?,
@@ -58,9 +54,7 @@ data class UtenlandskAdresse(
     val landkode: String,
 )
 
-data class UkjentBosted(
-    val bostedskommune: String? = null,
-)
+data class UkjentBosted(val bostedskommune: String? = null)
 
 fun Navn.toFormattedNameString(): String {
     return if (mellomnavn.isNullOrEmpty()) {
@@ -71,7 +65,11 @@ fun Navn.toFormattedNameString(): String {
 }
 
 private fun capitalizeFirstLetter(string: String): String {
-    return string.lowercase()
-        .split(" ").joinToString(" ") { it.replaceFirstChar(Char::titlecase) }
-        .split("-").joinToString("-") { it.replaceFirstChar(Char::titlecase) }.trimEnd()
+    return string
+        .lowercase()
+        .split(" ")
+        .joinToString(" ") { it.replaceFirstChar(Char::titlecase) }
+        .split("-")
+        .joinToString("-") { it.replaceFirstChar(Char::titlecase) }
+        .trimEnd()
 }

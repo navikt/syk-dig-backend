@@ -1,10 +1,10 @@
 package no.nav.sykdig.nasjonal.clients
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.ReceivedSykmelding
-import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.shared.ValidationResult
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.securelog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -14,12 +14,11 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
-
 @Component
 class NyRegelClient(
     @Value("\${ny-regel.url}") private val regelUrl: String,
-    private val nyRegelM2mRestTemplate: RestTemplate
-){
+    private val nyRegelM2mRestTemplate: RestTemplate,
+) {
     val log = applog()
     val securelog = securelog()
 
@@ -28,12 +27,17 @@ class NyRegelClient(
         val headers = HttpHeaders()
         headers["Nav-CallId"] = msgId
 
-        val response = nyRegelM2mRestTemplate.exchange(
-            "$regelUrl/v1/rules/validate/papir",
-            HttpMethod.POST,
-            HttpEntity(sykmelding, headers),
-            ValidationResult::class.java
-        )
-        return response.body ?: throw HttpClientErrorException(HttpStatus.NOT_FOUND, "regelvalidering feilet for sykmeldingId ${sykmelding.sykmelding.id}")
+        val response =
+            nyRegelM2mRestTemplate.exchange(
+                "$regelUrl/v1/rules/validate/papir",
+                HttpMethod.POST,
+                HttpEntity(sykmelding, headers),
+                ValidationResult::class.java,
+            )
+        return response.body
+            ?: throw HttpClientErrorException(
+                HttpStatus.NOT_FOUND,
+                "regelvalidering feilet for sykmeldingId ${sykmelding.sykmelding.id}",
+            )
     }
 }

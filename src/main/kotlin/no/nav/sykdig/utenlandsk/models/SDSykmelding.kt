@@ -1,5 +1,7 @@
 package no.nav.sykdig.utenlandsk.models
 
+import java.time.LocalDate
+import java.time.OffsetDateTime
 import no.nav.sykdig.shared.Arbeidsgiver
 import no.nav.sykdig.shared.Behandler
 import no.nav.sykdig.shared.KontaktMedPasient
@@ -8,8 +10,6 @@ import no.nav.sykdig.shared.MeldingTilNAV
 import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.shared.Prognose
 import no.nav.sykdig.shared.SporsmalSvar
-import java.time.LocalDate
-import java.time.OffsetDateTime
 
 data class SDSykmelding(
     val id: String,

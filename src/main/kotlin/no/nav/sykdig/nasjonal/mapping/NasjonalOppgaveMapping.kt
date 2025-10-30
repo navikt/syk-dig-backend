@@ -2,6 +2,9 @@ package no.nav.sykdig.digitalisering.papirsykmelding
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.util.*
 import no.nav.sykdig.generated.types.AktivitetIkkeMulig
 import no.nav.sykdig.generated.types.AnnenFraversArsak
 import no.nav.sykdig.generated.types.AnnenFraversArsakGrunn
@@ -28,16 +31,14 @@ import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Veileder
 import no.nav.sykdig.shared.*
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.util.*
 
 fun mapToNasjonalOppgave(oppgave: NasjonalManuellOppgaveDAO): NasjonalOppgave {
     requireNotNull(oppgave.dokumentInfoId)
     return NasjonalOppgave(
         oppgaveId = oppgave.oppgaveId.toString(),
         nasjonalSykmelding = mapToNasjonalSykmelding(oppgave),
-        documents = listOf(Document(tittel = "papirsykmelding", dokumentInfoId = oppgave.dokumentInfoId)),
+        documents =
+            listOf(Document(tittel = "papirsykmelding", dokumentInfoId = oppgave.dokumentInfoId)),
     )
 }
 
@@ -57,10 +58,10 @@ fun mapToNasjonalSykmelding(oppgave: NasjonalManuellOppgaveDAO): NasjonalSykmeld
         kontaktMedPasient = mapToKontaktMedPasient(oppgave.papirSmRegistrering.kontaktMedPasient),
         behandletTidspunkt = oppgave.papirSmRegistrering.behandletTidspunkt,
         behandler = mapToBehandler(oppgave.papirSmRegistrering.behandler),
-        harUtdypendeOpplysninger = !oppgave.papirSmRegistrering.utdypendeOpplysninger.isNullOrEmpty(),
+        harUtdypendeOpplysninger =
+            !oppgave.papirSmRegistrering.utdypendeOpplysninger.isNullOrEmpty(),
     )
 }
-
 
 fun mapToArbeidsgiver(oppgave: NasjonalManuellOppgaveDAO): Arbeidsgiver {
     return Arbeidsgiver(
@@ -75,7 +76,8 @@ fun mapToHarArbeidsGiver(oppgave: NasjonalManuellOppgaveDAO): HarArbeidsgiver? {
     return when (oppgave.papirSmRegistrering.arbeidsgiver?.harArbeidsgiver) {
         null -> null
         no.nav.sykdig.shared.HarArbeidsgiver.EN_ARBEIDSGIVER -> HarArbeidsgiver.EN_ARBEIDSGIVER
-        no.nav.sykdig.shared.HarArbeidsgiver.FLERE_ARBEIDSGIVERE -> HarArbeidsgiver.FLERE_ARBEIDSGIVERE
+        no.nav.sykdig.shared.HarArbeidsgiver.FLERE_ARBEIDSGIVERE ->
+            HarArbeidsgiver.FLERE_ARBEIDSGIVERE
         else -> HarArbeidsgiver.INGEN_ARBEIDSGIVER
     }
 }
@@ -84,7 +86,8 @@ fun mapToMedisinskVurdering(oppgave: NasjonalManuellOppgaveDAO): MedisinskVurder
     val oppgaveMedisinskVurdering = oppgave.papirSmRegistrering.medisinskVurdering
     return MedisinskVurdering(
         hovedDiagnose = oppgaveMedisinskVurdering?.hovedDiagnose?.let { mapToDiagnoseSchema(it) },
-        biDiagnoser = oppgaveMedisinskVurdering?.biDiagnoser?.map { mapToDiagnoseSchema(it) } ?: emptyList(),
+        biDiagnoser =
+            oppgaveMedisinskVurdering?.biDiagnoser?.map { mapToDiagnoseSchema(it) } ?: emptyList(),
         svangerskap = oppgaveMedisinskVurdering?.svangerskap ?: false,
         yrkesskade = oppgaveMedisinskVurdering?.yrkesskade ?: false,
         yrkesskadeDato = oppgaveMedisinskVurdering?.yrkesskadeDato?.toString(),
@@ -92,32 +95,35 @@ fun mapToMedisinskVurdering(oppgave: NasjonalManuellOppgaveDAO): MedisinskVurder
     )
 }
 
-
 fun mapToDiagnoseSchema(diagnose: Diagnose): DiagnoseSchema {
-    return DiagnoseSchema(
-        system = diagnose.system,
-        kode = diagnose.kode,
-        tekst = diagnose.tekst,
-    )
+    return DiagnoseSchema(system = diagnose.system, kode = diagnose.kode, tekst = diagnose.tekst)
 }
 
-
-fun mapToAnnenFraversArsak(annenFraversArsak: no.nav.sykdig.shared.AnnenFraversArsak?): AnnenFraversArsak? {
+fun mapToAnnenFraversArsak(
+    annenFraversArsak: no.nav.sykdig.shared.AnnenFraversArsak?
+): AnnenFraversArsak? {
     if (annenFraversArsak == null) return null
 
     return AnnenFraversArsak(
         beskrivelse = annenFraversArsak.beskrivelse,
-        grunn = annenFraversArsak.grunn.mapNotNull { mapToAnnenFraversArsakGrunn(it) }, // Use mapNotNull to skip invalid mappings
+        grunn =
+            annenFraversArsak.grunn.mapNotNull {
+                mapToAnnenFraversArsakGrunn(it)
+            }, // Use mapNotNull to skip invalid mappings
     )
 }
 
 fun mapToAnnenFraversArsakGrunn(annenFraverGrunn: AnnenFraverGrunn): AnnenFraversArsakGrunn? {
     return when (annenFraverGrunn) {
-        AnnenFraverGrunn.GODKJENT_HELSEINSTITUSJON -> AnnenFraversArsakGrunn.GODKJENT_HELSEINSTITUSJON
-        AnnenFraverGrunn.BEHANDLING_FORHINDRER_ARBEID -> AnnenFraversArsakGrunn.BEHANDLING_FORHINDRER_ARBEID
+        AnnenFraverGrunn.GODKJENT_HELSEINSTITUSJON ->
+            AnnenFraversArsakGrunn.GODKJENT_HELSEINSTITUSJON
+        AnnenFraverGrunn.BEHANDLING_FORHINDRER_ARBEID ->
+            AnnenFraversArsakGrunn.BEHANDLING_FORHINDRER_ARBEID
         AnnenFraverGrunn.ARBEIDSRETTET_TILTAK -> AnnenFraversArsakGrunn.ARBEIDSRETTET_TILTAK
-        AnnenFraverGrunn.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND -> AnnenFraversArsakGrunn.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND
-        AnnenFraverGrunn.NODVENDIG_KONTROLLUNDENRSOKELSE -> AnnenFraversArsakGrunn.NODVENDIG_KONTROLLUNDENRSOKELSE
+        AnnenFraverGrunn.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND ->
+            AnnenFraversArsakGrunn.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND
+        AnnenFraverGrunn.NODVENDIG_KONTROLLUNDENRSOKELSE ->
+            AnnenFraversArsakGrunn.NODVENDIG_KONTROLLUNDENRSOKELSE
         AnnenFraverGrunn.SMITTEFARE -> AnnenFraversArsakGrunn.SMITTEFARE
         AnnenFraverGrunn.ABORT -> AnnenFraversArsakGrunn.ABORT
         AnnenFraverGrunn.UFOR_GRUNNET_BARNLOSHET -> AnnenFraversArsakGrunn.UFOR_GRUNNET_BARNLOSHET
@@ -141,23 +147,23 @@ fun mapToPerioder(periode: no.nav.sykdig.shared.Periode): Periode {
 fun mapToGradert(gradert: no.nav.sykdig.shared.Gradert?): Gradert? {
     if (gradert == null) return null
 
-    return Gradert(
-        grad = gradert.grad,
-        reisetilskudd = gradert.reisetilskudd,
-    )
+    return Gradert(grad = gradert.grad, reisetilskudd = gradert.reisetilskudd)
 }
 
-fun mapToAktivitetIkkeMulig(aktivitetIkkeMulig: no.nav.sykdig.shared.AktivitetIkkeMulig?): AktivitetIkkeMulig? {
+fun mapToAktivitetIkkeMulig(
+    aktivitetIkkeMulig: no.nav.sykdig.shared.AktivitetIkkeMulig?
+): AktivitetIkkeMulig? {
     if (aktivitetIkkeMulig == null) return null
 
     return AktivitetIkkeMulig(
-
         medisinskArsak = mapToMedisinskArsak(aktivitetIkkeMulig.medisinskArsak),
         arbeidsrelatertArsak = mapToArbeidsrelatertArsak(aktivitetIkkeMulig.arbeidsrelatertArsak),
     )
 }
 
-fun mapToMedisinskArsak(medisinskArsak: MedisinskArsak?): no.nav.sykdig.generated.types.MedisinskArsak? {
+fun mapToMedisinskArsak(
+    medisinskArsak: MedisinskArsak?
+): no.nav.sykdig.generated.types.MedisinskArsak? {
     if (medisinskArsak == null) return null
 
     return no.nav.sykdig.generated.types.MedisinskArsak(
@@ -166,16 +172,23 @@ fun mapToMedisinskArsak(medisinskArsak: MedisinskArsak?): no.nav.sykdig.generate
     )
 }
 
-fun mapToMedisinskArsakType(medisinskArsakType: no.nav.sykdig.shared.MedisinskArsakType): MedisinskArsakType {
+fun mapToMedisinskArsakType(
+    medisinskArsakType: no.nav.sykdig.shared.MedisinskArsakType
+): MedisinskArsakType {
     return when (medisinskArsakType) {
-        no.nav.sykdig.shared.MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET -> MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET
-        no.nav.sykdig.shared.MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND -> MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND
-        no.nav.sykdig.shared.MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING -> MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING
+        no.nav.sykdig.shared.MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET ->
+            MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET
+        no.nav.sykdig.shared.MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND ->
+            MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND
+        no.nav.sykdig.shared.MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING ->
+            MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING
         no.nav.sykdig.shared.MedisinskArsakType.ANNET -> MedisinskArsakType.ANNET
     }
 }
 
-fun mapToArbeidsrelatertArsak(arbeidsrelatertArsak: no.nav.sykdig.shared.ArbeidsrelatertArsak?): ArbeidsrelatertArsak? {
+fun mapToArbeidsrelatertArsak(
+    arbeidsrelatertArsak: no.nav.sykdig.shared.ArbeidsrelatertArsak?
+): ArbeidsrelatertArsak? {
     if (arbeidsrelatertArsak == null) return null
 
     return ArbeidsrelatertArsak(
@@ -184,13 +197,15 @@ fun mapToArbeidsrelatertArsak(arbeidsrelatertArsak: no.nav.sykdig.shared.Arbeids
     )
 }
 
-fun mapToArbeidsrelatertArsakType(arbeidsrelatertArsakType: no.nav.sykdig.shared.ArbeidsrelatertArsakType): ArbeidsrelatertArsakType {
+fun mapToArbeidsrelatertArsakType(
+    arbeidsrelatertArsakType: no.nav.sykdig.shared.ArbeidsrelatertArsakType
+): ArbeidsrelatertArsakType {
     return when (arbeidsrelatertArsakType) {
-        no.nav.sykdig.shared.ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING -> ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING
+        no.nav.sykdig.shared.ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING ->
+            ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING
         no.nav.sykdig.shared.ArbeidsrelatertArsakType.ANNET -> ArbeidsrelatertArsakType.ANNET
     }
 }
-
 
 fun mapTilMeldingTilNAV(meldingTilNAV: no.nav.sykdig.shared.MeldingTilNAV?): MeldingTilNAV? {
     if (meldingTilNAV == null) return null
@@ -201,8 +216,9 @@ fun mapTilMeldingTilNAV(meldingTilNAV: no.nav.sykdig.shared.MeldingTilNAV?): Mel
     )
 }
 
-
-fun mapToKontaktMedPasient(kontaktMedPasient: no.nav.sykdig.shared.KontaktMedPasient?): KontaktMedPasient? {
+fun mapToKontaktMedPasient(
+    kontaktMedPasient: no.nav.sykdig.shared.KontaktMedPasient?
+): KontaktMedPasient? {
     if (kontaktMedPasient == null) return null
 
     return KontaktMedPasient(
@@ -224,24 +240,47 @@ fun mapToBehandler(behandler: no.nav.sykdig.shared.Behandler?): Behandler? {
     )
 }
 
+fun mapToUpdatedPapirSmRegistrering(
+    existingOppgave: NasjonalManuellOppgaveDAO,
+    smRegistreringManuell: SmRegistreringManuell?,
+    utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+): PapirSmRegistering {
+    val updatedPapirSmRegistrering =
+        existingOppgave.papirSmRegistrering.copy(
+            meldingTilArbeidsgiver =
+                smRegistreringManuell?.meldingTilArbeidsgiver
+                    ?: existingOppgave.papirSmRegistrering.meldingTilArbeidsgiver,
+            medisinskVurdering =
+                smRegistreringManuell?.medisinskVurdering
+                    ?: existingOppgave.papirSmRegistrering.medisinskVurdering,
+            meldingTilNAV =
+                smRegistreringManuell?.meldingTilNAV
+                    ?: existingOppgave.papirSmRegistrering.meldingTilNAV,
+            arbeidsgiver =
+                smRegistreringManuell?.arbeidsgiver
+                    ?: existingOppgave.papirSmRegistrering.arbeidsgiver,
+            kontaktMedPasient =
+                smRegistreringManuell?.kontaktMedPasient
+                    ?: existingOppgave.papirSmRegistrering.kontaktMedPasient,
+            perioder =
+                smRegistreringManuell?.perioder ?: existingOppgave.papirSmRegistrering.perioder,
+            behandletTidspunkt =
+                smRegistreringManuell?.behandletDato
+                    ?: existingOppgave.papirSmRegistrering.behandletTidspunkt,
+            syketilfelleStartDato =
+                smRegistreringManuell?.syketilfelleStartDato
+                    ?: existingOppgave.papirSmRegistrering.syketilfelleStartDato,
+            behandler =
+                smRegistreringManuell?.behandler ?: existingOppgave.papirSmRegistrering.behandler,
+            skjermesForPasient =
+                smRegistreringManuell?.skjermesForPasient
+                    ?: existingOppgave.papirSmRegistrering.skjermesForPasient,
+            utdypendeOpplysninger = utdypendeOpplysninger,
+        )
 
-fun mapToUpdatedPapirSmRegistrering(existingOppgave: NasjonalManuellOppgaveDAO, smRegistreringManuell: SmRegistreringManuell?, utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?): PapirSmRegistering {
-    val updatedPapirSmRegistrering = existingOppgave.papirSmRegistrering.copy(
-        meldingTilArbeidsgiver = smRegistreringManuell?.meldingTilArbeidsgiver
-            ?: existingOppgave.papirSmRegistrering.meldingTilArbeidsgiver,
-        medisinskVurdering = smRegistreringManuell?.medisinskVurdering ?: existingOppgave.papirSmRegistrering.medisinskVurdering,
-        meldingTilNAV = smRegistreringManuell?.meldingTilNAV ?: existingOppgave.papirSmRegistrering.meldingTilNAV,
-        arbeidsgiver = smRegistreringManuell?.arbeidsgiver ?: existingOppgave.papirSmRegistrering.arbeidsgiver,
-        kontaktMedPasient = smRegistreringManuell?.kontaktMedPasient ?: existingOppgave.papirSmRegistrering.kontaktMedPasient,
-        perioder = smRegistreringManuell?.perioder ?: existingOppgave.papirSmRegistrering.perioder,
-        behandletTidspunkt = smRegistreringManuell?.behandletDato ?: existingOppgave.papirSmRegistrering.behandletTidspunkt,
-        syketilfelleStartDato = smRegistreringManuell?.syketilfelleStartDato ?: existingOppgave.papirSmRegistrering.syketilfelleStartDato,
-        behandler = smRegistreringManuell?.behandler ?: existingOppgave.papirSmRegistrering.behandler,
-        skjermesForPasient = smRegistreringManuell?.skjermesForPasient ?: existingOppgave.papirSmRegistrering.skjermesForPasient,
-        utdypendeOpplysninger = utdypendeOpplysninger
+    securelog.info(
+        "Updated papirSmRegistrering: $updatedPapirSmRegistrering to be saved in syk-dig-backend db nasjonal_manuellOppgave"
     )
-
-    securelog.info("Updated papirSmRegistrering: $updatedPapirSmRegistrering to be saved in syk-dig-backend db nasjonal_manuellOppgave")
     return updatedPapirSmRegistrering
 }
 
@@ -272,17 +311,12 @@ fun mapToDaoOppgave(
         )
 
     if (existingId != null) {
-        nasjonalManuellOppgaveDAO.apply {
-            id = existingId
-        }
+        nasjonalManuellOppgaveDAO.apply { id = existingId }
     }
     return nasjonalManuellOppgaveDAO
-
 }
 
-fun mapFromDao(
-    nasjonalManuellOppgaveDAO: NasjonalManuellOppgaveDAO,
-): PapirManuellOppgave {
+fun mapFromDao(nasjonalManuellOppgaveDAO: NasjonalManuellOppgaveDAO): PapirManuellOppgave {
     val papirSmRegistering = nasjonalManuellOppgaveDAO.papirSmRegistrering
 
     requireNotNull(nasjonalManuellOppgaveDAO.oppgaveId)
@@ -293,11 +327,15 @@ fun mapFromDao(
         oppgaveid = nasjonalManuellOppgaveDAO.oppgaveId,
         papirSmRegistering = papirSmRegistering,
         pdfPapirSykmelding = byteArrayOf(),
-        documents = listOf(no.nav.sykdig.nasjonal.models.Document(dokumentInfoId = nasjonalManuellOppgaveDAO.dokumentInfoId, tittel = "papirsykmelding")),
+        documents =
+            listOf(
+                no.nav.sykdig.nasjonal.models.Document(
+                    dokumentInfoId = nasjonalManuellOppgaveDAO.dokumentInfoId,
+                    tittel = "papirsykmelding",
+                )
+            ),
     )
 }
-
-
 
 fun mapToDaoSykmelding(
     receivedSykmelding: ReceivedSykmelding,
@@ -310,29 +348,30 @@ fun mapToDaoSykmelding(
     val nasjonalManuellOppgaveDAO =
         NasjonalSykmeldingDAO(
             sykmeldingId = receivedSykmelding.sykmelding.id,
-            sykmelding = Sykmelding(
-                id = receivedSykmelding.sykmelding.id,
-                msgId = receivedSykmelding.sykmelding.msgId,
-                pasientAktoerId = receivedSykmelding.sykmelding.pasientAktoerId,
-                medisinskVurdering = receivedSykmelding.sykmelding.medisinskVurdering,
-                skjermesForPasient = receivedSykmelding.sykmelding.skjermesForPasient,
-                arbeidsgiver = receivedSykmelding.sykmelding.arbeidsgiver,
-                perioder = receivedSykmelding.sykmelding.perioder,
-                prognose = receivedSykmelding.sykmelding.prognose,
-                utdypendeOpplysninger = receivedSykmelding.sykmelding.utdypendeOpplysninger,
-                tiltakArbeidsplassen = receivedSykmelding.sykmelding.tiltakArbeidsplassen,
-                tiltakNAV = receivedSykmelding.sykmelding.tiltakNAV,
-                andreTiltak = receivedSykmelding.sykmelding.andreTiltak,
-                meldingTilNAV = receivedSykmelding.sykmelding.meldingTilNAV,
-                meldingTilArbeidsgiver = receivedSykmelding.sykmelding.meldingTilArbeidsgiver,
-                kontaktMedPasient = receivedSykmelding.sykmelding.kontaktMedPasient,
-                behandletTidspunkt = receivedSykmelding.sykmelding.behandletTidspunkt,
-                behandler = receivedSykmelding.sykmelding.behandler,
-                avsenderSystem = receivedSykmelding.sykmelding.avsenderSystem,
-                syketilfelleStartDato = receivedSykmelding.sykmelding.syketilfelleStartDato,
-                signaturDato = receivedSykmelding.sykmelding.signaturDato,
-                navnFastlege = receivedSykmelding.sykmelding.navnFastlege,
-            ),
+            sykmelding =
+                Sykmelding(
+                    id = receivedSykmelding.sykmelding.id,
+                    msgId = receivedSykmelding.sykmelding.msgId,
+                    pasientAktoerId = receivedSykmelding.sykmelding.pasientAktoerId,
+                    medisinskVurdering = receivedSykmelding.sykmelding.medisinskVurdering,
+                    skjermesForPasient = receivedSykmelding.sykmelding.skjermesForPasient,
+                    arbeidsgiver = receivedSykmelding.sykmelding.arbeidsgiver,
+                    perioder = receivedSykmelding.sykmelding.perioder,
+                    prognose = receivedSykmelding.sykmelding.prognose,
+                    utdypendeOpplysninger = receivedSykmelding.sykmelding.utdypendeOpplysninger,
+                    tiltakArbeidsplassen = receivedSykmelding.sykmelding.tiltakArbeidsplassen,
+                    tiltakNAV = receivedSykmelding.sykmelding.tiltakNAV,
+                    andreTiltak = receivedSykmelding.sykmelding.andreTiltak,
+                    meldingTilNAV = receivedSykmelding.sykmelding.meldingTilNAV,
+                    meldingTilArbeidsgiver = receivedSykmelding.sykmelding.meldingTilArbeidsgiver,
+                    kontaktMedPasient = receivedSykmelding.sykmelding.kontaktMedPasient,
+                    behandletTidspunkt = receivedSykmelding.sykmelding.behandletTidspunkt,
+                    behandler = receivedSykmelding.sykmelding.behandler,
+                    avsenderSystem = receivedSykmelding.sykmelding.avsenderSystem,
+                    syketilfelleStartDato = receivedSykmelding.sykmelding.syketilfelleStartDato,
+                    signaturDato = receivedSykmelding.sykmelding.signaturDato,
+                    navnFastlege = receivedSykmelding.sykmelding.navnFastlege,
+                ),
             timestamp = timestamp,
             ferdigstiltAv = veileder.veilederIdent,
             datoFerdigstilt = datoFerdigstilt,

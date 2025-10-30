@@ -1,15 +1,13 @@
 package no.nav.sykdig.saf
 
 import no.nav.syfo.oppgave.saf.model.DokumentMedTittel
-import no.nav.sykdig.shared.applog
 import no.nav.sykdig.saf.graphql.DokumentInfo
 import no.nav.sykdig.saf.graphql.Journalstatus
+import no.nav.sykdig.shared.applog
 import org.springframework.stereotype.Component
 
 @Component
-class SafJournalpostService(
-    private val safJournalpostGraphQlClient: SafJournalpostGraphQlClient,
-) {
+class SafJournalpostService(private val safJournalpostGraphQlClient: SafJournalpostGraphQlClient) {
     val logger = applog()
 
     fun getDokumenterM2m(
@@ -18,19 +16,17 @@ class SafJournalpostService(
         source: String,
     ): List<DokumentMedTittel>? {
         val journalpost =
-            safJournalpostGraphQlClient.getJournalpostM2m(
-                journalpostId = journalpostId,
-            )
+            safJournalpostGraphQlClient.getJournalpostM2m(journalpostId = journalpostId)
 
         journalpost.journalpost?.let {
             if (it.kanal != "EESSI" && source == "rina") {
                 logger.warn(
-                    "Journalpost med id $journalpostId har ikke forventet mottakskanal: ${it.kanal}, $sykmeldingId",
+                    "Journalpost med id $journalpostId har ikke forventet mottakskanal: ${it.kanal}, $sykmeldingId"
                 )
             }
             if (it.dokumenter?.any { it.brevkode == "S055" } == false && source == "rina") {
                 logger.warn(
-                    "Journalpost med id $journalpostId har ingen dokumenter med forventet brevkode, $sykmeldingId",
+                    "Journalpost med id $journalpostId har ingen dokumenter med forventet brevkode, $sykmeldingId"
                 )
             }
 
@@ -38,7 +34,7 @@ class SafJournalpostService(
                 return finnDokumentInfoIdForSykmeldingPdfListe(it.dokumenter, sykmeldingId)
             } else {
                 logger.warn(
-                    "Journalpost med id $journalpostId er allerede journalført, sporingsId $sykmeldingId",
+                    "Journalpost med id $journalpostId er allerede journalført, sporingsId $sykmeldingId"
                 )
                 return null
             }
@@ -50,8 +46,7 @@ class SafJournalpostService(
     private fun erIkkeJournalfort(journalpostStatus: Journalstatus?): Boolean {
         return journalpostStatus?.let {
             it == Journalstatus.MOTTATT || it == Journalstatus.FEILREGISTRERT
-        }
-            ?: false
+        } ?: false
     }
 
     fun erIkkeJournalfort(journalpostId: String): Boolean {
@@ -67,7 +62,8 @@ class SafJournalpostService(
             dokumentListe
                 ?.filter { dokument ->
                     dokument.dokumentvarianter?.any { it.variantformat == "ARKIV" } == true
-                }?.mapNotNull {
+                }
+                ?.mapNotNull {
                     if (it.tittel != null) {
                         DokumentMedTittel(it.dokumentInfoId, it.tittel)
                     } else {

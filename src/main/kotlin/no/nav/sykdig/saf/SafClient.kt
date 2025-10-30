@@ -66,7 +66,9 @@ class SafClient(
                     return PdfLoadingState.Good(response.body!!)
                 }
             } else {
-                log.error("Ugyldig journalpostId: $journalpostId eller dokumentInfoId: $dokumentInfoId er på ugyldig format")
+                log.error(
+                    "Ugyldig journalpostId: $journalpostId eller dokumentInfoId: $dokumentInfoId er på ugyldig format"
+                )
                 return PdfLoadingState.Bad(ErrorTypes.INVALID_FORMAT)
             }
         } catch (e: HttpClientErrorException) {
@@ -74,11 +76,17 @@ class SafClient(
                 log.warn("Veileder har ikke tilgang til journalpostId $journalpostId: ${e.message}")
                 return PdfLoadingState.Bad(ErrorTypes.SAKSBEHANDLER_IKKE_TILGANG)
             } else {
-                log.error("HttpClientErrorException med responskode ${e.statusCode.value()} fra SAF: ${e.message}", e)
+                log.error(
+                    "HttpClientErrorException med responskode ${e.statusCode.value()} fra SAF: ${e.message}",
+                    e,
+                )
             }
             return PdfLoadingState.Bad(ErrorTypes.SAF_CLIENT_ERROR)
         } catch (e: HttpServerErrorException) {
-            log.error("HttpServerErrorException med responskode ${e.statusCode.value()} fra SAF: ${e.message}", e)
+            log.error(
+                "HttpServerErrorException med responskode ${e.statusCode.value()} fra SAF: ${e.message}",
+                e,
+            )
             return PdfLoadingState.Bad(ErrorTypes.SAF_CLIENT_ERROR)
         }
     }

@@ -1,30 +1,30 @@
 package no.nav.sykdig.utenlandsk.services
 
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
-import net.logstash.logback.argument.StructuredArguments
-import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.sykdig.shared.applog
-import no.nav.sykdig.utenlandsk.db.OppgaveRepository
-import no.nav.sykdig.utenlandsk.db.toSykmelding
-import no.nav.sykdig.shared.exceptions.NoOppgaveException
-import no.nav.sykdig.gosys.models.AllOppgaveResponse
-import no.nav.sykdig.gosys.models.AllOppgaveType
-import no.nav.sykdig.gosys.OppgaveClient
-import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
-import no.nav.sykdig.pdl.Person
-import no.nav.sykdig.saf.graphql.DokumentInfo
-import no.nav.sykdig.saf.graphql.SafJournalpost
-import no.nav.sykdig.generated.types.Avvisingsgrunn
-import no.nav.sykdig.utenlandsk.models.DokumentDbModel
-import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
-import no.nav.sykdig.shared.securelog
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import no.nav.sykdig.shared.utils.getLoggingMeta
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
+import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.sykdig.generated.types.Avvisingsgrunn
+import no.nav.sykdig.gosys.OppgaveClient
+import no.nav.sykdig.gosys.models.AllOppgaveResponse
+import no.nav.sykdig.gosys.models.AllOppgaveType
+import no.nav.sykdig.pdl.Person
+import no.nav.sykdig.saf.graphql.DokumentInfo
+import no.nav.sykdig.saf.graphql.SafJournalpost
+import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.exceptions.NoOppgaveException
+import no.nav.sykdig.shared.securelog
+import no.nav.sykdig.shared.utils.getLoggingMeta
+import no.nav.sykdig.utenlandsk.db.OppgaveRepository
+import no.nav.sykdig.utenlandsk.db.toSykmelding
+import no.nav.sykdig.utenlandsk.models.DokumentDbModel
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
+import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SykDigOppgaveService(
@@ -35,7 +35,6 @@ class SykDigOppgaveService(
     private val log = applog()
     private val securelog = securelog()
 
-
     fun opprettOgLagreOppgave(
         journalpost: SafJournalpost,
         journalpostId: String,
@@ -43,19 +42,18 @@ class SykDigOppgaveService(
         aktoerId: String,
         navEpost: String,
     ): String {
-        val opprettetOppgave = oppgaveClient.opprettOppgave(
-            journalpostId = journalpostId,
-            aktoerId = aktoerId,
-        )
+        val opprettetOppgave =
+            oppgaveClient.opprettOppgave(journalpostId = journalpostId, aktoerId = aktoerId)
         val oppgaveId = opprettetOppgave.id.toString()
 
-        val oppgave = buildOppgaveModel(
-            oppgaveId = oppgaveId,
-            journalpost = journalpost,
-            journalpostId = journalpostId,
-            fnr = fnr,
-            navEpost = navEpost,
-        )
+        val oppgave =
+            buildOppgaveModel(
+                oppgaveId = oppgaveId,
+                journalpost = journalpost,
+                journalpostId = journalpostId,
+                fnr = fnr,
+                navEpost = navEpost,
+            )
 
         oppgaveRepository.lagreOppgave(oppgave)
         log.info("Oppgave med id $oppgaveId lagret")
@@ -70,7 +68,10 @@ class SykDigOppgaveService(
             throw DgsEntityNotFoundException("Fant ikke oppgave")
         }
 
-        log.info("Hentet oppgave ${oppgave.oppgaveId} fra $sykmeldingId", StructuredArguments.fields(loggingMeta))
+        log.info(
+            "Hentet oppgave ${oppgave.oppgaveId} fra $sykmeldingId",
+            StructuredArguments.fields(loggingMeta),
+        )
 
         return oppgave
     }
@@ -98,7 +99,10 @@ class SykDigOppgaveService(
         val existingOppgave = getExistingOppgave(journalpostId, journalpost) ?: return
 
         if (existingOppgave.id == null) {
-            log.warn("oppgaveId er null, får ikke lukket oppgave {}", kv("journalpostId", journalpostId))
+            log.warn(
+                "oppgaveId er null, får ikke lukket oppgave {}",
+                kv("journalpostId", journalpostId),
+            )
             return
         }
         log.info(
@@ -106,19 +110,24 @@ class SykDigOppgaveService(
             kv("journalpostId", journalpostId),
             kv("oppgaveId", existingOppgave.id),
         )
-        oppgaveClient.ferdigstillJournalføringsoppgave(oppgaveId = existingOppgave.id, oppgaveVersjon = existingOppgave.versjon, journalpostId = journalpostId, endretAvEnhetsnr = navEnhet)
+        oppgaveClient.ferdigstillJournalføringsoppgave(
+            oppgaveId = existingOppgave.id,
+            oppgaveVersjon = existingOppgave.versjon,
+            journalpostId = journalpostId,
+            endretAvEnhetsnr = navEnhet,
+        )
         log.info(
             "Ferdigstilt journalføringsoppgave {} {} {}",
             kv("journalpostId", journalpostId),
             kv("oppgaveId", existingOppgave.id),
-            kv("navEnhet", navEnhet ?: "ukjent")
+            kv("navEnhet", navEnhet ?: "ukjent"),
         )
         securelog.info(
             "Ferdigstilt journalføringsoppgave {} {} {} {}",
             kv("journalpostId", journalpostId),
             kv("oppgaveId", existingOppgave.id),
             kv("aktørId", existingOppgave.aktoerId),
-            kv("navEnhet", navEnhet ?: "ukjent")
+            kv("navEnhet", navEnhet ?: "ukjent"),
         )
     }
 
@@ -131,11 +140,13 @@ class SykDigOppgaveService(
             log.info("hentet ${oppgaver.size}, på journalpostId $journalpostId")
             val filtrerteOppgaver =
                 oppgaver.filter {
-                    (it.tema == "SYM" || it.tema == "SYK") && it.oppgavetype == AllOppgaveType.JFR.name
+                    (it.tema == "SYM" || it.tema == "SYK") &&
+                        it.oppgavetype == AllOppgaveType.JFR.name
                 }
             if (filtrerteOppgaver.size != 1) {
                 val oppgaverInfo =
-                    filtrerteOppgaver.joinToString(separator = ", ", prefix = "[", postfix = "]") { oppgave ->
+                    filtrerteOppgaver.joinToString(separator = ", ", prefix = "[", postfix = "]") {
+                        oppgave ->
                         "id=${oppgave.id}, status=${oppgave.status}, tildeltEnhetsnr=${oppgave.tildeltEnhetsnr}"
                     }
                 log.warn(
@@ -148,10 +159,7 @@ class SykDigOppgaveService(
             }
             return filtrerteOppgaver.single()
         } catch (e: NoOppgaveException) {
-            log.error(
-                "klarte ikke hente oppgave(r) tilhørende journalpostId $journalpostId",
-                e,
-            )
+            log.error("klarte ikke hente oppgave(r) tilhørende journalpostId $journalpostId", e)
             throw e
         }
     }
@@ -166,10 +174,7 @@ class SykDigOppgaveService(
         oppgaveRepository.updateOppgave(oppgave, sykmelding, navEpost, false)
     }
 
-    fun ferdigstillOppgaveGosys(
-        oppgave: OppgaveDbModel,
-        navEpost: String,
-    ) {
+    fun ferdigstillOppgaveGosys(oppgave: OppgaveDbModel, navEpost: String) {
         val sykmelding = oppgaveRepository.getLastSykmelding(oppgave.oppgaveId)
         oppgaveRepository.ferdigstillOppgaveGosys(oppgave, navEpost, sykmelding)
     }
@@ -212,7 +217,13 @@ class SykDigOppgaveService(
     }
 
     @Transactional
-    fun oppdaterSykmelding(oppgave: OppgaveDbModel, navEmail: String, values: FerdistilltRegisterOppgaveValues, enhetId: String, sykmeldt: Person) {
+    fun oppdaterSykmelding(
+        oppgave: OppgaveDbModel,
+        navEmail: String,
+        values: FerdistilltRegisterOppgaveValues,
+        enhetId: String,
+        sykmeldt: Person,
+    ) {
         val sykmelding = toSykmelding(oppgave, values)
         oppgaveRepository.updateSykmelding(oppgave, navEmail, sykmelding)
         log.info("updated sykmelding in db")
@@ -252,11 +263,12 @@ class SykDigOppgaveService(
 
     private fun buildDokumenter(dokumenter: List<DokumentInfo>): List<DokumentDbModel> {
         return dokumenter.map {
-            val oppdatertTittel = if (it.tittel == "Utenlandsk sykmelding") {
-                "Digitalisert utenlandsk sykmelding"
-            } else {
-                it.tittel ?: "Mangler Tittel"
-            }
+            val oppdatertTittel =
+                if (it.tittel == "Utenlandsk sykmelding") {
+                    "Digitalisert utenlandsk sykmelding"
+                } else {
+                    it.tittel ?: "Mangler Tittel"
+                }
             DokumentDbModel(it.dokumentInfoId, oppdatertTittel)
         }
     }

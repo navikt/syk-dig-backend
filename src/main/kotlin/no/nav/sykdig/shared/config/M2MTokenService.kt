@@ -1,4 +1,5 @@
 package no.nav.sykdig.shared.config
+
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -20,6 +21,7 @@ class M2MTokenService(
                 ?: throw RuntimeException("Client properties for $type not found")
 
         val accessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)
-        return accessTokenResponse.access_token ?: throw RuntimeException("Failed to retrieve M2M access token")
+        return accessTokenResponse.access_token
+            ?: throw RuntimeException("Failed to retrieve M2M access token")
     }
 }

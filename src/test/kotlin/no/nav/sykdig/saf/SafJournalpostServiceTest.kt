@@ -27,16 +27,17 @@ class SafJournalpostServiceTest {
                             DokumentInfo(
                                 dokumentInfoId = "dok1",
                                 tittel = "Dokument 1",
-                                dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV")),
+                                dokumentvarianter =
+                                    listOf(Dokumentvariant(variantformat = "ARKIV")),
                                 brevkode = "",
-                            ),
+                            )
                         ),
                     kanal = "EESSI",
                     avsenderMottaker = null,
                     bruker = null,
                     tema = null,
                     journalposttype = null,
-                ),
+                )
             )
 
         val result = safJournalpostService.getDokumenterM2m(journalpostId, sykmeldingId, source)
@@ -63,16 +64,17 @@ class SafJournalpostServiceTest {
                             DokumentInfo(
                                 dokumentInfoId = "dok1",
                                 tittel = "Dokument 1",
-                                dokumentvarianter = listOf(Dokumentvariant(variantformat = "ARKIV")),
+                                dokumentvarianter =
+                                    listOf(Dokumentvariant(variantformat = "ARKIV")),
                                 brevkode = "",
-                            ),
+                            )
                         ),
                     kanal = "EESSI",
                     avsenderMottaker = null,
                     bruker = null,
                     tema = null,
                     journalposttype = null,
-                ),
+                )
             )
         val result = safJournalpostService.getDokumenterM2m(journalpostId, sykmeldingId, source)
         assertNull(result)
@@ -94,16 +96,17 @@ class SafJournalpostServiceTest {
                             DokumentInfo(
                                 dokumentInfoId = "dok1",
                                 tittel = "Dokument 1",
-                                dokumentvarianter = listOf(Dokumentvariant(variantformat = "NON-ARKIV")),
+                                dokumentvarianter =
+                                    listOf(Dokumentvariant(variantformat = "NON-ARKIV")),
                                 brevkode = "1",
-                            ),
+                            )
                         ),
                     kanal = "EESSI",
                     avsenderMottaker = null,
                     bruker = null,
                     tema = null,
                     journalposttype = null,
-                ),
+                )
             )
 
         val exception =
@@ -116,32 +119,28 @@ class SafJournalpostServiceTest {
     @Test
     fun `er ikke journalført fordi status er mottatt`() {
         val journalpostId = "123"
-        every { safJournalpostGraphQlClient.getJournalpostNasjonal(journalpostId) } returns SafQueryJournalpostNasjonal(
-            journalpost = SafJournalpostNasjonal(
-                journalstatus = Journalstatus.MOTTATT,
+        every { safJournalpostGraphQlClient.getJournalpostNasjonal(journalpostId) } returns
+            SafQueryJournalpostNasjonal(
+                journalpost = SafJournalpostNasjonal(journalstatus = Journalstatus.MOTTATT)
             )
-        )
         val erIkkeJournalfort = safJournalpostService.erIkkeJournalfort(journalpostId)
         assertTrue(erIkkeJournalfort)
     }
+
     @Test
     fun `er ikke journalført fordi safjournalpost er null`() {
         val journalpostId = "123"
-        every { safJournalpostGraphQlClient.getJournalpostNasjonal(journalpostId) } returns SafQueryJournalpostNasjonal(
-            journalpost = null
-        )
+        every { safJournalpostGraphQlClient.getJournalpostNasjonal(journalpostId) } returns
+            SafQueryJournalpostNasjonal(journalpost = null)
         val erIkkeJournalfort = safJournalpostService.erIkkeJournalfort(journalpostId)
         assertFalse(erIkkeJournalfort)
     }
+
     @Test
     fun `er journalført fordi status er ukjent`() {
         val journalpostId = "123"
         every { safJournalpostGraphQlClient.getJournalpostNasjonal(journalpostId) } returns
-                SafQueryJournalpostNasjonal(
-                    journalpost = SafJournalpostNasjonal(
-                        Journalstatus.UKJENT
-                    )
-                )
+            SafQueryJournalpostNasjonal(journalpost = SafJournalpostNasjonal(Journalstatus.UKJENT))
 
         val erIkkeJournalfort = safJournalpostService.erIkkeJournalfort(journalpostId)
         assertFalse(erIkkeJournalfort)

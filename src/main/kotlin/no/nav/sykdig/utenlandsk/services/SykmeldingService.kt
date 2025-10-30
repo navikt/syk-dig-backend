@@ -1,9 +1,9 @@
 package no.nav.sykdig.utenlandsk.services
 
+import no.nav.sykdig.utenlandsk.db.JournalpostSykmeldingRepository
 import no.nav.sykdig.utenlandsk.models.CreateSykmeldingKafkaMessage
 import no.nav.sykdig.utenlandsk.models.JournalpostMetadata
 import no.nav.sykdig.utenlandsk.models.Metadata
-import no.nav.sykdig.utenlandsk.db.JournalpostSykmeldingRepository
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -20,33 +20,25 @@ class SykmeldingService(
         private val log = LoggerFactory.getLogger(this::class.java)
     }
 
-    fun createSykmelding(
-        journalpostId: String,
-        tema: String,
-    ) {
+    fun createSykmelding(journalpostId: String, tema: String) {
         try {
-            val journalpostSykmelding = journalpostSykmeldingRepository.getJournalpostSykmelding(journalpostId)
+            val journalpostSykmelding =
+                journalpostSykmeldingRepository.getJournalpostSykmelding(journalpostId)
 
             if (journalpostSykmelding == null) {
                 val createSykmeldingKafkaMessage =
                     CreateSykmeldingKafkaMessage(
                         metadata = Metadata(),
-                        data =
-                            JournalpostMetadata(
-                                journalpostId,
-                                tema,
-                            ),
+                        data = JournalpostMetadata(journalpostId, tema),
                     )
 
-                sykmeldingKafkaProducer.send(
-                    ProducerRecord(
-                        sykmeldingTopic,
-                        journalpostId,
-                        createSykmeldingKafkaMessage,
-                    ),
-                ).get()
+                sykmeldingKafkaProducer
+                    .send(
+                        ProducerRecord(sykmeldingTopic, journalpostId, createSykmeldingKafkaMessage)
+                    )
+                    .get()
                 log.info(
-                    "Sykmelding sendt to kafka topic $sykmeldingTopic journalpost id $journalpostId",
+                    "Sykmelding sendt to kafka topic $sykmeldingTopic journalpost id $journalpostId"
                 )
             } else {
                 log.info("Sykmelding already created for journalpost id $journalpostId")

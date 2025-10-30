@@ -7,23 +7,21 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class DocumentService internal constructor(
+class DocumentService
+internal constructor(
     private val oppgaveRepository: OppgaveRepository,
     private val dokarkivClient: DokarkivClient,
 ) {
     val log = applog()
 
     @Transactional
-    fun updateDocumentTitle(
-        oppgaveId: String,
-        dokumentInfoId: String,
-        tittel: String,
-    ) {
-        val oppgave = oppgaveRepository.getOppgave(oppgaveId) ?: throw DgsEntityNotFoundException("Fant ikke oppgave $oppgaveId")
+    fun updateDocumentTitle(oppgaveId: String, dokumentInfoId: String, tittel: String) {
+        val oppgave =
+            oppgaveRepository.getOppgave(oppgaveId)
+                ?: throw DgsEntityNotFoundException("Fant ikke oppgave $oppgaveId")
         val journalpostId = oppgave.journalpostId
         val document =
-            oppgave.dokumenter
-                .firstOrNull { it.dokumentInfoId == dokumentInfoId }
+            oppgave.dokumenter.firstOrNull { it.dokumentInfoId == dokumentInfoId }
                 ?: throw DgsEntityNotFoundException("Fant ikke dokument $dokumentInfoId")
 
         if (document.tittel == tittel) {

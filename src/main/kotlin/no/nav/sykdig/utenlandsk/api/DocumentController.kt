@@ -1,7 +1,8 @@
 package no.nav.sykdig.utenlandsk.api
 
-import no.nav.sykdig.shared.applog
+import java.util.*
 import no.nav.sykdig.saf.SafClient
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 @RestController
 class DocumentController(
@@ -30,10 +30,15 @@ class DocumentController(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String,
     ): ResponseEntity<Any> {
-        return getPdfResult(safClient.getPdfFraSaf(journalpostId, dokumentInfoId, UUID.randomUUID().toString()))
+        return getPdfResult(
+            safClient.getPdfFraSaf(journalpostId, dokumentInfoId, UUID.randomUUID().toString())
+        )
     }
 
-    @GetMapping("/api/document/{oppgaveId}/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
+    @GetMapping(
+        "/api/document/{oppgaveId}/{dokumentInfoId}",
+        produces = [MediaType.APPLICATION_PDF_VALUE],
+    )
     @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
     @ResponseBody
     fun getOppgaveDocument(
@@ -42,9 +47,7 @@ class DocumentController(
     ): ResponseEntity<Any> {
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
 
-        if (
-            dokumentInfoId == "primary"
-        ) {
+        if (dokumentInfoId == "primary") {
             if (oppgave.dokumentInfoId == null) {
                 log.error("oppgave: $oppgaveId mangler dokumentInfoId")
                 return ResponseEntity.badRequest()
@@ -55,11 +58,12 @@ class DocumentController(
                     dokumentInfoId = oppgave.dokumentInfoId,
                     journalpostId = oppgave.journalpostId,
                     callId = oppgave.sykmeldingId.toString(),
-                ),
+                )
             )
         }
 
-        val dokumentInfoIdInDokumenter = oppgave.dokumenter.firstOrNull { it.dokumentInfoId == dokumentInfoId }
+        val dokumentInfoIdInDokumenter =
+            oppgave.dokumenter.firstOrNull { it.dokumentInfoId == dokumentInfoId }
 
         if (dokumentInfoIdInDokumenter == null && oppgave.dokumentInfoId != dokumentInfoId) {
             log.error("$dokumentInfoId er ikke en del av oppgave $oppgaveId")
@@ -74,7 +78,7 @@ class DocumentController(
                     dokumentInfoId = dokumentInfoId,
                     journalpostId = oppgave.journalpostId,
                     callId = oppgave.sykmeldingId.toString(),
-                ),
+                )
             )
         } catch (e: Exception) {
             log.error("Noe gikk galt ved henting av pdf for oppgave med id $oppgaveId")
@@ -103,9 +107,7 @@ class DocumentController(
 fun getPdfResult(pdfResult: DocumentController.PdfLoadingState): ResponseEntity<Any> {
     return when (pdfResult) {
         is DocumentController.PdfLoadingState.Good -> {
-            ResponseEntity.ok()
-                .header("Content-Type", "application/pdf")
-                .body(pdfResult.value)
+            ResponseEntity.ok().header("Content-Type", "application/pdf").body(pdfResult.value)
         }
 
         is DocumentController.PdfLoadingState.Bad -> {
@@ -128,17 +130,23 @@ fun getPdfResult(pdfResult: DocumentController.PdfLoadingState): ResponseEntity<
                 DocumentController.ErrorTypes.INVALID_FORMAT ->
                     ResponseEntity.ok()
                         .header("Content-Type", "text/html")
-                        .body("<html><body><h1>JournalpostId eller DocumentId er på feil format.</h1></body></html>")
+                        .body(
+                            "<html><body><h1>JournalpostId eller DocumentId er på feil format.</h1></body></html>"
+                        )
 
                 DocumentController.ErrorTypes.SAKSBEHANDLER_IKKE_TILGANG ->
                     ResponseEntity.ok()
                         .header("Content-Type", "text/html")
-                        .body("<html><body><h1>Veileder har ikke tilgang til journalpost.</h1></body></html>")
+                        .body(
+                            "<html><body><h1>Veileder har ikke tilgang til journalpost.</h1></body></html>"
+                        )
 
                 DocumentController.ErrorTypes.SAF_CLIENT_ERROR ->
                     ResponseEntity.ok()
                         .header("Content-Type", "text/html")
-                        .body("<html><body><h1>SAF client feil har oppstått. Sjekk loggen</h1></body></html>")
+                        .body(
+                            "<html><body><h1>SAF client feil har oppstått. Sjekk loggen</h1></body></html>"
+                        )
             }
         }
     }

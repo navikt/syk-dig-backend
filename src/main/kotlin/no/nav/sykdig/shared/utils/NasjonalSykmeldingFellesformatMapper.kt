@@ -26,12 +26,11 @@ import no.nav.helse.sm2013.Ident
 import no.nav.helse.sm2013.NavnType
 import no.nav.helse.sm2013.TeleCom
 import no.nav.helse.sm2013.URL
-import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.*
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Sykmelder
 import no.nav.sykdig.pdl.Person
-
+import no.nav.sykdig.shared.*
+import no.nav.sykdig.shared.applog
 
 fun mapsmRegistreringManuelltTilFellesformat(
     smRegistreringManuell: SmRegistreringManuell,
@@ -56,7 +55,7 @@ fun mapsmRegistreringManuelltTilFellesformat(
                             datoOpprettet?.toString()
                                 ?: LocalDateTime.of(
                                         smRegistreringManuell.perioder.first().fom,
-                                        LocalTime.NOON
+                                        LocalTime.NOON,
                                     )
                                     .toString()
                         msgId = sykmeldingId
@@ -89,8 +88,8 @@ fun mapsmRegistreringManuelltTilFellesformat(
                                                                     s = "2.16.578.1.12.4.1.1.8116"
                                                                     v = "FNR"
                                                                 }
-                                                        },
-                                                    ),
+                                                        }
+                                                    )
                                                 )
                                             }
                                     }
@@ -127,7 +126,7 @@ fun mapsmRegistreringManuelltTilFellesformat(
                                                             v = "ENH"
                                                         }
                                                 },
-                                            ),
+                                            )
                                         )
                                     }
                             }
@@ -203,12 +202,10 @@ fun mapsmRegistreringManuelltTilFellesformat(
                                                         .apply {
                                                             isBistandNAVUmiddelbart =
                                                                 smRegistreringManuell.meldingTilNAV
-                                                                    ?.bistandUmiddelbart
-                                                                    ?: false
+                                                                    ?.bistandUmiddelbart ?: false
                                                             beskrivBistandNAV =
                                                                 smRegistreringManuell.meldingTilNAV
-                                                                    ?.beskrivBistand
-                                                                    ?: ""
+                                                                    ?.beskrivBistand ?: ""
                                                         }
                                                 meldingTilArbeidsgiver =
                                                     smRegistreringManuell.meldingTilArbeidsgiver
@@ -228,7 +225,7 @@ fun mapsmRegistreringManuelltTilFellesformat(
                                                                 LocalDateTime.of(
                                                                     smRegistreringManuell
                                                                         .behandletDato,
-                                                                    LocalTime.NOON
+                                                                    LocalTime.NOON,
                                                                 )
                                                         }
                                                 behandler = tilBehandler(sykmelder)
@@ -245,13 +242,13 @@ fun mapsmRegistreringManuelltTilFellesformat(
                                                             // syfosmsak
                                                         }
                                                 strekkode = "123456789qwerty"
-                                            },
+                                            }
                                         )
                                     }
                             }
-                    },
+                    }
                 )
-            },
+            }
         )
     }
 }
@@ -290,7 +287,7 @@ fun tilBehandler(sykmelder: Sykmelder): HelseOpplysningerArbeidsuforhet.Behandle
                             v = "HPR"
                         }
                 },
-            ),
+            )
         )
         adresse = Address()
         kontaktInfo.add(
@@ -301,7 +298,7 @@ fun tilBehandler(sykmelder: Sykmelder): HelseOpplysningerArbeidsuforhet.Behandle
                         dn = "Hovedtelefon"
                     }
                 teleAddress = URL().apply { v = "tel:55553336" }
-            },
+            }
         )
     }
 
@@ -320,14 +317,14 @@ fun flaggScanHarUtdypendeOpplysninger(): HelseOpplysningerArbeidsuforhet.Utdypen
                                     CS().apply {
                                         dn = RestrictionCode.RESTRICTED_FOR_EMPLOYER.text
                                         v = RestrictionCode.RESTRICTED_FOR_EMPLOYER.codeValue
-                                    },
+                                    }
                                 )
                             }
                         spmId = "6.1.1"
                         svarTekst = "Papirsykmeldingen inneholder utdypende opplysninger."
-                    },
+                    }
                 )
-            },
+            }
         )
     }
 }
@@ -336,9 +333,7 @@ fun tilPeriodeListe(
     perioder: List<Periode>
 ): List<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode> {
     return ArrayList<HelseOpplysningerArbeidsuforhet.Aktivitet.Periode>().apply {
-        addAll(
-            perioder.map { tilHelseOpplysningerArbeidsuforhetPeriode(it) },
-        )
+        addAll(perioder.map { tilHelseOpplysningerArbeidsuforhetPeriode(it) })
     }
 }
 
@@ -364,7 +359,7 @@ fun tilHelseOpplysningerArbeidsuforhetPeriode(
                                                 dn = it.text
                                             }
                                         }
-                                        .collect(Collectors.toList()),
+                                        .collect(Collectors.toList())
                                 )
                             }
                         } else {
@@ -384,7 +379,7 @@ fun tilHelseOpplysningerArbeidsuforhetPeriode(
                                                 dn = it.text
                                             }
                                         }
-                                        .collect(Collectors.toList()),
+                                        .collect(Collectors.toList())
                                 )
                             }
                         } else {
@@ -487,7 +482,7 @@ fun tilMedisinskVurdering(
                                     dn = it.text
                                 }
                             }
-                            .collect(Collectors.toList()),
+                            .collect(Collectors.toList())
                     )
                     beskriv = medisinskVurdering.annenFraversArsak.beskrivelse
                 }
@@ -508,7 +503,7 @@ fun toMedisinskVurderingDiagnode(diagnose: Diagnose): CV =
 enum class RestrictionCode(
     override val codeValue: String,
     override val text: String,
-    override val oid: String = "2.16.578.1.12.4.1.1.8134"
+    override val oid: String = "2.16.578.1.12.4.1.1.8134",
 ) : Kodeverk {
     RESTRICTED_FOR_EMPLOYER("A", "Informasjonen skal ikke vises arbeidsgiver"),
     RESTRICTED_FOR_PATIENT("P", "Informasjonen skal ikke vises pasient"),

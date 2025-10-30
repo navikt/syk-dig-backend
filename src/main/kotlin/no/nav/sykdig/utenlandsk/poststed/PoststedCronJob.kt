@@ -1,11 +1,11 @@
 package no.nav.sykdig.utenlandsk.poststed
 
+import java.util.UUID
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.utenlandsk.db.PoststedRepository
 import no.nav.sykdig.utenlandsk.poststed.client.KodeverkClient
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
 class PoststedCronJob(

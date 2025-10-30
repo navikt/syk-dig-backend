@@ -9,19 +9,14 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
 @Component
-class SykDigOppgaveListener(
-    val mottaOppgaverFraKafka: MottaOppgaverFraKafka,
-) {
+class SykDigOppgaveListener(val mottaOppgaverFraKafka: MottaOppgaverFraKafka) {
     @KafkaListener(
         topics = [SYK_DIG_OPPGAVE_TOPIC],
         groupId = "syk-dig-backend-consumer",
         properties = ["auto.offset.reset = none"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
-    fun listen(
-        cr: ConsumerRecord<String, String>,
-        acknowledgment: Acknowledgment,
-    ) {
+    fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         mottaOppgaverFraKafka.lagre(objectMapper.readValue(cr.value()), cr.key())
         acknowledgment.acknowledge()
     }

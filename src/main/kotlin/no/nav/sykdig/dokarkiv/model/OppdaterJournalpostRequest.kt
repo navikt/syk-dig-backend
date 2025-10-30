@@ -9,9 +9,7 @@ data class OppdaterJournalpostRequest(
     val dokumenter: List<DokumentInfo>?,
 )
 
-data class OppdaterDokumentRequest(
-    val dokumenter: List<DokumentInfo>,
-)
+data class OppdaterDokumentRequest(val dokumenter: List<DokumentInfo>)
 
 data class AvsenderMottakerRequest(
     val id: String?,
@@ -27,10 +25,7 @@ enum class IdType {
     UTL_ORG,
 }
 
-data class DokBruker(
-    val id: String,
-    val idType: String = "FNR",
-)
+data class DokBruker(val id: String, val idType: String = "FNR")
 
 enum class BrukerIdType {
     FNR,
@@ -38,11 +33,6 @@ enum class BrukerIdType {
     ORGNR,
 }
 
-data class Sak(
-    val sakstype: String = "GENERELL_SAK",
-)
+data class Sak(val sakstype: String = "GENERELL_SAK")
 
-data class DokumentInfo(
-    val dokumentInfoId: String?,
-    val tittel: String?,
-)
+data class DokumentInfo(val dokumentInfoId: String?, val tittel: String?)

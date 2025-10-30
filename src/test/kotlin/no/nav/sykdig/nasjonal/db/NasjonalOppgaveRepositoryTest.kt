@@ -1,22 +1,23 @@
 package no.nav.sykdig.nasjonal.db
 
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
+import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import org.amshove.kluent.internal.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.util.UUID
 
 class NasjonalOppgaveRepositoryTest : IntegrationTest() {
     @Test
     fun `given New NasjonalOppgave opprett og hent`() = runBlocking {
         val savedOppgave = nasjonalOppgaveRepository.save(testData(null, "123"))
-        val retrievedOppgave = nasjonalOppgaveRepository.findBySykmeldingId(savedOppgave.sykmeldingId)
+        val retrievedOppgave =
+            nasjonalOppgaveRepository.findBySykmeldingId(savedOppgave.sykmeldingId)
         Assertions.assertNotNull(retrievedOppgave)
         assertEquals(savedOppgave.sykmeldingId, retrievedOppgave?.sykmeldingId)
     }
@@ -48,15 +49,9 @@ class NasjonalOppgaveRepositoryTest : IntegrationTest() {
         assertEquals("4", nasjonalOppgaveRepository.findBySykmeldingId("4")?.sykmeldingId)
     }
 
-    @BeforeEach
-    fun setup() = runBlocking {
-        nasjonalOppgaveRepository.deleteAll()
-    }
+    @BeforeEach fun setup() = runBlocking { nasjonalOppgaveRepository.deleteAll() }
 
-    fun testData(
-        id: UUID?,
-        sykmeldingId: String,
-    ): NasjonalManuellOppgaveDAO {
+    fun testData(id: UUID?, sykmeldingId: String): NasjonalManuellOppgaveDAO {
         return NasjonalManuellOppgaveDAO(
             id = id,
             sykmeldingId = sykmeldingId,

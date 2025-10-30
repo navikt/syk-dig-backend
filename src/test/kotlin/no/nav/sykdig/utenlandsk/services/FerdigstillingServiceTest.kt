@@ -1,22 +1,22 @@
 package no.nav.sykdig.utenlandsk.services
 
+import java.time.LocalDate
+import java.time.Month
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.util.*
 import no.nav.sykdig.IntegrationTest
 import no.nav.sykdig.SykDigBackendApplication
-import no.nav.sykdig.dokarkiv.DokarkivClient
 import no.nav.sykdig.dokarkiv.DocumentService
-import no.nav.sykdig.shared.AktivitetIkkeMulig
-import no.nav.sykdig.shared.AvsenderSystem
-import no.nav.sykdig.shared.Diagnose
-import no.nav.sykdig.shared.KontaktMedPasient
-import no.nav.sykdig.shared.Periode
-import no.nav.sykdig.shared.SporsmalSvar
-import no.nav.sykdig.utenlandsk.mapping.mapToReceivedSykmelding
+import no.nav.sykdig.dokarkiv.DokarkivClient
+import no.nav.sykdig.generated.types.DiagnoseInput
+import no.nav.sykdig.generated.types.PeriodeInput
+import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.gosys.OppgaveClient
-import no.nav.sykdig.nasjonal.helsenett.SykmelderService
-import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.db.models.NasjonalManuellOppgaveDAO
 import no.nav.sykdig.nasjonal.db.models.Utfall
+import no.nav.sykdig.nasjonal.helsenett.SykmelderService
+import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.pdl.Bostedsadresse
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
@@ -28,10 +28,15 @@ import no.nav.sykdig.saf.graphql.Journalstatus
 import no.nav.sykdig.saf.graphql.SafJournalpost
 import no.nav.sykdig.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.saf.graphql.TEMA_SYKMELDING
+import no.nav.sykdig.shared.AktivitetIkkeMulig
+import no.nav.sykdig.shared.AvsenderSystem
+import no.nav.sykdig.shared.Diagnose
+import no.nav.sykdig.shared.KontaktMedPasient
+import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.shared.ReceivedSykmelding
-import no.nav.sykdig.generated.types.DiagnoseInput
-import no.nav.sykdig.generated.types.PeriodeInput
-import no.nav.sykdig.generated.types.PeriodeType
+import no.nav.sykdig.shared.SporsmalSvar
+import no.nav.sykdig.utenlandsk.mapping.mapToReceivedSykmelding
+import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -45,41 +50,36 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import java.time.LocalDate
-import java.time.Month
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 class FerdigstillingServiceTest : IntegrationTest() {
-    @MockitoBean
-    lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
+    @MockitoBean lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
 
-    @MockitoBean
-    lateinit var dokarkivClient: DokarkivClient
+    @MockitoBean lateinit var dokarkivClient: DokarkivClient
 
-    @MockitoBean
-    lateinit var oppgaveClient: OppgaveClient
+    @MockitoBean lateinit var oppgaveClient: OppgaveClient
 
-    @MockitoBean
-    lateinit var sykmelderService: SykmelderService
+    @MockitoBean lateinit var sykmelderService: SykmelderService
 
-    @Autowired
-    lateinit var sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>
+    @Autowired lateinit var sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>
 
-    @Autowired
-    lateinit var dokumentService: DocumentService
+    @Autowired lateinit var dokumentService: DocumentService
 
     lateinit var ferdigstillingService: FerdigstillingService
 
     @BeforeEach
     fun setup() {
-        ferdigstillingService = FerdigstillingService(safJournalpostGraphQlClient, dokarkivClient, oppgaveClient, sykmeldingOKProducer, dokumentService)
+        ferdigstillingService =
+            FerdigstillingService(
+                safJournalpostGraphQlClient,
+                dokarkivClient,
+                oppgaveClient,
+                sykmeldingOKProducer,
+                dokumentService,
+            )
         nasjonalOppgaveRepository.deleteAll()
-
     }
 
     @Test
@@ -105,9 +105,11 @@ class FerdigstillingServiceTest : IntegrationTest() {
                         tema = TEMA_SYKMELDING,
                         kanal = CHANNEL_SCAN_IM,
                         journalposttype = null,
-                    ),
+                    )
             )
-        Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer { journalpost }
+        Mockito.`when`(safJournalpostGraphQlClient.getJournalpost(journalpostId)).thenAnswer {
+            journalpost
+        }
         Mockito.`when`(safJournalpostGraphQlClient.erFerdigstilt(journalpost)).thenAnswer { false }
         Mockito.`when`(safJournalpostGraphQlClient.getAvsenderMottar(journalpost)).thenAnswer {
             AvsenderMottaker(
@@ -129,7 +131,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                     behandlingsdager = null,
                     gradert = null,
                     reisetilskudd = false,
-                ),
+                )
             )
 
         val validatedValues =
@@ -143,7 +145,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                             PeriodeType.AKTIVITET_IKKE_MULIG,
                             LocalDate.now().minusMonths(1),
                             LocalDate.now().minusWeeks(2),
-                        ),
+                        )
                     ),
                 hovedDiagnose = DiagnoseInput("A070", "ICD10"),
                 biDiagnoser = emptyList(),
@@ -175,19 +177,20 @@ class FerdigstillingServiceTest : IntegrationTest() {
             validatedValues = validatedValues,
         )
 
-        verify(dokarkivClient).oppdaterOgFerdigstillUtenlandskJournalpost(
-            "SWE",
-            "12345678910",
-            "2990",
-            "111",
-            journalpostId,
-            sykmeldingId.toString(),
-            perioder,
-            "scanning",
-            null,
-            journalpost,
-            "Fornavn Etternavn",
-        )
+        verify(dokarkivClient)
+            .oppdaterOgFerdigstillUtenlandskJournalpost(
+                "SWE",
+                "12345678910",
+                "2990",
+                "111",
+                journalpostId,
+                sykmeldingId.toString(),
+                perioder,
+                "scanning",
+                null,
+                journalpost,
+                "Fornavn Etternavn",
+            )
         verify(oppgaveClient).ferdigstillOppgave("123", sykmeldingId.toString(), "2990")
     }
 
@@ -219,9 +222,10 @@ class FerdigstillingServiceTest : IntegrationTest() {
                             fom = LocalDate.of(2019, Month.AUGUST, 15),
                             tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
                             grad = null,
-                        ),
+                        )
                     ),
-                hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
+                hovedDiagnose =
+                    DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
                 erAdresseUtland = null,
@@ -232,13 +236,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 fnrPasient,
                 Navn("fornavn", null, "etternavn"),
                 "aktorid",
-                Bostedsadresse(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                ),
+                Bostedsadresse(null, null, null, null, null),
                 null,
                 LocalDate.of(1970, 1, 1),
             )
@@ -261,33 +259,32 @@ class FerdigstillingServiceTest : IntegrationTest() {
         assertEquals(null, receivedSykmelding.tssid)
         assertEquals("aktorid", receivedSykmelding.sykmelding.pasientAktoerId)
         assertEquals(
-            Diagnose(
-                system = "2.16.578.1.12.4.1.1.7110",
-                kode = "A070",
-                tekst = "Balantidiasis",
-            ),
+            Diagnose(system = "2.16.578.1.12.4.1.1.7110", kode = "A070", tekst = "Balantidiasis"),
             receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose,
         )
 
         assertEquals(false, receivedSykmelding.sykmelding.skjermesForPasient)
         assertEquals(1, receivedSykmelding.sykmelding.perioder.size)
         assertEquals(null, receivedSykmelding.sykmelding.prognose)
-        assertEquals(emptyMap<String, Map<String, SporsmalSvar>>(), receivedSykmelding.sykmelding.utdypendeOpplysninger)
+        assertEquals(
+            emptyMap<String, Map<String, SporsmalSvar>>(),
+            receivedSykmelding.sykmelding.utdypendeOpplysninger,
+        )
         assertEquals(null, receivedSykmelding.sykmelding.tiltakArbeidsplassen)
         assertEquals(null, receivedSykmelding.sykmelding.tiltakNAV)
         assertEquals(null, receivedSykmelding.sykmelding.andreTiltak)
         assertEquals(null, receivedSykmelding.sykmelding.meldingTilNAV?.bistandUmiddelbart)
         assertEquals(null, receivedSykmelding.sykmelding.meldingTilArbeidsgiver)
-        assertEquals(
-            KontaktMedPasient(
-                null,
-                null,
-            ),
-            receivedSykmelding.sykmelding.kontaktMedPasient,
-        )
+        assertEquals(KontaktMedPasient(null, null), receivedSykmelding.sykmelding.kontaktMedPasient)
 
-        assertEquals(behandletTidspunkt.toLocalDateTime(), receivedSykmelding.sykmelding.behandletTidspunkt)
-        assertEquals(AvsenderSystem("syk-dig", journalPostId), receivedSykmelding.sykmelding.avsenderSystem)
+        assertEquals(
+            behandletTidspunkt.toLocalDateTime(),
+            receivedSykmelding.sykmelding.behandletTidspunkt,
+        )
+        assertEquals(
+            AvsenderSystem("syk-dig", journalPostId),
+            receivedSykmelding.sykmelding.avsenderSystem,
+        )
         assertEquals(LocalDate.of(2019, 8, 15), receivedSykmelding.sykmelding.syketilfelleStartDato)
         assertEquals(datoOpprettet.toLocalDateTime(), receivedSykmelding.sykmelding.signaturDato)
         assertEquals(null, receivedSykmelding.sykmelding.navnFastlege)
@@ -320,9 +317,10 @@ class FerdigstillingServiceTest : IntegrationTest() {
                             fom = LocalDate.of(2019, Month.AUGUST, 15),
                             tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
                             grad = 69,
-                        ),
+                        )
                     ),
-                hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
+                hovedDiagnose =
+                    DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
                 erAdresseUtland = null,
@@ -333,13 +331,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 fnrPasient,
                 Navn("fornavn", null, "etternavn"),
                 "aktorid",
-                Bostedsadresse(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                ),
+                Bostedsadresse(null, null, null, null, null),
                 null,
                 LocalDate.of(1970, 1, 1),
             )
@@ -384,9 +376,10 @@ class FerdigstillingServiceTest : IntegrationTest() {
                             fom = LocalDate.of(2019, Month.AUGUST, 15),
                             tom = LocalDate.of(2019, Month.SEPTEMBER, 30),
                             grad = 120,
-                        ),
+                        )
                     ),
-                hovedDiagnose = DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
+                hovedDiagnose =
+                    DiagnoseInput(kode = hoveddiagnose.kode, system = hoveddiagnose.system),
                 biDiagnoser = emptyList(),
                 folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
                 erAdresseUtland = null,
@@ -397,13 +390,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
                 fnrPasient,
                 Navn("fornavn", null, "etternavn"),
                 "aktorid",
-                Bostedsadresse(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                ),
+                Bostedsadresse(null, null, null, null, null),
                 null,
                 LocalDate.of(1970, 1, 1),
             )
@@ -428,12 +415,12 @@ class FerdigstillingServiceTest : IntegrationTest() {
         val oppgave = nasjonalOppgaveRepository.findByOppgaveId(oppgaveId)
 
         requireNotNull(oppgave)
-        val updatedOppgave = oppgave.copy(
-            utfall = Utfall.SENDT_TIL_GOSYS.toString(),
-            ferdigstilt = true,
-            ferdigstiltAv = "nav-ident@mail.no"
-        )
-
+        val updatedOppgave =
+            oppgave.copy(
+                utfall = Utfall.SENDT_TIL_GOSYS.toString(),
+                ferdigstilt = true,
+                ferdigstiltAv = "nav-ident@mail.no",
+            )
 
         val ferdigstiltOppgave = nasjonalOppgaveRepository.save(updatedOppgave)
 
@@ -444,10 +431,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
         assertEquals(ferdigstiltOppgave.ferdigstiltAv, "nav-ident@mail.no")
     }
 
-    fun nasjonalOppgave(
-        id: UUID?,
-        oppgaveId: Int,
-    ): NasjonalManuellOppgaveDAO {
+    fun nasjonalOppgave(id: UUID?, oppgaveId: Int): NasjonalManuellOppgaveDAO {
         return NasjonalManuellOppgaveDAO(
             id = id,
             sykmeldingId = "987",
@@ -458,30 +442,30 @@ class FerdigstillingServiceTest : IntegrationTest() {
             datoOpprettet = OffsetDateTime.now(),
             oppgaveId = oppgaveId,
             papirSmRegistrering =
-            PapirSmRegistering(
-                journalpostId = "123",
-                oppgaveId = "123",
-                fnr = "fnr",
-                aktorId = "aktor",
-                dokumentInfoId = "123",
-                datoOpprettet = OffsetDateTime.now(),
-                sykmeldingId = "123",
-                syketilfelleStartDato = LocalDate.now(),
-                arbeidsgiver = null,
-                medisinskVurdering = null,
-                skjermesForPasient = null,
-                perioder = null,
-                prognose = null,
-                utdypendeOpplysninger = null,
-                tiltakNAV = null,
-                tiltakArbeidsplassen = null,
-                andreTiltak = null,
-                meldingTilNAV = null,
-                meldingTilArbeidsgiver = null,
-                kontaktMedPasient = null,
-                behandletTidspunkt = null,
-                behandler = null,
-            ),
+                PapirSmRegistering(
+                    journalpostId = "123",
+                    oppgaveId = "123",
+                    fnr = "fnr",
+                    aktorId = "aktor",
+                    dokumentInfoId = "123",
+                    datoOpprettet = OffsetDateTime.now(),
+                    sykmeldingId = "123",
+                    syketilfelleStartDato = LocalDate.now(),
+                    arbeidsgiver = null,
+                    medisinskVurdering = null,
+                    skjermesForPasient = null,
+                    perioder = null,
+                    prognose = null,
+                    utdypendeOpplysninger = null,
+                    tiltakNAV = null,
+                    tiltakArbeidsplassen = null,
+                    andreTiltak = null,
+                    meldingTilNAV = null,
+                    meldingTilArbeidsgiver = null,
+                    kontaktMedPasient = null,
+                    behandletTidspunkt = null,
+                    behandler = null,
+                ),
             utfall = null,
             ferdigstiltAv = null,
             datoFerdigstilt = null,

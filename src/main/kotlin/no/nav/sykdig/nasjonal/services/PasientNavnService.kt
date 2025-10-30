@@ -6,13 +6,8 @@ import no.nav.sykdig.pdl.client.graphql.PdlResponse
 import org.springframework.stereotype.Service
 
 @Service
-class PasientNavnService(
-    private val pdlClient: PdlClient
-) {
-    fun getPersonNavn(
-        id: String,
-        callId: String,
-    ): Navn {
+class PasientNavnService(private val pdlClient: PdlClient) {
+    fun getPersonNavn(id: String, callId: String): Navn {
         val pdlResponse = pdlClient.getPerson(id, callId)
         return mapPdlResponseTilPersonNavn(pdlResponse)
     }

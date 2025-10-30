@@ -1,26 +1,21 @@
 package no.nav.sykdig.pdl.client
 
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
-import no.nav.sykdig.shared.applog
 import no.nav.sykdig.pdl.client.graphql.PDL_QUERY
 import no.nav.sykdig.pdl.client.graphql.PdlResponse
 import no.nav.sykdig.pdl.client.graphql.mapToPdlResponse
+import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.securelog
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 
 @Component
-class PdlClient(
-    private val pdlGraphQlClient: CustomGraphQLClient,
-) {
+class PdlClient(private val pdlGraphQlClient: CustomGraphQLClient) {
     val log = applog()
     val securelog = securelog()
 
     @Retryable
-    fun getPerson(
-        id: String,
-        callId: String,
-    ): PdlResponse {
+    fun getPerson(id: String, callId: String): PdlResponse {
         try {
             val response = pdlGraphQlClient.executeQuery(PDL_QUERY, mapOf("ident" to id))
 
@@ -40,7 +35,10 @@ class PdlClient(
                 securelog.info(("Fant ikke navn for person i PDL $callId, fnr: $id"))
                 throw RuntimeException("Fant ikke navn for person i PDL")
             }
-            if (pdlResponse.identer == null || pdlResponse.identer.identer.firstOrNull { it.gruppe == "AKTORID" } == null) {
+            if (
+                pdlResponse.identer == null ||
+                    pdlResponse.identer.identer.firstOrNull { it.gruppe == "AKTORID" } == null
+            ) {
                 log.error("Fant ikke aktørid for person i PDL $callId")
                 securelog.info(("Fant ikke aktørid for person i PDL $callId, fnr: $id"))
                 throw RuntimeException("Fant ikke aktørid for person i PDL")
