@@ -221,14 +221,13 @@ class SykDigOppgaveService(
         oppgave: OppgaveDbModel,
         navEmail: String,
         values: FerdistilltRegisterOppgaveValues,
-        enhetId: String,
         sykmeldt: Person,
     ) {
         val sykmelding = toSykmelding(oppgave, values)
         oppgaveRepository.updateSykmelding(oppgave, navEmail, sykmelding)
         log.info("updated sykmelding in db")
 
-        ferdigstillingService.sendUpdatedSykmelding(oppgave, sykmeldt, navEmail, values)
+        ferdigstillingService.sendUpdatedSykmelding(oppgave, sykmeldt, values)
     }
 
     private fun buildOppgaveModel(

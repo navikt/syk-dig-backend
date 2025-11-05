@@ -46,6 +46,8 @@ oppgave:
 
 nais:
     cluster: ${NAIS_CLUSTER_NAME}
+    appname: ${NAIS_APP_NAME}
+    namespace: ${NAIS_NAMESPACE}
 
 aiven-kafka:
     auto-offset-reset: none

@@ -8,19 +8,15 @@ import no.nav.sykdig.pdl.toFormattedNameString
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.config.kafka.OK_SYKMELDING_TOPIC
+import no.nav.sykdig.shared.kafka.SykmeldingProducer
 import no.nav.sykdig.shared.objectMapper
 import no.nav.sykdig.shared.securelog
-import no.nav.sykdig.shared.utils.PROCESSING_TARGET_HEADER
-import no.nav.sykdig.shared.utils.TSM_PROCESSING_TARGET_VALUE
 import no.nav.sykdig.shared.utils.createTitle
 import no.nav.sykdig.shared.utils.createTitleNavNo
 import no.nav.sykdig.shared.utils.createTitleRina
 import no.nav.sykdig.utenlandsk.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Component
 
 @Component
@@ -28,7 +24,7 @@ class FerdigstillingService(
     private val safJournalpostGraphQlClient: SafJournalpostGraphQlClient,
     private val dokarkivClient: DokarkivClient,
     private val oppgaveClient: OppgaveClient,
-    private val sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>,
+    private val sykmeldingOKProducer: SykmeldingProducer,
     private val dokumentService: DocumentService,
 ) {
     val log = applog()
@@ -85,19 +81,7 @@ class FerdigstillingService(
         updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
 
         try {
-            val record =
-                ProducerRecord(
-                    OK_SYKMELDING_TOPIC,
-                    receivedSykmelding.sykmelding.id,
-                    receivedSykmelding,
-                )
-            record
-                .headers()
-                .add(PROCESSING_TARGET_HEADER, TSM_PROCESSING_TARGET_VALUE.toByteArray())
-            sykmeldingOKProducer.send(record).get()
-            log.info(
-                "Sykmelding sendt to kafka topic $OK_SYKMELDING_TOPIC sykmelding id ${receivedSykmelding.sykmelding.id}"
-            )
+            sykmeldingOKProducer.send(receivedSykmelding)
         } catch (exception: Exception) {
             log.error(
                 "failed to send sykmelding to kafka result for sykmelding {}",
@@ -189,7 +173,6 @@ class FerdigstillingService(
     fun sendUpdatedSykmelding(
         oppgave: OppgaveDbModel,
         sykmeldt: Person,
-        navEmail: String,
         values: FerdistilltRegisterOppgaveValues,
     ) {
         val receivedSykmelding =
@@ -201,14 +184,7 @@ class FerdigstillingService(
                 opprettet = oppgave.opprettet.toLocalDateTime(),
             )
 
-        val record =
-            ProducerRecord(
-                OK_SYKMELDING_TOPIC,
-                receivedSykmelding.sykmelding.id,
-                receivedSykmelding,
-            )
-        record.headers().add(PROCESSING_TARGET_HEADER, TSM_PROCESSING_TARGET_VALUE.toByteArray())
-        sykmeldingOKProducer.send(record).get()
+        sykmeldingOKProducer.send(receivedSykmelding)
         log.info("sendt oppdatert sykmelding med id ${receivedSykmelding.sykmelding.id}")
         updateUtenlandskDocumentTitle(oppgave, receivedSykmelding)
     }

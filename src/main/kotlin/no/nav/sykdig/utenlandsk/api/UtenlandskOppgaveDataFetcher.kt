@@ -113,7 +113,6 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
         return utenlandskOppgaveService.oppdaterDigitalisertSykmelding(
             sykmeldingId = sykmeldingId,
-            enhetId = enhetId,
             values = ferdistilltRegisterOppgaveValues,
             navEmail = navEmail,
         )

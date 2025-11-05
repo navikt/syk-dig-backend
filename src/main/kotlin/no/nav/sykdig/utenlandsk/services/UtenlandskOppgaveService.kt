@@ -182,7 +182,6 @@ class UtenlandskOppgaveService(
 
     fun oppdaterDigitalisertSykmelding(
         sykmeldingId: String,
-        enhetId: String,
         values: FerdistilltRegisterOppgaveValues,
         navEmail: String,
     ): OppdatertSykmeldingStatus {
@@ -207,7 +206,7 @@ class UtenlandskOppgaveService(
             throw ClientException(valideringsresultat.joinToString())
         }
 
-        sykDigOppgaveService.oppdaterSykmelding(oppgave, navEmail, values, enhetId, sykmeldt)
+        sykDigOppgaveService.oppdaterSykmelding(oppgave, navEmail, values, sykmeldt)
         metricRegister.oppdatertSykmeldingCounter.increment()
         return OppdatertSykmeldingStatus(sykmeldingId, OppdatertSykmeldingStatusEnum.OPPDATERT)
     }

@@ -33,11 +33,10 @@ import no.nav.sykdig.shared.AvsenderSystem
 import no.nav.sykdig.shared.Diagnose
 import no.nav.sykdig.shared.KontaktMedPasient
 import no.nav.sykdig.shared.Periode
-import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.SporsmalSvar
+import no.nav.sykdig.shared.kafka.SykmeldingProducer
 import no.nav.sykdig.utenlandsk.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import org.apache.kafka.clients.producer.KafkaProducer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -63,7 +62,7 @@ class FerdigstillingServiceTest : IntegrationTest() {
 
     @MockitoBean lateinit var sykmelderService: SykmelderService
 
-    @Autowired lateinit var sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>
+    @Autowired lateinit var sykmeldingOKProducer: SykmeldingProducer
 
     @Autowired lateinit var dokumentService: DocumentService
 
