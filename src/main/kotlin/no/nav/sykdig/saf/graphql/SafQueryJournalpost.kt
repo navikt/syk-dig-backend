@@ -9,6 +9,7 @@ const val SAF_QUERY_FIND_JOURNALPOST =
             kanal
             tema
             journalstatus
+            journalfortAvNavn
             bruker {
                 id 
                 type
@@ -55,6 +56,7 @@ data class SafJournalpost(
     val dokumenter: List<DokumentInfo>,
     val tema: String?,
     val kanal: String?,
+    val journalfortAvNavn: String,
 )
 
 const val TEMA_SYKMELDING = "SYM"

@@ -52,6 +52,7 @@ class JournalpostService(
                 status = JournalpostStatusEnum.FEIL_TEMA,
             )
         }
+
         sykDigOppgaveService.ferdigstillExistingJournalfoeringsoppgave(
             journalpostId,
             journalpost,

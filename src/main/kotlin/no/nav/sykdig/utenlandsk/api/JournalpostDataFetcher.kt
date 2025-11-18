@@ -10,6 +10,7 @@ import no.nav.sykdig.generated.types.JournalpostStatus
 import no.nav.sykdig.generated.types.JournalpostStatusEnum
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.saf.graphql.Journalposttype
+import no.nav.sykdig.saf.graphql.SafJournalpost
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.objectMapper
 import no.nav.sykdig.shared.securelog
@@ -41,6 +42,15 @@ class JournalpostDataFetcher(
                 )
         securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
 
+        if (checkKanalAndJournalforendeEnhet(journalpost)) {
+            log.warn(
+                "Journalpost med id $trimedJournalpostId har ikke forventet mottakskanal: ${journalpost.kanal} eller avsender ${journalpost.journalfortAvNavn}"
+            )
+            return JournalpostStatus(
+                journalpostId = trimedJournalpostId,
+                status = JournalpostStatusEnum.FEIL_KANAL,
+            )
+        }
         if (journalpostService.isSykmeldingCreated(trimedJournalpostId)) {
             log.info("Sykmelding already created for journalpost id $trimedJournalpostId")
             return JournalpostStatus(
@@ -82,6 +92,15 @@ class JournalpostDataFetcher(
                 status = JournalpostStatusEnum.FEIL_TYPE,
             )
         }
+        if (checkKanalAndJournalforendeEnhet(journalpost)) {
+            log.warn(
+                "Journalpost med id $trimedJournalpostId har ikke forventet mottakskanal: ${journalpost.kanal} eller avsender ${journalpost.journalfortAvNavn}"
+            )
+            return JournalpostStatus(
+                journalpostId = trimedJournalpostId,
+                status = JournalpostStatusEnum.FEIL_KANAL,
+            )
+        }
         return journalpostService.createSykmeldingFromJournalpost(
             journalpost = journalpost,
             journalpostId = trimedJournalpostId,
@@ -89,4 +108,9 @@ class JournalpostDataFetcher(
             navEnhet = navEnhet,
         )
     }
+
+    private fun checkKanalAndJournalforendeEnhet(journalpost: SafJournalpost): Boolean =
+        journalpost.kanal == "HELSENETTET" ||
+            journalpost.journalfortAvNavn.startsWith("tsm:") ||
+            journalpost.journalfortAvNavn.startsWith("teamsykmelding:")
 }
