@@ -111,6 +111,6 @@ class JournalpostDataFetcher(
 
     private fun checkKanalAndJournalforendeEnhet(journalpost: SafJournalpost): Boolean =
         journalpost.kanal == "HELSENETTET" ||
-            journalpost.journalfortAvNavn.startsWith("tsm:") ||
-            journalpost.journalfortAvNavn.startsWith("teamsykmelding:")
+            (journalpost.journalfortAvNavn ?: "").startsWith("tsm:") ||
+            (journalpost.journalfortAvNavn ?: "").startsWith("teamsykmelding:")
 }

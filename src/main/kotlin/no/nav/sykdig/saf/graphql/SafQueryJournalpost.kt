@@ -56,7 +56,7 @@ data class SafJournalpost(
     val dokumenter: List<DokumentInfo>,
     val tema: String?,
     val kanal: String?,
-    val journalfortAvNavn: String,
+    val journalfortAvNavn: String?,
 )
 
 const val TEMA_SYKMELDING = "SYM"
