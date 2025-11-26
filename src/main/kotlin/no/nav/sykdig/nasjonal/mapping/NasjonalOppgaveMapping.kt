@@ -12,6 +12,7 @@ import no.nav.sykdig.generated.types.Arbeidsgiver
 import no.nav.sykdig.generated.types.ArbeidsrelatertArsak
 import no.nav.sykdig.generated.types.ArbeidsrelatertArsakType
 import no.nav.sykdig.generated.types.Behandler
+import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.generated.types.DiagnoseSchema
 import no.nav.sykdig.generated.types.Document
 import no.nav.sykdig.generated.types.Gradert
@@ -31,6 +32,10 @@ import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.models.SmRegistreringManuell
 import no.nav.sykdig.nasjonal.models.Veileder
 import no.nav.sykdig.shared.*
+import no.nav.sykdig.shared.utils.validateDiagnose
+import org.slf4j.LoggerFactory
+
+private val log = LoggerFactory.getLogger("no.nav.sykdig.nasjonal.mapping.NasjonalOppgaveMappingKt")
 
 fun mapToNasjonalOppgave(oppgave: NasjonalManuellOppgaveDAO): NasjonalOppgave {
     requireNotNull(oppgave.dokumentInfoId)
@@ -50,7 +55,8 @@ fun mapToNasjonalSykmelding(oppgave: NasjonalManuellOppgaveDAO): NasjonalSykmeld
         datoOpprettet = oppgave.datoOpprettet?.toString(),
         syketilfelleStartDato = oppgave.papirSmRegistrering.syketilfelleStartDato?.toString(),
         arbeidsgiver = mapToArbeidsgiver(oppgave),
-        medisinskVurdering = mapToMedisinskVurdering(oppgave),
+        medisinskVurdering =
+            mapToMedisinskVurdering(oppgave.papirSmRegistrering.medisinskVurdering),
         skjermesForPasient = oppgave.papirSmRegistrering.skjermesForPasient,
         perioder = oppgave.papirSmRegistrering.perioder?.map { mapToPerioder(it) } ?: emptyList(),
         meldingTilNAV = mapTilMeldingTilNAV(oppgave.papirSmRegistrering.meldingTilNAV),
@@ -82,20 +88,27 @@ fun mapToHarArbeidsGiver(oppgave: NasjonalManuellOppgaveDAO): HarArbeidsgiver? {
     }
 }
 
-fun mapToMedisinskVurdering(oppgave: NasjonalManuellOppgaveDAO): MedisinskVurdering {
-    val oppgaveMedisinskVurdering = oppgave.papirSmRegistrering.medisinskVurdering
+fun mapToMedisinskVurdering(
+    medisinskVurdering: no.nav.sykdig.shared.MedisinskVurdering?
+): MedisinskVurdering {
     return MedisinskVurdering(
-        hovedDiagnose = oppgaveMedisinskVurdering?.hovedDiagnose?.let { mapToDiagnoseSchema(it) },
+        hovedDiagnose = medisinskVurdering?.hovedDiagnose?.let { mapToDiagnoseSchema(it) },
         biDiagnoser =
-            oppgaveMedisinskVurdering?.biDiagnoser?.map { mapToDiagnoseSchema(it) } ?: emptyList(),
-        svangerskap = oppgaveMedisinskVurdering?.svangerskap ?: false,
-        yrkesskade = oppgaveMedisinskVurdering?.yrkesskade ?: false,
-        yrkesskadeDato = oppgaveMedisinskVurdering?.yrkesskadeDato?.toString(),
-        annenFraversArsak = mapToAnnenFraversArsak(oppgaveMedisinskVurdering?.annenFraversArsak),
+            medisinskVurdering?.biDiagnoser?.map { mapToDiagnoseSchema(it) } ?: emptyList(),
+        svangerskap = medisinskVurdering?.svangerskap ?: false,
+        yrkesskade = medisinskVurdering?.yrkesskade ?: false,
+        yrkesskadeDato = medisinskVurdering?.yrkesskadeDato?.toString(),
+        annenFraversArsak = mapToAnnenFraversArsak(medisinskVurdering?.annenFraversArsak),
     )
 }
 
 fun mapToDiagnoseSchema(diagnose: Diagnose): DiagnoseSchema {
+    try {
+        validateDiagnose(DiagnoseInput(system = diagnose.system, kode = diagnose.kode))
+    } catch (e: Exception) {
+        log.warn("Diagnose $diagnose is not valid, skipping mapping", e)
+        return DiagnoseSchema(system = diagnose.system, null, null)
+    }
     return DiagnoseSchema(system = diagnose.system, kode = diagnose.kode, tekst = diagnose.tekst)
 }
 
