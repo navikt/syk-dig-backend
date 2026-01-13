@@ -80,6 +80,8 @@ spec:
           cluster: prod-fss
     outbound:
       rules:
+        - application: logging
+          namespace: nais-system
         - application: istilgangskontroll
           namespace: teamsykefravr
           cluster: dev-gcp
@@ -99,8 +101,6 @@ spec:
   ingresses:
     - "https://syk-dig-backend.intern.dev.nav.no"
   leaderElection: true
-  secureLogs:
-    enabled: true
   env:
     - name: ISTILGANGSKONTROLL_AAD_CLIENT_ID
       value: dev-gcp.teamsykefravr.istilgangskontroll

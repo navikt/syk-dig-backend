@@ -77,6 +77,8 @@ spec:
         - application: syk-dig
     outbound:
       rules:
+        - application: logging
+          namespace: nais-system
         - application: istilgangskontroll
           namespace: teamsykefravr
           cluster: prod-gcp
@@ -96,8 +98,6 @@ spec:
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: oppgave.prod-fss-pub.nais.io
   leaderElection: true
-  secureLogs:
-    enabled: true
   env:
     - name: ISTILGANGSKONTROLL_AAD_CLIENT_ID
       value: prod-gcp.teamsykefravr.istilgangskontroll
