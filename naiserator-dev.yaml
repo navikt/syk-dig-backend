@@ -93,7 +93,7 @@ spec:
         - application: syfosmregler
       external:
         - host: kodeverk-api.nav.no
-        - host: oppgave-q1.dev-fss-pub.nais.io
+        - host: oppgave.dev-fss-pub.nais.io
         - host: dokarkiv.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: saf.dev-fss-pub.nais.io
@@ -106,7 +106,7 @@ spec:
     - name: SAF_URL
       value: https://saf.dev-fss-pub.nais.io
     - name: SAF_CLIENT_ID
-      value: dev-fss.teamdokumenthandtering.saf-q1
+      value: dev-fss.teamdokumenthandtering.saf
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: PDL_CLIENT_ID
@@ -118,13 +118,13 @@ spec:
     - name: DOKARKIV_URL
       value: https://dokarkiv.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
     - name: DOKARKIV_CLIENT_ID
-      value: dev-fss.teamdokumenthandtering.dokarkiv-q1
+      value: dev-fss.teamdokumenthandtering.dokarkiv
     - name: OPPGAVE_URL
-      value: https://oppgave-q1.dev-fss-pub.nais.io/api/v1/oppgaver
+      value: https://oppgave.dev-fss-pub.nais.io/api/v1/oppgaver
     - name: OPPGAVE_CLIENT_ID
-      value: dev-fss.oppgavehandtering.oppgave-q1
+      value: dev-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_TOPIC
-      value: oppgavehandtering.oppgavehendelse-q1-v1
+      value: oppgavehandtering.oppgavehendelse-v1
     - name: HELSENETT_URL
       value: http://syfohelsenettproxy
     - name: HELSENETT_CLIENT_ID
