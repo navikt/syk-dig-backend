@@ -13,7 +13,7 @@ class SykDigOppgaveListener(val mottaOppgaverFraKafka: MottaOppgaverFraKafka) {
     @KafkaListener(
         topics = [SYK_DIG_OPPGAVE_TOPIC],
         groupId = "syk-dig-backend-consumer",
-        properties = ["auto.offset.reset = none"],
+        properties = ["auto.offset.reset = latest"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
