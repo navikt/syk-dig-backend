@@ -94,7 +94,7 @@ spec:
       external:
         - host: kodeverk-api.nav.no
         - host: oppgave.dev-fss-pub.nais.io
-        - host: dokarkiv.dev-fss-pub.nais.io
+        - host: dokarkiv-q2.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: saf-q2.dev-fss-pub.nais.io
   ingresses:
@@ -116,7 +116,7 @@ spec:
     - name: KODEVERK_CLIENT_ID
       value: dev-gcp.team-rocket.kodeverk-api
     - name: DOKARKIV_URL
-      value: https://dokarkiv.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
+      value: https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
     - name: DOKARKIV_CLIENT_ID
       value: dev-fss.teamdokumenthandtering.dokarkiv
     - name: OPPGAVE_URL
