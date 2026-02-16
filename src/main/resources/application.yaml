@@ -50,7 +50,7 @@ nais:
     namespace: ${NAIS_NAMESPACE}
 
 aiven-kafka:
-    auto-offset-reset: none
+    auto-offset-reset: latest
     groupId: "syk-dig-oppgavelytter-consumer"
 
 istilgangskontroll.url: "http://istilgangskontroll.teamsykefravr"
