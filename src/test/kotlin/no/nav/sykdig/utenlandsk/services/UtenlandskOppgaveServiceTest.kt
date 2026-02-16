@@ -21,17 +21,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 class UtenlandskOppgaveServiceTest : IntegrationTest() {
     @Autowired lateinit var journalpostSykmeldingRepository: JournalpostSykmeldingRepository

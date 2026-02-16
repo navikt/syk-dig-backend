@@ -42,16 +42,12 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 class FerdigstillingServiceTest : IntegrationTest() {
     @MockitoBean lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient

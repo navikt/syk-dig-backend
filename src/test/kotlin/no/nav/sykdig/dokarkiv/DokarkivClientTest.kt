@@ -1,18 +1,11 @@
 package no.nav.sykdig.dokarkiv
 
 import no.nav.sykdig.IntegrationTest
-import no.nav.sykdig.SykDigBackendApplication
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.mockito.Mock
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.web.client.RestTemplate
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureObservability
-@SpringBootTest(classes = [SykDigBackendApplication::class])
 class DokarkivClientTest : IntegrationTest() {
     @Mock lateinit var dokarkivRestTemplate: RestTemplate
 

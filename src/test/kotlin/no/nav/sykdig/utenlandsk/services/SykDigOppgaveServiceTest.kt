@@ -18,15 +18,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.transaction.annotation.Transactional
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 @Transactional
 class SykDigOppgaveServiceTest : IntegrationTest() {

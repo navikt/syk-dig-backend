@@ -3,24 +3,15 @@ package no.nav.sykdig
 import no.nav.sykdig.nasjonal.db.NasjonalOppgaveRepository
 import no.nav.sykdig.nasjonal.db.NasjonalSykmeldingRepository
 import no.nav.sykdig.utenlandsk.db.OppgaveRepository
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Testcontainers
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.kafka.ConfluentKafkaContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
-private class PostgreSQLContainer14 :
-    PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
-
-@Testcontainers
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureObservability
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 abstract class IntegrationTest {
     @Autowired lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
@@ -31,30 +22,30 @@ abstract class IntegrationTest {
 
     @Autowired lateinit var oppgaveRepository: OppgaveRepository
 
-    @AfterAll
-    fun cleanup() {
-        namedParameterJdbcTemplate.update("DELETE FROM sykmelding", MapSqlParameterSource())
-        namedParameterJdbcTemplate.update(
-            "DELETE FROM journalpost_sykmelding",
-            MapSqlParameterSource(),
-        )
-    }
-
     companion object {
-        init {
 
-            ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0")).also {
-                it.start()
-                System.setProperty("KAFKA_BROKERS", it.bootstrapServers)
-            }
+        val postgres =
+            PostgreSQLContainer("postgres:14-alpine")
+                .withUsername("postgres")
+                .withPassword("postgres")
+                .withDatabaseName("postgres")
+                .withUrlParam("reWriteBatchedInserts", "true")
+                .withCommand("postgres", "-c", "wal_level=logical")
+                .apply { start() }
 
-            PostgreSQLContainer14().apply {
-                withCommand("postgres", "-c", "wal_level=logical")
+        val kafka =
+            ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:8.1.0")).apply {
                 start()
-                System.setProperty("spring.datasource.url", "$jdbcUrl&reWriteBatchedInserts=true")
-                System.setProperty("spring.datasource.username", username)
-                System.setProperty("spring.datasource.password", password)
             }
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun configureProperties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.datasource.url", postgres::getJdbcUrl)
+            registry.add("spring.datasource.username", postgres::getUsername)
+            registry.add("spring.datasource.password", postgres::getPassword)
+
+            registry.add("KAFKA_BROKERS", kafka::getBootstrapServers)
         }
     }
 }

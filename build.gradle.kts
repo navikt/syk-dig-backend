@@ -26,7 +26,7 @@ val postgresVersion = "42.7.8"
 val snakeYamlVersion = "2.5"
 val diagnosekoderVersion = "1.2025.0"
 val tokenSupportVersion = "5.0.39"
-val testContainersVersion = "1.21.3"
+val testContainersVersion = "2.0.2"
 val logstashLogbackEncoderVersion = "9.0"
 val javaJwtVersion = "4.5.0"
 val springBootResourceVersion = "3.5.7"
@@ -104,11 +104,9 @@ dependencies {
 
     implementation("org.hibernate.orm:hibernate-core:$hibernateVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.testcontainers:kafka")
-    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:postgresql:$testContainersVersion")
-    testImplementation("org.testcontainers:kafka:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers-postgresql:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers-kafka:$testContainersVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
