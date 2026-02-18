@@ -76,7 +76,7 @@ class SafClient(
                 log.warn("Veileder har ikke tilgang til journalpostId $journalpostId: ${e.message}")
                 return PdfLoadingState.Bad(ErrorTypes.SAKSBEHANDLER_IKKE_TILGANG)
             } else {
-                log.error(
+                log.warn(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra SAF: ${e.message}",
                     e,
                 )

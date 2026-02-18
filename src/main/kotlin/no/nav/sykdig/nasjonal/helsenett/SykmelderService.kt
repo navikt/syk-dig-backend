@@ -56,7 +56,10 @@ class SykmelderService(
     ): Sykmelder {
         val sykmelderHpr = smRegistreringManuell.behandler.hpr
         if (sykmelderHpr.isNullOrEmpty() || sykmelderHpr.isBlank()) {
-            log.error("HPR-nummer mangler {}", StructuredArguments.fields(loggingMeta))
+            log.error(
+                "HPR-nummer mangler {}",
+                StructuredArguments.fields(loggingMeta),
+            ) // TODO should be warn?
             throw SykmelderNotFoundException("HPR-nummer mangler")
         }
 

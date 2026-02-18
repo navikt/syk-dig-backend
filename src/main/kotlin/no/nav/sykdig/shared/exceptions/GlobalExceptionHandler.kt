@@ -18,23 +18,23 @@ class GlobalExceptionHandler {
         return when (e.statusCode) {
             HttpStatus.UNAUTHORIZED,
             HttpStatus.FORBIDDEN -> {
-                log.error("Access denied. Status: ${e.statusCode}. Message: ${e.message}", e)
+                log.warn("Access denied. Status: ${e.statusCode}. Message: ${e.message}", e)
                 ResponseEntity.status(e.statusCode).body("Veileder har ikke tilgang til oppgaven.")
             }
             HttpStatus.BAD_REQUEST -> {
-                log.error("Bad request. Status: ${e.statusCode}. Message: ${e.message}", e)
+                log.warn("Bad request. Status: ${e.statusCode}. Message: ${e.message}", e)
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.responseBodyAsString)
             }
             HttpStatus.NOT_FOUND -> {
-                log.error("Not found. Status: ${e.statusCode}. Message: ${e.message}", e)
+                log.warn("Not found. Status: ${e.statusCode}. Message: ${e.message}", e)
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.responseBodyAsString)
             }
             HttpStatus.GONE -> {
-                log.error("Gone. Status: ${e.statusCode}. Message: ${e.message}", e)
+                log.warn("Gone. Status: ${e.statusCode}. Message: ${e.message}", e)
                 ResponseEntity.status(HttpStatus.GONE).body(e.responseBodyAsString)
             }
             else -> {
-                log.error("Client error. Status: ${e.statusCode}. Message: ${e.message}", e)
+                log.warn("Client error. Status: ${e.statusCode}. Message: ${e.message}", e)
                 ResponseEntity.status(e.statusCode).body(e.responseBodyAsString)
             }
         }

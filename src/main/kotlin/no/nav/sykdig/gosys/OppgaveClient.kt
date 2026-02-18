@@ -124,7 +124,7 @@ class OppgaveClient(
                 log.warn("syk-dig-backend har ikke tilgang til oppgaveId $oppgaveId: ${e.message}")
                 throw IkkeTilgangException("syk-dig-backend har ikke tilgang til oppgave")
             } else {
-                log.error(
+                log.warn(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
                     e,
                 )
@@ -166,7 +166,7 @@ class OppgaveClient(
                     "Veileder har ikke tilgang til oppgave med id: $oppgaveId"
                 )
             } else {
-                log.error(
+                log.warn(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message}",
                     e,
                 )
@@ -208,7 +208,7 @@ class OppgaveClient(
                     "Veileder har ikke tilgang til oppgave med id: $oppgaveId"
                 )
             } else {
-                log.error(
+                log.warn(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Oppgave: ${e.message} med httpStatus ${e.statusCode.value()}",
                     e,
                 )
@@ -259,7 +259,7 @@ class OppgaveClient(
             return response.body?.oppgaver?.also { checkOppgavetype(it) }
                 ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $journalpostId")
         } catch (e: HttpClientErrorException) {
-            log.error(
+            log.warn(
                 "HttpClientErrorException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}",
                 e,
             )
@@ -320,7 +320,7 @@ class OppgaveClient(
                 )
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
-                log.error(
+                log.warn(
                     "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
                         "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                     e,
@@ -364,7 +364,7 @@ class OppgaveClient(
                 )
                 throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
             } else {
-                log.error(
+                log.warn(
                     "HttpClientErrorException for oppgaveId $oppgaveId med responskode " +
                         "${e.statusCode.value()} fra Oppgave ved ferdigstilling: ${e.message}",
                     e,
@@ -446,7 +446,7 @@ class OppgaveClient(
                 )
                 throw IkkeTilgangException("Syk-dig har ikke tilgang til oppgave")
             } else {
-                log.error(
+                log.warn(
                     "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
                         "fra Oppgave ved oppdaterOppgave: ${e.message}",
                     e,
@@ -587,7 +587,7 @@ class OppgaveClient(
                 )
                 throw IkkeTilgangException("Veileder har ikke tilgang til å opprette oppgave")
             } else {
-                log.error(
+                log.warn(
                     "HttpClientErrorException for oppgaveId $journalpostId med responskode " +
                         "${e.statusCode.value()} fra Oppgave ved createOppgave med correlation id $xCorrelationId: ${e.message}",
                     e,
@@ -669,7 +669,7 @@ class OppgaveClient(
             )
             throw IkkeTilgangException("Veileder har ikke tilgang til oppgave")
         } else {
-            log.error(
+            log.warn(
                 "HttpClientErrorException for oppgaveId $oppgaveId med responskode ${e.statusCode.value()} " +
                     "fra Oppgave ved oppdaterOppgave: ${e.message}",
                 e,
