@@ -259,7 +259,7 @@ class OppgaveClient(
             return response.body?.oppgaver?.also { checkOppgavetype(it) }
                 ?: throw NoOppgaveException("Fant ikke oppgaver på journalpostId $journalpostId")
         } catch (e: HttpClientErrorException) {
-            log.warn(
+            log.error(
                 "HttpClientErrorException med responskode ${e.statusCode.value()} fra journalpostId $journalpostId. Detaljer: ${e.message}",
                 e,
             )
