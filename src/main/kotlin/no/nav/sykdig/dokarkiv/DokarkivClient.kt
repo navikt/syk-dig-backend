@@ -134,7 +134,7 @@ class DokarkivClient(
                 )
                 throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else if (e.statusCode.value() == 400) {
-                log.error(
+                log.warn(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
                     e,
                 )
@@ -352,7 +352,7 @@ class DokarkivClient(
                 )
                 throw IkkeTilgangException("Veileder har ikke tilgang til journalpost")
             } else if (e.statusCode.value() == 400) {
-                log.error(
+                log.warn(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
                     e,
                 )
