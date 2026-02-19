@@ -139,7 +139,7 @@ class DokarkivClient(
                     e,
                 )
             } else {
-                log.warn(
+                log.error(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved oppdatering: ${e.message}",
                     e,
                 )
@@ -357,7 +357,7 @@ class DokarkivClient(
                     e,
                 )
             } else {
-                log.warn(
+                log.error(
                     "HttpClientErrorException med responskode ${e.statusCode.value()} fra Dokarkiv ved ferdigstilling: ${e.message}",
                     e,
                 )

@@ -44,7 +44,7 @@ class IstilgangskontrollOboClient(
                 log.warn("istilgangskontroll returnerte 403", e)
                 false
             } else {
-                log.warn("HttpClientErrorException mot tilgangskontroll", e)
+                log.error("HttpClientErrorException mot tilgangskontroll", e)
                 false
             }
         }
@@ -70,7 +70,7 @@ class IstilgangskontrollOboClient(
                 log.warn("istilgangskontroll returnerte 403", e)
                 false
             } else {
-                log.warn("HttpClientErrorException mot tilgangskontroll", e)
+                log.error("HttpClientErrorException mot tilgangskontroll", e)
                 false
             }
         }

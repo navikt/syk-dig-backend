@@ -26,15 +26,15 @@ class GlobalExceptionHandler {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.responseBodyAsString)
             }
             HttpStatus.NOT_FOUND -> {
-                log.warn("Not found. Status: ${e.statusCode}. Message: ${e.message}", e)
+                log.error("Not found. Status: ${e.statusCode}. Message: ${e.message}", e)
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.responseBodyAsString)
             }
             HttpStatus.GONE -> {
-                log.warn("Gone. Status: ${e.statusCode}. Message: ${e.message}", e)
+                log.error("Gone. Status: ${e.statusCode}. Message: ${e.message}", e)
                 ResponseEntity.status(HttpStatus.GONE).body(e.responseBodyAsString)
             }
             else -> {
-                log.warn("Client error. Status: ${e.statusCode}. Message: ${e.message}", e)
+                log.error("Client error. Status: ${e.statusCode}. Message: ${e.message}", e)
                 ResponseEntity.status(e.statusCode).body(e.responseBodyAsString)
             }
         }
