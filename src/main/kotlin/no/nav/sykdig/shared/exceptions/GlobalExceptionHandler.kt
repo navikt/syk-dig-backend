@@ -22,7 +22,7 @@ class GlobalExceptionHandler {
                 ResponseEntity.status(e.statusCode).body("Veileder har ikke tilgang til oppgaven.")
             }
             HttpStatus.BAD_REQUEST -> {
-                log.warn("Bad request. Status: ${e.statusCode}. Message: ${e.message}", e)
+                log.error("Bad request. Status: ${e.statusCode}. Message: ${e.message}", e)
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.responseBodyAsString)
             }
             HttpStatus.NOT_FOUND -> {
