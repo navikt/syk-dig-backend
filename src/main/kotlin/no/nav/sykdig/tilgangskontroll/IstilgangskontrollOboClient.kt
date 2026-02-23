@@ -41,7 +41,7 @@ class IstilgangskontrollOboClient(
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
             return if (e.statusCode.value() == 403) {
-                log.error("istilgangskontroll returnerte 403", e)
+                log.warn("istilgangskontroll returnerte 403", e)
                 false
             } else {
                 log.error("HttpClientErrorException mot tilgangskontroll", e)
@@ -67,7 +67,7 @@ class IstilgangskontrollOboClient(
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {
             return if (e.statusCode.value() == 403) {
-                log.error("istilgangskontroll returnerte 403", e)
+                log.warn("istilgangskontroll returnerte 403", e)
                 false
             } else {
                 log.error("HttpClientErrorException mot tilgangskontroll", e)
