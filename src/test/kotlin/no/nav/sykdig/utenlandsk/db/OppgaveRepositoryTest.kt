@@ -89,7 +89,7 @@ class OppgaveRepositoryTest : IntegrationTest() {
             oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.system,
         )
         assertEquals(
-            "Problem økonomi/fattigdom",
+            "Problem med økonomi/fattigdom",
             oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.hovedDiagnose?.tekst,
         )
         assertEquals(
@@ -101,7 +101,7 @@ class OppgaveRepositoryTest : IntegrationTest() {
             oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(0)?.system,
         )
         assertEquals(
-            "Problem drikkevann/mat",
+            "Problem med drikkevann/mat",
             oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(0)?.tekst,
         )
         assertEquals(
@@ -113,7 +113,7 @@ class OppgaveRepositoryTest : IntegrationTest() {
             oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(1)?.system,
         )
         assertEquals(
-            "Problem bolig/nabolag",
+            "Problem med bolig/nabolag",
             oppgave?.sykmelding?.sykmelding?.medisinskVurdering?.biDiagnoser?.get(1)?.tekst,
         )
         assertEquals(
