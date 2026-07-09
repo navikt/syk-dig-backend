@@ -1,7 +1,6 @@
 package no.nav.sykdig.shared.utils
 
 import no.nav.sykdig.generated.types.DiagnoseInput
-import no.nav.sykdig.shared.Diagnose
 import no.nav.sykdig.shared.exceptions.ClientException
 import no.nav.tsm.diagnoser.ICD10
 import no.nav.tsm.diagnoser.ICPC2
@@ -9,15 +8,6 @@ import no.nav.tsm.diagnoser.ICPC2
 fun validateDiagnose(diagnose: DiagnoseInput) {
     validateDiagnoseSystem(diagnose.system)
     validateDiagnoseKode(diagnose.system, diagnose.kode)
-}
-
-fun DiagnoseInput.mapToDiagnose(): Diagnose {
-    return Diagnose(
-        system = this.system,
-        // New diagnose lib supports having the real ICD10 codes that has a . in it, lets remove it
-        kode = if (this.system == "ICD10") this.kode.replace(".", "") else this.kode,
-        tekst = getDiagnoseText(this.system, this.kode),
-    )
 }
 
 fun getDiagnoseText(system: String, kode: String): String {

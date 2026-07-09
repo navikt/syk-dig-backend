@@ -1,4 +1,0 @@
-input DiagnoseInput {
-    kode: String!
-    system: String!
-}

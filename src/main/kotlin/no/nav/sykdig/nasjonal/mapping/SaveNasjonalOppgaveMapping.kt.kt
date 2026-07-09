@@ -6,6 +6,7 @@ import no.nav.sykdig.generated.types.AnnenFraversArsakValues
 import no.nav.sykdig.generated.types.ArbeidsgiverValues
 import no.nav.sykdig.generated.types.ArbeidsrelatertArsakValues
 import no.nav.sykdig.generated.types.BehandlerValues
+import no.nav.sykdig.generated.types.DiagnoseValues
 import no.nav.sykdig.generated.types.GradertValues
 import no.nav.sykdig.generated.types.KontaktMedPasientValues
 import no.nav.sykdig.generated.types.MedisinskArsakValues
@@ -22,6 +23,7 @@ import no.nav.sykdig.shared.Arbeidsgiver
 import no.nav.sykdig.shared.ArbeidsrelatertArsak
 import no.nav.sykdig.shared.ArbeidsrelatertArsakType
 import no.nav.sykdig.shared.Behandler
+import no.nav.sykdig.shared.Diagnose
 import no.nav.sykdig.shared.Gradert
 import no.nav.sykdig.shared.HarArbeidsgiver
 import no.nav.sykdig.shared.KontaktMedPasient
@@ -30,7 +32,6 @@ import no.nav.sykdig.shared.MedisinskArsakType
 import no.nav.sykdig.shared.MedisinskVurdering
 import no.nav.sykdig.shared.MeldingTilNAV
 import no.nav.sykdig.shared.Periode
-import no.nav.sykdig.shared.utils.mapToDiagnose
 
 fun mapToSmRegistreringManuell(sykmeldingValues: NasjonalSykmeldingValues): SmRegistreringManuell {
     return SmRegistreringManuell(
@@ -125,13 +126,17 @@ fun mapToArbeidsrelatertArsakType(
 
 fun mapToMedisinskVurdering(medisinskVurdering: MedisinskVurderingValues): MedisinskVurdering {
     return MedisinskVurdering(
-        hovedDiagnose = medisinskVurdering.hovedDiagnose?.mapToDiagnose(),
-        biDiagnoser = medisinskVurdering.biDiagnoser.map { it.mapToDiagnose() },
+        hovedDiagnose = medisinskVurdering.hovedDiagnose?.let { mapToDiagnose(it) },
+        biDiagnoser = medisinskVurdering.biDiagnoser.map { mapToDiagnose(it) } ?: emptyList(),
         svangerskap = medisinskVurdering.svangerskap,
         yrkesskade = medisinskVurdering.yrkesskade,
         yrkesskadeDato = medisinskVurdering.yrkesskadeDato,
         annenFraversArsak = mapToAnnenFraversArsak(medisinskVurdering.annenFraversArsak),
     )
+}
+
+fun mapToDiagnose(diagnose: DiagnoseValues): Diagnose {
+    return Diagnose(system = diagnose.system, kode = diagnose.kode, tekst = diagnose.tekst)
 }
 
 fun mapToAnnenFraversArsak(annenFraversArsak: AnnenFraversArsakValues?): AnnenFraversArsak? {
