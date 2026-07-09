@@ -3,7 +3,6 @@ package no.nav.sykdig.utenlandsk.mapping
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import no.nav.helse.diagnosekoder.Diagnosekoder
 import no.nav.helse.eiFellesformat.XMLEIFellesformat
 import no.nav.helse.msgHead.XMLCS
 import no.nav.helse.msgHead.XMLCV
@@ -29,6 +28,8 @@ import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.shared.exceptions.MappingException
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.tsm.diagnoser.ICD10
+import no.nav.tsm.diagnoser.ICPC2
 
 fun mapToFellesformat(
     validatedValues: FerdistilltRegisterOppgaveValues,
@@ -250,31 +251,20 @@ fun toMedisinskVurderingDiagnose(diagnose: DiagnoseInput): CV =
 
 fun getTextFromDiagnose(kode: String, diagnoseSystem: String): String {
     return when (diagnoseSystem) {
-        "ICD10" -> {
-            Diagnosekoder.icd10[kode]!!.text
-        }
-
-        "ICPC2" -> {
-            Diagnosekoder.icpc2[kode]!!.text
-        }
+        "ICD10" -> ICD10[kode]!!.text
+        "ICPC2" -> ICPC2[kode]!!.text
 
         else -> {
-            throw MappingException("Ukjent diagnose kode")
+            throw MappingException("Ukjent diagnosesystem: $diagnoseSystem")
         }
     }
 }
 
 fun toDiagnoseKithSystem(diagnoseSystem: String): String {
     return when (diagnoseSystem) {
-        "ICD10" -> {
-            "2.16.578.1.12.4.1.1.7110"
-        }
-        "ICPC2" -> {
-            "2.16.578.1.12.4.1.1.7170"
-        }
-        else -> {
-            throw MappingException("Ukjent diagnose system")
-        }
+        "ICD10" -> ICD10.OID
+        "ICPC2" -> ICPC2.OID
+        else -> throw MappingException("Ukjent diagnosesystem: $diagnoseSystem")
     }
 }
 

@@ -1,8 +1,9 @@
 package no.nav.sykdig.shared.utils
 
-import no.nav.helse.diagnosekoder.Diagnosekoder
 import no.nav.sykdig.generated.types.DiagnoseInput
 import no.nav.sykdig.shared.exceptions.ClientException
+import no.nav.tsm.diagnoser.ICD10
+import no.nav.tsm.diagnoser.ICPC2
 
 fun validateDiagnose(diagnose: DiagnoseInput) {
     validateDiagnoseSystem(diagnose.system)
@@ -12,10 +13,10 @@ fun validateDiagnose(diagnose: DiagnoseInput) {
 fun getDiagnoseText(system: String, kode: String): String {
     return when (system) {
         "ICD10" ->
-            Diagnosekoder.icd10[kode]?.text
+            ICD10[kode]?.text
                 ?: throw ClientException("Diagnosekoden som er benyttet: $kode er ukjent")
         "ICPC2" ->
-            Diagnosekoder.icpc2[kode]?.text
+            ICPC2[kode]?.text
                 ?: throw ClientException("Diagnosekoden som er benyttet: $kode er ukjent")
         else -> throw ClientException("Diagnosekode system som er benyttet: $system er ukjent")
     }
@@ -28,9 +29,9 @@ private fun validateDiagnoseSystem(system: String) {
 }
 
 private fun validateDiagnoseKode(system: String, kode: String) {
-    if (system == "ICD10" && Diagnosekoder.icd10[kode] == null) {
+    if (system == "ICD10" && ICD10[kode] == null) {
         throw ClientException("Diagnosekoden som er benyttet: $kode er ukjent")
-    } else if (system == "ICPC2" && Diagnosekoder.icpc2[kode] == null) {
+    } else if (system == "ICPC2" && ICPC2[kode] == null) {
         throw ClientException("Diagnosekoden som er benyttet: $kode er ukjent")
     }
 }

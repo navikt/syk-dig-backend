@@ -24,7 +24,7 @@ repositories {
 
 val postgresVersion = "42.7.8"
 val snakeYamlVersion = "2.5"
-val diagnosekoderVersion = "1.2025.0"
+val tsmDiagnoserVersion = "2026.1.13"
 val tokenSupportVersion = "5.0.39"
 val testContainersVersion = "2.0.2"
 val logstashLogbackEncoderVersion = "9.0"
@@ -79,7 +79,7 @@ dependencies {
     implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegen")
     implementation("no.nav.helse.xml:sm2013:$syfoXmlCodegen")
     implementation("no.nav.helse.xml:kith-hodemelding:$syfoXmlCodegen")
-    implementation("no.nav.helse:diagnosekoder:$diagnosekoderVersion")
+    implementation("no.nav.tsm:diagnoser:$tsmDiagnoserVersion")
     implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
     implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
     implementation("javax.activation:activation:$javaxActivationVersion")
