@@ -51,18 +51,12 @@ input GradertValues {
 }
 
 input MedisinskVurderingValues {
-    hovedDiagnose: DiagnoseValues
-    biDiagnoser: [DiagnoseValues!]!
+    hovedDiagnose: DiagnoseInput
+    biDiagnoser: [DiagnoseInput!]!
     svangerskap: Boolean!
     yrkesskade: Boolean!
     yrkesskadeDato: Date
     annenFraversArsak: AnnenFraversArsakValues
-}
-
-input DiagnoseValues {
-    system: String!
-    kode: String!
-    tekst: String
 }
 
 input AnnenFraversArsakValues {

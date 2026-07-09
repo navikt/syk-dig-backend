@@ -10,13 +10,12 @@ import no.nav.sykdig.generated.types.Avvisingsgrunn
 import no.nav.sykdig.generated.types.PeriodeInput
 import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.shared.AktivitetIkkeMulig
-import no.nav.sykdig.shared.Diagnose
 import no.nav.sykdig.shared.Gradert
 import no.nav.sykdig.shared.MedisinskVurdering
 import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.objectMapper
-import no.nav.sykdig.shared.utils.getDiagnoseText
+import no.nav.sykdig.shared.utils.mapToDiagnose
 import no.nav.sykdig.utenlandsk.models.DokumentDbModel
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
 import no.nav.sykdig.utenlandsk.models.RegisterOppgaveValues
@@ -384,22 +383,8 @@ private fun List<PeriodeInput>?.mapToPerioder(): List<Periode>? =
 
 private fun RegisterOppgaveValues.mapToMedisinskVurdering() =
     MedisinskVurdering(
-        hovedDiagnose =
-            hovedDiagnose?.let {
-                Diagnose(
-                    kode = it.kode,
-                    system = it.system,
-                    tekst = getDiagnoseText(it.system, it.kode),
-                )
-            },
-        biDiagnoser =
-            biDiagnoser?.map {
-                Diagnose(
-                    kode = it.kode,
-                    system = it.system,
-                    tekst = getDiagnoseText(it.system, it.kode),
-                )
-            } ?: emptyList(),
+        hovedDiagnose = hovedDiagnose?.mapToDiagnose(),
+        biDiagnoser = biDiagnoser?.map { it.mapToDiagnose() } ?: emptyList(),
         annenFraversArsak = null,
         svangerskap = false,
         yrkesskade = false,

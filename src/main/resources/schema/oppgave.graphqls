@@ -87,11 +87,6 @@ input SykmeldingUnderArbeidValues {
     erAdresseUtland: Boolean
 }
 
-input DiagnoseInput {
-    kode: String!
-    system: String!
-}
-
 input PeriodeInput {
     type: PeriodeType!
     fom: Date!
