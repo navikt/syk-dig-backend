@@ -2,7 +2,7 @@ import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 import com.diffplug.gradle.spotless.SpotlessExtension
 
 plugins {
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "3.5.16"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.spring") version "2.2.21"
@@ -29,11 +29,11 @@ val tokenSupportVersion = "5.0.39"
 val testContainersVersion = "2.0.2"
 val logstashLogbackEncoderVersion = "9.0"
 val javaJwtVersion = "4.5.0"
-val springBootResourceVersion = "3.5.7"
+val springBootResourceVersion = "3.5.16"
 val graphqlVersion = "20.2"
-val kafkaClientsVersion = "4.1.0"
+val kafkaClientsVersion = "4.1.2"
 val syfoXmlCodegen = "2.0.1"
-val springSecurityWebVersion = "6.5.6"
+val springSecurityWebVersion = "6.5.11"
 val okhttp3version = "4.12.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
@@ -51,7 +51,7 @@ val kluentVersion = "1.73"
 val coroutinesVersion = "1.10.2"
 val coroutineReactorVersion = "1.10.2"
 val hibernateVersion = "7.1.6.Final"
-val jacksonDatatypeJsr310Version = "2.20.1"
+val jacksonDatatypeJsr310Version = "2.22.1"
 val mockitoKotlinVersion = "6.1.0"
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
