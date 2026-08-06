@@ -21,7 +21,7 @@ class NasjonalOppgaveListener(
     @KafkaListener(
         topics = ["\${smreg.topic}"],
         groupId = "smregistrering-backend-consumer",
-        properties = ["auto.offset.reset = none"],
+        properties = ["auto.offset.reset = latest"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
