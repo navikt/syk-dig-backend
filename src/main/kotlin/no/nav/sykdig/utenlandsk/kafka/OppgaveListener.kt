@@ -15,7 +15,7 @@ class OppgaveListener(val mottaOppgaverFraKafka: MottaOppgaverFraKafka) {
     @KafkaListener(
         topics = ["\${oppgave.topic}"],
         groupId = "syk-dig-oppgavelytter-consumer",
-        properties = ["auto.offset.reset = latest"],
+        properties = ["auto.offset.reset = none"],
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
