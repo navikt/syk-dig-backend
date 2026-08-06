@@ -19,6 +19,11 @@ class OppgaveListener(val mottaOppgaverFraKafka: MottaOppgaverFraKafka) {
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+        if (cr.offset() == 272743L) {
+            logger.warn("Skipper offset ${cr.offset()} på topic ${cr.topic()}")
+            acknowledgment.acknowledge()
+            return
+        }
         val oppgaveRecord: OppgaveKafkaAivenRecord = objectMapper.readValue(cr.value())
         try {
             val isOppgaveOpprettet =
