@@ -13,12 +13,16 @@ spring:
     flyway:
         enabled: true
     datasource:
-        url: "jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?reWriteBatchedInserts=true"
+        url: "jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?reWriteBatchedInserts=true&socketTimeout=30"
         username: ${DB_USERNAME}
         password: ${DB_PASSWORD}
         hikari:
             minimum-idle: 1
             maximum-pool-size: 5
+            keepalive-time: 30000
+            max-lifetime: 600000
+            connection-timeout: 30000
+            validation-timeout: 5000
     security:
         basic:
             enabled: false
