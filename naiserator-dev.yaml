@@ -68,8 +68,8 @@ spec:
       allowAllUsers: true
       enabled: true
       claims:
-        extra:
-          - NAVident
+        groups:
+          - id: 16aff429-1efc-402a-ae12-4000633d0063 #0000-GA-papirsykmelding
   accessPolicy:
     inbound:
       rules:
@@ -81,9 +81,6 @@ spec:
       rules:
         - application: logging
           namespace: nais-system
-        - application: istilgangskontroll
-          namespace: teamsykefravr
-          cluster: dev-gcp
         - application: syfohelsenettproxy
           namespace: teamsykmelding
           cluster: dev-gcp
@@ -91,6 +88,9 @@ spec:
           namespace: teamsykmelding
           cluster: dev-gcp
         - application: syfosmregler
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
+          cluster: dev-gcp
       external:
         - host: kodeverk-api.nav.no
         - host: oppgave.dev-fss-pub.nais.io
@@ -101,8 +101,6 @@ spec:
     - "https://syk-dig-backend.intern.dev.nav.no"
   leaderElection: true
   env:
-    - name: ISTILGANGSKONTROLL_AAD_CLIENT_ID
-      value: dev-gcp.teamsykefravr.istilgangskontroll
     - name: SAF_URL
       value: https://saf-q2.dev-fss-pub.nais.io
     - name: SAF_CLIENT_ID
@@ -139,4 +137,9 @@ spec:
       value: dev-gcp.teamsykmelding.syfosmregler
     - name: SMREG_TOPIC
       value: teamsykmelding.papir-sm-registering
-
+    - name: TILGANGSMASKIN_SCOPE
+      value: dev-gcp.tilgangsmaskin.populasjonstilgangskontroll
+    - name: TILGANGSMASKIN_URL
+      value: http://populasjonstilgangskontroll.tilgangsmaskin
+    - name: PAPIRSYKMELDING_GROUP_ID
+      value: 16aff429-1efc-402a-ae12-4000633d0063

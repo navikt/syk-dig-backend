@@ -41,13 +41,13 @@ class AadRestTemplateConfiguration {
     val log = applog()
 
     @Bean
-    fun istilgangskontrollRestTemplate(
+    fun tilgangskontrollRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,
         oAuth2AccessTokenService: OAuth2AccessTokenService,
     ): RestTemplate =
         downstreamRestTemplate(
-            registrationName = "onbehalfof-istilgangskontroll",
+            registrationName = "onbehalfof-tilgangsmaskinen",
             restTemplateBuilder = restTemplateBuilder,
             clientConfigurationProperties = clientConfigurationProperties,
             oAuth2AccessTokenService = oAuth2AccessTokenService,
