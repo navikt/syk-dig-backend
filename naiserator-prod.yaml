@@ -68,8 +68,8 @@ spec:
       allowAllUsers: true
       enabled: true
       claims:
-        extra:
-          - NAVident
+        groups:
+          - id: dfde2123-1969-4cd2-8977-bdf19721e76d #0000-GA-papirsykmelding
   accessPolicy:
     inbound:
       rules:
@@ -91,6 +91,9 @@ spec:
           namespace: teamsykmelding
           cluster: prod-gcp
         - application: syfosmregler
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
+          cluster: prod-gcp
       external:
         - host: saf.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
@@ -136,3 +139,9 @@ spec:
       value: prod-gcp.teamsykmelding.syfosmregler
     - name: SMREG_TOPIC
       value: teamsykmelding.papir-sm-registering
+    - name: TILGANGSMASKIN_SCOPE
+      value: prod-gcp.tilgangsmaskin.populasjonstilgangskontroll
+    - name: TILGANGSMASKIN_URL
+      value: http://populasjonstilgangskontroll.tilgangsmaskin
+    - name: PAPIRSYKMELDING_GROUP_ID
+      value: dfde2123-1969-4cd2-8977-bdf19721e76d

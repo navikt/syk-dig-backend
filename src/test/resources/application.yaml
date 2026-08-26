@@ -42,7 +42,7 @@ aiven-kafka:
   auto-offset-reset: none
   groupId: "syk-dig-oppgavelytter-consumer"
 
-istilgangskontroll.url: http://istilgangskontroll
+tilgangskontroll.url: http://populasjonstilgangskontroll.tilgangsmaskin
 saf.url: http://saf
 pdl.url: http://pdl
 kodeverk.url: http://kodeverk
@@ -63,10 +63,10 @@ no.nav.security.jwt:
       accepted_audience: syk-dig-backend-client-id
   client:
     registration:
-      onbehalfof-istilgangskontroll:
+      onbehalfof-tilgangsmaskinen:
         token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: istilgangskontroll-client
+        scope: tilgangskontroll-client
         authentication:
           client-id: client-id
           client-secret: secret
@@ -117,6 +117,8 @@ AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:teamsykmelding:syk-dig\",\"
 
 logging.config: "classpath:logback-test.xml"
 elector.path: dont_look_for_leader
+
+PAPIRSYKMELDING_GROUP_ID: "GA_PAPIRSYKMELDING_UUID"
 
 logging:
   level:

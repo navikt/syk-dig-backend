@@ -57,7 +57,7 @@ aiven-kafka:
     auto-offset-reset: latest
     groupId: "syk-dig-oppgavelytter-consumer"
 
-istilgangskontroll.url: "http://istilgangskontroll.teamsykefravr"
+tilgangskontroll.url: http://populasjonstilgangskontroll.tilgangsmaskin
 saf.url: ${SAF_URL}
 pdl.url: ${PDL_URL}
 kodeverk.url: ${KODEVERK_URL}
@@ -131,10 +131,10 @@ no.nav.security.jwt:
                     client-id: ${AZURE_APP_CLIENT_ID}
                     client-secret: ${AZURE_APP_CLIENT_SECRET}
                     client-auth-method: client_secret_basic
-            onbehalfof-istilgangskontroll:
+            onbehalfof-tilgangsmaskinen:
                 token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
                 grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-                scope: api://${ISTILGANGSKONTROLL_AAD_CLIENT_ID}/.default
+                scope: api://${TILGANGSMASKIN_SCOPE}/.default
                 authentication:
                     client-id: ${AZURE_APP_CLIENT_ID}
                     client-secret: ${AZURE_APP_CLIENT_SECRET}

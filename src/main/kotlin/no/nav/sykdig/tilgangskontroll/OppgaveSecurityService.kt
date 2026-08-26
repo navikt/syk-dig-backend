@@ -14,16 +14,20 @@ import no.nav.sykdig.shared.auditlog
 import no.nav.sykdig.shared.objectMapper
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
 
 @Service
 class OppgaveSecurityService(
-    private val istilgangskontrollOboClient: IstilgangskontrollOboClient,
+    private val tilgangskontrollOboClient: TilgangskontrollOboClient,
     private val sykDigOppgaveService: SykDigOppgaveService,
     private val safGraphQlClient: SafJournalpostGraphQlClient,
     private val personService: PersonService,
     private val nasjonalSykmeldingMapper: NasjonalSykmeldingMapper,
     private val nasjonalDbService: NasjonalDbService,
+    @param:Value($$"${PAPIRSYKMELDING_GROUP_ID}") private val papirsykmeldingGroupId: String,
 ) {
     companion object {
         private val securelog = securelog()
@@ -93,20 +97,18 @@ class OppgaveSecurityService(
             securelog.info(
                 "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId"
             )
-            auditlog.info(
-                AuditLogger()
-                    .createcCefMessage(
-                        fnr = fnr,
-                        navEmail = navEmail,
-                        operation = AuditLogger.Operation.READ,
-                        requestPath = requestPath,
-                        permit =
-                            when (tilgang) {
-                                true -> AuditLogger.Permit.PERMIT
-                                false -> AuditLogger.Permit.DENY
-                            },
-                    )
-            )
+            if (tilgang) {
+                auditlog.info(
+                    AuditLogger()
+                        .createcCefMessage(
+                            fnr = fnr,
+                            navEmail = navEmail,
+                            operation = AuditLogger.Operation.READ,
+                            requestPath = requestPath,
+                            permit = AuditLogger.Permit.PERMIT,
+                        )
+                )
+            }
             return tilgang
         }
         return false
@@ -165,42 +167,33 @@ class OppgaveSecurityService(
         navEmail: String,
         requestPath: String = "/api/graphql",
     ): Boolean {
-        val tilgang = istilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
-        auditlog.info(
-            AuditLogger()
-                .createcCefMessage(
-                    fnr = fnr,
-                    navEmail = navEmail,
-                    operation = AuditLogger.Operation.READ,
-                    requestPath = requestPath,
-                    permit =
-                        when (tilgang) {
-                            true -> AuditLogger.Permit.PERMIT
-                            false -> AuditLogger.Permit.DENY
-                        },
-                )
-        )
+        val tilgang = tilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
+
+        if (tilgang) {
+            auditlog.info(
+                AuditLogger()
+                    .createcCefMessage(
+                        fnr = fnr,
+                        navEmail = navEmail,
+                        operation = AuditLogger.Operation.READ,
+                        requestPath = requestPath,
+                        permit = AuditLogger.Permit.PERMIT,
+                    )
+            )
+        }
 
         return tilgang
     }
 
     private fun hasSuperUserAccess(fnr: String, navEmail: String, requestPath: String): Boolean {
-        val tilgang = istilgangskontrollOboClient.sjekkSuperBrukerTilgangVeileder(fnr)
-        auditlog.info(
-            AuditLogger()
-                .createcCefMessage(
-                    fnr = fnr,
-                    navEmail = navEmail,
-                    operation = AuditLogger.Operation.READ,
-                    requestPath = requestPath,
-                    permit =
-                        when (tilgang) {
-                            true -> AuditLogger.Permit.PERMIT
-                            false -> AuditLogger.Permit.DENY
-                        },
-                )
-        )
+        val authentication =
+            SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
+        val claims = authentication.token.getClaimAsStringList("groups")
 
-        return tilgang
+        if (!claims.contains(papirsykmeldingGroupId)) {
+            return false
+        }
+
+        return hasAccess(fnr, navEmail, requestPath)
     }
 }
