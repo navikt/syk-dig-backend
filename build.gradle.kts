@@ -103,7 +103,6 @@ dependencies {
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("org.springframework.boot:spring-boot-starter-restclient:$springBootResourceVersion")
-
     implementation("org.hibernate.orm:hibernate-core:$hibernateVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
@@ -117,6 +116,7 @@ dependencies {
             because("overstyrer sårbar dependency fra com.opentable.components:otj-pg-embedded")
         }
     }
+    testImplementation("org.springframework.boot:spring-boot-micrometer-metrics-test")
     testImplementation(kotlin("test"))
 }
 
