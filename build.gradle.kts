@@ -30,7 +30,7 @@ val testContainersVersion = "2.0.2"
 val logstashLogbackEncoderVersion = "9.0"
 val javaJwtVersion = "4.5.0"
 val springBootResourceVersion = "4.1.1"
-val graphqlVersion = "20.2"
+val graphqlVersion = "25.0"
 val kafkaClientsVersion = "4.1.2"
 val syfoXmlCodegen = "2.0.1"
 val springSecurityWebVersion = "6.5.11"
@@ -39,7 +39,7 @@ val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
-val graphqlDgsPlatformDependenciesVersion = "9.2.2"
+val graphqlDgsPlatformDependenciesVersion = "12.0.1"
 val commonsCompressVersion = "1.28.0"
 val commonsLang3Version = "3.19.0"
 val httpClient5version = "5.5.1"
@@ -56,7 +56,7 @@ val mockitoKotlinVersion = "6.1.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
-    implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
+    implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")

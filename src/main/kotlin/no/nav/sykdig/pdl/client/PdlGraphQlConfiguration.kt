@@ -1,7 +1,6 @@
 package no.nav.sykdig.pdl.client
 
-import com.netflix.graphql.dgs.client.CustomGraphQLClient
-import com.netflix.graphql.dgs.client.GraphQLClient
+import com.netflix.graphql.dgs.client.DgsCustomGraphQLClient
 import com.netflix.graphql.dgs.client.HttpResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -18,8 +17,8 @@ class PdlGraphQlConfiguration {
     fun pdlGraphQlClient(
         @Value("\${pdl.url}") pdlUrl: String,
         pdlM2mRestTemplate: RestTemplate,
-    ): CustomGraphQLClient {
-        return GraphQLClient.createCustom(pdlUrl) { url, _, body ->
+    ): DgsCustomGraphQLClient {
+        return DgsCustomGraphQLClient(pdlUrl) { url, _, body ->
             val httpHeaders = HttpHeaders()
             httpHeaders["TEMA"] = "SYM"
             httpHeaders["Behandlingsnummer"] = "B229"

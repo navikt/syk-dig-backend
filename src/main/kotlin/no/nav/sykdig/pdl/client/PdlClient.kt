@@ -1,6 +1,6 @@
 package no.nav.sykdig.pdl.client
 
-import com.netflix.graphql.dgs.client.CustomGraphQLClient
+import com.netflix.graphql.dgs.client.DgsCustomGraphQLClient
 import no.nav.sykdig.pdl.client.graphql.PDL_QUERY
 import no.nav.sykdig.pdl.client.graphql.PdlResponse
 import no.nav.sykdig.pdl.client.graphql.mapToPdlResponse
@@ -10,7 +10,7 @@ import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 
 @Component
-class PdlClient(private val pdlGraphQlClient: CustomGraphQLClient) {
+class PdlClient(private val pdlGraphQlClient: DgsCustomGraphQLClient) {
     val log = applog()
     val securelog = securelog()
 

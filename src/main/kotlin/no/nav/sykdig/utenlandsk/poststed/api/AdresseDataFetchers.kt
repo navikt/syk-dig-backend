@@ -18,8 +18,8 @@ class AdresseDataFetchers(
         field = DgsConstants.VEGADRESSE.Poststed,
     )
     fun vegadressePoststed(dfe: DataFetchingEnvironment): String? {
-        val vegadresse: Vegadresse = dfe.getSource()
-        if (vegadresse.postnummer == null) {
+        val vegadresse: Vegadresse? = dfe.getSource<Vegadresse>()
+        if (vegadresse?.postnummer == null) {
             return null
         }
 
@@ -31,8 +31,8 @@ class AdresseDataFetchers(
         field = DgsConstants.MATRIKKELADRESSE.Poststed,
     )
     fun matrikkeladressePoststed(dfe: DataFetchingEnvironment): String? {
-        val vegadresse: Matrikkeladresse = dfe.getSource()
-        if (vegadresse.postnummer == null) {
+        val vegadresse: Matrikkeladresse? = dfe.getSource<Matrikkeladresse>()
+        if (vegadresse?.postnummer == null) {
             return null
         }
 
