@@ -3,7 +3,7 @@ package no.nav.sykdig.saf
 import com.netflix.graphql.dgs.client.CustomGraphQLClient
 import no.nav.sykdig.saf.graphql.*
 import no.nav.sykdig.shared.applog
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 
 @Component

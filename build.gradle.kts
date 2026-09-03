@@ -2,18 +2,18 @@ import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 import com.diffplug.gradle.spotless.SpotlessExtension
 
 plugins {
-    id("org.springframework.boot") version "3.5.16"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.spring") version "2.2.21"
-    id("com.netflix.dgs.codegen") version "5.12.4"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.diffplug.spotless") version "8.0.0"
+    kotlin("jvm") version "2.4.10"
+    kotlin("plugin.spring") version "2.4.10"
+    id("com.netflix.dgs.codegen") version "8.6.0"
+    id("com.gradleup.shadow") version "8.3.6"
+    id("com.diffplug.spotless") version "8.10.0"
 }
 
 group = "no.nav.sykdig"
 version = "1.0.0"
-java.sourceCompatibility = JavaVersion.VERSION_21
+java.sourceCompatibility = JavaVersion.VERSION_25
 
 repositories {
     mavenCentral()
@@ -29,7 +29,7 @@ val tokenSupportVersion = "5.0.39"
 val testContainersVersion = "2.0.2"
 val logstashLogbackEncoderVersion = "9.0"
 val javaJwtVersion = "4.5.0"
-val springBootResourceVersion = "3.5.16"
+val springBootResourceVersion = "4.1.1"
 val graphqlVersion = "20.2"
 val kafkaClientsVersion = "4.1.2"
 val syfoXmlCodegen = "2.0.1"
@@ -53,6 +53,7 @@ val coroutineReactorVersion = "1.10.2"
 val hibernateVersion = "7.1.6.Final"
 val jacksonDatatypeJsr310Version = "2.22.1"
 val mockitoKotlinVersion = "6.1.0"
+
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
@@ -101,6 +102,7 @@ dependencies {
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$opentelemetryVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
+    implementation("org.springframework.boot:spring-boot-starter-restclient:$springBootResourceVersion")
 
     implementation("org.hibernate.orm:hibernate-core:$hibernateVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

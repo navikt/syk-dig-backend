@@ -6,7 +6,7 @@ import no.nav.sykdig.pdl.client.graphql.PdlResponse
 import no.nav.sykdig.pdl.client.graphql.mapToPdlResponse
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.securelog
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 
 @Component

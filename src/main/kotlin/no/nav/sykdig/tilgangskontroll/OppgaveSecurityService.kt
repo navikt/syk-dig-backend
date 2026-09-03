@@ -190,8 +190,10 @@ class OppgaveSecurityService(
             SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         val claims = authentication.token.getClaimAsStringList("groups")
 
-        if (!claims.contains(papirsykmeldingGroupId)) {
-            return false
+        claims?.contains(papirsykmeldingGroupId)?.let {
+            if (!it) {
+                return false
+            }
         }
 
         return hasAccess(fnr, navEmail, requestPath)

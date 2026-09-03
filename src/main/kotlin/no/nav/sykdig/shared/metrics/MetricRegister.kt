@@ -31,11 +31,13 @@ class MetricRegister(private val registry: MeterRegistry) {
         registry.counter("${METRICS_NS}_message_stored_in_db_counter")
 
     fun incrementNewSykmelding(type: String, kanal: String?) {
-        registry
-            .counter(
-                "${METRICS_NS}_create_sykmelding_counter",
-                Tags.of("type", type, "kanal", kanal),
-            )
-            .increment()
+        kanal?.let {
+            registry
+                .counter(
+                    "${METRICS_NS}_create_sykmelding_counter",
+                    Tags.of("type", type, "kanal", it),
+                )
+        }
+            ?.increment()
     }
 }
