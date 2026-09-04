@@ -102,7 +102,7 @@ dependencies {
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$opentelemetryVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
-    implementation("org.springframework.boot:spring-boot-starter-restclient:$springBootResourceVersion")
+    implementation("org.springframework.boot:spring-boot-restclient")
     implementation("org.hibernate.orm:hibernate-core:$hibernateVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
