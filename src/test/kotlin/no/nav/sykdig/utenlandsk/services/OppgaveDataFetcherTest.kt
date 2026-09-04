@@ -1,8 +1,8 @@
 package no.nav.sykdig.utenlandsk.services
 
 import com.netflix.graphql.dgs.DgsQueryExecutor
+import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration
 import com.netflix.graphql.dgs.autoconfig.DgsExtendedScalarsAutoConfiguration
-import com.netflix.graphql.dgs.springgraphql.autoconfig.DgsSpringGraphQLAutoConfiguration
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
@@ -45,7 +45,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 @SpringBootTest(
     classes =
         [
-            DgsSpringGraphQLAutoConfiguration::class,
+            DgsAutoConfiguration::class,
             DgsExtendedScalarsAutoConfiguration::class,
             UtenlandskOppgaveDataFetcher::class,
             AdresseDataFetchers::class,

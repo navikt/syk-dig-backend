@@ -83,7 +83,7 @@ class AivenKafkaConfig(
             )
 
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.setConsumerFactory(consumerFactory)
+        factory.consumerFactory = consumerFactory
         factory.setCommonErrorHandler(aivenKafkaErrorHandler)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         return factory

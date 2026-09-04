@@ -1,6 +1,7 @@
 package no.nav.sykdig.saf.graphql
 
-import com.netflix.graphql.dgs.client.DgsCustomGraphQLClient
+import com.netflix.graphql.dgs.client.CustomGraphQLClient
+import com.netflix.graphql.dgs.client.GraphQLClient
 import com.netflix.graphql.dgs.client.HttpResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -17,7 +18,7 @@ class SafGraphQlConfiguration {
     fun safM2mGraphQlClient(
         @Value("\${saf.url}") safUrl: String,
         safM2mRestTemplate: RestTemplate,
-    ): DgsCustomGraphQLClient {
+    ): CustomGraphQLClient {
         return graphQLClient(safUrl, safM2mRestTemplate)
     }
 
@@ -25,15 +26,15 @@ class SafGraphQlConfiguration {
     fun safGraphQlClient(
         @Value("\${saf.url}") safUrl: String,
         safRestTemplate: RestTemplate,
-    ): DgsCustomGraphQLClient {
+    ): CustomGraphQLClient {
         return graphQLClient(safUrl, safRestTemplate)
     }
 
     private fun graphQLClient(
         safUrl: String,
         safDokumentTemplate: RestTemplate,
-    ): DgsCustomGraphQLClient {
-        return DgsCustomGraphQLClient(safUrl) { url, _, body ->
+    ): CustomGraphQLClient {
+        return GraphQLClient.createCustom(safUrl) { url, _, body ->
             val httpHeaders = HttpHeaders()
             httpHeaders.contentType = MediaType.APPLICATION_JSON
 
