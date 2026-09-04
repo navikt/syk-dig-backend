@@ -27,6 +27,7 @@ import no.nav.sykdig.utenlandsk.models.SykDigOppgave
 import no.nav.sykdig.utenlandsk.models.SykmeldingUnderArbeid
 import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
 import no.nav.sykdig.utenlandsk.poststed.api.AdresseDataFetchers
+import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,6 +37,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
@@ -55,6 +57,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
         ]
 )
 @EnableMethodSecurity(prePostEnabled = true)
+@Import(ExternalClientTestConfig::class)
 class OppgaveDataFetcherTest {
     @MockitoBean lateinit var poststedRepository: PoststedRepository
 

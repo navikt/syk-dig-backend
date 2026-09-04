@@ -13,18 +13,21 @@ import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
+import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest(classes = [SykDigBackendApplication::class])
 @Transactional
+@Import(ExternalClientTestConfig::class)
 class SykDigOppgaveServiceTest : IntegrationTest() {
     @MockitoBean lateinit var ferdigstillingService: FerdigstillingService
 

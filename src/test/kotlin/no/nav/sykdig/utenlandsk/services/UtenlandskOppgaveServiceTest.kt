@@ -17,6 +17,7 @@ import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.shared.metrics.MetricRegister
 import no.nav.sykdig.utenlandsk.db.JournalpostSykmeldingRepository
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
+import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -26,9 +27,11 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest(classes = [SykDigBackendApplication::class])
+@Import(ExternalClientTestConfig::class)
 class UtenlandskOppgaveServiceTest : IntegrationTest() {
     @Autowired lateinit var journalpostSykmeldingRepository: JournalpostSykmeldingRepository
 

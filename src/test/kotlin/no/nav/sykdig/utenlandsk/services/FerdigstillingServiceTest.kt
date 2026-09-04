@@ -37,6 +37,7 @@ import no.nav.sykdig.shared.SporsmalSvar
 import no.nav.sykdig.shared.kafka.SykmeldingProducer
 import no.nav.sykdig.utenlandsk.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
+import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -46,9 +47,11 @@ import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest(classes = [SykDigBackendApplication::class])
+@Import(ExternalClientTestConfig::class)
 class FerdigstillingServiceTest : IntegrationTest() {
     @MockitoBean lateinit var safJournalpostGraphQlClient: SafJournalpostGraphQlClient
 
