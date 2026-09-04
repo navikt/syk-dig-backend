@@ -13,7 +13,7 @@ import no.nav.sykdig.shared.LoggingMeta
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.exceptions.IkkeTilgangException
 import no.nav.sykdig.shared.exceptions.NoOppgaveException
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.jsonMapper
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.utenlandsk.services.getFristForFerdigstillingAvOppgave
 import org.springframework.beans.factory.annotation.Value
@@ -572,7 +572,7 @@ class OppgaveClient(
                     GetOppgaveResponse::class.java,
                 )
             secureLog.info(
-                "OpprettOppgave: $journalpostId: ${objectMapper.writeValueAsString(result.body)}, aktørId: $aktoerId"
+                "OpprettOppgave: $journalpostId: ${jsonMapper.writeValueAsString(result.body)}, aktørId: $aktoerId"
             )
             val oppgave = result.body!!
             log.info(
@@ -633,7 +633,7 @@ class OppgaveClient(
                     NasjonalOppgaveResponse::class.java,
                 )
             secureLog.info(
-                "OpprettNasjonalOppgave med journalpostId: ${opprettNasjonalOppgave.journalpostId}: ${objectMapper.writeValueAsString(result.body)}, aktørId: ${opprettNasjonalOppgave.aktoerId}"
+                "OpprettNasjonalOppgave med journalpostId: ${opprettNasjonalOppgave.journalpostId}: ${jsonMapper.writeValueAsString(result.body)}, aktørId: ${opprettNasjonalOppgave.aktoerId}"
             )
             val oppgave = result.body!!
             log.info(

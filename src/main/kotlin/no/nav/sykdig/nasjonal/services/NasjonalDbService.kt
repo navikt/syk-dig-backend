@@ -1,7 +1,5 @@
 package no.nav.sykdig.nasjonal.services
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import no.nav.sykdig.digitalisering.papirsykmelding.mapToDaoOppgave
@@ -19,6 +17,7 @@ import no.nav.sykdig.shared.SporsmalSvar
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.securelog
 import org.springframework.stereotype.Service
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 @Service
 class NasjonalDbService(
@@ -28,7 +27,7 @@ class NasjonalDbService(
 
     val log = applog()
     val securelog = securelog()
-    val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+    val objectMapper = jacksonMapperBuilder().build()
 
     fun saveOppgave(
         papirManuellOppgave: PapirManuellOppgave,

@@ -25,15 +25,15 @@ repositories {
 val postgresVersion = "42.7.8"
 val snakeYamlVersion = "2.5"
 val tsmDiagnoserVersion = "2026.1.13"
-val tokenSupportVersion = "5.0.39"
+val tokenSupportVersion = "6.0.11"
 val testContainersVersion = "2.0.2"
 val logstashLogbackEncoderVersion = "9.0"
 val javaJwtVersion = "4.5.0"
 val springBootResourceVersion = "4.1.1"
-val graphqlVersion = "25.0"
+val graphqlVersion = "26.1"
 val kafkaClientsVersion = "4.1.2"
 val syfoXmlCodegen = "2.0.1"
-val springSecurityWebVersion = "6.5.11"
+val springSecurityWebVersion = "7.1.1"
 val okhttp3version = "4.12.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
@@ -51,7 +51,7 @@ val kluentVersion = "1.73"
 val coroutinesVersion = "1.10.2"
 val coroutineReactorVersion = "1.10.2"
 val hibernateVersion = "7.1.6.Final"
-val jacksonDatatypeJsr310Version = "2.22.1"
+val jacksonVersion = "3.2.2"
 val mockitoKotlinVersion = "6.1.0"
 
 dependencies {
@@ -61,14 +61,15 @@ dependencies {
     implementation("com.graphql-java:graphql-java:$graphqlVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutineReactorVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonDatatypeJsr310Version")
+    implementation("tools.jackson.module:jackson-module-jaxb-annotations:$jacksonVersion")
+    implementation("tools.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("tools.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.apache.kafka:kafka-clients:$kafkaClientsVersion")
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-logging")
