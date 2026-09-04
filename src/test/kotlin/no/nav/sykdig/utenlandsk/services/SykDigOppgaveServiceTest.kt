@@ -11,9 +11,9 @@ import no.nav.sykdig.generated.types.PeriodeType
 import no.nav.sykdig.gosys.OppgaveClient
 import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
+import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
 import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
-import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals

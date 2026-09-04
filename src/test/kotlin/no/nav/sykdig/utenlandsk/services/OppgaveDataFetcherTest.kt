@@ -17,6 +17,7 @@ import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.Vegadresse
 import no.nav.sykdig.shared.config.CustomDataFetchingExceptionHandler
 import no.nav.sykdig.shared.utils.toOffsetDateTimeAtNoon
+import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import no.nav.sykdig.tilgangskontroll.OppgaveSecurityService
 import no.nav.sykdig.utenlandsk.api.UtenlandskOppgaveDataFetcher
 import no.nav.sykdig.utenlandsk.db.PoststedRepository
@@ -27,7 +28,6 @@ import no.nav.sykdig.utenlandsk.models.SykDigOppgave
 import no.nav.sykdig.utenlandsk.models.SykmeldingUnderArbeid
 import no.nav.sykdig.utenlandsk.models.UferdigRegisterOppgaveValues
 import no.nav.sykdig.utenlandsk.poststed.api.AdresseDataFetchers
-import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -15,9 +15,9 @@ import no.nav.sykdig.pdl.Navn
 import no.nav.sykdig.pdl.Person
 import no.nav.sykdig.pdl.PersonService
 import no.nav.sykdig.shared.metrics.MetricRegister
+import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import no.nav.sykdig.utenlandsk.db.JournalpostSykmeldingRepository
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
-import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull

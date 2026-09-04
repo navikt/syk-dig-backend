@@ -35,9 +35,9 @@ import no.nav.sykdig.shared.KontaktMedPasient
 import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.shared.SporsmalSvar
 import no.nav.sykdig.shared.kafka.SykmeldingProducer
+import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import no.nav.sykdig.utenlandsk.mapping.mapToReceivedSykmelding
 import no.nav.sykdig.utenlandsk.models.FerdistilltRegisterOppgaveValues
-import no.nav.sykdig.testconfig.ExternalClientTestConfig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
