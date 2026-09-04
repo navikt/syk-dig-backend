@@ -12,13 +12,13 @@ import org.springframework.web.client.RestTemplate
  */
 @TestConfiguration
 class ExternalClientTestConfig {
-    @Bean fun tilgangskontrollRestTemplate(): RestTemplate = RestTemplate()
+    @Bean fun tilgangskontrollRestTemplate(): RestTemplate = mockk(relaxed = true)
 
-    @Bean fun safRestTemplate(): RestTemplate = RestTemplate()
+    @Bean fun safRestTemplate(): RestTemplate = mockk(relaxed = true)
 
-    @Bean fun dokarkivRestTemplate(): RestTemplate = RestTemplate()
+    @Bean fun dokarkivRestTemplate(): RestTemplate = mockk(relaxed = true)
 
-    @Bean fun oppgaveRestTemplate(): RestTemplate = RestTemplate()
+    @Bean fun oppgaveRestTemplate(): RestTemplate = mockk(relaxed = true)
 
     @Bean fun pdlGraphQlClient(): CustomGraphQLClient = mockk(relaxed = true)
 }
