@@ -1,7 +1,5 @@
 package no.nav.sykdig.nasjonal.services
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.netflix.graphql.dgs.exceptions.DgsBadRequestException
 import com.netflix.graphql.dgs.exceptions.DgsEntityNotFoundException
 import net.logstash.logback.argument.StructuredArguments
@@ -22,6 +20,7 @@ import no.nav.sykdig.shared.utils.getLoggingMeta
 import no.nav.sykdig.utenlandsk.api.getPdfResult
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 @Service
 class NasjonalOppgaveService(
@@ -35,10 +34,10 @@ class NasjonalOppgaveService(
     val log = applog()
     val securelog = securelog()
     val auditLogger = auditlog()
-    val mapper = jacksonObjectMapper()
+    val mapper = jacksonMapperBuilder().build()
 
     val logger = applog()
-    val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+    val objectMapper = jacksonMapperBuilder().build()
 
     fun behandleNasjonalOppgaveFraKafka(papirSmRegistering: PapirSmRegistering) {
         val loggingMeta = getLoggingMeta(papirSmRegistering.sykmeldingId, papirSmRegistering)

@@ -11,7 +11,7 @@ This project contains the application code and infrastructure for syk-dig-backen
 
 #### Requirements
 
-* JDK 21
+* JDK 25
 * Docker
 
 
@@ -36,8 +36,8 @@ docker build -t syk-dig-backend .
 docker run --rm -it -p 8080:8080 syk-dig-backend
 ```
 
-### Upgrading the gradle wrapper
-Find the newest version of gradle here: https://gradle.org/releases/ Then run this command:
+### Upgrading the Gradle wrapper
+Find the newest version of Gradle here: https://gradle.org/releases/ Then run this command:
 
 ``` bash
 ./gradlew wrapper --gradle-version $gradleVersion

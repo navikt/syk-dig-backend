@@ -1,15 +1,15 @@
 package no.nav.sykdig.saf
 
-import com.netflix.graphql.dgs.client.CustomGraphQLClient
+import com.netflix.graphql.dgs.client.DgsCustomGraphQLClient
 import no.nav.sykdig.saf.graphql.*
 import no.nav.sykdig.shared.applog
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 
 @Component
 class SafJournalpostGraphQlClient(
-    private val safGraphQlClient: CustomGraphQLClient,
-    private val safM2mGraphQlClient: CustomGraphQLClient,
+    private val safGraphQlClient: DgsCustomGraphQLClient,
+    private val safM2mGraphQlClient: DgsCustomGraphQLClient,
 ) {
     val log = applog()
 

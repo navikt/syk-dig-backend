@@ -8,8 +8,8 @@ import no.nav.sykdig.pdl.toFormattedNameString
 import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.shared.ReceivedSykmelding
 import no.nav.sykdig.shared.applog
+import no.nav.sykdig.shared.jsonMapper
 import no.nav.sykdig.shared.kafka.SykmeldingProducer
-import no.nav.sykdig.shared.objectMapper
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.shared.utils.createTitle
 import no.nav.sykdig.shared.utils.createTitleNavNo
@@ -50,7 +50,7 @@ class FerdigstillingService(
         val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
 
         securelog.info(
-            "journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}"
+            "journalpostid ${oppgave.journalpostId} ble hentet: ${jsonMapper.writeValueAsString(journalpost)}"
         )
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {
             log.info(
@@ -146,7 +146,7 @@ class FerdigstillingService(
         }
         val journalpost = safJournalpostGraphQlClient.getJournalpost(oppgave.journalpostId)
         securelog.info(
-            "journalpostid ${oppgave.journalpostId} ble hentet: ${objectMapper.writeValueAsString(journalpost)}"
+            "journalpostid ${oppgave.journalpostId} ble hentet: ${jsonMapper.writeValueAsString(journalpost)}"
         )
 
         if (safJournalpostGraphQlClient.erFerdigstilt(journalpost)) {

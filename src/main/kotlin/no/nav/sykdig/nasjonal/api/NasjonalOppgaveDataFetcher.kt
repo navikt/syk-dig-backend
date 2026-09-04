@@ -160,7 +160,7 @@ class NasjonalOppgaveDataFetcher(
         val callId = UUID.randomUUID().toString()
         log.info("Henter person med callId $callId")
 
-        val fnr: String = dfe.graphQlContext.get("pasient_fnr")
+        val fnr: String = dfe.graphQlContext.get<String>("pasient_fnr")
         val personNavn = pasientNavnService.getPersonNavn(id = fnr, callId = callId)
         return personNavn
     }

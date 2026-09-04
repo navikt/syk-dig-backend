@@ -1,6 +1,5 @@
 package no.nav.sykdig.utenlandsk.db
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
@@ -15,7 +14,7 @@ import no.nav.sykdig.shared.Gradert
 import no.nav.sykdig.shared.MedisinskVurdering
 import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.jsonMapper
 import no.nav.sykdig.shared.utils.getDiagnoseText
 import no.nav.sykdig.utenlandsk.models.DokumentDbModel
 import no.nav.sykdig.utenlandsk.models.OppgaveDbModel
@@ -28,6 +27,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.module.kotlin.readValue
 
 @Transactional
 @Repository
@@ -409,7 +409,7 @@ private fun RegisterOppgaveValues.mapToMedisinskVurdering() =
 fun <T> T.toPGObject() =
     PGobject().also {
         it.type = "json"
-        it.value = objectMapper.writeValueAsString(this)
+        it.value = jsonMapper.writeValueAsString(this)
     }
 
 private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
@@ -426,10 +426,10 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
         type = getString("type"),
         sykmelding =
             getString("sykmelding")?.let {
-                objectMapper.readValue(it, SykmeldingUnderArbeid::class.java)
+                jsonMapper.readValue(it, SykmeldingUnderArbeid::class.java)
             },
         dokumenter =
-            getString("dokumenter").let { objectMapper.readValue<List<DokumentDbModel>>(it) },
+            getString("dokumenter").let { jsonMapper.readValue<List<DokumentDbModel>>(it) },
         endretAv = getString("endret_av"),
         timestamp = getTimestamp("timestamp").toInstant().atOffset(ZoneOffset.UTC),
         source = getString("source"),
@@ -438,5 +438,5 @@ private fun ResultSet.toDigitaliseringsoppgave(): OppgaveDbModel =
 private fun ResultSet.toSykmeldingUnderArbeid(): SykmeldingUnderArbeid? {
     val sykmeldingJsonb: String = getString("sykmelding") ?: return null
 
-    return objectMapper.readValue(sykmeldingJsonb, SykmeldingUnderArbeid::class.java)
+    return jsonMapper.readValue(sykmeldingJsonb, SykmeldingUnderArbeid::class.java)
 }

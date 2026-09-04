@@ -1,6 +1,5 @@
 package no.nav.sykdig.dokarkiv
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.Locale
 import no.nav.sykdig.dokarkiv.model.*
 import no.nav.sykdig.nasjonal.models.Sykmelder
@@ -10,7 +9,7 @@ import no.nav.sykdig.saf.graphql.SafQueryJournalpost
 import no.nav.sykdig.shared.Periode
 import no.nav.sykdig.shared.applog
 import no.nav.sykdig.shared.exceptions.IkkeTilgangException
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.jsonMapper
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.shared.utils.createTitle
 import no.nav.sykdig.shared.utils.createTitleNasjonal
@@ -22,11 +21,12 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.readValue
 
 @Component
 class DokarkivClient(
@@ -116,7 +116,7 @@ class DokarkivClient(
 
         try {
             securelog.info(
-                "createOppdaterJournalpostRequest: ${objectMapper.writeValueAsString(oppdaterJournalpostRequest)}"
+                "createOppdaterJournalpostRequest: ${jsonMapper.writeValueAsString(oppdaterJournalpostRequest)}"
             )
             val response =
                 dokarkivRestTemplate.exchange(
@@ -305,7 +305,7 @@ class DokarkivClient(
 
     fun findCountryName(landAlpha3: String): String {
         val countries: List<Country> =
-            objectMapper.readValue<List<Country>>(
+            jsonMapper.readValue<List<Country>>(
                 DokarkivClient::class
                     .java
                     .getResourceAsStream("/country/countries-norwegian.json")!!
@@ -315,7 +315,7 @@ class DokarkivClient(
 
     fun mapFromAlpha3Toalpha2(landAlpha3: String): String {
         val countries: List<Country> =
-            objectMapper.readValue<List<Country>>(
+            jsonMapper.readValue<List<Country>>(
                 DokarkivClient::class
                     .java
                     .getResourceAsStream("/country/countries-norwegian.json")!!

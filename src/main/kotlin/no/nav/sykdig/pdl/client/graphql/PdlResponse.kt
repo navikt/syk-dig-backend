@@ -1,7 +1,7 @@
 package no.nav.sykdig.pdl.client.graphql
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.jsonMapper
+import tools.jackson.module.kotlin.readValue
 
 const val PDL_QUERY =
     """
@@ -147,4 +147,4 @@ data class PdlUtenlandskAdresse(
 
 data class PdlNavn(val fornavn: String, val mellomnavn: String?, val etternavn: String)
 
-fun mapToPdlResponse(json: String): PdlResponse = objectMapper.readValue<Data>(json).data!!
+fun mapToPdlResponse(json: String): PdlResponse = jsonMapper.readValue<Data>(json).data!!
