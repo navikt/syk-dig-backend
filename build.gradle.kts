@@ -30,6 +30,7 @@ val testContainersVersion = "2.0.2"
 val logstashLogbackEncoderVersion = "9.0"
 val javaJwtVersion = "4.5.0"
 val springBootResourceVersion = "4.1.1"
+val springRetryVersion = "2.0.13"
 val graphqlVersion = "25.0"
 val kafkaClientsVersion = "4.1.2"
 val syfoXmlCodegen = "2.0.1"
@@ -89,6 +90,7 @@ dependencies {
     implementation("com.auth0:java-jwt:$javaJwtVersion")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-web:$springSecurityWebVersion")
+    implementation("org.springframework.retry:spring-retry:$springRetryVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:$springBootResourceVersion")
     implementation("com.squareup.okhttp3:okhttp:$okhttp3version")
