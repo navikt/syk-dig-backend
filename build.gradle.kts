@@ -101,6 +101,7 @@ dependencies {
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("org.springframework.boot:spring-boot-restclient")
     implementation("org.hibernate.orm:hibernate-core:$hibernateVersion")
+    implementation("com.jayway.jsonpath:json-path:3.0.0")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-postgresql:$testContainersVersion")
