@@ -3,11 +3,11 @@ package no.nav.sykdig.dokarkiv
 import no.nav.sykdig.IntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.mockito.Mock
+import org.mockito.kotlin.mock
 import org.springframework.web.client.RestTemplate
 
 class DokarkivClientTest : IntegrationTest() {
-    @Mock lateinit var dokarkivRestTemplate: RestTemplate
+    private val dokarkivRestTemplate: RestTemplate = mock()
 
     @Test
     fun `Should find Bahamas as country name`() {
