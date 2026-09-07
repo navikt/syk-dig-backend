@@ -1,7 +1,5 @@
 package no.nav.sykdig.digitalisering.papirsykmelding
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -34,6 +32,7 @@ import no.nav.sykdig.nasjonal.models.Veileder
 import no.nav.sykdig.shared.*
 import no.nav.sykdig.shared.utils.validateDiagnose
 import org.slf4j.LoggerFactory
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 private val log = LoggerFactory.getLogger("no.nav.sykdig.nasjonal.mapping.NasjonalOppgaveMappingKt")
 
@@ -356,8 +355,8 @@ fun mapToDaoSykmelding(
     datoFerdigstilt: OffsetDateTime? = OffsetDateTime.now(ZoneOffset.UTC),
     timestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
 ): NasjonalSykmeldingDAO {
-    val mapper = jacksonObjectMapper()
-    mapper.registerModules(JavaTimeModule())
+    val mapper = jacksonMapperBuilder().build()
+
     val nasjonalManuellOppgaveDAO =
         NasjonalSykmeldingDAO(
             sykmeldingId = receivedSykmelding.sykmelding.id,

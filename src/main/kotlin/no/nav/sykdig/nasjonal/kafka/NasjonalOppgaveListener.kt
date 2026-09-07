@@ -1,15 +1,15 @@
 package no.nav.sykdig.nasjonal.kafka
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sykdig.nasjonal.models.PapirSmRegistering
 import no.nav.sykdig.nasjonal.services.NasjonalDbService
 import no.nav.sykdig.nasjonal.services.NasjonalOppgaveService
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.jsonMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
+import tools.jackson.module.kotlin.readValue
 
 @Component
 class NasjonalOppgaveListener(
@@ -36,7 +36,7 @@ class NasjonalOppgaveListener(
             acknowledgment.acknowledge()
             return
         }
-        val oppgaveRecord: PapirSmRegistering = objectMapper.readValue(cr.value())
+        val oppgaveRecord: PapirSmRegistering = jsonMapper.readValue(cr.value())
         logger.info("behandler sykmelding med sykmeldingId: ${oppgaveRecord.sykmeldingId}")
         nasjonalOppgaveService.behandleNasjonalOppgaveFraKafka(oppgaveRecord)
         acknowledgment.acknowledge()

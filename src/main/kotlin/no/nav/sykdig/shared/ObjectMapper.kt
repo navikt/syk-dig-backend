@@ -2,13 +2,13 @@ package no.nav.sykdig.shared
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.*
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 class FlexibleOffsetDateTimeDeserializer : JsonDeserializer<OffsetDateTime>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): OffsetDateTime {
@@ -23,11 +23,5 @@ class FlexibleOffsetDateTimeDeserializer : JsonDeserializer<OffsetDateTime>() {
     }
 }
 
-val objectMapper: ObjectMapper =
-    ObjectMapper().apply {
-        registerKotlinModule()
-        registerModule(JavaTimeModule())
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        setTimeZone(TimeZone.getTimeZone("UTC"))
-    }
+val jsonMapper: JsonMapper =
+    jacksonMapperBuilder().defaultTimeZone(TimeZone.getTimeZone("UTC")).build()

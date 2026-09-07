@@ -2,18 +2,18 @@ import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 import com.diffplug.gradle.spotless.SpotlessExtension
 
 plugins {
-    id("org.springframework.boot") version "3.5.16"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.spring") version "2.2.21"
-    id("com.netflix.dgs.codegen") version "5.12.4"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.diffplug.spotless") version "8.0.0"
+    kotlin("jvm") version "2.4.10"
+    kotlin("plugin.spring") version "2.4.10"
+    id("com.netflix.dgs.codegen") version "8.6.0"
+    id("com.gradleup.shadow") version "8.3.6"
+    id("com.diffplug.spotless") version "8.10.0"
 }
 
 group = "no.nav.sykdig"
 version = "1.0.0"
-java.sourceCompatibility = JavaVersion.VERSION_21
+java.sourceCompatibility = JavaVersion.VERSION_25
 
 repositories {
     mavenCentral()
@@ -23,27 +23,24 @@ repositories {
 }
 
 val postgresVersion = "42.7.8"
-val snakeYamlVersion = "2.5"
 val tsmDiagnoserVersion = "2026.1.13"
-val tokenSupportVersion = "5.0.39"
+val tokenSupportVersion = "6.0.11"
 val testContainersVersion = "2.0.2"
 val logstashLogbackEncoderVersion = "9.0"
 val javaJwtVersion = "4.5.0"
-val springBootResourceVersion = "3.5.16"
-val graphqlVersion = "20.2"
+val springBootResourceVersion = "4.1.1"
+val graphqlVersion = "26.1"
 val kafkaClientsVersion = "4.1.2"
 val syfoXmlCodegen = "2.0.1"
-val springSecurityWebVersion = "6.5.11"
+val springSecurityWebVersion = "7.1.1"
 val okhttp3version = "4.12.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
-val graphqlDgsPlatformDependenciesVersion = "9.2.2"
-val commonsCompressVersion = "1.28.0"
+val graphqlDgsPlatformDependenciesVersion = "12.0.1"
 val commonsLang3Version = "3.19.0"
 val httpClient5version = "5.5.1"
-val flywayVersion = "11.15.0"
 val opentelemetryVersion = "2.21.0"
 val prometheusVersion = "0.16.0"
 val mockkVersion = "1.14.6"
@@ -51,31 +48,31 @@ val kluentVersion = "1.73"
 val coroutinesVersion = "1.10.2"
 val coroutineReactorVersion = "1.10.2"
 val hibernateVersion = "7.1.6.Final"
-val jacksonDatatypeJsr310Version = "2.22.1"
 val mockitoKotlinVersion = "6.1.0"
+
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
-    implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
+    implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
-    implementation("com.graphql-java:graphql-java:$graphqlVersion")
+    implementation("com.graphql-java:graphql-java")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutineReactorVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonDatatypeJsr310Version")
+    implementation("tools.jackson.module:jackson-module-jaxb-annotations")
+    implementation("tools.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.dataformat:jackson-dataformat-xml")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.apache.kafka:kafka-clients:$kafkaClientsVersion")
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-logging")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
     implementation("org.postgresql:postgresql:$postgresVersion")
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")
-    implementation("org.yaml:snakeyaml:$snakeYamlVersion") // overstyrer sårbar dependency
     implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegen")
     implementation("no.nav.helse.xml:sm2013:$syfoXmlCodegen")
     implementation("no.nav.helse.xml:kith-hodemelding:$syfoXmlCodegen")
@@ -101,20 +98,19 @@ dependencies {
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$opentelemetryVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
-
+    implementation("org.springframework.boot:spring-boot-restclient")
     implementation("org.hibernate.orm:hibernate-core:$hibernateVersion")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("com.jayway.jsonpath:json-path:3.0.0")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-test")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-kafka:$testContainersVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
-    constraints {
-        testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion") {
-            because("overstyrer sårbar dependency fra com.opentable.components:otj-pg-embedded")
-        }
-    }
+
+    testImplementation("org.springframework.boot:spring-boot-micrometer-metrics-test")
     testImplementation(kotlin("test"))
 }
 

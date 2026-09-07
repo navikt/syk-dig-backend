@@ -12,7 +12,7 @@ import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.saf.graphql.Journalposttype
 import no.nav.sykdig.saf.graphql.SafJournalpost
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.jsonMapper
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.utenlandsk.services.JournalpostService
 import no.nav.sykdig.utenlandsk.services.SykmeldingService
@@ -40,7 +40,7 @@ class JournalpostDataFetcher(
                     journalpostId = trimedJournalpostId,
                     status = JournalpostStatusEnum.MANGLENDE_JOURNALPOST,
                 )
-        securelog.info("journalpost from saf: ${objectMapper.writeValueAsString(journalpost)}")
+        securelog.info("journalpost from saf: ${jsonMapper.writeValueAsString(journalpost)}")
 
         if (checkKanalAndJournalforendeEnhet(journalpost)) {
             log.warn(

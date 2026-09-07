@@ -11,7 +11,7 @@ import no.nav.sykdig.saf.SafJournalpostGraphQlClient
 import no.nav.sykdig.saf.graphql.Type
 import no.nav.sykdig.shared.auditLogger.AuditLogger
 import no.nav.sykdig.shared.auditlog
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.jsonMapper
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
 import org.springframework.beans.factory.annotation.Value
@@ -137,7 +137,7 @@ class OppgaveSecurityService(
     fun hasAccessToJournalpostId(journalpostId: String): Boolean {
         val journalpost = safGraphQlClient.getJournalpost(journalpostId)
         securelog.info(
-            "journalpostid $journalpostId ble hentet: ${objectMapper.writeValueAsString(journalpost)}"
+            "journalpostid $journalpostId ble hentet: ${jsonMapper.writeValueAsString(journalpost)}"
         )
 
         val id =
@@ -190,8 +190,10 @@ class OppgaveSecurityService(
             SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         val claims = authentication.token.getClaimAsStringList("groups")
 
-        if (!claims.contains(papirsykmeldingGroupId)) {
-            return false
+        claims?.contains(papirsykmeldingGroupId)?.let {
+            if (!it) {
+                return false
+            }
         }
 
         return hasAccess(fnr, navEmail, requestPath)

@@ -1,12 +1,12 @@
 package no.nav.sykdig.utenlandsk.kafka
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.jsonMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
+import tools.jackson.module.kotlin.readValue
 
 @Component
 class OppgaveListener(val mottaOppgaverFraKafka: MottaOppgaverFraKafka) {
@@ -19,7 +19,7 @@ class OppgaveListener(val mottaOppgaverFraKafka: MottaOppgaverFraKafka) {
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        val oppgaveRecord: OppgaveKafkaAivenRecord = objectMapper.readValue(cr.value())
+        val oppgaveRecord: OppgaveKafkaAivenRecord = jsonMapper.readValue(cr.value())
         try {
             val isOppgaveOpprettet =
                 oppgaveRecord.hendelse.hendelsestype == Hendelsestype.OPPGAVE_OPPRETTET

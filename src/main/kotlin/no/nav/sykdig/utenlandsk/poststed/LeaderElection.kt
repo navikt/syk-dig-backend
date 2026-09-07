@@ -2,7 +2,7 @@ package no.nav.sykdig.utenlandsk.poststed
 
 import java.net.InetAddress
 import no.nav.sykdig.shared.applog
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.jsonMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -38,7 +38,7 @@ class LeaderElection(
         }
 
         result.body?.let {
-            val leader: Leader = objectMapper.readValue(it, Leader::class.java)
+            val leader: Leader = jsonMapper.readValue(it, Leader::class.java)
             return leader.name == hostname
         }
 

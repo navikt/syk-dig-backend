@@ -1,12 +1,12 @@
 package no.nav.sykdig.utenlandsk.kafka
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sykdig.shared.config.kafka.SYK_DIG_OPPGAVE_TOPIC
-import no.nav.sykdig.shared.objectMapper
+import no.nav.sykdig.shared.jsonMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
+import tools.jackson.module.kotlin.readValue
 
 @Component
 class SykDigOppgaveListener(val mottaOppgaverFraKafka: MottaOppgaverFraKafka) {
@@ -17,7 +17,7 @@ class SykDigOppgaveListener(val mottaOppgaverFraKafka: MottaOppgaverFraKafka) {
         containerFactory = "aivenKafkaListenerContainerFactory",
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        mottaOppgaverFraKafka.lagre(objectMapper.readValue(cr.value()), cr.key())
+        mottaOppgaverFraKafka.lagre(jsonMapper.readValue(cr.value()), cr.key())
         acknowledgment.acknowledge()
     }
 }

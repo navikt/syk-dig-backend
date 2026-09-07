@@ -109,7 +109,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         dfe: DataFetchingEnvironment,
     ): OppdatertSykmeldingStatus {
         log.info("update sykmelding $sykmeldingId")
-        val navEmail: String = dfe.graphQlContext.get("username")
+        val navEmail: String = dfe.graphQlContext.get<String>("username")!!
         val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
         return utenlandskOppgaveService.oppdaterDigitalisertSykmelding(
             sykmeldingId = sykmeldingId,
@@ -127,7 +127,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         @InputArgument status: SykmeldingUnderArbeidStatus,
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveResult {
-        val navEmail: String = dfe.graphQlContext.get("username")
+        val navEmail: String = dfe.graphQlContext.get<String>("username")!!
         when (status) {
             SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
                 val ferdistilltRegisterOppgaveValues = validateRegisterOppgaveValues(values)
@@ -170,8 +170,8 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         @InputArgument navEnhet: String,
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveStatus {
-        val navEpost: String = dfe.graphQlContext.get("username")
-        val navIdent: String = dfe.graphQlContext.get("nav_ident")
+        val navEpost: String = dfe.graphQlContext.get<String>("username")!!
+        val navIdent: String = dfe.graphQlContext.get<String>("nav_ident")!!
         utenlandskOppgaveService.ferdigstillOppgaveSendTilGosys(
             oppgaveId = oppgaveId,
             navEnhet = navEnhet,
@@ -194,8 +194,8 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         @InputArgument avvisningsgrunnAnnet: String?,
         dfe: DataFetchingEnvironment,
     ): DigitaliseringsoppgaveStatus {
-        val navEpost: String = dfe.graphQlContext.get("username")
-        val navIdent: String = dfe.graphQlContext.get("nav_ident")
+        val navEpost: String = dfe.graphQlContext.get<String>("username")!!
+        val navIdent: String = dfe.graphQlContext.get<String>("nav_ident")!!
 
         utenlandskOppgaveService.avvisOppgave(
             oppgaveId = oppgaveId,
