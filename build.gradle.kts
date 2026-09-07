@@ -50,6 +50,9 @@ val coroutinesVersion = "1.10.2"
 val coroutineReactorVersion = "1.10.2"
 val hibernateVersion = "7.1.6.Final"
 val mockitoKotlinVersion = "6.1.0"
+val jsonPathVersion = "3.0.0"
+
+extra["json-path.version"] = jsonPathVersion
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
