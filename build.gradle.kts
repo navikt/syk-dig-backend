@@ -23,7 +23,6 @@ repositories {
 }
 
 val postgresVersion = "42.7.8"
-val snakeYamlVersion = "2.5"
 val tsmDiagnoserVersion = "2026.1.13"
 val tokenSupportVersion = "6.0.11"
 val testContainersVersion = "2.0.2"
@@ -40,7 +39,6 @@ val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
 val graphqlDgsPlatformDependenciesVersion = "12.0.1"
-val commonsCompressVersion = "1.28.0"
 val commonsLang3Version = "3.19.0"
 val httpClient5version = "5.5.1"
 val flywayVersion = "11.15.0"
@@ -51,19 +49,18 @@ val kluentVersion = "1.73"
 val coroutinesVersion = "1.10.2"
 val coroutineReactorVersion = "1.10.2"
 val hibernateVersion = "7.1.6.Final"
-val jacksonVersion = "3.2.2"
 val mockitoKotlinVersion = "6.1.0"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
-    implementation("com.graphql-java:graphql-java:$graphqlVersion")
+    implementation("com.graphql-java:graphql-java")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutineReactorVersion")
-    implementation("tools.jackson.module:jackson-module-jaxb-annotations:$jacksonVersion")
-    implementation("tools.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("tools.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
+    implementation("tools.jackson.module:jackson-module-jaxb-annotations")
+    implementation("tools.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.dataformat:jackson-dataformat-xml")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.micrometer:micrometer-registry-prometheus")
@@ -77,7 +74,6 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql")
-    implementation("org.yaml:snakeyaml:$snakeYamlVersion") // overstyrer sårbar dependency
     implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegen")
     implementation("no.nav.helse.xml:sm2013:$syfoXmlCodegen")
     implementation("no.nav.helse.xml:kith-hodemelding:$syfoXmlCodegen")
@@ -105,18 +101,14 @@ dependencies {
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("org.springframework.boot:spring-boot-restclient")
     implementation("org.hibernate.orm:hibernate-core:$hibernateVersion")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-kafka:$testContainersVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
-    constraints {
-        testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion") {
-            because("overstyrer sårbar dependency fra com.opentable.components:otj-pg-embedded")
-        }
-    }
+
     testImplementation("org.springframework.boot:spring-boot-micrometer-metrics-test")
     testImplementation(kotlin("test"))
 }
