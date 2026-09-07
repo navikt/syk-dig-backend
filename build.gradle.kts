@@ -41,7 +41,6 @@ val javaTimeAdapterVersion = "1.1.3"
 val graphqlDgsPlatformDependenciesVersion = "12.0.1"
 val commonsLang3Version = "3.19.0"
 val httpClient5version = "5.5.1"
-val flywayVersion = "11.15.0"
 val opentelemetryVersion = "2.21.0"
 val prometheusVersion = "0.16.0"
 val mockkVersion = "1.14.6"
@@ -72,7 +71,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-logging")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
     implementation("org.postgresql:postgresql:$postgresVersion")
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegen")
     implementation("no.nav.helse.xml:sm2013:$syfoXmlCodegen")
@@ -103,6 +102,7 @@ dependencies {
     implementation("org.hibernate.orm:hibernate-core:$hibernateVersion")
     implementation("com.jayway.jsonpath:json-path:3.0.0")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-test")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-kafka:$testContainersVersion")
