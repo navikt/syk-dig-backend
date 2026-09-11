@@ -60,7 +60,7 @@ spec:
       memory: 2Gi
     requests:
       cpu: 100m
-      memory: 1300Mi
+      memory: 1500Mi
   kafka:
     pool: nav-prod
   azure:
