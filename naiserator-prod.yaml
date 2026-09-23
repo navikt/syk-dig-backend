@@ -10,7 +10,7 @@ spec:
   gcp:
     sqlInstances:
       - name: syk-dig-backend-db-instance
-        type: POSTGRES_14
+        type: POSTGRES_16
         diskSize: 10
         databases:
           - name: syk-dig-backend
