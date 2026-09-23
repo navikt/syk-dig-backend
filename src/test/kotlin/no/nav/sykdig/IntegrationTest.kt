@@ -25,7 +25,7 @@ abstract class IntegrationTest {
     companion object {
 
         val postgres =
-            PostgreSQLContainer("postgres:14-alpine")
+            PostgreSQLContainer("postgres:15-alpine")
                 .withUsername("postgres")
                 .withPassword("postgres")
                 .withDatabaseName("postgres")
