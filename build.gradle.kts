@@ -51,7 +51,7 @@ val hibernateVersion = "7.1.6.Final"
 val mockitoKotlinVersion = "6.1.0"
 
 // Included due vulnerabilities in this transitive dependency
-val tomcatEmbedCoreVersion = "11.0.25"
+val tomcatEmbedCoreVersion = "11.0.26"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
