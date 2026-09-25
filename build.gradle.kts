@@ -22,15 +22,15 @@ repositories {
     }
 }
 
-val postgresVersion = "42.7.8"
+val postgresVersion = "42.7.11"
 val tsmDiagnoserVersion = "2026.1.13"
 val tokenSupportVersion = "6.0.11"
-val testContainersVersion = "2.0.2"
+val testContainersVersion = "2.0.5"
 val logstashLogbackEncoderVersion = "9.0"
 val javaJwtVersion = "4.5.0"
 val springBootResourceVersion = "4.1.1"
 val graphqlVersion = "26.1"
-val kafkaClientsVersion = "4.1.2"
+val kafkaClientsVersion = "4.3.1"
 val syfoXmlCodegen = "2.0.1"
 val springSecurityWebVersion = "7.1.1"
 val okhttp3version = "4.12.0"
@@ -43,15 +43,15 @@ val commonsLang3Version = "3.19.0"
 val httpClient5version = "5.5.1"
 val opentelemetryVersion = "2.21.0"
 val prometheusVersion = "0.16.0"
-val mockkVersion = "1.14.6"
+val mockkVersion = "1.14.11"
 val kluentVersion = "1.73"
-val coroutinesVersion = "1.10.2"
-val coroutineReactorVersion = "1.10.2"
-val hibernateVersion = "7.1.6.Final"
+val coroutinesVersion = "1.11.0"
+val coroutineReactorVersion = "1.11.0"
+val hibernateVersion = "7.1.10.Final"
 val mockitoKotlinVersion = "6.1.0"
 
 // Included due vulnerabilities in this transitive dependency
-val tomcatEmbedCoreVersion = "11.0.25"
+val tomcatEmbedCoreVersion = "11.0.26"
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
@@ -71,6 +71,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web"){
         constraints {
             implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedCoreVersion")
+            implementation("org.apache.tomcat.embed:tomcat-embed-el:$tomcatEmbedCoreVersion")
+            implementation("org.apache.tomcat.embed:tomcat-embed-websocket:$tomcatEmbedCoreVersion")
             because("Due to this transitive dependency vulnerability inside of org.springframework.boot:spring-boot-starter-web")
         }
     }
