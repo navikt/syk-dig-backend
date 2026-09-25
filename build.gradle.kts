@@ -71,6 +71,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web"){
         constraints {
             implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedCoreVersion")
+            implementation("org.apache.tomcat.embed:tomcat-embed-el:$tomcatEmbedCoreVersion")
+            implementation("org.apache.tomcat.embed:tomcat-embed-websocket:$tomcatEmbedCoreVersion")
             because("Due to this transitive dependency vulnerability inside of org.springframework.boot:spring-boot-starter-web")
         }
     }
