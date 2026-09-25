@@ -52,6 +52,7 @@ val mockitoKotlinVersion = "6.1.0"
 
 // Included due vulnerabilities in this transitive dependency
 val tomcatEmbedCoreVersion = "11.0.26"
+extra["tomcat.version"] = tomcatEmbedCoreVersion
 
 dependencies {
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
@@ -68,14 +69,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.apache.kafka:kafka-clients:$kafkaClientsVersion")
-    implementation("org.springframework.boot:spring-boot-starter-web"){
-        constraints {
-            implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedCoreVersion")
-            implementation("org.apache.tomcat.embed:tomcat-embed-el:$tomcatEmbedCoreVersion")
-            implementation("org.apache.tomcat.embed:tomcat-embed-websocket:$tomcatEmbedCoreVersion")
-            because("Due to this transitive dependency vulnerability inside of org.springframework.boot:spring-boot-starter-web")
-        }
-    }
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-logging")
