@@ -27,11 +27,11 @@ class OppgaveSecurityService(
     private val personService: PersonService,
     private val nasjonalSykmeldingMapper: NasjonalSykmeldingMapper,
     private val nasjonalDbService: NasjonalDbService,
-    @param:Value($$"${SYKMELDING_KORIGERING_GROUP_ID}") private val sykmeldingKorrigeringGroupId: String,
+    @param:Value($$"${SYKMELDING_KORIGERING_GROUP_ID}")
+    private val sykmeldingKorrigeringGroupId: String,
     @param:Value($$"${SYKMELDING_NASJONAL_GROUP_ID}") private val sykmeldingNasjonalGroupId: String,
     @param:Value($$"${SYKMELDING_UTLAND_GROUP_ID}") private val sykmeldingUtlandGroupId: String,
-
-    ) {
+) {
     companion object {
         private val securelog = securelog()
         private val auditlog = auditlog()
@@ -59,7 +59,9 @@ class OppgaveSecurityService(
         securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
-        val tilgang = (hasAccess(oppgave.fnr, navEmail) && hasSykmeldingUtenlandskGroupIdAccess(oppgave.fnr, requestPath))
+        val tilgang =
+            (hasAccess(oppgave.fnr, navEmail) &&
+                hasSykmeldingUtenlandskGroupIdAccess(oppgave.fnr, requestPath))
         securelog.info(
             "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId"
         )
@@ -70,7 +72,9 @@ class OppgaveSecurityService(
         securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
         val oppgave = nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId)
 
-        val tilgang = validateAccess(oppgave, requestPath) && (hasSykmeldingNasjonalGroupIdAccess(oppgave?.id.toString(),requestPath))
+        val tilgang =
+            validateAccess(oppgave, requestPath) &&
+                (hasSykmeldingNasjonalGroupIdAccess(oppgave?.id.toString(), requestPath))
 
         return tilgang
     }
@@ -194,7 +198,9 @@ class OppgaveSecurityService(
         securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
         val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
-        val tilgang = (hasAccess(oppgave.fnr, navEmail) && hasSykmeldingUtlandGroupIdAccess(oppgave.fnr, navEmail, requestPath))
+        val tilgang =
+            (hasAccess(oppgave.fnr, navEmail) &&
+                hasSykmeldingUtlandGroupIdAccess(oppgave.fnr, navEmail, requestPath))
         securelog.info(
             "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId"
         )
@@ -261,7 +267,11 @@ class OppgaveSecurityService(
         return tilgang
     }
 
-    private fun hasSykmeldingKorrigeringGroupIdAccess(fnr: String, navEmail: String, requestPath: String): Boolean {
+    private fun hasSykmeldingKorrigeringGroupIdAccess(
+        fnr: String,
+        navEmail: String,
+        requestPath: String,
+    ): Boolean {
         val authentication =
             SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         val claims = authentication.token.getClaimAsStringList("groups")
@@ -275,7 +285,11 @@ class OppgaveSecurityService(
         return hasAccess(fnr, navEmail, requestPath)
     }
 
-    private fun hasSykmeldingNasjonalGroupIdAccess(fnr: String, navEmail: String, requestPath: String): Boolean {
+    private fun hasSykmeldingNasjonalGroupIdAccess(
+        fnr: String,
+        navEmail: String,
+        requestPath: String,
+    ): Boolean {
         val authentication =
             SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         val claims = authentication.token.getClaimAsStringList("groups")
@@ -289,7 +303,11 @@ class OppgaveSecurityService(
         return hasAccess(fnr, navEmail, requestPath)
     }
 
-    private fun hasSykmeldingUtlandGroupIdAccess(fnr: String, navEmail: String, requestPath: String): Boolean {
+    private fun hasSykmeldingUtlandGroupIdAccess(
+        fnr: String,
+        navEmail: String,
+        requestPath: String,
+    ): Boolean {
         val authentication =
             SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         val claims = authentication.token.getClaimAsStringList("groups")

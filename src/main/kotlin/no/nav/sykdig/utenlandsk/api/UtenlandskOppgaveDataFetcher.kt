@@ -37,7 +37,9 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         private val log = applog()
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskSykmelding(#sykmeldingId, DgsConstants.QUERY.DigitalisertSykmelding)")
+    @PreAuthorize(
+        "@oppgaveSecurityService.hasAccessToUtenlandskSykmelding(#sykmeldingId, '/digitalisertSykmelding')"
+    )
     @DgsQuery(field = DgsConstants.QUERY.DigitalisertSykmelding)
     fun getDigitalisertSykmelding(
         @InputArgument sykmeldingId: String,
@@ -51,7 +53,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         return mapToDigitalisertSykmelding(oppgave)
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskOppgave(#oppgaveId, '/oppgave')")
     @DgsQuery(field = DgsConstants.QUERY.Oppgave)
     fun getOppgave(
         @InputArgument oppgaveId: String,
@@ -100,7 +102,9 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         }
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskSykmelding(#sykmeldingId, DgsConstants.MUTATION.OppdaterDigitalisertSykmelding)")
+    @PreAuthorize(
+        "@oppgaveSecurityService.hasAccessToUtenlandskSykmelding(#sykmeldingId, '/oppdaterDigitalisertSykmelding')"
+    )
     @DgsMutation(field = DgsConstants.MUTATION.OppdaterDigitalisertSykmelding)
     fun oppdaterSykmelding(
         @InputArgument sykmeldingId: String,
@@ -118,7 +122,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         )
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskOppgave(#oppgaveId, DgsConstants.MUTATION.Lagre)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskOppgave(#oppgaveId, '/lagre')")
     @DgsMutation(field = DgsConstants.MUTATION.Lagre)
     fun lagreOppgave(
         @InputArgument oppgaveId: String,
@@ -163,7 +167,9 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         }
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskOppgave(#oppgaveId)")
+    @PreAuthorize(
+        "@oppgaveSecurityService.hasAccessToUtenlandskOppgave(#oppgaveId, '/oppgaveTilbakeTilGosys')"
+    )
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
     fun oppgaveTilbakeTilGosys(
         @InputArgument oppgaveId: String,
@@ -185,7 +191,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         )
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskOppgave(#oppgaveId, '/avist')")
     @DgsMutation(field = DgsConstants.MUTATION.Avvis)
     fun avvis(
         @InputArgument oppgaveId: String,

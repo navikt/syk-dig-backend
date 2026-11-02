@@ -109,8 +109,10 @@ class NasjonalOppgaveDataFetcher(
                     (oppgaveSecurityService.hasAccessToNasjonalOppgave(
                         oppgaveId,
                         "/dgs/nasjonal/oppgave/{oppgaveId}/send",
-                    )) && (oppgaveSecurityService.hasSykmeldingNasjonalGroupIdAccess(  oppgaveId,
-                        "/dgs/nasjonal/oppgave/{oppgaveId}/send",
+                    )) &&
+                        (oppgaveSecurityService.hasSykmeldingNasjonalGroupIdAccess(
+                            oppgaveId,
+                            "/dgs/nasjonal/oppgave/{oppgaveId}/send",
                         ))
                 ) {
                     val ferdigstiltSykmeldingValues = mapToSmRegistreringManuell(sykmeldingValues)
