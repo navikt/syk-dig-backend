@@ -55,22 +55,24 @@ class OppgaveSecurityService(
         return validateAccess(oppgave, requestPath)
     }
 
-    fun hasAccessToUtenlandskOppgave(oppgaveId: String): Boolean {
+    fun hasAccessToUtenlandskOppgave(oppgaveId: String, requestPath: String): Boolean {
         securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
-        val tilgang = hasAccess(oppgave.fnr, navEmail)
+        val tilgang = (hasAccess(oppgave.fnr, navEmail) && hasSykmeldingUtenlandskGroupIdAccess(oppgave.fnr, requestPath))
         securelog.info(
             "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId"
         )
-        // TODO IMPL
         return tilgang
     }
 
     fun hasAccessToNasjonalSykmelding(sykmeldingId: String, requestPath: String): Boolean {
         securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
         val oppgave = nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId)
-        return validateAccess(oppgave, requestPath)
+
+        val tilgang = validateAccess(oppgave, requestPath) && (hasSykmeldingNasjonalGroupIdAccess(oppgave?.id.toString(),requestPath))
+
+        return tilgang
     }
 
     private fun validateAccess(oppgave: NasjonalManuellOppgaveDAO?, requestPath: String): Boolean {
@@ -188,11 +190,11 @@ class OppgaveSecurityService(
         return false
     }
 
-    fun hasAccessToSykmelding(sykmeldingId: String): Boolean {
+    fun hasAccessToUtenlandskSykmelding(sykmeldingId: String, requestPath: String): Boolean {
         securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
         val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
-        val tilgang = hasAccess(oppgave.fnr, navEmail)
+        val tilgang = (hasAccess(oppgave.fnr, navEmail) && hasSykmeldingUtlandGroupIdAccess(oppgave.fnr, navEmail, requestPath))
         securelog.info(
             "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId"
         )

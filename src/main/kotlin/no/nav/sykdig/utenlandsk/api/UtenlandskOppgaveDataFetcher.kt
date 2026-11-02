@@ -37,7 +37,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         private val log = applog()
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToSykmelding(#sykmeldingId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskSykmelding(#sykmeldingId, DgsConstants.QUERY.DigitalisertSykmelding)")
     @DgsQuery(field = DgsConstants.QUERY.DigitalisertSykmelding)
     fun getDigitalisertSykmelding(
         @InputArgument sykmeldingId: String,
@@ -100,7 +100,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         }
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToSykmelding(#sykmeldingId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskSykmelding(#sykmeldingId, DgsConstants.MUTATION.OppdaterDigitalisertSykmelding)")
     @DgsMutation(field = DgsConstants.MUTATION.OppdaterDigitalisertSykmelding)
     fun oppdaterSykmelding(
         @InputArgument sykmeldingId: String,
@@ -118,7 +118,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         )
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskOppgave(#oppgaveId, DgsConstants.MUTATION.Lagre)")
     @DgsMutation(field = DgsConstants.MUTATION.Lagre)
     fun lagreOppgave(
         @InputArgument oppgaveId: String,
@@ -163,7 +163,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         }
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.OppgaveTilbakeTilGosys)
     fun oppgaveTilbakeTilGosys(
         @InputArgument oppgaveId: String,
@@ -185,7 +185,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         )
     }
 
-    @PreAuthorize("@oppgaveSecurityService.hasAccessToOppgave(#oppgaveId)")
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskOppgave(#oppgaveId)")
     @DgsMutation(field = DgsConstants.MUTATION.Avvis)
     fun avvis(
         @InputArgument oppgaveId: String,
