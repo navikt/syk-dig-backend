@@ -106,10 +106,12 @@ class NasjonalOppgaveDataFetcher(
         when (status) {
             SykmeldingUnderArbeidStatus.UNDER_ARBEID -> {
                 if (
-                    oppgaveSecurityService.hasAccessToNasjonalOppgave(
+                    (oppgaveSecurityService.hasAccessToNasjonalOppgave(
                         oppgaveId,
                         "/dgs/nasjonal/oppgave/{oppgaveId}/send",
-                    )
+                    )) && (oppgaveSecurityService.hasSykmeldingNasjonalGroupIdAccess(  oppgaveId,
+                        "/dgs/nasjonal/oppgave/{oppgaveId}/send",
+                        ))
                 ) {
                     val ferdigstiltSykmeldingValues = mapToSmRegistreringManuell(sykmeldingValues)
                     return nasjonalOppgaveService
@@ -129,7 +131,7 @@ class NasjonalOppgaveDataFetcher(
 
             SykmeldingUnderArbeidStatus.FERDIGSTILT -> {
                 if (
-                    oppgaveSecurityService.hasSuperUserAccessToNasjonalSykmelding(
+                    oppgaveSecurityService.hasSykmeldingKorrigeringGroupIdAccess(
                         oppgaveId,
                         "/dgs/nasjonal/sykmelding/korriger",
                     )
