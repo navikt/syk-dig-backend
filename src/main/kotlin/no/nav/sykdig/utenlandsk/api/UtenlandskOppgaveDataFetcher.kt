@@ -86,7 +86,8 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
             return mapToDigitaliseringsoppgave(oppgave)
         } catch (error: DgsEntityNotFoundException) {
             log.info(
-                "Oppgave med $oppgaveId kastet DgsEntityNotFoundException, returnerer status FINNES_IKKE"
+                "Oppgave med $oppgaveId kastet DgsEntityNotFoundException, returnerer status FINNES_IKKE",
+                error,
             )
             return DigitaliseringsoppgaveStatus(
                 oppgaveId = oppgaveId,

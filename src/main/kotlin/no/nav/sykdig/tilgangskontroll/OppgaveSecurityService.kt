@@ -38,7 +38,7 @@ class OppgaveSecurityService(
     }
 
     fun hasAccessToOppgave(oppgaveId: String): Boolean {
-        securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
+        securelog.info("sjekker om bruker har tilgang via tilgangsmaskin på oppgave $oppgaveId")
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val tilgang = hasAccess(oppgave.fnr, navEmail)
@@ -49,14 +49,14 @@ class OppgaveSecurityService(
     }
 
     fun hasAccessToNasjonalOppgave(oppgaveId: String, requestPath: String): Boolean {
-        securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
+        securelog.info("sjekker om bruker har tilgang på nasjonal oppgave $oppgaveId")
 
         val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
         return validateAccess(oppgave, requestPath)
     }
 
     fun hasAccessToUtenlandskOppgave(oppgaveId: String, requestPath: String): Boolean {
-        securelog.info("sjekker om bruker har tilgang på oppgave $oppgaveId")
+        securelog.info("sjekker om bruker har tilgang på utenlandsk oppgave $oppgaveId")
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val tilgang =
@@ -69,7 +69,7 @@ class OppgaveSecurityService(
     }
 
     fun hasAccessToNasjonalSykmelding(sykmeldingId: String, requestPath: String): Boolean {
-        securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
+        securelog.info("sjekker om bruker har tilgang på nasjonal sykmelding $sykmeldingId")
         val oppgave = nasjonalDbService.getOppgaveBySykmeldingId(sykmeldingId)
 
         val tilgang =
@@ -108,7 +108,7 @@ class OppgaveSecurityService(
 
     fun hasSykmeldingKorrigeringGroupIdAccess(oppgaveId: String, requestPath: String): Boolean {
         securelog.info(
-            "sjekker om bruker har super bruker tilgang på sykmelding med oppgaveId $oppgaveId"
+            "sjekker om bruker har korrigering tilgang på sykmelding med oppgaveId $oppgaveId"
         )
         val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
@@ -190,12 +190,11 @@ class OppgaveSecurityService(
             }
             return tilgang
         }
-        // TODO IMPL
         return false
     }
 
     fun hasAccessToUtenlandskSykmelding(sykmeldingId: String, requestPath: String): Boolean {
-        securelog.info("sjekker om bruker har tilgang på sykmelding $sykmeldingId")
+        securelog.info("sjekker om bruker har tilgang på utenlandsk sykmelding $sykmeldingId")
         val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val tilgang =
@@ -210,8 +209,8 @@ class OppgaveSecurityService(
     fun hasAccessToJournalpost(journalpostResult: JournalpostResult): Boolean {
         return when (journalpostResult) {
             is Journalpost ->
-                return hasAccess(journalpostResult.fnr, nasjonalSykmeldingMapper.getNavEmail())
-            is JournalpostStatus -> return true
+                hasAccess(journalpostResult.fnr, nasjonalSykmeldingMapper.getNavEmail())
+            is JournalpostStatus -> true
             else -> false
         }
     }

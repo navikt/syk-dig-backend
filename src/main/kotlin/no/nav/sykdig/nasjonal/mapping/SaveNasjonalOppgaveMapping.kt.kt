@@ -127,7 +127,7 @@ fun mapToArbeidsrelatertArsakType(
 fun mapToMedisinskVurdering(medisinskVurdering: MedisinskVurderingValues): MedisinskVurdering {
     return MedisinskVurdering(
         hovedDiagnose = medisinskVurdering.hovedDiagnose?.let { mapToDiagnose(it) },
-        biDiagnoser = medisinskVurdering.biDiagnoser.map { mapToDiagnose(it) } ?: emptyList(),
+        biDiagnoser = medisinskVurdering.biDiagnoser.map { mapToDiagnose(it) },
         svangerskap = medisinskVurdering.svangerskap,
         yrkesskade = medisinskVurdering.yrkesskade,
         yrkesskadeDato = medisinskVurdering.yrkesskadeDato,

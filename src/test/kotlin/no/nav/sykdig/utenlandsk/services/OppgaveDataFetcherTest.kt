@@ -71,7 +71,6 @@ class OppgaveDataFetcherTest {
         Mockito.`when`(securityContext.authentication).thenReturn(authentication)
         SecurityContextHolder.setContext(securityContext)
         Mockito.`when`(authentication.isAuthenticated).thenReturn(true)
-        // Mockito.`when`(securityService.hasAccessToOppgave(anyString())).thenAnswer { true }
         Mockito.`when`(securityService.hasAccessToUtenlandskOppgave(anyString(), anyString()))
             .thenAnswer { true }
     }
