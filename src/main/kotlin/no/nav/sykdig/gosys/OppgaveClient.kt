@@ -202,10 +202,10 @@ class OppgaveClient(
         } catch (e: HttpClientErrorException) {
             if (e.statusCode.value() == 401 || e.statusCode.value() == 403) {
                 log.warn(
-                    "Veileder har ikke tilgang til oppgaveId $oppgaveId: ${e.message} med httpStatus ${e.statusCode.value()}"
+                    "Veileder har ikke tilgang til NasjonalOppgave oppgaveId $oppgaveId: ${e.message} med httpStatus ${e.statusCode.value()}"
                 )
                 throw IkkeTilgangException(
-                    "Veileder har ikke tilgang til oppgave med id: $oppgaveId"
+                    "Veileder har ikke tilgang til NasjonalOppgave oppgave med id: $oppgaveId"
                 )
             } else {
                 log.error(

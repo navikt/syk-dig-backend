@@ -66,7 +66,7 @@ class OppgaveSecurityService(
                     requestPath = requestPath,
                 ))
         securelog.info(
-            "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId"
+            "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk oppgave med id $oppgaveId"
         )
         return tilgang
     }
@@ -148,7 +148,7 @@ class OppgaveSecurityService(
         if (oppgave != null && fnr != null) {
             val tilgang = hasSykmeldingNasjonalGroupIdAccess(fnr, navEmail, requestPath)
             securelog.info(
-                "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId"
+                "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til nasjonal oppgave med id $oppgaveId"
             )
             if (tilgang) {
                 auditlog.info(
@@ -177,7 +177,7 @@ class OppgaveSecurityService(
         if (oppgave != null && fnr != null) {
             val tilgang = hasSykmeldingUtlandGroupIdAccess(fnr, navEmail, requestPath)
             securelog.info(
-                "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId"
+                "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk oppgave med id $oppgaveId"
             )
             if (tilgang) {
                 auditlog.info(
@@ -204,7 +204,7 @@ class OppgaveSecurityService(
             (hasAccess(oppgave.fnr, navEmail) &&
                 hasSykmeldingUtlandGroupIdAccess(oppgave.fnr, navEmail, requestPath))
         securelog.info(
-            "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $sykmeldingId"
+            "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk oppgave med id $sykmeldingId"
         )
         return tilgang
     }
