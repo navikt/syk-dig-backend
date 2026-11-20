@@ -61,7 +61,10 @@ class OppgaveSecurityService(
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val tilgang =
             (hasAccess(oppgave.fnr, navEmail) &&
-                hasSykmeldingUtenlandskGroupIdAccess(oppgave.fnr, requestPath))
+                hasSykmeldingUtenlandskGroupIdAccess(
+                    oppgaveId = oppgaveId,
+                    requestPath = requestPath,
+                ))
         securelog.info(
             "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId"
         )
