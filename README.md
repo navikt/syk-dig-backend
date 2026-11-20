@@ -9,10 +9,23 @@ This project contains the application code and infrastructure for syk-dig-backen
 * Gradle
 * Junit
 
-#### Requirements
+## Requirements for developing the application
+#### Java
+Make sure you have the Java JDK 25 installed
+You can check which version you have installed using this command:
+``` bash
+java -version
+```
+or install it: https://sdkman.io/
 
-* JDK 25
-* Docker
+#### Docker
+Make sure you have docker installed using this command:
+You can check which version you have installed using this command:
+``` bash
+docker --version
+```
+or install it: https://docs.docker.com/engine/install/
+
 
 
 ## Getting started
@@ -36,11 +49,9 @@ docker build -t syk-dig-backend .
 docker run --rm -it -p 8080:8080 syk-dig-backend
 ```
 
-### Upgrading the Gradle wrapper
-Find the newest version of Gradle here: https://gradle.org/releases/ Then run this command:
-
+### Upgrading the Gradle wrapper version to latest
 ``` bash
-./gradlew wrapper --gradle-version $gradleVersion
+./gradlew :wrapper --gradle-version latest
 ```
 
 ### GraphQL

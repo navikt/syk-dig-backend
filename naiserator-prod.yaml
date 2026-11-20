@@ -69,7 +69,7 @@ spec:
       enabled: true
       claims:
         groups:
-          - id: dfde2123-1969-4cd2-8977-bdf19721e76d #0000-GA-papirsykmelding
+          - id: 2b5ff98b-7532-4519-bada-35f821be1809 #0000-CA-SYK-DIG_SYKMELDING_KORIGERING
   accessPolicy:
     inbound:
       rules:
@@ -143,5 +143,9 @@ spec:
       value: prod-gcp.tilgangsmaskin.populasjonstilgangskontroll
     - name: TILGANGSMASKIN_URL
       value: http://populasjonstilgangskontroll.tilgangsmaskin
-    - name: PAPIRSYKMELDING_GROUP_ID
-      value: dfde2123-1969-4cd2-8977-bdf19721e76d
+    - name: SYKMELDING_KORIGERING_GROUP_ID
+      value: 2b5ff98b-7532-4519-bada-35f821be1809
+    - name: SYKMELDING_NASJONAL_GROUP_ID
+      value: 73a9ab44-fe0c-48b9-b04d-a451d293bbc9
+    - name: SYKMELDING_UTLAND_GROUP_ID
+      value: d078843c-8af1-45f3-958e-57a02baa1f93

@@ -24,7 +24,7 @@ class SafJournalpostService(private val safJournalpostGraphQlClient: SafJournalp
                     "Journalpost med id $journalpostId har ikke forventet mottakskanal: ${it.kanal}, $sykmeldingId"
                 )
             }
-            if (it.dokumenter?.any { it.brevkode == "S055" } == false && source == "rina") {
+            if (it.dokumenter.any { it.brevkode == "S055" } == false && source == "rina") {
                 logger.warn(
                     "Journalpost med id $journalpostId har ingen dokumenter med forventet brevkode, $sykmeldingId"
                 )

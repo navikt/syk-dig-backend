@@ -118,7 +118,10 @@ AZURE_APP_PRE_AUTHORIZED_APPS: "[{\"name\":\"dev-gcp:teamsykmelding:syk-dig\",\"
 logging.config: "classpath:logback-test.xml"
 elector.path: dont_look_for_leader
 
-PAPIRSYKMELDING_GROUP_ID: "GA_PAPIRSYKMELDING_UUID"
+SYKMELDING_KORIGERING_GROUP_ID: "SYKMELDING_KORRIGERING_UUID"
+SYKMELDING_NASJONAL_GROUP_ID: "SYKMELDING_NASJONAL_UUID"
+SYKMELDING_UTLAND_GROUP_ID: "SYKMELDING_UTLAND_UUID"
+
 
 logging:
   level:
