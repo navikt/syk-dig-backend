@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Service
 class OppgaveSecurityService(
@@ -164,7 +165,7 @@ class OppgaveSecurityService(
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val fnr = oppgave?.fnr
         if (oppgave != null && fnr != null) {
-            val tilgang = hasSykmeldingUtlandGroupIdAccess(fnr, navEmail, requestPath)
+            val tilgang = hasSykmeldingUtlandGroupIdAccess(navEmail)
             securelog.info(
                 "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk oppgave med id $oppgaveId, hasSykmeldingUtenlandskGroupIdAccess"
             )
@@ -185,15 +186,9 @@ class OppgaveSecurityService(
         return false
     }
 
-    fun hasAccessToUtenlandskSykmelding(sykmeldingId: String, requestPath: String): Boolean {
-        val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
+    fun hasAccessToUtenlandskSykmelding(sykmeldingId: String): Boolean {
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
-        val tilgang =
-            hasSykmeldingUtlandGroupIdAccess(
-                fnr = oppgave.fnr,
-                navEmail = navEmail,
-                requestPath = requestPath,
-            )
+        val tilgang = hasSykmeldingUtlandGroupIdAccess(navEmail)
         securelog.info(
             "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk sykmelding med id $sykmeldingId, hasAccessToUtenlandskSykmelding"
         )
@@ -302,14 +297,14 @@ class OppgaveSecurityService(
         return hasAccess(fnr = fnr, navEmail = navEmail, requestPath = requestPath)
     }
 
-    private fun hasSykmeldingUtlandGroupIdAccess(
-        fnr: String,
-        navEmail: String,
-        requestPath: String,
-    ): Boolean {
+    private fun hasSykmeldingUtlandGroupIdAccess(navEmail: String): Boolean {
         val authentication =
             SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         val claims = authentication.token.getClaimAsStringList("groups")
+
+        securelog.info(
+            "Groups: ${jacksonObjectMapper().writeValueAsString(claims)}, bruker: $navEmail"
+        )
 
         claims?.contains(sykmeldingUtlandGroupId)?.let {
             if (!it) {
@@ -317,6 +312,6 @@ class OppgaveSecurityService(
             }
         }
 
-        return hasAccess(fnr = fnr, navEmail = navEmail, requestPath = requestPath)
+        return true
     }
 }

@@ -37,9 +37,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         private val log = applog()
     }
 
-    @PreAuthorize(
-        "@oppgaveSecurityService.hasAccessToUtenlandskSykmelding(#sykmeldingId, '/digitalisertSykmelding')"
-    )
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskSykmelding(#sykmeldingId)")
     @DgsQuery(field = DgsConstants.QUERY.DigitalisertSykmelding)
     fun getDigitalisertSykmelding(
         @InputArgument sykmeldingId: String,
@@ -103,9 +101,7 @@ class UtenlandskOppgaveDataFetcher(val utenlandskOppgaveService: UtenlandskOppga
         }
     }
 
-    @PreAuthorize(
-        "@oppgaveSecurityService.hasAccessToUtenlandskSykmelding(#sykmeldingId, '/oppdaterDigitalisertSykmelding')"
-    )
+    @PreAuthorize("@oppgaveSecurityService.hasAccessToUtenlandskSykmelding(#sykmeldingId)")
     @DgsMutation(field = DgsConstants.MUTATION.OppdaterDigitalisertSykmelding)
     fun oppdaterSykmelding(
         @InputArgument sykmeldingId: String,
