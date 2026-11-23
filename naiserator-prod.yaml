@@ -68,6 +68,11 @@ spec:
       allowAllUsers: true
       enabled: true
       tenant: nav.no
+      claims:
+        groups:
+          - id: "2b5ff98b-7532-4519-bada-35f821be1809"
+          - id: "73a9ab44-fe0c-48b9-b04d-a451d293bbc9"
+          - id: "d078843c-8af1-45f3-958e-57a02baa1f93"
   accessPolicy:
     inbound:
       rules:
