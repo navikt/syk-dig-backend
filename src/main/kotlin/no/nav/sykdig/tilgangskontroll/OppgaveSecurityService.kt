@@ -288,6 +288,10 @@ class OppgaveSecurityService(
             SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         val claims = authentication.token.getClaimAsStringList("groups")
 
+        securelog.info(
+            "Groups: ${jacksonObjectMapper().writeValueAsString(claims)}, bruker: $navEmail"
+        )
+
         claims?.contains(sykmeldingNasjonalGroupId)?.let {
             if (!it) {
                 return false
