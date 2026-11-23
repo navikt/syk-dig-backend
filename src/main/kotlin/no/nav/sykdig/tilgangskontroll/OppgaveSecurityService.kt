@@ -138,6 +138,11 @@ class OppgaveSecurityService(
         val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val fnr = oppgave?.fnr
+
+        securelog.info(
+            "Oppgave hasSykmeldingNasjonalGroupIdAccess er: ${jacksonObjectMapper().writeValueAsString(oppgave)} og fnr er: $fnr, navEmail: $navEmail"
+        )
+
         if (oppgave != null && fnr != null) {
             val tilgang = hasSykmeldingNasjonalGroupIdAccess(fnr, navEmail, requestPath)
             securelog.info(
@@ -166,10 +171,10 @@ class OppgaveSecurityService(
         val fnr = oppgave?.fnr
 
         securelog.info(
-            "Oppgave er: ${jacksonObjectMapper().writeValueAsString(oppgave)} og fnr er: $fnr"
+            "Oppgave hasSykmeldingUtenlandskGroupIdAccess er: ${jacksonObjectMapper().writeValueAsString(oppgave)} og fnr er: $fnr, navEmail: $navEmail"
         )
 
-        if (oppgave != null && fnr != null) {
+        if (fnr != null) {
             val tilgang = hasSykmeldingUtlandGroupIdAccess(navEmail)
             securelog.info(
                 "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk oppgave med id $oppgaveId, hasSykmeldingUtenlandskGroupIdAccess"
