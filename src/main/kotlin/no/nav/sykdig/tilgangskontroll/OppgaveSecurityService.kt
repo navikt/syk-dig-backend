@@ -164,6 +164,11 @@ class OppgaveSecurityService(
         val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val fnr = oppgave?.fnr
+
+        securelog.info(
+            "Oppgave er: ${jacksonObjectMapper().writeValueAsString(oppgave)} og fnr er: $fnr"
+        )
+
         if (oppgave != null && fnr != null) {
             val tilgang = hasSykmeldingUtlandGroupIdAccess(navEmail)
             securelog.info(
