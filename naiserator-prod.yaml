@@ -67,9 +67,7 @@ spec:
     application:
       allowAllUsers: true
       enabled: true
-      claims:
-        groups:
-          - id: 2b5ff98b-7532-4519-bada-35f821be1809 #0000-CA-SYK-DIG_SYKMELDING_KORIGERING
+      tenant: nav.no
   accessPolicy:
     inbound:
       rules:
