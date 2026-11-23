@@ -253,6 +253,10 @@ class OppgaveSecurityService(
     ): Boolean {
         val tilgang = tilgangskontrollOboClient.sjekkTilgangVeileder(fnr)
 
+        securelog.info(
+            "sjekker tilgang via tilgangskontroll bruker: $navEmail har${if (!tilgang) " ikke" else ""} til requestPath med id $requestPath"
+        )
+
         if (tilgang) {
             auditlog.info(
                 AuditLogger()
