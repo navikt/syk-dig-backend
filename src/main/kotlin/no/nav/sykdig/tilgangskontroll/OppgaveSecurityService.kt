@@ -14,6 +14,7 @@ import no.nav.sykdig.shared.auditlog
 import no.nav.sykdig.shared.jsonMapper
 import no.nav.sykdig.shared.securelog
 import no.nav.sykdig.utenlandsk.services.SykDigOppgaveService
+import no.nav.sykdig.utenlandsk.services.UtenlandskOppgaveService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -32,6 +33,7 @@ class OppgaveSecurityService(
     private val sykmeldingKorrigeringGroupId: String,
     @param:Value($$"${SYKMELDING_NASJONAL_GROUP_ID}") private val sykmeldingNasjonalGroupId: String,
     @param:Value($$"${SYKMELDING_UTLAND_GROUP_ID}") private val sykmeldingUtlandGroupId: String,
+    private val utenlandskOppgaveService: UtenlandskOppgaveService,
 ) {
     companion object {
         private val securelog = securelog()
@@ -57,10 +59,10 @@ class OppgaveSecurityService(
     }
 
     fun hasAccessToUtenlandskOppgave(oppgaveId: String, requestPath: String): Boolean {
-        val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
+        val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave((oppgaveId))
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val tilgang =
-            (hasAccess(fnr = oppgave.fnr, navEmail = navEmail) &&
+            (hasAccess(fnr = oppgave.oppgaveDbModel.fnr, navEmail = navEmail) &&
                 hasSykmeldingUtenlandskGroupIdAccess(
                     oppgaveId = oppgaveId,
                     requestPath = requestPath,
@@ -166,15 +168,16 @@ class OppgaveSecurityService(
     }
 
     fun hasSykmeldingUtenlandskGroupIdAccess(oppgaveId: String, requestPath: String): Boolean {
-        val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
+        securelog.info("oppgaveId er: $oppgaveId")
+        val oppgave = utenlandskOppgaveService.getDigitaiseringsoppgave(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
-        val fnr = oppgave?.fnr
+        val fnr = oppgave.oppgaveDbModel.fnr
 
         securelog.info(
             "Oppgave hasSykmeldingUtenlandskGroupIdAccess er: ${jacksonObjectMapper().writeValueAsString(oppgave)} og fnr er: $fnr, navEmail: $navEmail"
         )
 
-        if (fnr != null) {
+        if (oppgave != null && fnr != null) {
             val tilgang = hasSykmeldingUtlandGroupIdAccess(navEmail)
             securelog.info(
                 "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk oppgave med id $oppgaveId, hasSykmeldingUtenlandskGroupIdAccess"
