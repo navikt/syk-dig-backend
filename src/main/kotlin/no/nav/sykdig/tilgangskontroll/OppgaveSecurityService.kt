@@ -41,7 +41,7 @@ class OppgaveSecurityService(
         securelog.info("sjekker om bruker har tilgang via tilgangsmaskin på oppgave $oppgaveId")
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
-        val tilgang = hasAccess(oppgave.fnr, navEmail)
+        val tilgang = hasAccess(fnr = oppgave.fnr, navEmail = navEmail)
         securelog.info(
             "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId"
         )
@@ -60,7 +60,7 @@ class OppgaveSecurityService(
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val tilgang =
-            (hasAccess(oppgave.fnr, navEmail) &&
+            (hasAccess(fnr = oppgave.fnr, navEmail = navEmail) &&
                 hasSykmeldingUtenlandskGroupIdAccess(
                     oppgaveId = oppgaveId,
                     requestPath = requestPath,
@@ -86,7 +86,7 @@ class OppgaveSecurityService(
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val fnr = oppgave?.fnr
         if (oppgave != null && fnr != null) {
-            val tilgang = hasAccess(fnr, navEmail, requestPath)
+            val tilgang = hasAccess(fnr = fnr, navEmail = navEmail, requestPath = requestPath)
             securelog.info(
                 "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id ${oppgave.oppgaveId}"
             )
@@ -201,8 +201,11 @@ class OppgaveSecurityService(
         val oppgave = sykDigOppgaveService.getOppgaveFromSykmeldingId(sykmeldingId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val tilgang =
-            (hasAccess(oppgave.fnr, navEmail) &&
-                hasSykmeldingUtlandGroupIdAccess(oppgave.fnr, navEmail, requestPath))
+            hasSykmeldingUtlandGroupIdAccess(
+                fnr = oppgave.fnr,
+                navEmail = navEmail,
+                requestPath = requestPath,
+            )
         securelog.info(
             "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk oppgave med id $sykmeldingId, hasAccessToUtenlandskSykmelding"
         )
@@ -212,7 +215,10 @@ class OppgaveSecurityService(
     fun hasAccessToJournalpost(journalpostResult: JournalpostResult): Boolean {
         return when (journalpostResult) {
             is Journalpost ->
-                hasAccess(journalpostResult.fnr, nasjonalSykmeldingMapper.getNavEmail())
+                hasAccess(
+                    fnr = journalpostResult.fnr,
+                    navEmail = nasjonalSykmeldingMapper.getNavEmail(),
+                )
             is JournalpostStatus -> true
             else -> false
         }
@@ -239,7 +245,7 @@ class OppgaveSecurityService(
 
         securelog.info("Fødselsnummer: $fnr")
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
-        val tilgang = hasAccess(fnr, journalpostId)
+        val tilgang = hasAccess(fnr = fnr, navEmail = navEmail)
         securelog.info(
             "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} til journalpost med id $journalpostId"
         )
@@ -288,7 +294,7 @@ class OppgaveSecurityService(
             }
         }
 
-        return hasAccess(fnr, navEmail, requestPath)
+        return hasAccess(fnr = fnr, navEmail = navEmail, requestPath = requestPath)
     }
 
     private fun hasSykmeldingNasjonalGroupIdAccess(
@@ -306,7 +312,7 @@ class OppgaveSecurityService(
             }
         }
 
-        return hasAccess(fnr, navEmail, requestPath)
+        return hasAccess(fnr = fnr, navEmail = navEmail, requestPath = requestPath)
     }
 
     private fun hasSykmeldingUtlandGroupIdAccess(
@@ -324,6 +330,6 @@ class OppgaveSecurityService(
             }
         }
 
-        return hasAccess(fnr, navEmail, requestPath)
+        return hasAccess(fnr = fnr, navEmail = navEmail, requestPath = requestPath)
     }
 }
