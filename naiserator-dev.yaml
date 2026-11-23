@@ -68,6 +68,11 @@ spec:
       allowAllUsers: true
       enabled: true
       tenant: trygdeetaten.no
+      claims:
+        groups:
+          - id: "a1131a3d-00d6-4569-bef6-e6b1a276292f"
+          - id: "62dd5e14-6474-4ce8-9a97-40f4c8821ccb"
+          - id: "7ff9b4aa-81be-48c2-bc0c-0395a0b50126"
   accessPolicy:
     inbound:
       rules:
