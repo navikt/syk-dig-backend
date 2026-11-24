@@ -38,5 +38,6 @@
 
     <logger name="no.nav" level="INFO"/>
     <logger name="org.apache.kafka" level="WARN"/>
-
+    <logger name="ch.qos.logback" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
 </configuration>
