@@ -45,9 +45,6 @@ class OppgaveSecurityService(
         val oppgave = sykDigOppgaveService.getOppgave(oppgaveId)
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val tilgang = hasAccess(fnr = oppgave.fnr, navEmail = navEmail)
-        securelog.info(
-            "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til oppgave med id $oppgaveId"
-        )
         return tilgang
     }
 
@@ -65,9 +62,7 @@ class OppgaveSecurityService(
                     oppgaveId = oppgaveId,
                     requestPath = requestPath,
                 ))
-        securelog.info(
-            "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else " "} tilgang til utenlandsk oppgave med id $oppgaveId, hasAccessToUtenlandskOppgave"
-        )
+
         return tilgang
     }
 
