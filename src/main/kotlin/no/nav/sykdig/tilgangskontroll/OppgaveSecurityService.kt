@@ -52,8 +52,6 @@ class OppgaveSecurityService(
     }
 
     fun hasAccessToNasjonalOppgave(oppgaveId: String, requestPath: String): Boolean {
-        securelog.info("sjekker om bruker har tilgang på nasjonal oppgave $oppgaveId")
-
         val oppgave = nasjonalDbService.getOppgaveByOppgaveId(oppgaveId)
         return validateAccess(oppgave, requestPath)
     }
@@ -141,10 +139,6 @@ class OppgaveSecurityService(
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val fnr = oppgave?.fnr
 
-        securelog.info(
-            "Oppgave hasSykmeldingNasjonalGroupIdAccess er: ${jacksonObjectMapper().writeValueAsString(oppgave)} og fnr er: $fnr, navEmail: $navEmail"
-        )
-
         if (oppgave != null && fnr != null) {
             val tilgang = hasSykmeldingNasjonalGroupIdAccess(fnr, navEmail, requestPath)
             securelog.info(
@@ -173,14 +167,10 @@ class OppgaveSecurityService(
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val fnr = oppgave.oppgaveDbModel.fnr
 
-        securelog.info(
-            "Oppgave hasSykmeldingUtenlandskGroupIdAccess er: ${jacksonObjectMapper().writeValueAsString(oppgave)} og fnr er: $fnr, navEmail: $navEmail"
-        )
-
         if (oppgave != null && fnr != null) {
             val tilgang = hasSykmeldingUtlandGroupIdAccess(navEmail)
             securelog.info(
-                "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk oppgave med id $oppgaveId, hasSykmeldingUtenlandskGroupIdAccess"
+                "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk oppgave med id $oppgaveId"
             )
             if (tilgang) {
                 auditlog.info(
@@ -203,7 +193,7 @@ class OppgaveSecurityService(
         val navEmail = nasjonalSykmeldingMapper.getNavEmail()
         val tilgang = hasSykmeldingUtlandGroupIdAccess(navEmail)
         securelog.info(
-            "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk sykmelding med id $sykmeldingId, hasAccessToUtenlandskSykmelding"
+            "Innlogget bruker: $navEmail har${if (!tilgang) " ikke" else ""} tilgang til utenlandsk sykmelding med id $sykmeldingId"
         )
         return tilgang
     }
@@ -301,10 +291,6 @@ class OppgaveSecurityService(
             SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         val claims = authentication.token.getClaimAsStringList("groups")
 
-        securelog.info(
-            "Groups: ${jacksonObjectMapper().writeValueAsString(claims)}, bruker: $navEmail"
-        )
-
         claims?.contains(sykmeldingNasjonalGroupId)?.let {
             if (!it) {
                 return false
@@ -318,10 +304,6 @@ class OppgaveSecurityService(
         val authentication =
             SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         val claims = authentication.token.getClaimAsStringList("groups")
-
-        securelog.info(
-            "Groups: ${jacksonObjectMapper().writeValueAsString(claims)}, bruker: $navEmail"
-        )
 
         claims?.contains(sykmeldingUtlandGroupId)?.let {
             if (!it) {
