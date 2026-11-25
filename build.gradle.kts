@@ -2,13 +2,13 @@ import com.netflix.graphql.dgs.codegen.gradle.GenerateJavaTask
 import com.diffplug.gradle.spotless.SpotlessExtension
 
 plugins {
-    id("org.springframework.boot") version "4.1.1"
+    id("org.springframework.boot") version "4.2.0"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("jvm") version "2.4.10"
-    kotlin("plugin.spring") version "2.4.10"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.spring") version "2.4.21"
     id("com.netflix.dgs.codegen") version "8.6.0"
-    id("com.gradleup.shadow") version "8.3.6"
-    id("com.diffplug.spotless") version "8.10.0"
+    id("com.gradleup.shadow") version "9.6.1"
+    id("com.diffplug.spotless") version "8.12.0"
 }
 
 group = "no.nav.sykdig"
@@ -22,39 +22,45 @@ repositories {
     }
 }
 
-val postgresVersion = "42.7.11"
+val postgresVersion = "42.7.14"
 val tsmDiagnoserVersion = "2026.1.13"
 val tokenSupportVersion = "6.0.11"
 val testContainersVersion = "2.0.5"
 val logstashLogbackEncoderVersion = "9.0"
-val javaJwtVersion = "4.5.0"
-val springBootResourceVersion = "4.1.1"
+val javaJwtVersion = "4.6.2"
+val springBootResourceVersion = "4.2.0"
 val graphqlVersion = "26.1"
-val kafkaClientsVersion = "4.3.1"
+val kafkaClientsVersion = "4.4.0"
 val syfoXmlCodegen = "2.0.1"
-val springSecurityWebVersion = "7.1.1"
+val springSecurityWebVersion = "7.2.0"
 val okhttp3version = "4.12.0"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val javaTimeAdapterVersion = "1.1.3"
-val graphqlDgsPlatformDependenciesVersion = "12.0.1"
-val commonsLang3Version = "3.19.0"
-val httpClient5version = "5.5.1"
-val opentelemetryVersion = "2.21.0"
+val graphqlDgsPlatformDependenciesVersion = "12.1.1"
+val federationGraphqlJavaSupportVersion = "7.1.1"
+val commonsLang3Version = "3.22.0"
+val httpClient5version = "5.6.5"
+val opentelemetryVersion = "2.34.0"
 val prometheusVersion = "0.16.0"
-val mockkVersion = "1.14.11"
+val mockkVersion = "1.14.12"
 val kluentVersion = "1.73"
 val coroutinesVersion = "1.11.0"
 val coroutineReactorVersion = "1.11.0"
-val hibernateVersion = "7.1.10.Final"
-val mockitoKotlinVersion = "6.1.0"
+val hibernateVersion = "7.1.17.Final"
+val mockitoKotlinVersion = "6.4.0"
 
 // Included due vulnerabilities in this transitive dependency
 val tomcatEmbedCoreVersion = "11.0.26"
 extra["tomcat.version"] = tomcatEmbedCoreVersion
 
 dependencies {
+    constraints {
+        implementation("com.apollographql.federation:federation-graphql-java-support:$federationGraphqlJavaSupportVersion") {
+            because("GraphQL Java 26 requires Federation JVM 7 or newer")
+        }
+    }
     implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:$graphqlDgsPlatformDependenciesVersion"))
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
     implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
@@ -121,6 +127,8 @@ dependencies {
 tasks {
 
     shadowJar {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        mergeServiceFiles {}
         archiveBaseName.set("app")
         archiveClassifier.set("")
         isZip64 = true

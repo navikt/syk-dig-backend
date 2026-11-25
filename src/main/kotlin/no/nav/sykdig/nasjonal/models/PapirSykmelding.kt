@@ -1,9 +1,9 @@
 package no.nav.sykdig.nasjonal.models
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import no.nav.sykdig.shared.*
+import tools.jackson.databind.annotation.JsonDeserialize
 
 data class PapirManuellOppgave(
     val fnr: String?,

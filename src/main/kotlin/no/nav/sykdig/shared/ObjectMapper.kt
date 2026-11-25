@@ -1,16 +1,16 @@
 package no.nav.sykdig.shared
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.*
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.*
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.jacksonMapperBuilder
 
-class FlexibleOffsetDateTimeDeserializer : JsonDeserializer<OffsetDateTime>() {
+class FlexibleOffsetDateTimeDeserializer : ValueDeserializer<OffsetDateTime>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): OffsetDateTime {
         val text = p.valueAsString
 
