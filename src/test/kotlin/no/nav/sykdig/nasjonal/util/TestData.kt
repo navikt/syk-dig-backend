@@ -18,7 +18,6 @@ import no.nav.sykdig.shared.*
 import no.nav.sykdig.shared.utils.getLocalDateTime
 import no.nav.sykdig.shared.utils.mapsmRegistreringManuelltTilFellesformat
 import no.nav.sykdig.utils.TestHelper.Companion.januar
-import okhttp3.internal.EMPTY_BYTE_ARRAY
 
 fun getXmleiFellesformat(
     smRegistreringManuell: SmRegistreringManuell,
@@ -142,7 +141,7 @@ fun testDataPapirManuellOppgave(
         sykmeldingId = "123",
         fnr = "fnr",
         oppgaveid = oppgaveId,
-        pdfPapirSykmelding = EMPTY_BYTE_ARRAY,
+        pdfPapirSykmelding = byteArrayOf(),
         papirSmRegistering =
             PapirSmRegistering(
                 journalpostId = "123",
