@@ -22,7 +22,7 @@ repositories {
     }
 }
 
-val postgresVersion = "42.7.14"
+val postgresVersion = "42.7.15"
 val tsmDiagnoserVersion = "2026.1.13"
 val tokenSupportVersion = "6.0.11"
 val testContainersVersion = "2.0.5"
